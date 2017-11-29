@@ -1,0 +1,3 @@
+
+Icons:
+    - /icon.png (DinosoftLabs; https://www.iconfinder.com/dinosoftlabs)
