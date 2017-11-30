@@ -2,7 +2,7 @@
     "name": "vscode-deploy-reloaded",
     "displayName": "Deploy (Reloaded)",
     "description": "Deploys files of a workspace to a destination.",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "publisher": "mkloubert",
     "engines": {
         "vscode": "^1.18.0"
@@ -24,6 +24,16 @@
     "main": "./out/extension",
     "contributes": {
         "commands": [
+            {
+                "command": "extension.deploy.reloaded.deletePackage",
+                "title": "Delete package",
+                "category": "Deploy Reloaded"
+            },
+            {
+                "command": "extension.deploy.reloaded.deleteFile",
+                "title": "Delete current file",
+                "category": "Deploy Reloaded"
+            },
             {
                 "command": "extension.deploy.reloaded.deployWorkspace",
                 "title": "Deploy workspace",
@@ -65,6 +75,16 @@
                 "command": "extension.deploy.reloaded.pullWorkspace",
                 "key": "ctrl+alt+p w",
                 "mac": "cmd+alt+p w"
+            },
+            {
+                "command": "extension.deploy.reloaded.deletePackage",
+                "key": "ctrl+alt+d w",
+                "mac": "cmd+alt+d w"
+            },
+            {
+                "command": "extension.deploy.reloaded.deleteFile",
+                "key": "ctrl+alt+d f",
+                "mac": "cmd+alt+d f"
             }
         ],
         "configuration": {

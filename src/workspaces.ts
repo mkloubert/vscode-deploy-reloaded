@@ -16,6 +16,7 @@
  */
 
 import * as deploy_contracts from './contracts';
+import * as deploy_delete from './delete';
 import * as deploy_deploy from './deploy';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
@@ -90,6 +91,27 @@ export class Workspace extends Events.EventEmitter implements vscode.Disposable 
      */
     public get config(): deploy_contracts.Configuration {
         return this._config;
+    }
+
+    /**
+     * Deletes a file in a target.
+     * 
+     * @param {string} file The file to delete.
+     * @param {deploy_targets.Target} target The target to delete in.
+     */
+    public async deleteFileIn(file: string, target: deploy_targets.Target) {
+        return await deploy_delete.deleteFileIn
+                                  .apply(this, arguments);
+    }
+
+    /**
+     * Deletes a package.
+     * 
+     * @param {deploy_packages.Package} pkg The package to delete. 
+     */
+    public async deletePackage(pkg: deploy_packages.Package) {
+        return await deploy_delete.deletePackage
+                                  .apply(this, arguments);
     }
 
     /**

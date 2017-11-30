@@ -25,12 +25,13 @@ import * as vscode from 'vscode';
 
 
 /**
- * Pulls a file from a target.
+ * Deletes a file in a target.
  * 
- * @param {string} file The file to pull.
- * @param {deploy_targets.Target} target The target from where to pull from.
+ * @param {string} file The file to delete.
+ * @param {deploy_targets.Target} target The target to delete in.
+ * @param {number} [targetNr] The number of the target.
  */
-export async function pullFileFrom(file: string, target: deploy_targets.Target) {
+export async function deleteFileIn(file: string, target: deploy_targets.Target) {
     const ME: deploy_workspaces.Workspace = this;
 
     if (!target) {
@@ -39,24 +40,54 @@ export async function pullFileFrom(file: string, target: deploy_targets.Target) 
 
     if (target.__workspace.FOLDER.uri.fsPath !== ME.FOLDER.uri.fsPath) {
         //TODO: translate
-        throw new Error(`File '${file}' cannot be pulled to workspace '${ME.FOLDER.uri.fsPath}'!`);
+        throw new Error(`File '${file}' cannot be deleted in workspace '${ME.FOLDER.uri.fsPath}'!`);
     }
 
-    await pullFilesFrom.apply(
+    //TODO: translate
+    const BUTTONS: deploy_contracts.MessageItemWithValue[] = [
+        {
+            title: 'No',
+            value: 1,
+        },
+        {
+            title: 'Yes',
+            value: 2,
+        },
+        {
+            isCloseAffordance: true,
+            title: 'Cancel',
+            value: 0,
+        }
+    ];
+
+    //TODO: translate
+    const PRESSED_BTN: deploy_contracts.MessageItemWithValue = await vscode.window.showWarningMessage.apply(
+        null,
+        [ <any>'Also delete local file?', {} ].concat(BUTTONS),
+    );
+
+    if (!PRESSED_BTN || 0 == PRESSED_BTN.value) {
+        return;
+    }
+
+    const DELETE_LOCAL_FILE = 2 === PRESSED_BTN.value;
+
+    await deleteFilesIn.apply(
         ME,
-        [ [ file ], target, target.__index + 1 ]
+        [ [ file ], target, target.__index + 1, DELETE_LOCAL_FILE ]
     );
 }
 
 /**
- * Pulls files from a target.
+ * Deletes files in a target.
  * 
- * @param {string[]} files The files to pull.
- * @param {deploy_targets.Target} target The target from where to pull from.
- * @param {number} [targetNr] The number of the target.
+ * @param {string[]} files The files to delete.
+ * @param {deploy_targets.Target} target The target to delete in.
+ * @param {boolean} [deleteLocalFiles] Also delete local files or not.
  */
-export async function pullFilesFrom(files: string[],
-                                    target: deploy_targets.Target, targetNr?: number) {
+export async function deleteFilesIn(files: string[],
+                                    target: deploy_targets.Target, targetNr?: number,
+                                    deleteLocalFiles?: boolean) {
     const ME: deploy_workspaces.Workspace = this;
     
     if (!files || files.length < 1) {
@@ -76,7 +107,7 @@ export async function pullFilesFrom(files: string[],
 
     const PLUGINS = ME.CONTEXT.plugins.filter(pi => {
         return '' === pi.__type || 
-               (TARGET_TYPE === pi.__type && pi.canDownload && pi.download);
+               (TARGET_TYPE === pi.__type && pi.canDelete && pi.deleteFiles);
     });
 
     if (PLUGINS.length < 1) {
@@ -96,23 +127,39 @@ export async function pullFilesFrom(files: string[],
 
             // TODO: translate
             if (files.length > 1) {
-                ME.CONTEXT.outputChannel.appendLine(`Start pulling files from '${TARGET_NAME}'...`);
+                ME.CONTEXT.outputChannel.appendLine(`Start deleting files in '${TARGET_NAME}'...`);
             }
 
-            const CTX: deploy_plugins.DownloadContext = {
+            const CTX: deploy_plugins.DeleteContext = {
                 files: files.map(f => {
-                    const SF = new deploy_plugins.SimpleFileToDownload(ME, f);
-                    SF.onBeforeDownload = async () => {
+                    const SF = new deploy_plugins.SimpleFileToDelete(ME, f);
+                    SF.onBeforeDelete = async () => {
                         // TODO: translate
-                        ME.CONTEXT.outputChannel.append(`Pulling file '${f}' from '${TARGET_NAME}'... `);
+                        ME.CONTEXT.outputChannel.append(`Deleting file '${f}' in '${TARGET_NAME}'... `);
                     };
-                    SF.onDownloadCompleted = async (err?: any) => {
+                    SF.onDeleteCompleted = async (err?: any, deleteLocal?: boolean) => {
                         // TODO: translate
                         if (err) {
                             ME.CONTEXT.outputChannel.appendLine(`[ERROR: ${err}]`);
                         }
                         else {
-                            ME.CONTEXT.outputChannel.appendLine(`[OK]`);
+                            try {
+                                let doDeleteLocalFiles = deploy_helpers.toBooleanSafe(deleteLocalFiles);
+                                if (doDeleteLocalFiles) {
+                                    doDeleteLocalFiles = deploy_helpers.toBooleanSafe(deleteLocal, true);
+                                }
+
+                                if (doDeleteLocalFiles) {
+                                    if (await deploy_helpers.exists(SF.file)) {
+                                        await deploy_helpers.unlink(SF.file);
+                                    }
+                                }
+
+                                ME.CONTEXT.outputChannel.appendLine(`[OK]`);
+                            }
+                            catch (e) {
+                                ME.CONTEXT.outputChannel.appendLine(`[WARNING: ${e}]`);
+                            }
                         }
                     };
 
@@ -121,27 +168,27 @@ export async function pullFilesFrom(files: string[],
             };
 
             await Promise.resolve(
-                PI.download(CTX)
+                PI.deleteFiles(CTX)
             );
 
             if (files.length > 1) {
                 // TODO: translate
-                ME.CONTEXT.outputChannel.appendLine(`Pulling files from '${TARGET_NAME}' has been finished.`);
+                ME.CONTEXT.outputChannel.appendLine(`Deleting files in '${TARGET_NAME}' has been finished.`);
             }
         }
         catch (e) {
             // TODO: translate
-            ME.CONTEXT.outputChannel.appendLine(`[ERROR] Pulling from '${TARGET_NAME}' failed: ${e}`);
+            ME.CONTEXT.outputChannel.appendLine(`[ERROR] Deleting files in '${TARGET_NAME}' failed: ${e}`);
         }
     }
 }
 
 /**
- * Pulls a package.
+ * Deletes a package.
  * 
- * @param {deploy_packages.Package} pkg The package to pull. 
+ * @param {deploy_packages.Package} pkg The package to delete. 
  */
-export async function pullPackage(pkg: deploy_packages.Package) {
+export async function deletePackage(pkg: deploy_packages.Package) {
     const ME: deploy_workspaces.Workspace = this;
 
     if (!pkg) {
@@ -150,7 +197,7 @@ export async function pullPackage(pkg: deploy_packages.Package) {
 
     if (pkg.__workspace.FOLDER.uri.fsPath !== ME.FOLDER.uri.fsPath) {
         //TODO: translate
-        throw new Error(`Package '${deploy_packages.getPackageName(pkg)}' cannot be pulled into workspace '${ME.FOLDER.uri.fsPath}'!`);
+        throw new Error(`Package '${deploy_packages.getPackageName(pkg)}' cannot be deleted in workspace '${ME.FOLDER.uri.fsPath}'!`);
     }
 
     const FILES = deploy_helpers.asArray(pkg.files).filter(f => {
@@ -163,7 +210,7 @@ export async function pullPackage(pkg: deploy_packages.Package) {
 
     const ROOT_DIR = ME.FOLDER.uri.fsPath;
 
-    const FILES_TO_PULL = await deploy_helpers.glob(FILES, {
+    const FILES_TO_DELETE = await deploy_helpers.glob(FILES, {
         absolute: true,
         cwd: ROOT_DIR,
         dot: false,
@@ -175,7 +222,7 @@ export async function pullPackage(pkg: deploy_packages.Package) {
         sync: false,
     });
 
-    if (FILES_TO_PULL.length < 1) {
+    if (FILES_TO_DELETE.length < 1) {
         //TODO: translate
         await deploy_helpers.showWarningMessage(
             `No FILES found!`
@@ -184,11 +231,40 @@ export async function pullPackage(pkg: deploy_packages.Package) {
         return;
     }
 
+    //TODO: translate
+    const BUTTONS: deploy_contracts.MessageItemWithValue[] = [
+        {
+            title: 'No',
+            value: 1,
+        },
+        {
+            title: 'Yes',
+            value: 2,
+        },
+        {
+            isCloseAffordance: true,
+            title: 'Cancel',
+            value: 0,
+        }
+    ];
+
+    //TODO: translate
+    const PRESSED_BTN: deploy_contracts.MessageItemWithValue = await vscode.window.showWarningMessage.apply(
+        null,
+        [ <any>'Also delete local files?', {} ].concat(BUTTONS),
+    );
+
+    if (!PRESSED_BTN || 0 == PRESSED_BTN.value) {
+        return;
+    }
+
+    const DELETE_LOCAL_FILES = 2 === PRESSED_BTN.value;
+
     const QUICK_PICK_ITEMS: deploy_contracts.ActionQuickPick[] = ME.getTargets().map((t, i) => {
         return {
             action: async () => {
-                await pullFilesFrom.apply(ME,
-                                          [ FILES_TO_PULL, t, i + 1 ]);
+                await deleteFilesIn.apply(ME,
+                                          [ FILES_TO_DELETE, t, i + 1, DELETE_LOCAL_FILES ]);
             },
             description: deploy_helpers.toStringSafe( t.description ).trim(),
             detail: t.__workspace.FOLDER.uri.fsPath,
@@ -211,7 +287,7 @@ export async function pullPackage(pkg: deploy_packages.Package) {
     }
     else {
         selectedItem = await vscode.window.showQuickPick(QUICK_PICK_ITEMS, {
-            placeHolder: 'Select the TARGET to pull from...',  //TODO: translate
+            placeHolder: 'Select the TARGET to delete files in...',  //TODO: translate
         });
     }
 

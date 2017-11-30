@@ -28,6 +28,30 @@ export interface TestTarget extends deploy_targets.Target {
 }
 
 class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
+    public get canDelete() {
+        return true;
+    }
+    public get canDownload() {
+        return true;
+    }
+
+    public async deleteFiles(context: deploy_plugins.DeleteContext) {
+        await deploy_helpers.forEachAsync(context.files, async (f) => {
+            try {
+                await f.onBeforeDelete()
+
+                await deploy_helpers.readFile(
+                    f.file,
+                );
+
+                await f.onDeleteCompleted(null, false);
+            }
+            catch (e) {
+                await f.onDeleteCompleted(e);
+            }
+        });
+    }
+
     public async download(context: deploy_plugins.DownloadContext) {
         await deploy_helpers.forEachAsync(context.files, async (f) => {
             try {

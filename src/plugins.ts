@@ -24,6 +24,16 @@ import * as vscode from 'vscode';
 
 
 /**
+ * A delete context.
+ */
+export interface DeleteContext {
+    /**
+     * The files to delete.
+     */
+    readonly files: FileToDelete[];
+}
+
+/**
  * A download context.
  */
 export interface DownloadContext {
@@ -37,6 +47,31 @@ export interface DownloadContext {
  * A downloaded file.
  */
 export interface DownloadedFile extends vscode.Disposable {
+}
+
+/**
+ * A file to delete.
+ */
+export interface FileToDelete {
+    /**
+     * The path to the (local) file.
+     */
+    readonly file: string;
+    /**
+     * The method that should be invoked BEFORE a deletion of that file starts.
+     */
+    readonly onBeforeDelete: () => PromiseLike<void>;
+    /**
+     * The method that should be invoked AFTER a deletion of that file has been finished.
+     * 
+     * @param {any} [err] The error (if occurred).
+     * @param {boolean} [deleteLocalFiles] Delete local version or not.
+     */
+    readonly onDeleteCompleted: (err?: any, deleteLocal?: boolean) => PromiseLike<void>;
+    /**
+     * The underlying workspace.
+     */
+    readonly workspace: deploy_workspaces.Workspace;
 }
 
 /**
@@ -130,6 +165,10 @@ export interface Plugin extends NodeJS.EventEmitter, vscode.Disposable {
     __type?: string;
 
     /**
+     * Gets if the plugin can delete files or not.
+     */
+    readonly canDelete?: boolean;
+    /**
      * Gets if the plugin can download files or not.
      */
     readonly canDownload?: boolean;
@@ -143,6 +182,12 @@ export interface Plugin extends NodeJS.EventEmitter, vscode.Disposable {
      * @return {InitializePluginResult|PromiseLike<InitializePluginResult>} The result.
      */
     readonly initialize?: () => InitializePluginResult | PromiseLike<InitializePluginResult>;
+    /**
+     * Deletes files.
+     * 
+     * @param {DeleteContext} The context.
+     */
+    readonly deleteFiles?: (context: DeleteContext) => void | PromiseLike<void>;
     /**
      * Downloads files.
      * 
@@ -264,6 +309,10 @@ export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_
     public __type: string;
 
     /** @inheritdoc */
+    public get canDelete() {
+        return false;
+    }
+    /** @inheritdoc */
     public get canDownload() {
         return false;
     }
@@ -286,8 +335,13 @@ export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_
     }
 
     /** @inheritdoc */
+    public async deleteFiles(context: DeleteContext) {
+        throw new Error(`'deleteFiles()' is NOT implemented!`);
+    }
+
+    /** @inheritdoc */
     public async download(context: DownloadContext) {
-        throw new Error(`'download()' is not implemented!`);
+        throw new Error(`'download()' is NOT implemented!`);
     }
 
     /** @inheritdoc */
@@ -296,18 +350,42 @@ export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_
 
     /** @inheritdoc */
     public async upload(context: UploadContext) {
-        throw new Error(`'upload()' is not implemented!`);
+        throw new Error(`'upload()' is NOT implemented!`);
     }
 }
 
 /**
- * A simple implementation of an file to download.
+ * A simple implementation of a file to delete.
+ */
+export class SimpleFileToDelete implements FileToDelete {
+    /**
+     * Initializes a new instance of that class.
+     * 
+     * @param {deploy_workspaces.Workspace} workspace the underlying workspace.
+     * @param {string} file The path to the (local) file.
+     */
+    constructor(public readonly workspace: deploy_workspaces.Workspace,
+                public readonly file: string) {
+    }
+
+    /** @inheritdoc */
+    public onBeforeDelete = async () => {
+    };
+
+    /** @inheritdoc */
+    public onDeleteCompleted = async () => {
+    };
+}
+
+/**
+ * A simple implementation of a file to download.
  */
 export class SimpleFileToDownload implements FileToDownload {
     /**
      * Initializes a new instance of that class.
      * 
      * @param {deploy_workspaces.Workspace} workspace the underlying workspace.
+     * @param {string} file The path to the (local) file.
      */
     constructor(public readonly workspace: deploy_workspaces.Workspace,
                 public readonly file: string) {

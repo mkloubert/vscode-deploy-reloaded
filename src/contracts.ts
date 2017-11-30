@@ -81,6 +81,16 @@ export interface FileFilter {
 }
 
 /**
+ * A message item with a value.
+ */
+export interface MessageItemWithValue<TValue = any> extends vscode.MessageItem {
+    /**
+     * The value.
+     */
+    value?: TValue;
+}
+
+/**
  * Describes the structure of the package file of that extenstion.
  */
 export interface PackageFile {

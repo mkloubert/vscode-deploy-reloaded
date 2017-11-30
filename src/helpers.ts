@@ -449,3 +449,23 @@ export function tryDispose(obj: { dispose?: () => any }): boolean {
         return false;
     }
 }
+
+/**
+ * Promise version of 'FS.unlink()' function.
+ * 
+ * @param {string|Buffer} path The path.
+ */
+export function unlink(path: string | Buffer) {
+    return new Promise<void>((resolve, reject) => {
+        const COMPLETED = createCompletedAction(resolve, reject);
+
+        try {
+            FS.unlink(path, (err) => {
+                COMPLETED(err);
+            });
+        }
+        catch (e) {
+            COMPLETED(e);
+        }
+    });
+}
