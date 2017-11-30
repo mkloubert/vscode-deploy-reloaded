@@ -19,6 +19,7 @@
 
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
+import * as deploy_log from './log';
 import * as deploy_plugins from './plugins';
 import * as deploy_workspaces from './workspaces';
 import * as Moment from 'moment';
@@ -27,6 +28,7 @@ import * as vscode from 'vscode';
 import * as Workflows from 'node-workflows';
 
 
+let activeWorkspaces: deploy_workspaces.Workspace[] = [];
 let currentContext: vscode.ExtensionContext;
 let fileWatcher: vscode.FileSystemWatcher;
 let isDeactivating = false;
@@ -34,6 +36,74 @@ let outputChannel: vscode.OutputChannel;
 let packageFile: deploy_contracts.PackageFile;
 const PLUGINS: deploy_plugins.Plugin[] = [];
 const WORKSPACES: deploy_workspaces.Workspace[] = [];
+
+function onDidChangeActiveTextEditor(editor: vscode.TextEditor) {
+    if (isDeactivating) {
+        return;
+    }
+
+    try {
+        activeWorkspaces = [];
+
+        WORKSPACES.forEach(ws => {
+            try {
+                const DOC = editor.document;
+                if (!DOC) {
+                    return;
+                }
+
+                if (Path.resolve(DOC.fileName).startsWith( Path.resolve(ws.FOLDER.uri.fsPath) )) {
+                    activeWorkspaces.push(ws);
+
+                    ws.onDidChangeActiveTextEditor(editor).then(() => {
+                        // OK
+                    }).catch((err) => {
+                        deploy_log.CONSOLE
+                                  .err(err, 'extension.onDidChangeActiveTextEditor(3)');
+                    });
+                }
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .err(e, 'extension.onDidChangeActiveTextEditor(2)');
+            }
+        });
+    }
+    catch (e) {
+        deploy_log.CONSOLE
+                  .err(e, 'extension.onDidChangeActiveTextEditor(1)');
+    }
+}
+
+function onDidFileChange(e: vscode.Uri, type: deploy_contracts.FileChangeType) {
+    if (isDeactivating) {
+        return;
+    }
+
+    try {
+        WORKSPACES.forEach(ws => {
+            try {
+                if (Path.resolve(e.fsPath).startsWith( Path.resolve(ws.FOLDER.uri.fsPath) )) {
+                    ws.onDidFileChange(e, type).then(() => {
+                        // OK
+                    }).catch((err) => {
+                        deploy_log.CONSOLE
+                                  .err(e, 'extension.onDidFileChange(3)');
+                    });
+                }
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .err(e, 'extension.onDidFileChange(2)');
+            }
+        });
+    }
+    catch (e) {
+        deploy_log.CONSOLE
+                  .err(e, 'extension.onDidFileChange(1)');
+    }
+}
+
 function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?: vscode.WorkspaceFolder[]) {
     if (isDeactivating) {
         return;
@@ -63,28 +133,44 @@ function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?: vscod
         added.forEach(wsf => {
             let newWorkspace: deploy_workspaces.Workspace;
             try {
-                newWorkspace = new deploy_workspaces.Workspace(wsf, {
+                const CTX: deploy_workspaces.WorkspaceContext = {
                     extension: currentContext,
                     outputChannel: outputChannel,
+                    workspaces: undefined,
+                };
+
+                Object.defineProperty(CTX, 'workspaces', {
+                    enumerable: true,
+                    
+                    get: () => {
+                        return WORKSPACES.filter(ws => {
+                            return ws !== newWorkspace;
+                        });
+                    }
                 });
+
+                newWorkspace = new deploy_workspaces.Workspace(wsf, CTX);
 
                 newWorkspace.initialize().then((hasBeenInitialized) => {
                     if (hasBeenInitialized) {
                         WORKSPACES.push(newWorkspace);
                     }
                     else {
-                        //TODO: log or show message
-
-                        deploy_helpers.tryDispose(newWorkspace);
+                        //TODO: translate
+                        deploy_helpers.showErrorMessage(
+                            `Workspace '${wsf.uri.fsPath}' has NOT been initialized!`
+                        );
                     }
                 }).catch((err) => {
-                    //TODO: log
+                    deploy_log.CONSOLE
+                              .err(err, 'extension.reloadWorkspaceFolders(2)');
 
                     deploy_helpers.tryDispose(newWorkspace);
                 });
             }
             catch (e) {
-                //TODO: log
+                deploy_log.CONSOLE
+                          .err(e, 'extension.reloadWorkspaceFolders(1)');
 
                 deploy_helpers.tryDispose(newWorkspace);
             }
@@ -92,31 +178,6 @@ function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?: vscod
     }
 }
 
-function onDidFileChange(e: vscode.Uri, type: deploy_contracts.FileChangeType) {
-    if (isDeactivating) {
-        return;
-    }
-
-    try {
-        WORKSPACES.forEach(ws => {
-            try {
-                if (Path.resolve(e.fsPath).startsWith( Path.resolve(ws.FOLDER.uri.fsPath) )) {
-                    ws.onDidFileChange(e, type).then(() => {
-                        // OK
-                    }).catch((err) => {
-                        //TODO: log
-                    });
-                }
-            }
-            catch (e) {
-                //TODO: log
-            }
-        });
-    }
-    catch (e) {
-        //TODO: log
-    }
-}
 
 async function reloadPlugins() {
     if (isDeactivating) {
@@ -195,35 +256,68 @@ async function reloadPlugins() {
                                                 PLUGINS.push(PI);
                                             }
                                             else {
-                                                //TODO: show warning message
+                                                //TODO: translate
+                                                deploy_helpers.showErrorMessage(
+                                                    `Plugin '${PI.__file}' has NOT been initialized!`
+                                                );
                                             }
                                         }
                                         catch (e) {
-                                            //TODO: log
+                                            //TODO: translate
+                                            deploy_helpers.showErrorMessage(
+                                                `Error while initializing plugin '${js}' (s. debug output 'CTRL + Y')!`
+                                            );
+
+                                            deploy_log.CONSOLE
+                                                      .trace(e, 'extension.reloadPlugins(2)');
                                         }
                                     }
                                 }
                             }
                             else {
-                                // show warning message
+                                //TODO: translate
+                                deploy_helpers.showWarningMessage(
+                                    `Plugin module '${js}' contains NO factory function!`
+                                );
                             }
                         }
                         else {
-                            // show warning message
+                            //TODO: translate
+                            deploy_helpers.showWarningMessage(
+                                `Plugin '${js}' contains NO module!`
+                            );
                         }
                     }
                     catch (e) {
+                        //TODO: translate
+                        deploy_helpers.showErrorMessage(
+                            `Error while loading '${js}' (s. debug output 'CTRL + Y')!`
+                        );
 
+                        deploy_log.CONSOLE
+                                  .trace(e, 'extension.reloadPlugins(1)');
                     }
                 }
             }
             else {
-                //TODO: show warning message.
+                //TODO: translate
+                deploy_helpers.showWarningMessage(
+                    `NO plugins found in '${PLUGIN_DIR}'!`
+                );
             }
         }
         else {
-            //TODO: show warning message
+            //TODO: translate
+            deploy_helpers.showErrorMessage(
+                `Plugin folder '${PLUGIN_DIR}' is NO directory!`
+            );
         }
+    }
+    else {
+        //TODO: translate
+        deploy_helpers.showErrorMessage(
+            `Plugin folder '${PLUGIN_DIR}' does NOT exist!`
+        );
     }
 }
 
@@ -245,7 +339,8 @@ export async function activate(context: vscode.ExtensionContext) {
                 );
             }
             catch (e) {
-                //TODO: log
+                deploy_log.CONSOLE
+                          .trace(e, 'extension.activate(package file)');
             }
 
             COMPLETED(null);
@@ -273,9 +368,14 @@ export async function activate(context: vscode.ExtensionContext) {
         });
     });
 
+    // global VSCode events
     WF.next(() => {
         vscode.workspace.onDidChangeWorkspaceFolders((e) => {
             reloadWorkspaceFolders(e.added, e.removed);
+        });
+
+        vscode.window.onDidChangeActiveTextEditor((e) => {
+            onDidChangeActiveTextEditor(e);
         });
     });
 
@@ -307,7 +407,8 @@ export async function activate(context: vscode.ExtensionContext) {
             fileWatcher = newWatcher;
         }
         catch (e) {
-            //TODO: log
+            deploy_log.CONSOLE
+                      .trace(e, 'extension.activate(file system watcher)');
 
             deploy_helpers.tryDispose(newWatcher);
         }

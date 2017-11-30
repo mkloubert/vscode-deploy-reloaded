@@ -15,8 +15,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as deploy_helpers from './helpers';
 import * as deploy_contracts from './contracts';
+import * as deploy_helpers from './helpers';
+import * as deploy_log from './log';
 import * as Enumerable from 'node-enumerable';
 import * as Events from 'events';
 import * as Path from 'path';
@@ -35,6 +36,10 @@ export interface WorkspaceContext {
      * The output channel.
      */
     readonly outputChannel: vscode.OutputChannel;
+    /**
+     * The list of other workspaces.
+     */
+    readonly workspaces: Workspace[];
 }
 
 
@@ -160,6 +165,10 @@ export class Workspace extends Events.EventEmitter implements vscode.Disposable 
         return true;
     }
 
+    public async onDidChangeActiveTextEditor(editor: vscode.TextEditor) {
+
+    }
+
     /**
      * Is invoked on a file / directory change.
      * 
@@ -232,7 +241,8 @@ export class Workspace extends Events.EventEmitter implements vscode.Disposable 
                         ME, LOADED_CFG, OLD_CFG);
             }
             catch (e) {
-                //TODO: log
+                deploy_log.CONSOLE
+                          .trace(e, 'workspaces.reloadConfiguration(1)');
             }
         }
         finally {

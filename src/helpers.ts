@@ -15,9 +15,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as deploy_log from './log';
 import * as Enumerable from 'node-enumerable';
 import * as FS from 'fs';
 import * as Glob from 'glob';
+import * as vscode from 'vscode';
 import * as Workflows from 'node-workflows';
 
 
@@ -221,6 +223,18 @@ export function invokeAfter<TResult = any>(action: (...args: any[]) => TResult, 
 }
 
 /**
+ * Checks if the string representation of a value is empty
+ * or contains whitespaces only.
+ * 
+ * @param {any} val The value to check.
+ * 
+ * @return {boolean} Is empty or not.
+ */
+export function isEmptyString(val: any) {
+    return '' === toStringSafe(val).trim();
+}
+
+/**
  * Checks if a value is (null) or (undefined).
  * 
  * @param {any} val The value to check.
@@ -260,6 +274,22 @@ export function lstat(path: string | Buffer) {
 }
 
 /**
+ * Normalizes a value as string so that is comparable.
+ * 
+ * @param {any} val The value to convert.
+ * @param {(str: string) => string} [normalizer] The custom normalizer.
+ * 
+ * @return {string} The normalized value.
+ */
+export function normalizeString(val: any, normalizer?: (str: string) => string): string {
+    if (!normalizer) {
+        normalizer = (str) => str.toLowerCase().trim();
+    }
+
+    return normalizer(toStringSafe(val));
+}
+
+/**
  * Promise version of 'FS.readFile()' function.
  * 
  * @param {string|Buffer} path The path.
@@ -284,6 +314,40 @@ export function readFile(filename: string) {
             COMPLETED(e);
         }
     });
+}
+
+/**
+ * Promise (and safe) version of 'vscode.window.showErrorMessage()' function.
+ * 
+ * @param {string} msg The message to display.
+ * @param {TItem[]} [items] The optional items.
+ */
+export async function showErrorMessage<TItem extends vscode.MessageItem = vscode.MessageItem>(msg: string, ...items: TItem[]) {
+    try {
+        await vscode.window.showErrorMessage
+                           .apply(null, [ <any>`[vscode-deploy-reloaded] ${msg}`.trim() ].concat(items));
+    }
+    catch (e) {
+        deploy_log.CONSOLE
+                  .trace(e, 'helpers.showErrorMessage()');
+    }
+}
+
+/**
+ * Promise (and safe) version of 'vscode.window.showWarningMessage()' function.
+ * 
+ * @param {string} msg The message to display.
+ * @param {TItem[]} [items] The optional items.
+ */
+export async function showWarningMessage<TItem extends vscode.MessageItem = vscode.MessageItem>(msg: string, ...items: TItem[]) {
+    try {
+        await vscode.window.showWarningMessage
+                           .apply(null, [ <any>`[vscode-deploy-reloaded] ${msg}`.trim() ].concat(items));
+    }
+    catch (e) {
+        deploy_log.CONSOLE
+                  .trace(e, 'helpers.showWarningMessage()');
+    }
 }
 
 /**
@@ -322,8 +386,9 @@ export function toStringSafe(str: any, defValue: any = ''): string {
 
         return '' + str;
     }
-    catch {
-        //TODO: log
+    catch (e) {
+        deploy_log.CONSOLE
+                  .trace(e, 'helpers.toStringSafe()');
 
         return '';
     }
@@ -345,7 +410,8 @@ export function tryDispose(obj: { dispose?: () => any }): boolean {
         return true;
     }
     catch (e) {
-        //TODO: log
+        deploy_log.CONSOLE
+                  .trace(e, 'helpers.tryDispose()');
 
         return false;
     }
