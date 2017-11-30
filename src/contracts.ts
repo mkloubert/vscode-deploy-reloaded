@@ -39,6 +39,10 @@ export interface ActionQuickPick<TState = any> extends vscode.QuickPickItem {
  */
 export interface Configuration {
     /**
+     * The ID of the language to use (e.g. 'en', 'de')
+     */
+    readonly language?: string;
+    /**
      * One or more package.
      */
     readonly packages?: deploy_packages.Package | deploy_packages.Package[];

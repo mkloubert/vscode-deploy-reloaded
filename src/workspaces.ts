@@ -19,6 +19,7 @@ import * as deploy_contracts from './contracts';
 import * as deploy_delete from './delete';
 import * as deploy_deploy from './deploy';
 import * as deploy_helpers from './helpers';
+import * as deploy_i18 from './i18';
 import * as deploy_log from './log';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
@@ -26,6 +27,7 @@ import * as deploy_pull from './pull';
 import * as deploy_targets from './targets';
 import * as Enumerable from 'node-enumerable';
 import * as Events from 'events';
+import * as i18next from 'i18next';
 import * as Path from 'path';
 import * as vscode from 'vscode';
 
@@ -75,6 +77,10 @@ export class Workspace extends Events.EventEmitter implements vscode.Disposable 
      * Stores if configuration is currently reloaded or not.
      */
     protected _isReloadingConfig = false;
+    /**
+     * The current translation function.
+     */
+    protected _translator: i18next.TranslationFunction;
 
     /**
      * Initializes a new instance of that class.
@@ -375,9 +381,38 @@ export class Workspace extends Events.EventEmitter implements vscode.Disposable 
                 deploy_log.CONSOLE
                           .trace(e, 'workspaces.reloadConfiguration(1)');
             }
+
+            ME._translator = null;
+            try {
+                ME._translator = await deploy_i18.init(ME);
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .trace(e, 'workspaces.reloadConfiguration(2)');
+            }
         }
         finally {
             ME._isReloadingConfig = true;
         }
+    }
+
+    /**
+     * Returns a translated string by key.
+     * 
+     * @param {string} key The key.
+     * @param {any} [args] The optional arguments.
+     * 
+     * @return {string} The "translated" string.
+     */
+    public t(key: string, ...args: any[]): string {
+        const TRANSLATOR = this._translator;
+        if (TRANSLATOR) {
+            let formatStr = TRANSLATOR(deploy_helpers.toStringSafe(key));
+            formatStr = deploy_helpers.toStringSafe(formatStr);
+    
+            return deploy_helpers.formatArray(formatStr, args);
+        }
+
+        return key;
     }
 }

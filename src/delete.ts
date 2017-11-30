@@ -46,16 +46,16 @@ export async function deleteFileIn(file: string, target: deploy_targets.Target) 
     //TODO: translate
     const BUTTONS: deploy_contracts.MessageItemWithValue[] = [
         {
-            title: 'No',
+            title: ME.t('no'),
             value: 1,
         },
         {
-            title: 'Yes',
+            title: ME.t('yes'),
             value: 2,
         },
         {
             isCloseAffordance: true,
-            title: 'Cancel',
+            title: ME.t('cancel'),
             value: 0,
         }
     ];
@@ -234,16 +234,16 @@ export async function deletePackage(pkg: deploy_packages.Package) {
     //TODO: translate
     const BUTTONS: deploy_contracts.MessageItemWithValue[] = [
         {
-            title: 'No',
+            title: ME.t('no'),
             value: 1,
         },
         {
-            title: 'Yes',
+            title: ME.t('yes'),
             value: 2,
         },
         {
             isCloseAffordance: true,
-            title: 'Cancel',
+            title: ME.t('cancel'),
             value: 0,
         }
     ];

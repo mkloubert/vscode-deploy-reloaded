@@ -155,6 +155,87 @@ export async function forEachAsync<T, TResult>(items: Enumerable.Sequence<T>,
 }
 
 /**
+ * Formats a string.
+ * 
+ * @param {any} formatStr The value that represents the format string.
+ * @param {any[]} [args] The arguments for 'formatStr'.
+ * 
+ * @return {string} The formated string.
+ */
+export function format(formatStr: any, ...args: any[]): string {
+    return formatArray(formatStr, args);
+}
+
+/**
+ * Formats a string.
+ * 
+ * @param {any} formatStr The value that represents the format string.
+ * @param {any[]} [args] The arguments for 'formatStr'.
+ * 
+ * @return {string} The formated string.
+ */
+export function formatArray(formatStr: any, args: any[]): string {
+    if (!args) {
+        args = [];
+    }
+
+    formatStr = toStringSafe(formatStr);
+
+    // apply arguments in
+    // placeholders
+    return formatStr.replace(/{(\d+)(\:)?([^}]*)}/g, (match, index, formatSeparator, formatExpr) => {
+        index = parseInt(toStringSafe(index).trim());
+        
+        let resultValue = args[index];
+
+        if (':' === formatSeparator) {
+            // collect "format providers"
+            let formatProviders = toStringSafe(formatExpr).split(',')
+                                                          .map(x => x.toLowerCase().trim())
+                                                          .filter(x => x);
+
+            // transform argument by
+            // format providers
+            formatProviders.forEach(fp => {
+                switch (fp) {
+                    case 'leading_space':
+                        resultValue = toStringSafe(resultValue);
+                        if ('' !== resultValue) {
+                            resultValue = ' ' + resultValue;
+                        }
+                        break;
+
+                    case 'lower':
+                        resultValue = toStringSafe(resultValue).toLowerCase();
+                        break;
+
+                    case 'trim':
+                        resultValue = toStringSafe(resultValue).trim();
+                        break;
+
+                    case 'upper':
+                        resultValue = toStringSafe(resultValue).toUpperCase();
+                        break;
+
+                    case 'surround':
+                        resultValue = toStringSafe(resultValue);
+                        if ('' !== resultValue) {
+                            resultValue = "'" + toStringSafe(resultValue) + "'";
+                        }
+                        break;
+                }
+            });
+        }
+
+        if ('undefined' === typeof resultValue) {
+            return match;
+        }
+
+        return toStringSafe(resultValue);        
+    });
+}
+
+/**
  * Promise version of 'Glob()' function.
  * 
  * @param {string|string[]} patterns One or more patterns.
@@ -347,6 +428,24 @@ export function readFile(filename: string) {
             COMPLETED(e);
         }
     });
+}
+
+/**
+ * Replaces all occurrences of a string.
+ * 
+ * @param {string} str The input string.
+ * @param {string} searchValue The value to search for.
+ * @param {string} replaceValue The value to replace 'searchValue' with.
+ * 
+ * @return {string} The output string.
+ */
+export function replaceAllStrings(str: string, searchValue: string, replaceValue: string) {
+    str = toStringSafe(str);
+    searchValue = toStringSafe(searchValue);
+    replaceValue = toStringSafe(replaceValue);
+
+    return str.split(searchValue)
+              .join(replaceValue);
 }
 
 /**
