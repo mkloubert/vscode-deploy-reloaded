@@ -17,9 +17,32 @@
 
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
+import * as deploy_targets from './targets';
 import * as Events from 'events';
 import * as vscode from 'vscode';
 
+
+/**
+ * A file to upload.
+ */
+export interface FileToUpload {
+    /**
+     * The method that should be invoked BEFORE an upload of that file starts.
+     */
+    readonly onBeforeUpload: () => PromiseLike<void>;
+    /**
+     * The method that should be invoked AFTER an upload of that file has been finished.
+     * 
+     * @param {any} [err] The error (if occurred).
+     */
+    readonly onUploadCompleted: (err?: any) => PromiseLike<void>;
+    /**
+     * Reads the complete content of that file.
+     * 
+     * @return {PromiseLike<Buffer>} The loaded data.
+     */
+    readonly read: () => PromiseLike<Buffer>;
+}
 
 /**
  * The result for the 'initialize' method of a plugin.
@@ -61,11 +84,21 @@ export interface Plugin extends NodeJS.EventEmitter, vscode.Disposable {
     __type?: string;
 
     /**
+     * Gets if the plugin can upload files or not.
+     */
+    readonly canUpload?: boolean;
+    /**
      * Initializes the plugin.
      * 
      * @return {InitializePluginResult|PromiseLike<InitializePluginResult>} The result.
      */
     readonly initialize?: () => InitializePluginResult | PromiseLike<InitializePluginResult>;
+    /**
+     * Uploads files.
+     * 
+     * @param {UploadContext} The context.
+     */
+    readonly upload?: (context: UploadContext) => void | PromiseLike<void>;
 }
 
 /**
@@ -93,9 +126,54 @@ export interface PluginModule {
 }
 
 /**
+ * An upload context.
+ */
+export interface UploadContext {
+    /**
+     * The files to upload.
+     */
+    readonly files: FileToUpload[];
+}
+
+/**
+ * A local file to upload.
+ */
+export abstract class FileToUploadBase implements FileToUpload {
+    /** @inheritdoc */
+    public onBeforeUpload = async () => {
+    };
+
+    /** @inheritdoc */
+    public onUploadCompleted = async () => {
+    };
+
+    /** @inheritdoc */
+    public abstract async read();
+}
+
+/**
+ * A local file to upload.
+ */
+export class LocalFileToUpload extends FileToUploadBase {
+    /**
+     * Initializes a new instance of that class.
+     * 
+     * @param {string} FILE The path to the local file. 
+     */
+    constructor(public readonly FILE: string) {
+        super();
+    }
+
+    /** @inheritdoc */
+    public async read() {
+        return deploy_helpers.readFile(this.FILE);
+    }
+}
+
+/**
  * A basic plugin.
  */
-export abstract class PluginBase<TTarget extends deploy_contracts.Target = deploy_contracts.Target> extends Events.EventEmitter implements Plugin {
+export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_targets.Target> extends Events.EventEmitter implements Plugin {
     /**
      * Stores all disposable items.
      */
@@ -120,6 +198,11 @@ export abstract class PluginBase<TTarget extends deploy_contracts.Target = deplo
     public __type: string;
 
     /** @inheritdoc */
+    public get canUpload() {
+        return true;
+    }
+
+    /** @inheritdoc */
     public dispose() {
         const ME = this;
         
@@ -134,5 +217,10 @@ export abstract class PluginBase<TTarget extends deploy_contracts.Target = deplo
 
     /** @inheritdoc */
     public async initialize() {
+    }
+
+    /** @inheritdoc */
+    public async upload(context: UploadContext) {
+        throw new Error(`Not implemented!`);
     }
 }

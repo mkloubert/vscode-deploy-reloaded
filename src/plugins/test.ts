@@ -16,16 +16,32 @@
  */
 
 import * as deploy_contracts from '../contracts';
+import * as deploy_helpers from '../helpers';
 import * as deploy_plugins from '../plugins';
+import * as deploy_targets from '../targets';
 
 
 /**
  * A 'test' target.
  */
-export interface TestTarget extends deploy_contracts.Target {
+export interface TestTarget extends deploy_targets.Target {
 }
 
 class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
+    public async upload(context: deploy_plugins.UploadContext) {
+        await deploy_helpers.forEachAsync(context.files, async (f) => {
+            try {
+                await f.onBeforeUpload();
+
+                await f.read();
+
+                await f.onUploadCompleted();
+            }
+            catch (e) {
+                await f.onUploadCompleted(e);
+            }
+        });
+    }
 }
 
 /**

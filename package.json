@@ -2,7 +2,7 @@
     "name": "vscode-deploy-reloaded",
     "displayName": "Deploy (Reloaded)",
     "description": "Deploys files of a workspace to a destination.",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "publisher": "mkloubert",
     "engines": {
         "vscode": "^1.18.0"
@@ -23,7 +23,35 @@
     ],
     "main": "./out/extension",
     "contributes": {
-        "commands": []
+        "commands": [
+            {
+                "command": "extension.deploy.reloaded.deployWorkspace",
+                "title": "Workspace",
+                "category": "Deploy Reloaded"
+            },
+            {
+                "command": "extension.deploy.reloaded.deployFile",
+                "title": "Current file",
+                "category": "Deploy Reloaded"
+            }
+        ],
+        "keybindings": [
+            {
+                "command": "extension.deploy.reloaded.deployWorkspace",
+                "key": "ctrl+alt+w",
+                "mac": "cmd+alt+w"
+            },
+            {
+                "command": "extension.deploy.reloaded.deployFile",
+                "key": "ctrl+alt+f",
+                "mac": "cmd+alt+f"
+            }
+        ],
+        "configuration": {
+            "properties": {
+                "deploy.reloaded": {}
+            }
+        }
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",

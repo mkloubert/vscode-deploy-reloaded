@@ -122,6 +122,39 @@ export function exists(path: string | Buffer) {
 }
 
 /**
+ * Async 'forEach'.
+ * 
+ * @param {Enumerable.Sequence<T>} items The items to iterate.
+ * @param {Function} action The item action.
+ * @param {any} [thisArg] The underlying object / value for the item action.
+ * 
+ * @return {TResult} The result of the last action call.
+ */
+export async function forEachAsync<T, TResult>(items: Enumerable.Sequence<T>,
+                                               action: (item: T, index: number, array: T[]) => TResult | PromiseLike<TResult>,
+                                               thisArg?: any) {
+    if (!isNullOrUndefined(items)) {
+        if (!Array.isArray(items)) {
+            items = Enumerable.from(items)
+                              .toArray();
+        }
+    }
+
+    let lastResult: TResult;
+
+    if (action) {
+        for (let i = 0; i < (<T[]>items).length; i++) {
+            lastResult = await Promise.resolve(
+                action.apply(thisArg,
+                             [ items[i], i, items ]),
+            );
+        }
+    }
+
+    return lastResult;
+}
+
+/**
  * Promise version of 'Glob()' function.
  * 
  * @param {string|string[]} patterns One or more patterns.

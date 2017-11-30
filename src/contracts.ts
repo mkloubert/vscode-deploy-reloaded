@@ -15,8 +15,24 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as deploy_packages from './packages';
+import * as deploy_targets from './targets';
 import * as vscode from 'vscode';
 
+
+/**
+ * A quick pick item based on an action.
+ */
+export interface ActionQuickPick<TState = any> extends vscode.QuickPickItem {
+    /**
+     * The action to invoke.
+     */
+    readonly action?: (state?: TState) => any;
+    /**
+     * The state value for the action.
+     */
+    readonly state?: TState;
+}
 
 /**
  * Deploy settings.
@@ -25,11 +41,11 @@ export interface Configuration {
     /**
      * One or more package.
      */
-    readonly packages?: Package | Package[];
+    readonly packages?: deploy_packages.Package | deploy_packages.Package[];
     /**
      * One or more target.
      */
-    readonly targets?: Target | Target[];
+    readonly targets?: deploy_targets.Target | deploy_targets.Target[];
 }
 
 /**
@@ -51,15 +67,17 @@ export enum FileChangeType {
 }
 
 /**
- * A package.
+ * A file filter.
  */
-export interface Package {
+export interface FileFilter {
     /**
-     * [INTERNAL] DO NOT DEFINE OR OVERWRITE THIS PROPERTY BY YOUR OWN!
-     * 
-     * Gets the zero-based of that package.
+     * One or more (glob) patterns that describes the files to EXCLUDE.
      */
-    readonly __index?: number;
+    readonly exclude?: string | string[];
+    /**
+     * One or more (glob) patterns that describes the files to INCLUDE.
+     */
+    readonly files?: string | string[];
 }
 
 /**
@@ -78,18 +96,6 @@ export interface PackageFile {
      * The version string.
      */
     readonly version: string;
-}
-
-/**
- * A target.
- */
-export interface Target {
-    /**
-     * [INTERNAL] DO NOT DEFINE OR OVERWRITE THIS PROPERTY BY YOUR OWN!
-     * 
-     * Gets the zero-based of that target.
-     */
-    readonly __index?: number;
 }
 
 /**
