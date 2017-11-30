@@ -16,10 +16,12 @@
  */
 
 import * as deploy_contracts from './contracts';
+import * as deploy_deploy from './deploy';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
+import * as deploy_pull from './pull';
 import * as deploy_targets from './targets';
 import * as Enumerable from 'node-enumerable';
 import * as Events from 'events';
@@ -97,20 +99,8 @@ export class Workspace extends Events.EventEmitter implements vscode.Disposable 
      * @param {deploy_targets.Target} target The target to deploy to.
      */
     public async deployFileTo(file: string, target: deploy_targets.Target) {
-        if (!target) {
-            return;
-        }
-
-        if (target.__workspace.FOLDER.uri.fsPath !== this.FOLDER.uri.fsPath) {
-            //TODO: translate
-            throw new Error(`File '${file}' cannot be deployed from workspace '${this.FOLDER.uri.fsPath}'!`);
-        }
-
-        file = Path.resolve(file);
-
-        await this.deployFilesTo(
-            [ file ], target, target.__index + 1
-        );
+        return await deploy_deploy.deployFileTo
+                                  .apply(this, arguments);
     }
 
     /**
@@ -118,81 +108,12 @@ export class Workspace extends Events.EventEmitter implements vscode.Disposable 
      * 
      * @param {string[]} files The files to deploy.
      * @param {deploy_targets.Target} target The target to deploy to.
-     * @param {number} The number of the target.
+     * @param {number} [targetNr] The number of the target.
      */
     protected async deployFilesTo(files: string[],
-                                  target: deploy_targets.Target, targetNr: number) {
-        const ME = this;
-        
-        if (!files || files.length < 1) {
-            return;
-        }
-
-        if (!target) {
-            return;
-        }
-
-        const TARGET_NAME = deploy_targets.getTargetName(target, targetNr);
-        const TARGET_TYPE = deploy_helpers.normalizeString(target.type);
-
-        const PLUGINS = ME.CONTEXT.plugins.filter(pi => {
-            return '' === pi.__type || 
-                   (TARGET_TYPE === pi.__type && pi.canUpload && pi.upload);
-        });
-
-        if (PLUGINS.length < 1) {
-            //TODO: translate
-            await deploy_helpers.showWarningMessage(
-                `No matching PLUGINS found!`
-            );
-
-            return;
-        }
-
-        while (PLUGINS.length > 0) {
-            const PI = PLUGINS.shift();
-
-            try {
-                // TODO: translate
-                ME.CONTEXT.outputChannel.appendLine('');
-                ME.CONTEXT.outputChannel.appendLine(`Start deploying files to '${TARGET_NAME}'...`);
-
-                const CTX: deploy_plugins.UploadContext = {
-                    files: files.map(f => {
-                        const LF = new deploy_plugins.LocalFileToUpload(f);
-                        LF.onBeforeUpload = async () => {
-                            // TODO: translate
-                            ME.CONTEXT.outputChannel.append(`Deploying file '${f}' to '${TARGET_NAME}'... `);
-                        };
-                        LF.onUploadCompleted = async (err?: any) => {
-                            // TODO: translate
-                            if (err) {
-                                ME.CONTEXT.outputChannel.appendLine(`[ERROR: ${err}]`);
-                            }
-                            else {
-                                ME.CONTEXT.outputChannel.appendLine(`[OK]`);
-                            }
-                        };
-
-                        return LF;
-                    }),
-                };
-
-                await Promise.resolve(
-                    PI.upload(CTX)
-                );
-
-                // TODO: translate
-                ME.CONTEXT.outputChannel.appendLine(`Deploying files to '${TARGET_NAME}' has been finished.`);
-            }
-            catch (e) {
-                // TODO: translate
-                ME.CONTEXT.outputChannel.appendLine(`[ERROR] deploying to '${TARGET_NAME}' failed: ${e}`);
-            }
-            finally {
-                ME.CONTEXT.outputChannel.appendLine('');
-            }
-        }
+                                  target: deploy_targets.Target, targetNr?: number) {
+        return await deploy_deploy.deployFilesTo
+                                  .apply(this, arguments);
     }
 
     /**
@@ -201,83 +122,8 @@ export class Workspace extends Events.EventEmitter implements vscode.Disposable 
      * @param {deploy_packages.Package} pkg The package to deploy. 
      */
     public async deployPackage(pkg: deploy_packages.Package) {
-        const ME = this;
-
-        if (!pkg) {
-            return;
-        }
-
-        if (pkg.__workspace.FOLDER.uri.fsPath !== ME.FOLDER.uri.fsPath) {
-            //TODO: translate
-            throw new Error(`Package '${deploy_packages.getPackageName(pkg)}' cannot be deployed from workspace '${ME.FOLDER.uri.fsPath}'!`);
-        }
-
-        const FILES = deploy_helpers.asArray(pkg.files).filter(f => {
-            return !deploy_helpers.isEmptyString(f);
-        });
-
-        const EXCLUDE = deploy_helpers.asArray(pkg.exclude).filter(f => {
-            return !deploy_helpers.isEmptyString(f);
-        });
-
-        const ROOT_DIR = ME.FOLDER.uri.fsPath;
-
-        const FILES_TO_DEPLOY = await deploy_helpers.glob(FILES, {
-            absolute: true,
-            cwd: ROOT_DIR,
-            dot: false,
-            ignore: EXCLUDE,
-            nodir: true,
-            nonull: true,
-            nosort: false,
-            root: ROOT_DIR,
-            sync: false,
-        });
-
-        if (FILES_TO_DEPLOY.length < 1) {
-            //TODO: translate
-            await deploy_helpers.showWarningMessage(
-                `No FILES found!`
-            );
-
-            return;
-        }
-
-        const QUICK_PICK_ITEMS: deploy_contracts.ActionQuickPick[] = ME.getTargets().map((t, i) => {
-            return {
-                action: async () => {
-                    await ME.deployFilesTo(FILES_TO_DEPLOY, t, i + 1);
-                },
-                description: deploy_helpers.toStringSafe( t.description ).trim(),
-                detail: t.__workspace.FOLDER.uri.fsPath,
-                label: deploy_targets.getTargetName(t, i + 1),
-            };
-        });
-
-        if (QUICK_PICK_ITEMS.length < 1) {
-            //TODO: translate
-            await deploy_helpers.showWarningMessage(
-                `No TARGETS found!`
-            );
-
-            return;
-        }
-
-        let selectedItem: deploy_contracts.ActionQuickPick;
-        if (1 === QUICK_PICK_ITEMS.length) {
-            selectedItem = QUICK_PICK_ITEMS[0];
-        }
-        else {
-            selectedItem = await vscode.window.showQuickPick(QUICK_PICK_ITEMS, {
-                placeHolder: 'Select the TARGET to deploy to...',  //TODO: translate
-            });
-        }
-
-        if (selectedItem) {
-            await Promise.resolve(
-                selectedItem.action()
-            );
-        }
+        return await deploy_deploy.deployPackage
+                                  .apply(this, arguments);
     }
 
     /** @inheritdoc */
@@ -368,6 +214,13 @@ export class Workspace extends Events.EventEmitter implements vscode.Disposable 
         return true;
     }
 
+    /**
+     * Checks if a path is part of that workspace.
+     * 
+     * @param {string} path The path to check.
+     * 
+     * @return {boolean} Is part of that workspace or not. 
+     */
     public isPathOf(path: string) {
         if (!deploy_helpers.isEmptyString(path)) {
             if (!Path.isAbsolute(path)) {
@@ -426,6 +279,40 @@ export class Workspace extends Events.EventEmitter implements vscode.Disposable 
         finally {
             delete FILES_CHANGES[e.fsPath];
         }
+    }
+
+    /**
+     * Pulls a file from a target.
+     * 
+     * @param {string} file The file to pull.
+     * @param {deploy_targets.Target} target The target from where to pull from.
+     */
+    public async pullFileFrom(file: string, target: deploy_targets.Target) {
+        return await deploy_pull.pullFileFrom
+                                .apply(this, arguments);
+    }
+
+    /**
+     * Pulls files from a target.
+     * 
+     * @param {string[]} files The files to pull.
+     * @param {deploy_targets.Target} target The target to pull from.
+     * @param {number} [targetNr] The number of the target.
+     */
+    protected async pullFilesFrom(files: string[],
+                                  target: deploy_targets.Target, targetNr?: number) {
+        return await deploy_pull.pullFilesFrom
+                                .apply(this, arguments);
+    }
+
+    /**
+     * Pulls a package.
+     * 
+     * @param {deploy_packages.Package} pkg The package to pull. 
+     */
+    public async pullPackage(pkg: deploy_packages.Package) {
+        return await deploy_pull.pullPackage
+                                .apply(this, arguments);
     }
 
     /**

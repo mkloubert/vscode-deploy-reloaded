@@ -28,6 +28,23 @@ export interface TestTarget extends deploy_targets.Target {
 }
 
 class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
+    public async download(context: deploy_plugins.DownloadContext) {
+        await deploy_helpers.forEachAsync(context.files, async (f) => {
+            try {
+                await f.onBeforeDownload()
+
+                await deploy_helpers.readFile(
+                    f.file,
+                );
+
+                await f.onDownloadCompleted(null);
+            }
+            catch (e) {
+                await f.onDownloadCompleted(e);
+            }
+        });
+    }
+
     public async upload(context: deploy_plugins.UploadContext) {
         await deploy_helpers.forEachAsync(context.files, async (f) => {
             try {

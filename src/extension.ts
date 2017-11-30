@@ -501,7 +501,134 @@ export async function activate(context: vscode.ExtensionContext) {
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.deployFile');
                 }
-            })
+            }),
+
+            // pull workspace
+            vscode.commands.registerCommand('extension.deploy.reloaded.pullWorkspace', async () => {
+                try {
+                    const PACKAGES: deploy_packages.Package[] = [];
+                    await deploy_helpers.forEachAsync(activeWorkspaces, async (ws) => {
+                        Enumerable.from(ws.getPackages())
+                                  .pushTo(PACKAGES);
+                    });
+
+                    const QUICK_PICK_ITEMS: deploy_contracts.ActionQuickPick[] = PACKAGES.map((p, i) => {
+                        return {
+                            action: async () => {
+                                await p.__workspace
+                                       .pullPackage(p);
+                            },
+                            description: deploy_helpers.toStringSafe( p.description ).trim(),
+                            detail: p.__workspace.FOLDER.uri.fsPath,
+                            label: deploy_packages.getPackageName(p, i + 1),
+                        };
+                    });
+
+                    if (QUICK_PICK_ITEMS.length < 1) {
+                        //TODO: translate
+                        await deploy_helpers.showWarningMessage(
+                            `No PACKAGES found!`
+                        );
+                    }
+                    else {
+                        let selectedItem: deploy_contracts.ActionQuickPick;
+                        if (1 === QUICK_PICK_ITEMS.length) {
+                            selectedItem = QUICK_PICK_ITEMS[0];
+                        }
+                        else {
+                            selectedItem = await vscode.window.showQuickPick(QUICK_PICK_ITEMS, {
+                                placeHolder: 'Select the PACKAGE to pull...',  //TODO: translate
+                            });
+                        }
+
+                        if (selectedItem) {
+                            await Promise.resolve(
+                                selectedItem.action()
+                            );
+                        }
+                    }
+                }
+                catch (e) {
+                    //TODO: translate
+                    await deploy_helpers.showErrorMessage(
+                        `Pulling WORKSPACE failed (s. debug output 'CTRL + Y')!`
+                    );
+
+                    deploy_log.CONSOLE
+                              .trace(e, 'extension.deploy.reloaded.pullWorkspace');
+                }
+            }),
+
+            // pull current file
+            vscode.commands.registerCommand('extension.deploy.reloaded.pullFile', async () => {
+                try {
+                    const ACTIVE_EDITOR = vscode.window.activeTextEditor;
+                    if (ACTIVE_EDITOR) {
+                        const MATCHING_WORKSPACES = WORKSPACES.filter(ws => {
+                            return ACTIVE_EDITOR.document &&
+                                   ws.isPathOf(ACTIVE_EDITOR.document.fileName);
+                        });
+
+                        const TARGETS: deploy_targets.Target[] = [];
+                        MATCHING_WORKSPACES.forEach(ws => {
+                            Enumerable.from( ws.getTargets() )
+                                      .pushTo(TARGETS);
+                        });
+
+                        const QUICK_PICK_ITEMS: deploy_contracts.ActionQuickPick[] = TARGETS.map((t, i) => {
+                            return {
+                                action: async () => {
+                                    await t.__workspace
+                                           .pullFileFrom(ACTIVE_EDITOR.document.fileName, t);
+                                },
+                                description: deploy_helpers.toStringSafe( t.description ).trim(),
+                                detail: t.__workspace.FOLDER.uri.fsPath,
+                                label: deploy_targets.getTargetName(t, i + 1),
+                            };
+                        });
+                
+                        if (QUICK_PICK_ITEMS.length < 1) {
+                            //TODO: translate
+                            await deploy_helpers.showWarningMessage(
+                                `No TARGETS found!`
+                            );
+                
+                            return;
+                        }
+                
+                        let selectedItem: deploy_contracts.ActionQuickPick;
+                        if (1 === QUICK_PICK_ITEMS.length) {
+                            selectedItem = QUICK_PICK_ITEMS[0];
+                        }
+                        else {
+                            selectedItem = await vscode.window.showQuickPick(QUICK_PICK_ITEMS, {
+                                placeHolder: 'Select the TARGET to pull from...',  //TODO: translate
+                            });
+                        }
+
+                        if (selectedItem) {
+                            await Promise.resolve(
+                                selectedItem.action()
+                            );
+                        }
+                    }
+                    else {
+                        //TODO: translate
+                        await deploy_helpers.showWarningMessage(
+                            `No ACTIVE EDITOR found!`
+                        );
+                    }
+                }
+                catch (e) {
+                    //TODO: translate
+                    await deploy_helpers.showErrorMessage(
+                        `Pulling CURRENT FILE failed (s. debug output 'CTRL + Y')!`
+                    );
+
+                    deploy_log.CONSOLE
+                              .trace(e, 'extension.deploy.reloaded.pullFile');
+                }
+            }),
         );
     });
     

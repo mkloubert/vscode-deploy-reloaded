@@ -18,9 +18,51 @@
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
 import * as deploy_targets from './targets';
+import * as deploy_workspaces from './workspaces';
 import * as Events from 'events';
 import * as vscode from 'vscode';
 
+
+/**
+ * A download context.
+ */
+export interface DownloadContext {
+    /**
+     * The files to download.
+     */
+    readonly files: FileToDownload[];
+}
+
+/**
+ * A downloaded file.
+ */
+export interface DownloadedFile extends vscode.Disposable {
+}
+
+/**
+ * A file to download.
+ */
+export interface FileToDownload {
+    /**
+     * The path to the (local) file.
+     */
+    readonly file: string;
+    /**
+     * The method that should be invoked BEFORE a download of that file starts.
+     */
+    readonly onBeforeDownload: () => PromiseLike<void>;
+    /**
+     * The method that should be invoked AFTER a download of that file has been finished.
+     * 
+     * @param {any} err The error (if occurred).
+     * @param {DownloadedFile} [file] The downloaded file (if available).
+     */
+    readonly onDownloadCompleted: (err: any, file?: DownloadedFile) => PromiseLike<void>;
+    /**
+     * The underlying workspace.
+     */
+    readonly workspace: deploy_workspaces.Workspace;
+}
 
 /**
  * A file to upload.
@@ -42,6 +84,10 @@ export interface FileToUpload {
      * @return {PromiseLike<Buffer>} The loaded data.
      */
     readonly read: () => PromiseLike<Buffer>;
+    /**
+     * The underlying workspace.
+     */
+    readonly workspace: deploy_workspaces.Workspace;
 }
 
 /**
@@ -84,6 +130,10 @@ export interface Plugin extends NodeJS.EventEmitter, vscode.Disposable {
     __type?: string;
 
     /**
+     * Gets if the plugin can download files or not.
+     */
+    readonly canDownload?: boolean;
+    /**
      * Gets if the plugin can upload files or not.
      */
     readonly canUpload?: boolean;
@@ -93,6 +143,12 @@ export interface Plugin extends NodeJS.EventEmitter, vscode.Disposable {
      * @return {InitializePluginResult|PromiseLike<InitializePluginResult>} The result.
      */
     readonly initialize?: () => InitializePluginResult | PromiseLike<InitializePluginResult>;
+    /**
+     * Downloads files.
+     * 
+     * @param {DownloadContext} The context.
+     */
+    readonly download?: (context: DownloadContext) => void | PromiseLike<void>;
     /**
      * Uploads files.
      * 
@@ -139,6 +195,14 @@ export interface UploadContext {
  * A local file to upload.
  */
 export abstract class FileToUploadBase implements FileToUpload {
+    /**
+     * Initializes a new instance of that class.
+     * 
+     * @param {deploy_workspaces.Workspace} workspace the underlying workspace.
+     */
+    constructor(public readonly workspace: deploy_workspaces.Workspace) {
+    }
+
     /** @inheritdoc */
     public onBeforeUpload = async () => {
     };
@@ -158,10 +222,12 @@ export class LocalFileToUpload extends FileToUploadBase {
     /**
      * Initializes a new instance of that class.
      * 
+     * @param {deploy_workspaces.Workspace} workspace the underlying workspace.
      * @param {string} FILE The path to the local file. 
      */
-    constructor(public readonly FILE: string) {
-        super();
+    constructor(workspace: deploy_workspaces.Workspace,
+                public readonly FILE: string) {
+        super(workspace);
     }
 
     /** @inheritdoc */
@@ -198,6 +264,10 @@ export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_
     public __type: string;
 
     /** @inheritdoc */
+    public get canDownload() {
+        return false;
+    }
+    /** @inheritdoc */
     public get canUpload() {
         return true;
     }
@@ -216,11 +286,38 @@ export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_
     }
 
     /** @inheritdoc */
+    public async download(context: DownloadContext) {
+        throw new Error(`'download()' is not implemented!`);
+    }
+
+    /** @inheritdoc */
     public async initialize() {
     }
 
     /** @inheritdoc */
     public async upload(context: UploadContext) {
-        throw new Error(`Not implemented!`);
+        throw new Error(`'upload()' is not implemented!`);
     }
+}
+
+/**
+ * A simple implementation of an file to download.
+ */
+export class SimpleFileToDownload implements FileToDownload {
+    /**
+     * Initializes a new instance of that class.
+     * 
+     * @param {deploy_workspaces.Workspace} workspace the underlying workspace.
+     */
+    constructor(public readonly workspace: deploy_workspaces.Workspace,
+                public readonly file: string) {
+    }
+
+    /** @inheritdoc */
+    public onBeforeDownload = async () => {
+    };
+
+    /** @inheritdoc */
+    public onDownloadCompleted = async () => {
+    };
 }

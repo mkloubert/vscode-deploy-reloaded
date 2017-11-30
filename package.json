@@ -2,7 +2,7 @@
     "name": "vscode-deploy-reloaded",
     "displayName": "Deploy (Reloaded)",
     "description": "Deploys files of a workspace to a destination.",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "publisher": "mkloubert",
     "engines": {
         "vscode": "^1.18.0"
@@ -26,12 +26,22 @@
         "commands": [
             {
                 "command": "extension.deploy.reloaded.deployWorkspace",
-                "title": "Workspace",
+                "title": "Deploy workspace",
                 "category": "Deploy Reloaded"
             },
             {
                 "command": "extension.deploy.reloaded.deployFile",
-                "title": "Current file",
+                "title": "Deploy current file",
+                "category": "Deploy Reloaded"
+            },
+            {
+                "command": "extension.deploy.reloaded.pullWorkspace",
+                "title": "Pull workspace",
+                "category": "Deploy Reloaded"
+            },
+            {
+                "command": "extension.deploy.reloaded.pullFile",
+                "title": "Pull current file",
                 "category": "Deploy Reloaded"
             }
         ],
@@ -45,6 +55,16 @@
                 "command": "extension.deploy.reloaded.deployFile",
                 "key": "ctrl+alt+f",
                 "mac": "cmd+alt+f"
+            },
+            {
+                "command": "extension.deploy.reloaded.pullFile",
+                "key": "ctrl+alt+p f",
+                "mac": "cmd+alt+p f"
+            },
+            {
+                "command": "extension.deploy.reloaded.pullWorkspace",
+                "key": "ctrl+alt+p w",
+                "mac": "cmd+alt+p w"
             }
         ],
         "configuration": {
