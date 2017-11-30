@@ -71,7 +71,7 @@ export async function pullFilesFrom(files: string[],
         targetNr = target.__index + 1;
     }
 
-    const TARGET_NAME = deploy_targets.getTargetName(target, targetNr);
+    const TARGET_NAME = deploy_targets.getTargetName(target);
     const TARGET_TYPE = deploy_helpers.normalizeString(target.type);
 
     const PLUGINS = ME.CONTEXT.plugins.filter(pi => {
@@ -101,23 +101,44 @@ export async function pullFilesFrom(files: string[],
 
             const CTX: deploy_plugins.DownloadContext = {
                 files: files.map(f => {
-                    const SF = new deploy_plugins.SimpleFileToDownload(ME, f);
-                    SF.onBeforeDownload = async () => {
+                    const NAME_AND_PATH = ME.toNameAndPath(f);
+                    if (false === NAME_AND_PATH) {
+                        // TODO: translate
+                        ME.CONTEXT.outputChannel.append(`Cannot detect path information for file '${f}'!`);
+
+                        return null;
+                    }
+
+                    const SF = new deploy_plugins.SimpleFileToDownload(ME, f, NAME_AND_PATH);
+                    SF.onBeforeDownload = async (destination?: string) => {
                         // TODO: translate
                         ME.CONTEXT.outputChannel.append(`Pulling file '${f}' from '${TARGET_NAME}'... `);
                     };
-                    SF.onDownloadCompleted = async (err?: any) => {
+                    SF.onDownloadCompleted = async (err?: any, downloadedFile?: deploy_plugins.DownloadedFile) => {
                         // TODO: translate
-                        if (err) {
-                            ME.CONTEXT.outputChannel.appendLine(`[ERROR: ${err}]`);
+                        try {
+                            if (err) {
+                                throw err;
+                            }
+                            else {
+                                if (downloadedFile) {
+                                    await deploy_helpers.writeFile(
+                                        f,
+                                        await downloadedFile.read(),
+                                    );
+                                }
+
+                                ME.CONTEXT.outputChannel.appendLine(`[OK]`);
+                            }
                         }
-                        else {
-                            ME.CONTEXT.outputChannel.appendLine(`[OK]`);
+                        catch (e) {
+                            ME.CONTEXT.outputChannel.appendLine(`[ERROR: ${e}]`);
                         }
                     };
 
                     return SF;
-                }),
+                }).filter(f => null !== f),
+                target: target,
             };
 
             await Promise.resolve(
@@ -192,7 +213,7 @@ export async function pullPackage(pkg: deploy_packages.Package) {
             },
             description: deploy_helpers.toStringSafe( t.description ).trim(),
             detail: t.__workspace.FOLDER.uri.fsPath,
-            label: deploy_targets.getTargetName(t, i + 1),
+            label: deploy_targets.getTargetName(t),
         };
     });
 

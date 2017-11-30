@@ -35,10 +35,10 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
         return true;
     }
 
-    public async deleteFiles(context: deploy_plugins.DeleteContext) {
+    public async deleteFiles(context: deploy_plugins.DeleteContext<TestTarget>) {
         await deploy_helpers.forEachAsync(context.files, async (f) => {
             try {
-                await f.onBeforeDelete()
+                await f.onBeforeDelete();
 
                 await deploy_helpers.readFile(
                     f.file,
@@ -52,10 +52,10 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
         });
     }
 
-    public async download(context: deploy_plugins.DownloadContext) {
+    public async download(context: deploy_plugins.DownloadContext<TestTarget>) {
         await deploy_helpers.forEachAsync(context.files, async (f) => {
             try {
-                await f.onBeforeDownload()
+                await f.onBeforeDownload();
 
                 await deploy_helpers.readFile(
                     f.file,
@@ -69,7 +69,7 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
         });
     }
 
-    public async upload(context: deploy_plugins.UploadContext) {
+    public async upload(context: deploy_plugins.UploadContext<TestTarget>) {
         await deploy_helpers.forEachAsync(context.files, async (f) => {
             try {
                 await f.onBeforeUpload();

@@ -77,7 +77,7 @@ async function invokeForActiveEditor(placeHolder: string,
                 },
                 description: deploy_helpers.toStringSafe( t.description ).trim(),
                 detail: t.__workspace.FOLDER.uri.fsPath,
-                label: deploy_targets.getTargetName(t, i + 1),
+                label: deploy_targets.getTargetName(t),
             };
         });
 
@@ -430,7 +430,7 @@ async function invokeForActivePackage(placeHolder: string,
             },
             description: deploy_helpers.toStringSafe( p.description ).trim(),
             detail: p.__workspace.FOLDER.uri.fsPath,
-            label: deploy_packages.getPackageName(p, i + 1),
+            label: deploy_packages.getPackageName(p),
         };
     });
 

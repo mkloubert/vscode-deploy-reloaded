@@ -60,7 +60,7 @@ const FILES_CHANGES: { [path: string]: deploy_contracts.FileChangeType } = {};
 /**
  * A workspace.
  */
-export class Workspace extends Events.EventEmitter implements vscode.Disposable {
+export class Workspace extends Events.EventEmitter implements deploy_contracts.Translator, vscode.Disposable {
     /**
      * Stores the current configuration.
      */
@@ -396,14 +396,7 @@ export class Workspace extends Events.EventEmitter implements vscode.Disposable 
         }
     }
 
-    /**
-     * Returns a translated string by key.
-     * 
-     * @param {string} key The key.
-     * @param {any} [args] The optional arguments.
-     * 
-     * @return {string} The "translated" string.
-     */
+    /** @inheritdoc */
     public t(key: string, ...args: any[]): string {
         const TRANSLATOR = this._translator;
         if (TRANSLATOR) {
@@ -414,5 +407,50 @@ export class Workspace extends Events.EventEmitter implements vscode.Disposable 
         }
 
         return key;
+    }
+
+    /**
+     * Extracts the name and (relative) path from a file.
+     * 
+     * @param {string} file The file (path).
+     * 
+     * @return {deploy_contracts.WithNameAndPath|false} The extracted data or (false) if file path is invalid.
+     */
+    public toNameAndPath(file: string): deploy_contracts.WithNameAndPath | false {
+        if (deploy_helpers.isEmptyString(file)) {
+            return;
+        }
+
+        let workspaceDir = Path.resolve(this.FOLDER.uri.fsPath);
+        workspaceDir = deploy_helpers.replaceAllStrings(workspaceDir, Path.sep, '/');
+
+        if (!Path.isAbsolute(file)) {
+            Path.join(workspaceDir, file);
+        }
+        file = Path.resolve(file);
+        file = deploy_helpers.replaceAllStrings(file, Path.sep, '/');
+
+        if (!file.startsWith(workspaceDir)) {
+            return false;
+        }
+
+        const NAME = Path.basename(file);
+
+        let relativePath = Path.dirname(file).substr(workspaceDir.length);
+        while (relativePath.startsWith('/')) {
+            relativePath = relativePath.substr(1);
+        }
+        while (relativePath.endsWith('/')) {
+            relativePath = relativePath.substr(0, relativePath.length - 1);
+        }
+
+        if ('' === relativePath.trim()) {
+            relativePath = '';
+        }
+
+        return {
+            name: NAME,
+            path: relativePath,
+        };
     }
 }

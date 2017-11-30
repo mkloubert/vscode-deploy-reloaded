@@ -51,27 +51,24 @@ export interface Package extends deploy_contracts.FileFilter {
 /**
  * Returns the name for a package.
  * 
- * @param {Package} pkg The package. 
- * @param {number} [nr] The number of the package.
+ * @param {Package} pkg The package.
  * 
  * @return {string} The name. 
  */
-export function getPackageName(pkg: Package,
-                               nr?: number): string {
-    nr = parseInt( deploy_helpers.toStringSafe(nr).trim() );
-    
+export function getPackageName(pkg: Package): string {
+    if (!pkg) {
+        return;
+    }
+
+    const TRANSLATOR: deploy_contracts.Translator = pkg.__workspace;
+
     if (!pkg) {
         return;
     }
 
     let name = deploy_helpers.toStringSafe(pkg.name).trim();
     if ('' === name) {
-        //TODO: translate
-        name = 'Package';
-
-        if (!isNaN(nr)) {
-            name += ` #${nr}`;
-        }
+        name = TRANSLATOR.t('packages.defaultName', pkg.__index + 1);
     }
 
     return name;

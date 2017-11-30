@@ -15,6 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
 import * as deploy_workspaces from './workspaces';
 
@@ -53,27 +54,20 @@ export interface Target {
 /**
  * Returns the name for a target.
  * 
- * @param {Target} target The target. 
- * @param {number} [nr] The number of the target.
+ * @param {Target} target The target.
  * 
  * @return {string} The name. 
  */
-export function getTargetName(target: Target,
-                              nr?: number): string {
-    nr = parseInt( deploy_helpers.toStringSafe(nr).trim() );
-    
+export function getTargetName(target: Target): string {
     if (!target) {
         return;
     }
 
+    const TRANSLATOR: deploy_contracts.Translator = target.__workspace;
+
     let name = deploy_helpers.toStringSafe(target.name).trim();
     if ('' === name) {
-        //TODO: translate
-        name = 'Target';
-
-        if (!isNaN(nr)) {
-            name += ` #${nr}`;
-        }
+        name = TRANSLATOR.t('targets.defaultName', target.__index + 1);
     }
 
     return name;

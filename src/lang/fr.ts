@@ -25,5 +25,11 @@ import { Translation } from '../i18';
 export const translation: Translation = {
     cancel: 'Abandonner',
     no: 'Aucun',
+    packages: {
+        defaultName: '(Paquetage #{0:trim})',
+    },
+    targets: {
+        defaultName: '(Cible #{0:trim})',
+    },
     yes: 'Oui',
 }

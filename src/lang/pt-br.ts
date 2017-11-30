@@ -24,5 +24,11 @@ import { Translation } from '../i18';
 export const translation: Translation = {
     cancel: 'Abortar',
     no: 'Não',
+    packages: {
+        defaultName: '(Pacote #{0:trim})',
+    },
+    targets: {
+        defaultName: '(Destino #{0:trim})',
+    },
     yes: 'Sím',
 }

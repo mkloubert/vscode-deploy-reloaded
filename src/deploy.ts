@@ -48,7 +48,7 @@ export async function deployFilesTo(files: string[],
         targetNr = target.__index + 1;
     }
 
-    const TARGET_NAME = deploy_targets.getTargetName(target, targetNr);
+    const TARGET_NAME = deploy_targets.getTargetName(target);
     const TARGET_TYPE = deploy_helpers.normalizeString(target.type);
 
     const PLUGINS = ME.CONTEXT.plugins.filter(pi => {
@@ -78,8 +78,16 @@ export async function deployFilesTo(files: string[],
 
             const CTX: deploy_plugins.UploadContext = {
                 files: files.map(f => {
-                    const LF = new deploy_plugins.LocalFileToUpload(ME, f);
-                    LF.onBeforeUpload = async () => {
+                    const NAME_AND_PATH = ME.toNameAndPath(f);
+                    if (false === NAME_AND_PATH) {
+                        // TODO: translate
+                        ME.CONTEXT.outputChannel.append(`Cannot detect path information for file '${f}'!`);
+
+                        return null;
+                    }
+
+                    const LF = new deploy_plugins.LocalFileToUpload(ME, f, NAME_AND_PATH);
+                    LF.onBeforeUpload = async (destination?: string) => {
                         // TODO: translate
                         ME.CONTEXT.outputChannel.append(`Deploying file '${f}' to '${TARGET_NAME}'... `);
                     };
@@ -94,7 +102,8 @@ export async function deployFilesTo(files: string[],
                     };
 
                     return LF;
-                }),
+                }).filter(f => null !== f),
+                target: target,
             };
 
             await Promise.resolve(
@@ -195,7 +204,7 @@ export async function deployPackage(pkg: deploy_packages.Package) {
             },
             description: deploy_helpers.toStringSafe( t.description ).trim(),
             detail: t.__workspace.FOLDER.uri.fsPath,
-            label: deploy_targets.getTargetName(t, i + 1),
+            label: deploy_targets.getTargetName(t),
         };
     });
 

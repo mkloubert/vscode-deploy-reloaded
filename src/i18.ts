@@ -31,6 +31,12 @@ import * as Workflows from 'node-workflows';
 export interface Translation {
     cancel?: string;
     no?: string;
+    packages?: {
+        defaultName?: string;
+    };
+    targets?: {
+        defaultName?: string;
+    };
     yes?: string;
 }
 

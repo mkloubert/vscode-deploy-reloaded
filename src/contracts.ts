@@ -113,6 +113,35 @@ export interface PackageFile {
 }
 
 /**
+ * An object that can provide translated strings by key.
+ */
+export interface Translator {
+    /**
+     * Returns a translated string by key.
+     * 
+     * @param {string} key The key.
+     * @param {any} [args] The optional arguments.
+     * 
+     * @return {string} The "translated" string.
+     */
+    readonly t: (key: string, ...args: any[]) => string;
+}
+
+/**
+ * An object that stores a name and a path.
+ */
+export interface WithNameAndPath {
+    /**
+     * The name.
+     */
+    readonly name: string;
+    /**
+     * The path.
+     */
+    readonly path: string;
+}
+
+/**
  * The name of the event that is raised after workspace config has been reloaded.
  */
 export const EVENT_CONFIG_RELOADED = 'workspace.config.reloaded';

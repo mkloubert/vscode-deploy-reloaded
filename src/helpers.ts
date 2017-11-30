@@ -406,7 +406,7 @@ export function normalizeString(val: any, normalizer?: (str: string) => string):
 /**
  * Promise version of 'FS.readFile()' function.
  * 
- * @param {string|Buffer} path The path.
+ * @param {string} filename The file to read.
  * 
  * @return {Promise<FS.Stats>} The promise with the stats.
  */
@@ -547,6 +547,32 @@ export function tryDispose(obj: { dispose?: () => any }): boolean {
 
         return false;
     }
+}
+
+/**
+ * Promise version of 'FS.unlink()' function.
+ * 
+ * @param {string} filename The file to write to.
+ * @param {any} data The data to write.
+ */
+export function writeFile(filename: string, data: any) {
+    return new Promise<void>((resolve, reject) => {
+        const COMPLETED = createCompletedAction(resolve, reject);
+
+        try {
+            FS.writeFile(filename, data, (err) => {
+                if (err) {
+                    COMPLETED(err);
+                }
+                else {
+                    COMPLETED(null);
+                }
+            });
+        }
+        catch (e) {
+            COMPLETED(e);
+        }
+    });
 }
 
 /**

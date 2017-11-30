@@ -26,7 +26,7 @@ import * as vscode from 'vscode';
 /**
  * A delete context.
  */
-export interface DeleteContext {
+export interface DeleteContext<TTarget extends deploy_targets.Target = deploy_targets.Target> extends FilesContext<TTarget> {
     /**
      * The files to delete.
      */
@@ -36,7 +36,7 @@ export interface DeleteContext {
 /**
  * A download context.
  */
-export interface DownloadContext {
+export interface DownloadContext<TTarget extends deploy_targets.Target = deploy_targets.Target> extends FilesContext<TTarget> {
     /**
      * The files to download.
      */
@@ -46,21 +46,30 @@ export interface DownloadContext {
 /**
  * A downloaded file.
  */
-export interface DownloadedFile extends vscode.Disposable {
+export interface DownloadedFile extends vscode.Disposable, deploy_contracts.WithNameAndPath {
+    readonly read: () => PromiseLike<Buffer>;
+}
+
+/**
+ * A context for handling files.
+ */
+export interface FilesContext<TTarget extends deploy_targets.Target = deploy_targets.Target> {
+    /**
+     * Gets the underlying target.
+     */
+    readonly target: TTarget;
 }
 
 /**
  * A file to delete.
  */
-export interface FileToDelete {
-    /**
-     * The path to the (local) file.
-     */
-    readonly file: string;
+export interface FileToDelete extends WorkspaceFile {
     /**
      * The method that should be invoked BEFORE a deletion of that file starts.
+     * 
+     * @param {string} [destination] A custom value for the destination.
      */
-    readonly onBeforeDelete: () => PromiseLike<void>;
+    readonly onBeforeDelete: (destination?: string) => PromiseLike<void>;
     /**
      * The method that should be invoked AFTER a deletion of that file has been finished.
      * 
@@ -77,15 +86,13 @@ export interface FileToDelete {
 /**
  * A file to download.
  */
-export interface FileToDownload {
-    /**
-     * The path to the (local) file.
-     */
-    readonly file: string;
+export interface FileToDownload extends WorkspaceFile {
     /**
      * The method that should be invoked BEFORE a download of that file starts.
+     * 
+     * @param {string} [destination] A custom value for the destination.
      */
-    readonly onBeforeDownload: () => PromiseLike<void>;
+    readonly onBeforeDownload: (destination?: string) => PromiseLike<void>;
     /**
      * The method that should be invoked AFTER a download of that file has been finished.
      * 
@@ -102,11 +109,13 @@ export interface FileToDownload {
 /**
  * A file to upload.
  */
-export interface FileToUpload {
+export interface FileToUpload extends WorkspaceFile {
     /**
      * The method that should be invoked BEFORE an upload of that file starts.
+     * 
+     * @param {string} [destination] A custom value for the destination.
      */
-    readonly onBeforeUpload: () => PromiseLike<void>;
+    readonly onBeforeUpload: (destination?: string) => PromiseLike<void>;
     /**
      * The method that should be invoked AFTER an upload of that file has been finished.
      * 
@@ -119,10 +128,6 @@ export interface FileToUpload {
      * @return {PromiseLike<Buffer>} The loaded data.
      */
     readonly read: () => PromiseLike<Buffer>;
-    /**
-     * The underlying workspace.
-     */
-    readonly workspace: deploy_workspaces.Workspace;
 }
 
 /**
@@ -138,7 +143,7 @@ export type NewPlugins = Plugin | PromiseLike<Plugin> | Plugin[] | PromiseLike<P
 /**
  * A plugin.
  */
-export interface Plugin extends NodeJS.EventEmitter, vscode.Disposable {
+export interface Plugin<TTarget extends deploy_targets.Target = deploy_targets.Target> extends NodeJS.EventEmitter, vscode.Disposable {
     /**
      * [INTERNAL] DO NOT DEFINE OR OVERWRITE THIS PROPERTY BY YOUR OWN!
      * 
@@ -187,19 +192,19 @@ export interface Plugin extends NodeJS.EventEmitter, vscode.Disposable {
      * 
      * @param {DeleteContext} The context.
      */
-    readonly deleteFiles?: (context: DeleteContext) => void | PromiseLike<void>;
+    readonly deleteFiles?: (context: DeleteContext<TTarget>) => void | PromiseLike<void>;
     /**
      * Downloads files.
      * 
      * @param {DownloadContext} The context.
      */
-    readonly download?: (context: DownloadContext) => void | PromiseLike<void>;
+    readonly download?: (context: DownloadContext<TTarget>) => void | PromiseLike<void>;
     /**
      * Uploads files.
      * 
      * @param {UploadContext} The context.
      */
-    readonly upload?: (context: UploadContext) => void | PromiseLike<void>;
+    readonly upload?: (context: UploadContext<TTarget>) => void | PromiseLike<void>;
 }
 
 /**
@@ -229,12 +234,27 @@ export interface PluginModule {
 /**
  * An upload context.
  */
-export interface UploadContext {
+export interface UploadContext<TTarget extends deploy_targets.Target = deploy_targets.Target> extends FilesContext<TTarget> {
     /**
      * The files to upload.
      */
     readonly files: FileToUpload[];
 }
+
+/**
+ * A workspace file.
+ */
+export interface WorkspaceFile extends deploy_contracts.WithNameAndPath {
+    /**
+     * The path to the (local) file.
+     */
+    readonly file: string;
+    /**
+     * The underlying workspace.
+     */
+    readonly workspace: deploy_workspaces.Workspace;
+}
+
 
 /**
  * A local file to upload.
@@ -244,8 +264,17 @@ export abstract class FileToUploadBase implements FileToUpload {
      * Initializes a new instance of that class.
      * 
      * @param {deploy_workspaces.Workspace} workspace the underlying workspace.
+     * @param {string} file The path to the local file. 
+     * @param {deploy_contracts.WithNameAndPath} _NAME_AND_PATH Name and relative path information.
      */
-    constructor(public readonly workspace: deploy_workspaces.Workspace) {
+    constructor(public readonly workspace: deploy_workspaces.Workspace,
+                public readonly file: string,
+                private readonly _NAME_AND_PATH: deploy_contracts.WithNameAndPath) {
+    }
+
+    /** @inheritdoc */
+    public get name() {
+        return this._NAME_AND_PATH.name;
     }
 
     /** @inheritdoc */
@@ -255,6 +284,11 @@ export abstract class FileToUploadBase implements FileToUpload {
     /** @inheritdoc */
     public onUploadCompleted = async () => {
     };
+
+    /** @inheritdoc */
+    public get path() {
+        return this._NAME_AND_PATH.path;
+    }
 
     /** @inheritdoc */
     public abstract async read();
@@ -268,16 +302,18 @@ export class LocalFileToUpload extends FileToUploadBase {
      * Initializes a new instance of that class.
      * 
      * @param {deploy_workspaces.Workspace} workspace the underlying workspace.
-     * @param {string} FILE The path to the local file. 
+     * @param {string} file The path to the local file.
+     * @param {deploy_contracts.WithNameAndPath} nameAndPath Name and relative path information.
      */
     constructor(workspace: deploy_workspaces.Workspace,
-                public readonly FILE: string) {
-        super(workspace);
+                file: string,
+                nameAndPath: deploy_contracts.WithNameAndPath) {
+        super(workspace, file, nameAndPath);
     }
 
     /** @inheritdoc */
     public async read() {
-        return deploy_helpers.readFile(this.FILE);
+        return deploy_helpers.readFile(this.file);
     }
 }
 
@@ -363,9 +399,16 @@ export class SimpleFileToDelete implements FileToDelete {
      * 
      * @param {deploy_workspaces.Workspace} workspace the underlying workspace.
      * @param {string} file The path to the (local) file.
+     * @param {deploy_contracts.WithNameAndPath} _NAME_AND_PATH Name and relative path information.
      */
     constructor(public readonly workspace: deploy_workspaces.Workspace,
-                public readonly file: string) {
+                public readonly file: string,
+                private readonly _NAME_AND_PATH: deploy_contracts.WithNameAndPath) {
+    }
+
+    /** @inheritdoc */
+    public get name() {
+        return this._NAME_AND_PATH.name;
     }
 
     /** @inheritdoc */
@@ -375,6 +418,11 @@ export class SimpleFileToDelete implements FileToDelete {
     /** @inheritdoc */
     public onDeleteCompleted = async () => {
     };
+
+    /** @inheritdoc */
+    public get path() {
+        return this._NAME_AND_PATH.path;
+    }
 }
 
 /**
@@ -386,9 +434,16 @@ export class SimpleFileToDownload implements FileToDownload {
      * 
      * @param {deploy_workspaces.Workspace} workspace the underlying workspace.
      * @param {string} file The path to the (local) file.
+     * @param {deploy_contracts.WithNameAndPath} _NAME_AND_PATH Name and relative path information.
      */
     constructor(public readonly workspace: deploy_workspaces.Workspace,
-                public readonly file: string) {
+                public readonly file: string,
+                private readonly _NAME_AND_PATH: deploy_contracts.WithNameAndPath) {
+    }
+
+    /** @inheritdoc */
+    public get name() {
+        return this._NAME_AND_PATH.name;
     }
 
     /** @inheritdoc */
@@ -398,4 +453,51 @@ export class SimpleFileToDownload implements FileToDownload {
     /** @inheritdoc */
     public onDownloadCompleted = async () => {
     };
+
+    /** @inheritdoc */
+    public get path() {
+        return this._NAME_AND_PATH.path;
+    }
+}
+
+
+/**
+ * Creates a new instance of a 'downloaded file' from a buffer.
+ * 
+ * @param {WorkspaceFile} file The underlying workspace file.
+ * @param {Buffer} buff The buffer with the data.
+ * 
+ * @return {DownloadedFile} The new object.
+ */
+export function createDownloadedFileFromBuffer(file: WorkspaceFile, buff: Buffer): DownloadedFile {
+    const DOWNLOADED: DownloadedFile = {
+        dispose: () => {
+            buff = null;
+        },
+        name: undefined,
+        path: undefined,
+        read: async () => {
+            return buff;
+        },
+    };
+
+    // DOWNLOADED.name
+    Object.defineProperty(DOWNLOADED, 'name', {
+        enumerable: true,
+
+        get: () => {
+            return file.name;
+        }
+    });
+
+    // DOWNLOADED.path
+    Object.defineProperty(DOWNLOADED, 'path', {
+        enumerable: true,
+        
+        get: () => {
+            return file.path;
+        }
+    });
+    
+    return DOWNLOADED;
 }

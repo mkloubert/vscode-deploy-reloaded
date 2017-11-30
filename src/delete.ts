@@ -102,7 +102,7 @@ export async function deleteFilesIn(files: string[],
         targetNr = target.__index + 1;
     }
 
-    const TARGET_NAME = deploy_targets.getTargetName(target, targetNr);
+    const TARGET_NAME = deploy_targets.getTargetName(target);
     const TARGET_TYPE = deploy_helpers.normalizeString(target.type);
 
     const PLUGINS = ME.CONTEXT.plugins.filter(pi => {
@@ -132,8 +132,16 @@ export async function deleteFilesIn(files: string[],
 
             const CTX: deploy_plugins.DeleteContext = {
                 files: files.map(f => {
-                    const SF = new deploy_plugins.SimpleFileToDelete(ME, f);
-                    SF.onBeforeDelete = async () => {
+                    const NAME_AND_PATH = ME.toNameAndPath(f);
+                    if (false === NAME_AND_PATH) {
+                        // TODO: translate
+                        ME.CONTEXT.outputChannel.append(`Cannot detect path information for file '${f}'!`);
+
+                        return null;
+                    }
+
+                    const SF = new deploy_plugins.SimpleFileToDelete(ME, f, NAME_AND_PATH);
+                    SF.onBeforeDelete = async (destination?: string) => {
                         // TODO: translate
                         ME.CONTEXT.outputChannel.append(`Deleting file '${f}' in '${TARGET_NAME}'... `);
                     };
@@ -164,7 +172,8 @@ export async function deleteFilesIn(files: string[],
                     };
 
                     return SF;
-                }),
+                }).filter(f => null !== f),
+                target: target,
             };
 
             await Promise.resolve(
@@ -268,7 +277,7 @@ export async function deletePackage(pkg: deploy_packages.Package) {
             },
             description: deploy_helpers.toStringSafe( t.description ).trim(),
             detail: t.__workspace.FOLDER.uri.fsPath,
-            label: deploy_targets.getTargetName(t, i + 1),
+            label: deploy_targets.getTargetName(t),
         };
     });
 
