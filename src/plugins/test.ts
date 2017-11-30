@@ -16,9 +16,13 @@
  */
 
 import * as deploy_contracts from '../contracts';
+import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
 import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
+import * as deploy_workspaces from '../workspaces';
+import * as Moment from 'moment';
+import * as Path from 'path';
 
 
 /**
@@ -32,6 +36,9 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
         return true;
     }
     public get canDownload() {
+        return true;
+    }
+    public get canList() {
         return true;
     }
 
@@ -52,7 +59,7 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
         });
     }
 
-    public async download(context: deploy_plugins.DownloadContext<TestTarget>) {
+    public async downloadFiles(context: deploy_plugins.DownloadContext<TestTarget>) {
         await deploy_helpers.forEachAsync(context.files, async (f) => {
             try {
                 await f.onBeforeDownload();
@@ -69,7 +76,104 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
         });
     }
 
-    public async upload(context: deploy_plugins.UploadContext<TestTarget>) {
+    public async listDirectory(context: deploy_plugins.ListDirectoryContext<TestTarget>) {
+        const WORKSPACE_DIR = Path.resolve(
+            context.workspace.FOLDER.uri.fsPath
+        );
+
+        let targetDir = Path.join(
+            WORKSPACE_DIR,
+            context.dir
+        );
+        targetDir = Path.resolve(targetDir);
+
+        if (!targetDir.startsWith(WORKSPACE_DIR)) {
+            //TODO: translate
+            throw new Error(
+                `'${context.dir}' is an invalid directory!`
+            );
+        }
+
+        let relativePath = targetDir.substr(WORKSPACE_DIR.length);
+        relativePath = deploy_helpers.replaceAllStrings(relativePath, Path.sep, '/');
+
+        while (relativePath.startsWith('/')) {
+            relativePath = relativePath.substr(1);
+        }
+        while (relativePath.endsWith('/')) {
+            relativePath = relativePath.substr(0, relativePath.length - 1);
+        }
+
+        if (deploy_helpers.isEmptyString(relativePath)) {
+            relativePath = '';
+        }
+
+        const RESULT: deploy_plugins.ListDirectoryResult<TestTarget> = {
+            dirs: [],
+            files: [],
+            others: [],
+            target: context.target,
+        };
+
+        const FILES_AND_FOLDERS = await deploy_helpers.readDir(targetDir);
+        await deploy_helpers.forEachAsync(FILES_AND_FOLDERS, async (f) => {
+            let fullPath = Path.join(
+                targetDir, f
+            );
+
+            const STATS = await deploy_helpers.lstat(fullPath);
+
+            let time: Moment.Moment;
+            if (STATS.mtime) {
+                time = Moment(STATS.mtime);
+                if (time.isValid() && !time.isUTC()) {
+                    time = time.utc();
+                }
+            }
+
+            const SIZE = STATS.size;
+
+            if (STATS.isDirectory()) {
+                const DI: deploy_files.DirectoryInfo = {
+                    name: f,
+                    path: relativePath,
+                    size: SIZE,
+                    time: time,
+                    type: deploy_files.FileSystemType.Directory,
+                };
+
+                RESULT.dirs.push(DI);
+            }
+            else if (STATS.isFile()) {
+                const FI: deploy_files.FileInfo = {
+                    download: async () => {
+                        return deploy_helpers.readFile(fullPath);
+                    },
+                    name: f,
+                    path: relativePath,
+                    size: SIZE,
+                    time: time,
+                    type: deploy_files.FileSystemType.File,
+                };
+
+                RESULT.files.push(FI);
+            }
+            else {
+                const FSI: deploy_files.FileSystemInfo = {
+                    name: f,
+                    path: relativePath,
+                    size: SIZE,
+                    time: time,
+                };
+
+                RESULT.others.push(FSI);
+            }
+        });
+
+        return RESULT;
+    }
+
+    public async uploadFiles(context: deploy_plugins.UploadContext<TestTarget>) {
         await deploy_helpers.forEachAsync(context.files, async (f) => {
             try {
                 await f.onBeforeUpload();

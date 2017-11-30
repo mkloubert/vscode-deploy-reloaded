@@ -53,7 +53,7 @@ export async function deployFilesTo(files: string[],
 
     const PLUGINS = ME.CONTEXT.plugins.filter(pi => {
         return '' === pi.__type || 
-               (TARGET_TYPE === pi.__type && pi.canUpload && pi.upload);
+               (TARGET_TYPE === pi.__type && pi.canUpload && pi.uploadFiles);
     });
 
     if (PLUGINS.length < 1) {
@@ -107,7 +107,7 @@ export async function deployFilesTo(files: string[],
             };
 
             await Promise.resolve(
-                PI.upload(CTX)
+                PI.uploadFiles(CTX)
             );
 
             if (files.length > 1) {

@@ -20,6 +20,7 @@ import * as deploy_delete from './delete';
 import * as deploy_deploy from './deploy';
 import * as deploy_helpers from './helpers';
 import * as deploy_i18 from './i18';
+import * as deploy_list from './list';
 import * as deploy_log from './log';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
@@ -52,6 +53,26 @@ export interface WorkspaceContext {
      * The list of other workspaces.
      */
     readonly workspaces: Workspace[];
+}
+
+/**
+ * A workspace file.
+ */
+export interface WorkspaceFile extends deploy_contracts.WithNameAndPath, WorkspaceItem {
+    /**
+     * The path to the (local) file.
+     */
+    readonly file: string;
+}
+
+/**
+ * A workspace item.
+ */
+export interface WorkspaceItem {
+    /**
+     * The underlying workspace.
+     */
+    readonly workspace: Workspace;
 }
 
 
@@ -310,6 +331,16 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
     }
 
     /**
+     * List the root directory on a target.
+     * 
+     * @param {deploy_targets.Target} target The target from where to list.
+     */
+    public async listDirectory(target: deploy_targets.Target) {
+        return await deploy_list.listDirectory
+                                .apply(this, [ target ]);
+    }
+
+    /**
      * Pulls a file from a target.
      * 
      * @param {string} file The file to pull.
@@ -453,4 +484,22 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
             path: relativePath,
         };
     }
+}
+
+
+/**
+ * Returns the display name of a workspace.
+ * 
+ * @param {Workspace} ws The workspace.
+ * 
+ * @return {string} The name.
+ */
+export function getWorkspaceName(ws: Workspace): string {
+    if (!ws) {
+        return;
+    }
+
+    return Path.basename(
+        ws.FOLDER.uri.fsPath
+    );
 }

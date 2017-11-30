@@ -76,7 +76,7 @@ export async function pullFilesFrom(files: string[],
 
     const PLUGINS = ME.CONTEXT.plugins.filter(pi => {
         return '' === pi.__type || 
-               (TARGET_TYPE === pi.__type && pi.canDownload && pi.download);
+               (TARGET_TYPE === pi.__type && pi.canDownload && pi.downloadFiles);
     });
 
     if (PLUGINS.length < 1) {
@@ -124,7 +124,9 @@ export async function pullFilesFrom(files: string[],
                                 if (downloadedFile) {
                                     await deploy_helpers.writeFile(
                                         f,
-                                        await downloadedFile.read(),
+                                        await Promise.resolve(
+                                            downloadedFile.read()
+                                        ),
                                     );
                                 }
 
@@ -142,7 +144,7 @@ export async function pullFilesFrom(files: string[],
             };
 
             await Promise.resolve(
-                PI.download(CTX)
+                PI.downloadFiles(CTX)
             );
 
             if (files.length > 1) {

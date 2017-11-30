@@ -19,9 +19,30 @@ import * as deploy_log from './log';
 import * as Enumerable from 'node-enumerable';
 import * as FS from 'fs';
 import * as Glob from 'glob';
+import * as MimeTypes from 'mime-types';
+import * as Path from 'path';
+import * as TMP from 'tmp';
 import * as vscode from 'vscode';
 import * as Workflows from 'node-workflows';
 
+
+/**
+ * Options for 'invokeForTempFile' function.
+ */
+export interface InvokeForTempFileOptions {
+    /**
+     * The custom prefix.
+     */
+    readonly prefix?: string;
+    /**
+     * The custom postfix / suffix.
+     */
+    readonly postfix?: string;
+    /**
+     * Keep file after execution or not.
+     */
+    readonly keep?: boolean;
+}
 
 /**
  * Describes a simple 'completed' action.
@@ -66,6 +87,49 @@ export function cloneObject<T>(val: T): T {
     return JSON.parse(
         JSON.stringify(val)
     );
+}
+
+/**
+ * Compares two values for a sort operation.
+ * 
+ * @param {T} x The left value.
+ * @param {T} y The right value.
+ * 
+ * @return {number} The "sort value".
+ */
+export function compareValues<T>(x: T, y: T): number {
+    if (x === y) {
+        return 0;
+    }
+
+    if (x > y) {
+        return 1;
+    }
+
+    if (x < y) {
+        return -1;
+    }
+
+    return 0;
+}
+
+/**
+ * Compares values by using a selector.
+ * 
+ * @param {T} x The left value. 
+ * @param {T} y The right value.
+ * @param {Function} selector The selector.
+ * 
+ * @return {number} The "sort value".
+ */
+export function compareValuesBy<T, U>(x: T, y: T,
+                                      selector: (t: T) => U): number {
+    if (!selector) {
+        selector = (t) => <any>t;
+    }
+
+    return compareValues<U>(selector(x),
+                            selector(y));
 }
 
 /**
@@ -337,6 +401,85 @@ export function invokeAfter<TResult = any>(action: (...args: any[]) => TResult, 
 }
 
 /**
+ * Invokes an action for a temporary file.
+ * 
+ * @param {Function} action The action to invoke. 
+ * @param {InvokeForTempFileOptions} [opts] Custom options.
+ * 
+ * @return {TResult} The result of the action.
+ */
+export function invokeForTempFile<TResult = any>(action: (path: string) => TResult,
+                                                 opts?: InvokeForTempFileOptions) {
+    if (!opts) {
+        opts = {};
+    }
+
+    return new Promise<TResult>((resolve, reject) => {
+        let tempFile: string;
+        const COMPLETED = (err: any, result?: any) => {
+            try {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve(result);
+                }
+            }
+            finally {
+                // remove temp file?
+                if (!toBooleanSafe(opts.keep)) {
+                    try {
+                        if (!isEmptyString(tempFile)) {
+                            if (FS.existsSync(tempFile)) {
+                                FS.unlinkSync(tempFile);
+                            }
+                        }
+                    }
+                    catch (e) {
+                        deploy_log.CONSOLE
+                                  .trace(e, 'helpers.invokeForTempFile');
+                    }
+                }
+            }
+        };
+
+        try {
+            TMP.tmpName({
+                keep: true,
+                prefix: opts.prefix,
+                postfix: opts.postfix,
+            }, (err, tf) => {
+                if (err) {
+                    COMPLETED(err);
+                }
+                else {
+                    tempFile = tf;
+
+                    try {
+                        if (action) {
+                            Promise.resolve( action(tf) ).then((result) => {
+                                COMPLETED(null, result);
+                            }).catch((e) => {
+                                COMPLETED(e);
+                            });
+                        }
+                        else {
+                            COMPLETED(null);
+                        }
+                    }
+                    catch (e) {
+                        COMPLETED(e);
+                    }
+                }
+            });
+        }
+        catch (e) {
+            COMPLETED(e);
+        }
+    });
+}
+
+/**
  * Checks if the string representation of a value is empty
  * or contains whitespaces only.
  * 
@@ -401,6 +544,33 @@ export function normalizeString(val: any, normalizer?: (str: string) => string):
     }
 
     return normalizer(toStringSafe(val));
+}
+
+/**
+ * Promise version of 'FS.readdir()' function.
+ * 
+ * @param {string|Buffer} path The path.
+ * 
+ * @return {Promise<string[]>} The promise with the file and folder names.
+ */
+export function readDir(path: string | Buffer) {
+    return new Promise<string[]>((resolve, reject) => {
+        const COMPLETED = createCompletedAction(resolve, reject);
+
+        try {
+            FS.readdir(path, (err, result) => {
+                if (err) {
+                    COMPLETED(err);
+                }
+                else {
+                    COMPLETED(null, result);
+                }
+            });
+        }
+        catch (e) {
+            COMPLETED(e);
+        }
+    });
 }
 
 /**
@@ -547,6 +717,61 @@ export function tryDispose(obj: { dispose?: () => any }): boolean {
 
         return false;
     }
+}
+
+/**
+ * Tries to find a language ID by filename.
+ * 
+ * @param {string} file The (name of the) file.
+ * 
+ * @return {Promise<string>} The promise with the language ID (if found). 
+ */
+export async function tryFindLanguageIdByFilename(file: string) {
+    file = toStringSafe(file);
+
+    let langId: string;
+
+    if (!isEmptyString(file)) {
+        try {
+            const EXT = Path.extname(file).substr(1);
+            switch (EXT) {
+                case 'cs':
+                    return 'csharp';
+                
+                case 'coffee':
+                    return 'coffeescript';
+
+                case 'ts':
+                    return 'typescript';
+            }
+
+            const ALL_LANGUAGES = await vscode.languages.getLanguages();
+            for (let i = 0; i < ALL_LANGUAGES.length; i++) {
+                try {
+                    const LANG = ALL_LANGUAGES[i];
+                    
+                    const CONTENT_TYPE = MimeTypes.lookup(LANG);
+                    if (false !== CONTENT_TYPE) {
+                        const MIME_EXT = MimeTypes.extension(CONTENT_TYPE);
+
+                        if (EXT === MIME_EXT) {
+                            langId = LANG;
+                        }
+                    }
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'helpers.tryFindLanguageIdByFilename(2)');
+                }
+            }
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'helpers.tryFindLanguageIdByFilename(1)');
+        }
+    }
+
+    return langId;
 }
 
 /**

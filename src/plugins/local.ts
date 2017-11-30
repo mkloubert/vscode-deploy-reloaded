@@ -16,10 +16,13 @@
  */
 
 import * as deploy_contracts from '../contracts';
+import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
 import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
+import * as deploy_workspaces from '../workspaces';
 import * as FSExtra from 'fs-extra';
+import * as Moment from 'moment';
 import * as Path from 'path';
 
 
@@ -48,6 +51,9 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
         return true;
     }
     public get canDownload() {
+        return true;
+    }
+    public get canList() {
         return true;
     }
 
@@ -91,7 +97,7 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
         });
     }
 
-    public async download(context: deploy_plugins.DownloadContext<LocalTarget>) {
+    public async downloadFiles(context: deploy_plugins.DownloadContext<LocalTarget>) {
         const ME = this;
 
         await deploy_helpers.forEachAsync(context.files, async (f) => {
@@ -124,19 +130,11 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
     }
 
     protected async getTargetSettings(context: deploy_plugins.FilesContext<LocalTarget>,
-                                      file: deploy_plugins.WorkspaceFile): Promise<TargetSettings> {
-        let dir: string | false = deploy_helpers.toStringSafe(context.target.dir);
-        if ('' === dir.trim()) {
-            dir = './out';
-        }
+                                      file: deploy_workspaces.WorkspaceFile): Promise<TargetSettings> {
+        const DIR = this.normalizeDir(context.target, file);
 
-        if (!Path.isAbsolute(dir)) {
-            dir = Path.join(file.workspace.FOLDER.uri.fsPath, dir);
-        }
-        dir = Path.resolve(dir);
-
-        if (await deploy_helpers.exists(dir)) {
-            if (!(await deploy_helpers.lstat(dir)).isDirectory()) {
+        if (await deploy_helpers.exists(DIR)) {
+            if (!(await deploy_helpers.lstat(DIR)).isDirectory()) {
                 //TODO: translate
                 throw new Error(
                     `'${context.target.dir}' is NO directory!`
@@ -145,12 +143,121 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
         }
 
         return {
-            dir: dir,
+            dir: DIR,
             empty: deploy_helpers.toBooleanSafe(context.target.empty),
         };
     }
 
-    public async upload(context: deploy_plugins.UploadContext<LocalTarget>) {
+    public async listDirectory(context: deploy_plugins.ListDirectoryContext<LocalTarget>) {
+        const DIR = this.normalizeDir(context.target, context);
+
+        let targetDir = Path.join(
+            DIR,
+            context.dir
+        );
+        targetDir = Path.resolve(targetDir);
+
+        if (!targetDir.startsWith(DIR)) {
+            //TODO: translate
+            throw new Error(
+                `'${context.dir}' is an invalid directory!`
+            );
+        }
+
+        let relativePath = targetDir.substr(DIR.length);
+        relativePath = deploy_helpers.replaceAllStrings(relativePath, Path.sep, '/');
+
+        while (relativePath.startsWith('/')) {
+            relativePath = relativePath.substr(1);
+        }
+        while (relativePath.endsWith('/')) {
+            relativePath = relativePath.substr(0, relativePath.length - 1);
+        }
+
+        if (deploy_helpers.isEmptyString(relativePath)) {
+            relativePath = '';
+        }
+
+        const RESULT: deploy_plugins.ListDirectoryResult<LocalTarget> = {
+            dirs: [],
+            files: [],
+            others: [],
+            target: context.target,
+        };
+
+        const FILES_AND_FOLDERS = await deploy_helpers.readDir(targetDir);
+        await deploy_helpers.forEachAsync(FILES_AND_FOLDERS, async (f) => {
+            let fullPath = Path.join(
+                targetDir, f
+            );
+
+            const STATS = await deploy_helpers.lstat(fullPath);
+
+            let time: Moment.Moment;
+            if (STATS.mtime) {
+                time = Moment(STATS.mtime);
+                if (time.isValid() && !time.isUTC()) {
+                    time = time.utc();
+                }
+            }
+
+            const SIZE = STATS.size;
+
+            if (STATS.isDirectory()) {
+                const DI: deploy_files.DirectoryInfo = {
+                    name: f,
+                    path: relativePath,
+                    size: SIZE,
+                    time: time,
+                    type: deploy_files.FileSystemType.Directory,
+                };
+
+                RESULT.dirs.push(DI);
+            }
+            else if (STATS.isFile()) {
+                const FI: deploy_files.FileInfo = {
+                    download: async () => {
+                        return deploy_helpers.readFile(fullPath);
+                    },
+                    name: f,
+                    path: relativePath,
+                    size: SIZE,
+                    time: time,
+                    type: deploy_files.FileSystemType.File,
+                };
+
+                RESULT.files.push(FI);
+            }
+            else {
+                const FSI: deploy_files.FileSystemInfo = {
+                    name: f,
+                    path: relativePath,
+                    size: SIZE,
+                    time: time,
+                };
+
+                RESULT.others.push(FSI);
+            }
+        });
+
+        return RESULT;
+    }
+
+    private normalizeDir(target: LocalTarget, wsi: deploy_workspaces.WorkspaceItem) {
+        let dir = deploy_helpers.toStringSafe(target.dir);
+        if (deploy_helpers.isEmptyString(dir)) {
+            dir = './out'
+        }
+
+        if (!Path.isAbsolute(dir)) {
+            dir = Path.join(wsi.workspace.FOLDER.uri.fsPath, dir);
+        }
+        dir = Path.resolve(dir);
+
+        return dir;
+    }
+
+    public async uploadFiles(context: deploy_plugins.UploadContext<LocalTarget>) {
         const ME = this;
         
         const ALREADY_CHECKED = {};

@@ -38,6 +38,7 @@ let isDeactivating = false;
 let outputChannel: vscode.OutputChannel;
 let packageFile: deploy_contracts.PackageFile;
 const PLUGINS: deploy_plugins.Plugin[] = [];
+let selectWorkspaceBtn: vscode.StatusBarItem;
 const WORKSPACES: deploy_workspaces.Workspace[] = [];
 
 function getActivePackages() {
@@ -114,7 +115,51 @@ async function invokeForActiveEditor(placeHolder: string,
     }
 }
 
-function onDidChangeActiveTextEditor(editor: vscode.TextEditor) {
+async function invokeForActivePackage(placeHolder: string,
+                                      action: (pkg: deploy_packages.Package) => any) {
+    const PACKAGES = getActivePackages();
+    
+    const QUICK_PICK_ITEMS: deploy_contracts.ActionQuickPick[] = PACKAGES.map((p, i) => {
+        return {
+            action: async () => {
+                if (action) {
+                    await Promise.resolve(
+                        action(p)
+                    );
+                }
+            },
+            description: deploy_helpers.toStringSafe( p.description ).trim(),
+            detail: p.__workspace.FOLDER.uri.fsPath,
+            label: deploy_packages.getPackageName(p),
+        };
+    });
+
+    if (QUICK_PICK_ITEMS.length < 1) {
+        //TODO: translate
+        await deploy_helpers.showWarningMessage(
+            `No PACKAGES found!`
+        );
+    }
+    else {
+        let selectedItem: deploy_contracts.ActionQuickPick;
+        if (1 === QUICK_PICK_ITEMS.length) {
+            selectedItem = QUICK_PICK_ITEMS[0];
+        }
+        else {
+            selectedItem = await vscode.window.showQuickPick(QUICK_PICK_ITEMS, {
+                placeHolder: placeHolder,
+            });
+        }
+
+        if (selectedItem) {
+            await Promise.resolve(
+                selectedItem.action()
+            );
+        }
+    }
+}
+
+async function onDidChangeActiveTextEditor(editor: vscode.TextEditor) {
     if (isDeactivating) {
         return;
     }
@@ -122,29 +167,29 @@ function onDidChangeActiveTextEditor(editor: vscode.TextEditor) {
     try {
         activeWorkspaces = [];
 
-        WORKSPACES.forEach(ws => {
-            try {
-                const DOC = editor.document;
-                if (!DOC) {
-                    return;
-                }
+        try {
+            await deploy_helpers.forEachAsync(WORKSPACES, async (ws) => {
+                try {
+                    const DOC = editor.document;
+                    if (!DOC) {
+                        return;
+                    }
 
-                if (Path.resolve(DOC.fileName).startsWith( Path.resolve(ws.FOLDER.uri.fsPath) )) {
-                    activeWorkspaces.push(ws);
+                    if (Path.resolve(DOC.fileName).startsWith( Path.resolve(ws.FOLDER.uri.fsPath) )) {
+                        activeWorkspaces.push(ws);
 
-                    ws.onDidChangeActiveTextEditor(editor).then(() => {
-                        // OK
-                    }).catch((err) => {
-                        deploy_log.CONSOLE
-                                  .err(err, 'extension.onDidChangeActiveTextEditor(3)');
-                    });
+                        await ws.onDidChangeActiveTextEditor(editor);
+                    }
                 }
-            }
-            catch (e) {
-                deploy_log.CONSOLE
-                          .err(e, 'extension.onDidChangeActiveTextEditor(2)');
-            }
-        });
+                catch (e) {
+                    deploy_log.CONSOLE
+                            .err(e, 'extension.onDidChangeActiveTextEditor(2)');
+                }
+            });
+        }
+        finally {
+            await updateWorkspaceButton();
+        }
     }
     catch (e) {
         deploy_log.CONSOLE
@@ -181,7 +226,7 @@ function onDidFileChange(e: vscode.Uri, type: deploy_contracts.FileChangeType) {
     }
 }
 
-function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?: vscode.WorkspaceFolder[]) {
+async function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?: vscode.WorkspaceFolder[]) {
     if (isDeactivating) {
         return;
     }
@@ -207,7 +252,7 @@ function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?: vscod
     }
 
     if (added) {
-        added.forEach(wsf => {
+        await deploy_helpers.forEachAsync(added, async (wsf) => {
             let newWorkspace: deploy_workspaces.Workspace;
             try {
                 const CTX: deploy_workspaces.WorkspaceContext = {
@@ -238,9 +283,9 @@ function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?: vscod
                 });
 
                 newWorkspace = new deploy_workspaces.Workspace(wsf, CTX);
-
-                newWorkspace.initialize().then((hasBeenInitialized) => {
-                    if (hasBeenInitialized) {
+                try {
+                    const HAS_BEEN_INITIALIZED = await newWorkspace.initialize();
+                    if (HAS_BEEN_INITIALIZED) {
                         WORKSPACES.push(newWorkspace);
                     }
                     else {
@@ -249,12 +294,13 @@ function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?: vscod
                             `Workspace '${wsf.uri.fsPath}' has NOT been initialized!`
                         );
                     }
-                }).catch((err) => {
+                }
+                catch (err) {
                     deploy_log.CONSOLE
-                              .err(err, 'extension.reloadWorkspaceFolders(2)');
+                              .trace(err, 'extension.reloadWorkspaceFolders(2)');
 
                     deploy_helpers.tryDispose(newWorkspace);
-                });
+                }
             }
             catch (e) {
                 deploy_log.CONSOLE
@@ -271,6 +317,8 @@ function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?: vscod
                       .firstOrDefault(x => true, undefined)
         );
     }
+
+    await updateWorkspaceButton();
 }
 
 async function reloadPlugins() {
@@ -415,47 +463,49 @@ async function reloadPlugins() {
     }
 }
 
-async function invokeForActivePackage(placeHolder: string,
-                                      action: (pkg: deploy_packages.Package) => any) {
-    const PACKAGES = getActivePackages();
-    
-    const QUICK_PICK_ITEMS: deploy_contracts.ActionQuickPick[] = PACKAGES.map((p, i) => {
-        return {
-            action: async () => {
-                if (action) {
-                    await Promise.resolve(
-                        action(p)
-                    );
-                }
-            },
-            description: deploy_helpers.toStringSafe( p.description ).trim(),
-            detail: p.__workspace.FOLDER.uri.fsPath,
-            label: deploy_packages.getPackageName(p),
-        };
-    });
 
-    if (QUICK_PICK_ITEMS.length < 1) {
-        //TODO: translate
-        await deploy_helpers.showWarningMessage(
-            `No PACKAGES found!`
-        );
+async function updateWorkspaceButton() {
+    const BTN = selectWorkspaceBtn;
+    if (!BTN) {
+        return;
     }
-    else {
-        let selectedItem: deploy_contracts.ActionQuickPick;
-        if (1 === QUICK_PICK_ITEMS.length) {
-            selectedItem = QUICK_PICK_ITEMS[0];
+
+    try {
+        const ACTIVE_WORKSPACES = deploy_helpers.asArray(activeWorkspaces)
+                                                .map(ws => ws);
+
+        // TODO: translate
+        let command: string;
+        let color = '#ffffff';
+        let text = 'Deploy Reloaded: ';
+        if (ACTIVE_WORKSPACES.length < 1) {
+            color = '#ffff00';
+            text += '(no workspace selected)';
         }
         else {
-            selectedItem = await vscode.window.showQuickPick(QUICK_PICK_ITEMS, {
-                placeHolder: placeHolder,
-            });
+            text += Enumerable.from( ACTIVE_WORKSPACES ).select(ws => {
+                return deploy_workspaces.getWorkspaceName(ws);
+            }).joinToString(', ');
         }
 
-        if (selectedItem) {
-            await Promise.resolve(
-                selectedItem.action()
-            );
+        if (WORKSPACES.length > 0) {
+            command = 'extension.deploy.reloaded.selectWorkspace';
         }
+
+        BTN.color = color;
+        BTN.command = command;
+        BTN.text = text;
+
+        if (WORKSPACES.length > 0) {
+            BTN.show();
+        }
+        else {
+            BTN.hide();
+        }
+    }
+    catch (e) {
+        deploy_log.CONSOLE
+                  .trace(e, 'extension.updateWorkspaceButton()');
     }
 }
 
@@ -506,13 +556,13 @@ export async function activate(context: vscode.ExtensionContext) {
                     );
                 }
                 catch (e) {
-                    //TODO: translate
-                    await deploy_helpers.showErrorMessage(
-                        `Deploying WORKSPACE failed (s. debug output 'CTRL + Y')!`
-                    );
-
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.deployWorkspace');
+                    
+                    //TODO: translate
+                    deploy_helpers.showErrorMessage(
+                        `Deploying WORKSPACE failed (s. debug output 'CTRL + Y')!`
+                    );
                 }
             }),
 
@@ -528,13 +578,13 @@ export async function activate(context: vscode.ExtensionContext) {
                     );
                 }
                 catch (e) {
-                    //TODO: translate
-                    await deploy_helpers.showErrorMessage(
-                        `Deploying CURRENT FILE failed (s. debug output 'CTRL + Y')!`
-                    );
-
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.deployFile');
+                    
+                    //TODO: translate
+                    deploy_helpers.showErrorMessage(
+                        `Deploying CURRENT FILE failed (s. debug output 'CTRL + Y')!`
+                    );
                 }
             }),
 
@@ -550,13 +600,13 @@ export async function activate(context: vscode.ExtensionContext) {
                     );
                 }
                 catch (e) {
-                    //TODO: translate
-                    await deploy_helpers.showErrorMessage(
-                        `Pulling WORKSPACE failed (s. debug output 'CTRL + Y')!`
-                    );
-
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.pullWorkspace');
+
+                    //TODO: translate
+                    deploy_helpers.showErrorMessage(
+                        `Pulling WORKSPACE failed (s. debug output 'CTRL + Y')!`
+                    );
                 }
             }),
 
@@ -572,13 +622,13 @@ export async function activate(context: vscode.ExtensionContext) {
                     );
                 }
                 catch (e) {
-                    //TODO: translate
-                    await deploy_helpers.showErrorMessage(
-                        `Pulling CURRENT FILE failed (s. debug output 'CTRL + Y')!`
-                    );
-
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.pullFile');
+                    
+                    //TODO: translate
+                    deploy_helpers.showErrorMessage(
+                        `Pulling CURRENT FILE failed (s. debug output 'CTRL + Y')!`
+                    );
                 }
             }),
 
@@ -594,13 +644,13 @@ export async function activate(context: vscode.ExtensionContext) {
                     );
                 }
                 catch (e) {
-                    //TODO: translate
-                    await deploy_helpers.showErrorMessage(
-                        `Deleting PACKAGE failed (s. debug output 'CTRL + Y')!`
-                    );
-
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.deletePackage');
+
+                    //TODO: translate
+                    deploy_helpers.showErrorMessage(
+                        `Deleting PACKAGE failed (s. debug output 'CTRL + Y')!`
+                    );
                 }
             }),
 
@@ -616,13 +666,114 @@ export async function activate(context: vscode.ExtensionContext) {
                     );
                 }
                 catch (e) {
-                    //TODO: translate
-                    await deploy_helpers.showErrorMessage(
-                        `Deleting CURRENT FILE failed (s. debug output 'CTRL + Y')!`
-                    );
-
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.deleteFile');
+                    
+                    //TODO: translate
+                    deploy_helpers.showErrorMessage(
+                        `Deleting CURRENT FILE failed (s. debug output 'CTRL + Y')!`
+                    );
+                }
+            }),
+
+            // list directory
+            vscode.commands.registerCommand('extension.deploy.reloaded.listDirectory', async () => {
+                try {
+                    const TARGETS: deploy_targets.Target[] = [];
+                    activeWorkspaces.forEach(ws => {
+                        const WORKSPACE_TARGETS = ws.getTargets().filter(t => {
+                            const PLUGINS = t.__workspace.CONTEXT.plugins.filter(pi => {
+                                const TARGET_TYPE = deploy_helpers.normalizeString(t.type);
+
+                                return '' === pi.__type || 
+                                       (TARGET_TYPE === pi.__type && pi.canList && pi.listDirectory);
+                            });
+
+                            return PLUGINS.length > 0;
+                        });
+
+                        TARGETS.push
+                               .apply(TARGETS, WORKSPACE_TARGETS);
+                    });
+
+                    await deploy_targets.showTargetQuickPick(
+                        TARGETS,
+                        'Select the TARGET from where what you would like to list...',
+                        async (target) => {
+                            await target.__workspace
+                                        .listDirectory(target);
+                        }
+                    );
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'extension.deploy.reloaded.listDirectory');
+
+                    //TODO: translate
+                    deploy_helpers.showErrorMessage(
+                        `Listening directory failed (s. debug output 'CTRL + Y')!`
+                    );
+                }
+            }),
+
+            // list directory
+            vscode.commands.registerCommand('extension.deploy.reloaded.selectWorkspace', async () => {
+                try {
+                    const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = WORKSPACES.map(ws => {
+                        return {
+                            label: deploy_workspaces.getWorkspaceName(ws),
+                            description: Path.dirname(
+                                ws.FOLDER.uri.fsPath
+                            ),
+
+                            action: async () => {
+                                activeWorkspaces = [ ws ];
+
+                                await updateWorkspaceButton();
+                            }
+                        };
+                    });
+
+                    if (QUICK_PICKS.length < 1) {
+                        //TODO: translate
+                        deploy_helpers.showWarningMessage(
+                            `No WORKSPACE found!`
+                        );
+                        
+                        return;
+                    }
+
+                    let selectedItem: deploy_contracts.ActionQuickPick;
+                    if (1 === QUICK_PICKS.length) {
+                        selectedItem = QUICK_PICKS[0];
+                    }
+                    else {
+                        //TODO: translate
+                        selectedItem = await vscode.window.showQuickPick(
+                            QUICK_PICKS,
+                            {
+                                placeHolder: 'Select the active workspace...',
+                            }
+                        );
+                    }
+
+                    if (selectedItem) {
+                        await Promise.resolve(
+                            selectedItem.action()
+                        );
+                    }
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'extension.deploy.reloaded.selectWorkspace');
+
+                    //TODO: translate
+                    deploy_helpers.showErrorMessage(
+                        `Selecting workspace failed (s. debug output 'CTRL + Y')!`
+                    );
+                }
+                finally {
+                    await updateWorkspaceButton();
                 }
             }),
         );
@@ -648,18 +799,26 @@ export async function activate(context: vscode.ExtensionContext) {
     WF.next(() => {
         context.subscriptions.push(
             vscode.workspace.onDidChangeWorkspaceFolders((e) => {
-                reloadWorkspaceFolders(e.added, e.removed);
+                reloadWorkspaceFolders(e.added, e.removed).then(() => {
+                }).catch((err) => {
+                    deploy_log.CONSOLE
+                              .trace(err, 'vscode.workspace.onDidChangeWorkspaceFolders');
+                });
             }),
 
             vscode.window.onDidChangeActiveTextEditor((e) => {
-                onDidChangeActiveTextEditor(e);
+                onDidChangeActiveTextEditor(e).then(() => {
+                }).catch((err) => {
+                    deploy_log.CONSOLE
+                              .trace(err, 'vscode.workspace.onDidChangeActiveTextEditor');
+                });
             })
         );
     });
 
     // reload workspace folders
-    WF.next(() => {
-        reloadWorkspaceFolders(
+    WF.next(async () => {
+        await reloadWorkspaceFolders(
             vscode.workspace.workspaceFolders
         );
     });
@@ -692,6 +851,19 @@ export async function activate(context: vscode.ExtensionContext) {
         }
     });
 
+    // select workspace button
+    WF.next(() => {
+        let newBtn: vscode.StatusBarItem;
+        try {
+            newBtn = vscode.window.createStatusBarItem();
+
+            selectWorkspaceBtn = newBtn;
+        }
+        catch (e) {
+            deploy_helpers.tryDispose(newBtn);
+        }
+    });
+
     WF.next(() => {
         const NOW = Moment();
 
@@ -714,6 +886,11 @@ export async function activate(context: vscode.ExtensionContext) {
         });
 
         outputChannel.show();
+    });
+
+    // update 'select workspace' button
+    WF.next(async () => {
+        await updateWorkspaceButton();
     });
 
     await WF.start();

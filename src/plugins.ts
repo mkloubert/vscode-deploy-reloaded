@@ -16,6 +16,7 @@
  */
 
 import * as deploy_contracts from './contracts';
+import * as deploy_files from './files';
 import * as deploy_helpers from './helpers';
 import * as deploy_targets from './targets';
 import * as deploy_workspaces from './workspaces';
@@ -47,23 +48,24 @@ export interface DownloadContext<TTarget extends deploy_targets.Target = deploy_
  * A downloaded file.
  */
 export interface DownloadedFile extends vscode.Disposable, deploy_contracts.WithNameAndPath {
-    readonly read: () => PromiseLike<Buffer>;
+    /**
+     * Reads the whole content of the file.
+     * 
+     * @return {PromiseLike<Buffer>} The read data.
+     */
+    readonly read: () => Buffer | PromiseLike<Buffer>;
 }
 
 /**
  * A context for handling files.
  */
-export interface FilesContext<TTarget extends deploy_targets.Target = deploy_targets.Target> {
-    /**
-     * Gets the underlying target.
-     */
-    readonly target: TTarget;
+export interface FilesContext<TTarget extends deploy_targets.Target = deploy_targets.Target> extends TargetContext<TTarget> {
 }
 
 /**
  * A file to delete.
  */
-export interface FileToDelete extends WorkspaceFile {
+export interface FileToDelete extends deploy_workspaces.WorkspaceFile {
     /**
      * The method that should be invoked BEFORE a deletion of that file starts.
      * 
@@ -86,7 +88,7 @@ export interface FileToDelete extends WorkspaceFile {
 /**
  * A file to download.
  */
-export interface FileToDownload extends WorkspaceFile {
+export interface FileToDownload extends deploy_workspaces.WorkspaceFile {
     /**
      * The method that should be invoked BEFORE a download of that file starts.
      * 
@@ -109,7 +111,7 @@ export interface FileToDownload extends WorkspaceFile {
 /**
  * A file to upload.
  */
-export interface FileToUpload extends WorkspaceFile {
+export interface FileToUpload extends deploy_workspaces.WorkspaceFile {
     /**
      * The method that should be invoked BEFORE an upload of that file starts.
      * 
@@ -134,6 +136,38 @@ export interface FileToUpload extends WorkspaceFile {
  * The result for the 'initialize' method of a plugin.
  */
 export type InitializePluginResult = boolean | void;
+
+/**
+ * A context for listening a directory.
+ */
+export interface ListDirectoryContext<TTarget extends deploy_targets.Target = deploy_targets.Target> extends TargetContext<TTarget>, deploy_workspaces.WorkspaceItem {
+    /**
+     * The directory to list.
+     */
+    readonly dir?: string;
+}
+
+/**
+ * A 'list directory' result.
+ */
+export interface ListDirectoryResult<TTarget extends deploy_targets.Target = deploy_targets.Target> {
+    /**
+     * The directories.
+     */
+    readonly dirs: deploy_files.DirectoryInfo[];
+    /**
+     * The files.
+     */
+    readonly files: deploy_files.FileInfo[];
+    /**
+     * The other / unknown elements.
+     */
+    readonly others: deploy_files.FileSystemInfo[];
+    /**
+     * The underlying target.
+     */
+    readonly target: TTarget;
+}
 
 /**
  * Result type of new plugins.
@@ -178,6 +212,10 @@ export interface Plugin<TTarget extends deploy_targets.Target = deploy_targets.T
      */
     readonly canDownload?: boolean;
     /**
+     * Gets if the plugin can list directories or not.
+     */
+    readonly canList?: boolean;
+    /**
      * Gets if the plugin can upload files or not.
      */
     readonly canUpload?: boolean;
@@ -190,21 +228,29 @@ export interface Plugin<TTarget extends deploy_targets.Target = deploy_targets.T
     /**
      * Deletes files.
      * 
-     * @param {DeleteContext} The context.
+     * @param {DeleteContext<TTarget>} The context.
      */
     readonly deleteFiles?: (context: DeleteContext<TTarget>) => void | PromiseLike<void>;
     /**
      * Downloads files.
      * 
-     * @param {DownloadContext} The context.
+     * @param {DownloadContext<TTarget>} The context.
      */
-    readonly download?: (context: DownloadContext<TTarget>) => void | PromiseLike<void>;
+    readonly downloadFiles?: (context: DownloadContext<TTarget>) => void | PromiseLike<void>;
+    /**
+     * List a directory.
+     * 
+     * @param {ListDirectoryContext<TTarget>} The context.
+     * 
+     * @return {ListDirectoryResult<TTarget>|PromiseLike<ListDirectoryResult<TTarget>>} The result.
+     */
+    readonly listDirectory?: (context: ListDirectoryContext<TTarget>) => ListDirectoryResult<TTarget> | PromiseLike<ListDirectoryResult<TTarget>>;
     /**
      * Uploads files.
      * 
-     * @param {UploadContext} The context.
+     * @param {UploadContext<TTarget>} The context.
      */
-    readonly upload?: (context: UploadContext<TTarget>) => void | PromiseLike<void>;
+    readonly uploadFiles?: (context: UploadContext<TTarget>) => void | PromiseLike<void>;
 }
 
 /**
@@ -232,6 +278,16 @@ export interface PluginModule {
 }
 
 /**
+ * A context based on a target.
+ */
+export interface TargetContext<TTarget extends deploy_targets.Target = deploy_targets.Target> {
+    /**
+     * Gets the underlying target.
+     */
+    readonly target: TTarget;
+}
+
+/**
  * An upload context.
  */
 export interface UploadContext<TTarget extends deploy_targets.Target = deploy_targets.Target> extends FilesContext<TTarget> {
@@ -239,20 +295,6 @@ export interface UploadContext<TTarget extends deploy_targets.Target = deploy_ta
      * The files to upload.
      */
     readonly files: FileToUpload[];
-}
-
-/**
- * A workspace file.
- */
-export interface WorkspaceFile extends deploy_contracts.WithNameAndPath {
-    /**
-     * The path to the (local) file.
-     */
-    readonly file: string;
-    /**
-     * The underlying workspace.
-     */
-    readonly workspace: deploy_workspaces.Workspace;
 }
 
 
@@ -353,6 +395,10 @@ export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_
         return false;
     }
     /** @inheritdoc */
+    public get canList() {
+        return false;
+    }
+    /** @inheritdoc */
     public get canUpload() {
         return true;
     }
@@ -371,13 +417,13 @@ export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_
     }
 
     /** @inheritdoc */
-    public async deleteFiles(context: DeleteContext) {
+    public async deleteFiles(context: DeleteContext<TTarget>): Promise<void> {
         throw new Error(`'deleteFiles()' is NOT implemented!`);
     }
 
     /** @inheritdoc */
-    public async download(context: DownloadContext) {
-        throw new Error(`'download()' is NOT implemented!`);
+    public async downloadFiles(context: DownloadContext<TTarget>): Promise<void> {
+        throw new Error(`'downloadFiles()' is NOT implemented!`);
     }
 
     /** @inheritdoc */
@@ -385,8 +431,13 @@ export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_
     }
 
     /** @inheritdoc */
-    public async upload(context: UploadContext) {
-        throw new Error(`'upload()' is NOT implemented!`);
+    public async listDirectory(context: ListDirectoryContext<TTarget>): Promise<ListDirectoryResult<TTarget>> {
+        throw new Error(`'listDirectory()' is NOT implemented!`);
+    }
+
+    /** @inheritdoc */
+    public async uploadFiles(context: UploadContext<TTarget>): Promise<void> {
+        throw new Error(`'uploadFiles()' is NOT implemented!`);
     }
 }
 
@@ -464,12 +515,12 @@ export class SimpleFileToDownload implements FileToDownload {
 /**
  * Creates a new instance of a 'downloaded file' from a buffer.
  * 
- * @param {WorkspaceFile} file The underlying workspace file.
+ * @param {deploy_workspaces.WorkspaceFile} file The underlying workspace file.
  * @param {Buffer} buff The buffer with the data.
  * 
  * @return {DownloadedFile} The new object.
  */
-export function createDownloadedFileFromBuffer(file: WorkspaceFile, buff: Buffer): DownloadedFile {
+export function createDownloadedFileFromBuffer(file: deploy_workspaces.WorkspaceFile, buff: Buffer): DownloadedFile {
     const DOWNLOADED: DownloadedFile = {
         dispose: () => {
             buff = null;
