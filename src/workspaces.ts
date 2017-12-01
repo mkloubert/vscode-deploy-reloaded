@@ -358,6 +358,13 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
                                          MergeDeep(DEFAULT_OPTS, opts));
     }
 
+    /**
+     * Returns an existing path based on the settings folder.
+     * 
+     * @param {string} path The path.
+     * 
+     * @return {string|boolean} The existing, full normalized path or (false) if path does not exist.
+     */
     public async getExistingSettingPath(path: string): Promise<string | false> {
         path = deploy_helpers.toStringSafe(path);
         
@@ -422,7 +429,7 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
 
         let index = -1;
 
-        return Enumerable.from( deploy_helpers.asArray(CFG.packages) ).where(p => {
+        let packages = Enumerable.from( deploy_helpers.asArray(CFG.packages) ).where(p => {
             return 'object' === typeof p;
         }).select(p => {
             return deploy_helpers.cloneObject(p);
@@ -438,6 +445,10 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
                 deploy_packages.getPackageName(p)
             );
         }).toArray();
+
+        packages = deploy_helpers.filterConditionalItems(packages);
+
+        return packages;
     }
 
     /**
@@ -475,7 +486,7 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
 
         let index = -1;
 
-        return Enumerable.from( deploy_helpers.asArray(CFG.targets) ).where(t => {
+        let targets = Enumerable.from( deploy_helpers.asArray(CFG.targets) ).where(t => {
             return 'object' === typeof t;
         }).select(t => {
             return deploy_helpers.cloneObject(t);
@@ -491,6 +502,10 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
                 deploy_targets.getTargetName(t)
             );
         }).toArray();
+
+        targets = deploy_helpers.filterConditionalItems(targets);
+
+        return targets;
     }
 
     /**
@@ -720,6 +735,13 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
     }
 
     /**
+     * Gets the name of that workspace.
+     */
+    public get name(): string {
+        return Path.basename(this.folder.uri.fsPath);
+    }
+
+    /**
      * Pulls a file from a target.
      * 
      * @param {string} file The file to pull.
@@ -761,10 +783,13 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
     public async reloadConfiguration(retry = true) {
         const ME = this;
 
+        const MY_ARGS = arguments;
+
         if (ME._isReloadingConfig) {
             if (retry) {
                 await deploy_helpers.invokeAfter(async () => {
-                    await ME.reloadConfiguration();
+                    ME.reloadConfiguration
+                      .apply(ME, MY_ARGS);
                 });
             }
 
@@ -772,17 +797,23 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
         }
         ME._isReloadingConfig = true;
 
+        let finalizer: () => any;
         try {
             let loadedCfg: WorkspaceSettings = vscode.workspace.getConfiguration(ME.configSource.section,
                                                                                  ME.configSource.resource) || <any>{};
 
             // imports
             try {
-                await deploy_helpers.forEachAsync(deploy_helpers.asArray(loadedCfg.imports), async (ie) => {
+                let allImports = deploy_helpers.asArray(loadedCfg.imports);
+
+                await deploy_helpers.forEachAsync(allImports, async (ie) => {
                     let importFile: string;
 
                     if (deploy_helpers.isObject<deploy_contracts.Import>(ie)) {
-                        importFile = deploy_helpers.toStringSafe(ie.from);
+                        const CI = deploy_helpers.filterConditionalItems(ie);
+                        if (1 === CI.length) {
+                            importFile = deploy_helpers.toStringSafe(CI[0].from);
+                        }
                     }
                     else {
                         importFile = deploy_helpers.toStringSafe(ie);
@@ -811,10 +842,6 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
                                   });
                 });
             }
-            catch (e) {
-                deploy_log.CONSOLE
-                          .trace(e, 'workspaces.reloadConfiguration(3)');
-            }
             finally {
                 (<any>loadedCfg).packages = deploy_helpers.mergeByName(loadedCfg.packages);
                 (<any>loadedCfg).targets = deploy_helpers.mergeByName(loadedCfg.targets);
@@ -842,7 +869,53 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
                           .trace(e, 'workspaces.reloadConfiguration(2)');
             }
         }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'workspaces.reloadConfiguration(3)');
+
+            finalizer = async () => {
+                // DO NOT TRANSLATE
+                // BECAUSE IT IS NOT GARANTEED THAT
+                // A TRANSLATOR HAS BEEN LOADED YET!
+
+                const BUTTONS: deploy_contracts.MessageItemWithValue[] = [
+                    {
+                        title: 'Yes',
+                        value: 1,
+                    },
+                    {
+                        title: 'No',
+                        value: 2,
+                    }
+                ];
+
+                const SELECTED_ITEM = await ME.showErrorMessage.apply(
+                    ME,
+                    [ <any>`The settings could not be loaded! Do you want to try it again?` ].concat(BUTTONS)
+                );
+                if (SELECTED_ITEM) {
+                    if (1 === SELECTED_ITEM.value) {
+                        ME._isReloadingConfig = false;
+
+                        ME.reloadConfiguration
+                          .apply(ME, MY_ARGS);
+                    }
+                }
+            };
+        }
         finally {
+            if (finalizer) {
+                try {
+                    await Promise.resolve(
+                        finalizer()
+                    );
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'workspaces.reloadConfiguration(4)');
+                }
+            }
+
             ME._isReloadingConfig = false;
         }
     }
@@ -858,6 +931,44 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
                 await deploy_delete.removeOnChange
                                    .apply(this, arguments);
             }
+        }
+    }
+
+    /**
+     * Promise (and safe) version of 'vscode.window.showErrorMessage()' function.
+     * 
+     * @param {string} msg The message to display.
+     * @param {TItem[]} [items] The optional items.
+     * 
+     * @return {Promise<TItem>} The promise with the selected item.
+     */
+    public async showErrorMessage<TItem extends vscode.MessageItem = vscode.MessageItem>(msg: string, ...items: TItem[]): Promise<TItem> {
+        try {
+            return await vscode.window.showErrorMessage
+                                      .apply(null, [ <any>`[vscode-deploy-reloaded]::[${this.name}] ${msg}`.trim() ].concat(items));
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'workspaces.Workspace.showErrorMessage()');
+        }
+    }
+
+    /**
+     * Promise (and safe) version of 'vscode.window.showWarningMessage()' function.
+     * 
+     * @param {string} msg The message to display.
+     * @param {TItem[]} [items] The optional items.
+     * 
+     * @return {Promise<TItem>} The promise with the selected item.
+     */
+    public async showWarningMessage<TItem extends vscode.MessageItem = vscode.MessageItem>(msg: string, ...items: TItem[]): Promise<TItem> {
+        try {
+            return await vscode.window.showWarningMessage
+                                      .apply(null, [ <any>`[vscode-deploy-reloaded]::[${this.name}] ${msg}`.trim() ].concat(items));
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'workspaces.Workspace.showWarningMessage()');
         }
     }
 

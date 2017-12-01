@@ -15,6 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as deploy_code from './code';
 import * as deploy_contracts from './contracts';
 import * as deploy_log from './log';
 import * as Enumerable from 'node-enumerable';
@@ -238,6 +239,49 @@ export function exists(path: string | Buffer) {
         }
         catch (e) {
             COMPLETED(e);
+        }
+    });
+}
+
+/**
+ * Filters items with 'if' code.
+ * 
+ * @param {TItem | TItem[]} items The items to filter.
+ * @param {boolean} [throwOnError] Throw on error or not. 
+ * @param {any} [errorResult] The custom result when an error occurred.
+ */
+export function filterConditionalItems<TItem extends deploy_contracts.ConditionalItem = deploy_contracts.ConditionalItem>(
+    items: TItem | TItem[],
+    throwOnError = false,
+    errorResult: any = false,
+): TItem[] {
+    if (isNullOrUndefined(items)) {
+        return <any>items;
+    }
+
+    items = asArray(items, false);
+    throwOnError = toBooleanSafe(throwOnError);
+
+    return items.filter(i => {
+        try {
+            if (!isNullOrUndefined(i)) {
+                const CONDITION = toStringSafe(i.if);
+                if ('' !== CONDITION.trim()) {
+                    return deploy_code.executeCode( CONDITION );
+                }
+            }
+
+            return true;
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'helpers.filterConditionalItems()');
+
+            if (throwOnError) {
+                throw e;
+            }
+
+            return errorResult;
         }
     });
 }
@@ -774,11 +818,13 @@ export function replaceAllStrings(str: string, searchValue: string, replaceValue
  * 
  * @param {string} msg The message to display.
  * @param {TItem[]} [items] The optional items.
+ * 
+ * @return {Promise<TItem>} The promise with the selected item.
  */
-export async function showErrorMessage<TItem extends vscode.MessageItem = vscode.MessageItem>(msg: string, ...items: TItem[]) {
+export async function showErrorMessage<TItem extends vscode.MessageItem = vscode.MessageItem>(msg: string, ...items: TItem[]): Promise<TItem> {
     try {
-        await vscode.window.showErrorMessage
-                           .apply(null, [ <any>`[vscode-deploy-reloaded] ${msg}`.trim() ].concat(items));
+        return await vscode.window.showErrorMessage
+                                  .apply(null, [ <any>`[vscode-deploy-reloaded] ${msg}`.trim() ].concat(items));
     }
     catch (e) {
         deploy_log.CONSOLE
@@ -791,11 +837,13 @@ export async function showErrorMessage<TItem extends vscode.MessageItem = vscode
  * 
  * @param {string} msg The message to display.
  * @param {TItem[]} [items] The optional items.
+ * 
+ * @return {Promise<TItem>} The promise with the selected item.
  */
-export async function showWarningMessage<TItem extends vscode.MessageItem = vscode.MessageItem>(msg: string, ...items: TItem[]) {
+export async function showWarningMessage<TItem extends vscode.MessageItem = vscode.MessageItem>(msg: string, ...items: TItem[]): Promise<TItem> {
     try {
-        await vscode.window.showWarningMessage
-                           .apply(null, [ <any>`[vscode-deploy-reloaded] ${msg}`.trim() ].concat(items));
+        return await vscode.window.showWarningMessage
+                                  .apply(null, [ <any>`[vscode-deploy-reloaded] ${msg}`.trim() ].concat(items));
     }
     catch (e) {
         deploy_log.CONSOLE

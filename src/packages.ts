@@ -29,7 +29,8 @@ export type AutoDeploySettings = boolean | string | string[] | deploy_contracts.
 /**
  * A package.
  */
-export interface Package extends deploy_contracts.FileFilter,
+export interface Package extends deploy_contracts.ConditionalItem,
+                                 deploy_contracts.FileFilter,
                                  deploy_contracts.WithOptionalName,
                                  deploy_targets.TargetProvider,
                                  deploy_workspaces.WorkspaceItemFromSettings {

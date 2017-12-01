@@ -35,6 +35,16 @@ export interface ActionQuickPick<TState = any> extends vscode.QuickPickItem {
 }
 
 /**
+ * An item that uses JavaScript code if it is available or not.
+ */
+export interface ConditionalItem {
+    /**
+     * One or more (JavaScript) conditions that check if that item is available or not.
+     */
+    if?: string | string[];
+}
+
+/**
  * Stores data of configuration source.
  */
 export interface ConfigSource {
@@ -105,7 +115,7 @@ export interface FileFilter {
 /**
  * An import entry.
  */
-export interface Import {
+export interface Import extends ConditionalItem {
     /**
      * An optional description for the entry.
      */

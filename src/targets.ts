@@ -25,8 +25,10 @@ import * as vscode from 'vscode';
 /**
  * A target.
  */
-export interface Target extends deploy_workspaces.WorkspaceItemFromSettings,
-                                deploy_contracts.WithOptionalName {
+export interface Target extends deploy_contracts.ConditionalItem,
+                                deploy_contracts.WithOptionalName,
+                                deploy_workspaces.WorkspaceItemFromSettings
+{
     /**
      * A description.
      */
