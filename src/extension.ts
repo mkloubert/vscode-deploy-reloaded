@@ -197,6 +197,20 @@ async function onDidChangeActiveTextEditor(editor: vscode.TextEditor) {
     }
 }
 
+async function onDidChangeConfiguration(e: vscode.ConfigurationChangeEvent) {
+    await deploy_helpers.forEachAsync(WORKSPACES, async (ws) => {
+        try {
+            if (e.affectsConfiguration(ws.configSource.section, ws.configSource.resource)) {
+                await ws.onDidChangeConfiguration(e);
+            }
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'extension.onDidChangeConfiguration()');
+        }
+    });
+}
+
 function onDidFileChange(e: vscode.Uri, type: deploy_contracts.FileChangeType) {
     if (isDeactivating) {
         return;
@@ -518,22 +532,19 @@ export async function activate(context: vscode.ExtensionContext) {
     });
 
     // package file
-    WF.next(() => {
-        return new Promise<void>(async (resolve, reject) => {
-            const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
+    WF.next(async () => {
+        try {
+            const CUR_DIR = __dirname;
+            const FILE_PATH = Path.join(CUR_DIR, '../package.json');
 
-            try {
-                packageFile = JSON.parse(
-                    (await deploy_helpers.readFile(Path.join(__dirname, '../../package.json'))).toString('utf8')
-                );
-            }
-            catch (e) {
-                deploy_log.CONSOLE
-                          .trace(e, 'extension.activate(package file)');
-            }
-
-            COMPLETED(null);
-        });
+            packageFile = JSON.parse(
+                (await deploy_helpers.readFile(FILE_PATH)).toString('utf8')
+            );
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'extension.activate(package file)');
+        }
     });
 
     // output channel
@@ -810,9 +821,17 @@ export async function activate(context: vscode.ExtensionContext) {
                 onDidChangeActiveTextEditor(e).then(() => {
                 }).catch((err) => {
                     deploy_log.CONSOLE
-                              .trace(err, 'vscode.workspace.onDidChangeActiveTextEditor');
+                              .trace(err, 'vscode.window.onDidChangeActiveTextEditor');
                 });
-            })
+            }),
+
+            vscode.workspace.onDidChangeConfiguration((e) => {
+                onDidChangeConfiguration(e).then(() => {
+                }).catch((err) => {
+                    deploy_log.CONSOLE
+                              .trace(err, 'vscode.workspace.onDidChangeConfiguration');
+                });
+            }),
         );
     });
 

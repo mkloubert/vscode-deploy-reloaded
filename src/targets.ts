@@ -18,6 +18,7 @@
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
 import * as deploy_workspaces from './workspaces';
+import * as Enumerable from 'node-enumerable';
 import * as vscode from 'vscode';
 
 
@@ -53,6 +54,17 @@ export interface Target {
 }
 
 /**
+ * An object that provides target names.
+ */
+export interface TargetProvider {
+    /**
+     * One or more target.
+     */
+    readonly targets?: string | string[];
+}
+
+
+/**
  * Returns the name for a target.
  * 
  * @param {Target} target The target.
@@ -72,6 +84,56 @@ export function getTargetName(target: Target): string {
     }
 
     return name;
+}
+
+/**
+ * Returns targets by their names and shows an error message if targets could not be found.
+ * 
+ * @param {string|string[]} targetNames One or more target name.
+ * @param {Target|Target[]} targets One or more existing targets.
+ * 
+ * @return {Target[]|false} The list of matching targets or (false) if at least one target could not be found.
+ */
+export function getTargetsByName(targetNames: string | string[],
+                                 targets: Target | Target[]): Target[] | false {
+    targetNames = Enumerable.from( deploy_helpers.asArray(targetNames) ).select(tn => {
+        return deploy_helpers.normalizeString(tn);
+    }).distinct()
+      .toArray();
+    targets = deploy_helpers.asArray(targets);
+
+    const EXISTING_TARGETS: Target[] = [];
+    const NON_EXISTING_TARGETS: string[] = [];
+    targetNames.forEach(tn => {
+        const MATCHING_TARGETS = (<Target[]>targets).filter(t => {
+            const TARGET_NAME = deploy_helpers.normalizeString(
+                getTargetName(t)
+            );
+
+            return TARGET_NAME === tn;
+        });
+
+        if (MATCHING_TARGETS.length > -1) {
+            EXISTING_TARGETS.push
+                            .apply(EXISTING_TARGETS, MATCHING_TARGETS);
+        }
+        else {
+            NON_EXISTING_TARGETS.push(tn);
+        }
+    });
+
+    if (NON_EXISTING_TARGETS.length > 0) {
+        NON_EXISTING_TARGETS.forEach(tn => {
+            //TODO: translate
+            deploy_helpers.showWarningMessage(
+                `The target '${tn}' does NOT EXIST!`
+            );
+        });
+
+        return false;
+    }
+
+    return EXISTING_TARGETS;
 }
 
 /**

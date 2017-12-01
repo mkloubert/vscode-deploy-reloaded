@@ -17,13 +17,14 @@
 
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
+import * as deploy_targets from './targets';
 import * as deploy_workspaces from './workspaces';
 
 
 /**
  * A package.
  */
-export interface Package extends deploy_contracts.FileFilter {
+export interface Package extends deploy_contracts.FileFilter, deploy_targets.TargetProvider {
     /**
      * [INTERNAL] DO NOT DEFINE OR OVERWRITE THIS PROPERTY BY YOUR OWN!
      * 
@@ -45,6 +46,10 @@ export interface Package extends deploy_contracts.FileFilter {
      * The (display) name.
      */
     readonly name?: string;
+    /**
+     * Deletes a file of this package, if it has been deleted from a workspace.
+     */
+    readonly removeOnChange?: boolean | string | string[] | deploy_contracts.FileFilter;
 }
 
 

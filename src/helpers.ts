@@ -20,6 +20,7 @@ import * as Enumerable from 'node-enumerable';
 import * as FS from 'fs';
 import * as Glob from 'glob';
 import * as MimeTypes from 'mime-types';
+import * as Minimatch from 'minimatch';
 import * as Path from 'path';
 import * as TMP from 'tmp';
 import * as vscode from 'vscode';
@@ -161,6 +162,31 @@ export function createCompletedAction<TResult = any>(resolve: (value?: TResult |
             }
         }
     };
+}
+
+/**
+ * Handles a value as string and checks if it does match at least one (minimatch) pattern.
+ * 
+ * @param {any} val The value to check.
+ * @param {string|string[]} patterns One or more patterns.
+ * @param {Minimatch.IOptions} [options] Additional options.
+ * 
+ * @return {boolean} Does match or not.
+ */
+export function doesMatch(val: any, patterns: string | string[], options?: Minimatch.IOptions): boolean {
+    val = toStringSafe(val);
+    
+    patterns = asArray(patterns).map(p => {
+        return toStringSafe(p);
+    });
+
+    for (const P of patterns) {
+        if (Minimatch(val, P, options)) {
+            return true;
+        }
+    }
+    
+    return false;
 }
 
 /**
@@ -480,6 +506,17 @@ export function invokeForTempFile<TResult = any>(action: (path: string) => TResu
 }
 
 /**
+ * Checks if a value is a boolean or not.
+ * 
+ * @param {any} val The value to check.
+ * 
+ * @return {boolean} Is boolean or not. 
+ */
+export function isBool(val: any): val is boolean {
+    return 'boolean' === typeof val;
+}
+
+/**
  * Checks if the string representation of a value is empty
  * or contains whitespaces only.
  * 
@@ -501,6 +538,29 @@ export function isEmptyString(val: any) {
 export function isNullOrUndefined(val: any): boolean {
     return null === val ||
            'undefined' === typeof val;
+}
+
+/**
+ * Checks if a value is an object or not.
+ * 
+ * @param {any} val The value to check.
+ * 
+ * @return {boolean} Is object or not. 
+ */
+export function isObject<TObj = Object>(val: any): val is TObj {
+    return !Array.isArray(val) &&
+           'object' === typeof val;
+}
+
+/**
+ * Checks if a value is a string or not.
+ * 
+ * @param {any} val The value to check.
+ * 
+ * @return {boolean} Is string or not. 
+ */
+export function isString(val: any): val is string {
+    return 'string' === typeof val;
 }
 
 /**

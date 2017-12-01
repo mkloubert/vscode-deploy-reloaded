@@ -35,6 +35,20 @@ export interface ActionQuickPick<TState = any> extends vscode.QuickPickItem {
 }
 
 /**
+ * Stores data of configuration source.
+ */
+export interface ConfigSource {
+    /**
+     * Gets the resource URI.
+     */
+    readonly resource?: vscode.Uri;
+    /**
+     * Gets the name of the section.
+     */
+    readonly section: string;
+}
+
+/**
  * Deploy settings.
  */
 export interface Configuration {

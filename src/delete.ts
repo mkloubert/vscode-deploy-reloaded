@@ -30,8 +30,10 @@ import * as vscode from 'vscode';
  * @param {string} file The file to delete.
  * @param {deploy_targets.Target} target The target to delete in.
  * @param {number} [targetNr] The number of the target.
+ * @param {boolean} [askForDeleteLocalFile] Also ask for deleting the local file or not.
  */
-export async function deleteFileIn(file: string, target: deploy_targets.Target) {
+export async function deleteFileIn(file: string, target: deploy_targets.Target,
+                                   askForDeleteLocalFile = true) {
     const ME: deploy_workspaces.Workspace = this;
 
     if (!target) {
@@ -60,21 +62,25 @@ export async function deleteFileIn(file: string, target: deploy_targets.Target) 
         }
     ];
 
-    //TODO: translate
-    const PRESSED_BTN: deploy_contracts.MessageItemWithValue = await vscode.window.showWarningMessage.apply(
-        null,
-        [ <any>'Also delete local file?', {} ].concat(BUTTONS),
-    );
+    let deleteLocalFile = false;
 
-    if (!PRESSED_BTN || 0 == PRESSED_BTN.value) {
-        return;
+    if (deploy_helpers.toBooleanSafe(askForDeleteLocalFile, true)) {
+        //TODO: translate
+        const PRESSED_BTN: deploy_contracts.MessageItemWithValue = await vscode.window.showWarningMessage.apply(
+            null,
+            [ <any>'Also delete local file?', {} ].concat(BUTTONS),
+        );
+
+        if (!PRESSED_BTN || 0 == PRESSED_BTN.value) {
+            return;
+        }
+
+        deleteLocalFile = 2 === PRESSED_BTN.value;
     }
-
-    const DELETE_LOCAL_FILE = 2 === PRESSED_BTN.value;
 
     await deleteFilesIn.apply(
         ME,
-        [ [ file ], target, target.__index + 1, DELETE_LOCAL_FILE ]
+        [ [ file ], target, target.__index + 1, deleteLocalFile ]
     );
 }
 
@@ -97,6 +103,8 @@ export async function deleteFilesIn(files: string[],
     if (!target) {
         return;
     }
+
+    deleteLocalFiles = deploy_helpers.toBooleanSafe(deleteLocalFiles);
 
     if (isNaN(targetNr)) {
         targetNr = target.__index + 1;
@@ -195,9 +203,11 @@ export async function deleteFilesIn(files: string[],
 /**
  * Deletes a package.
  * 
- * @param {deploy_packages.Package} pkg The package to delete. 
+ * @param {deploy_packages.Package} pkg The package to delete.
+ * @param {boolean} [askForDeleteLocalFiles] Also ask for deleting the local files or not.
  */
-export async function deletePackage(pkg: deploy_packages.Package) {
+export async function deletePackage(pkg: deploy_packages.Package,
+                                    askForDeleteLocalFiles = true) {
     const ME: deploy_workspaces.Workspace = this;
 
     if (!pkg) {
@@ -257,23 +267,27 @@ export async function deletePackage(pkg: deploy_packages.Package) {
         }
     ];
 
-    //TODO: translate
-    const PRESSED_BTN: deploy_contracts.MessageItemWithValue = await vscode.window.showWarningMessage.apply(
-        null,
-        [ <any>'Also delete local files?', {} ].concat(BUTTONS),
-    );
+    let deleteLocalFiles = false;
 
-    if (!PRESSED_BTN || 0 == PRESSED_BTN.value) {
-        return;
+    if (deploy_helpers.toBooleanSafe(askForDeleteLocalFiles, true)) {
+        //TODO: translate
+        const PRESSED_BTN: deploy_contracts.MessageItemWithValue = await vscode.window.showWarningMessage.apply(
+            null,
+            [ <any>'Also delete local files?', {} ].concat(BUTTONS),
+        );
+
+        if (!PRESSED_BTN || 0 == PRESSED_BTN.value) {
+            return;
+        }
+
+        deleteLocalFiles = 2 === PRESSED_BTN.value;
     }
-
-    const DELETE_LOCAL_FILES = 2 === PRESSED_BTN.value;
 
     const QUICK_PICK_ITEMS: deploy_contracts.ActionQuickPick[] = ME.getTargets().map((t, i) => {
         return {
             action: async () => {
                 await deleteFilesIn.apply(ME,
-                                          [ FILES_TO_DELETE, t, i + 1, DELETE_LOCAL_FILES ]);
+                                          [ FILES_TO_DELETE, t, i + 1, deleteLocalFiles ]);
             },
             description: deploy_helpers.toStringSafe( t.description ).trim(),
             detail: t.__workspace.FOLDER.uri.fsPath,

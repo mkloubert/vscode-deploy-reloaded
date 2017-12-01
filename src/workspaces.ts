@@ -87,6 +87,10 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
      */
     protected _config: deploy_contracts.Configuration;
     /**
+     * Stores the source of the configuration data.
+     */
+    protected _configSource: deploy_contracts.ConfigSource;
+    /**
      * Stores all disposable items.
      */
     protected readonly _DISPOSABLES: vscode.Disposable[] = [];
@@ -121,12 +125,21 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
     }
 
     /**
+     * Gets the config source.
+     */
+    public get configSource(): deploy_contracts.ConfigSource {
+        return this._configSource;
+    }
+
+    /**
      * Deletes a file in a target.
      * 
      * @param {string} file The file to delete.
      * @param {deploy_targets.Target} target The target to delete in.
+     * @param {boolean} [askForDeleteLocalFile] Also ask for deleting the local file or not.
      */
-    public async deleteFileIn(file: string, target: deploy_targets.Target) {
+    public async deleteFileIn(file: string, target: deploy_targets.Target,
+                              askForDeleteLocalFile = true) {
         return await deploy_delete.deleteFileIn
                                   .apply(this, arguments);
     }
@@ -134,9 +147,11 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
     /**
      * Deletes a package.
      * 
-     * @param {deploy_packages.Package} pkg The package to delete. 
+     * @param {deploy_packages.Package} pkg The package to delete.
+     * @param {boolean} [askForDeleteLocalFiles] Also ask for deleting the local files or not.
      */
-    public async deletePackage(pkg: deploy_packages.Package) {
+    public async deletePackage(pkg: deploy_packages.Package,
+                               askForDeleteLocalFiles = true) {
         return await deploy_delete.deletePackage
                                   .apply(this, arguments);
     }
@@ -186,6 +201,43 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
 
             deploy_helpers.tryDispose(DISP);
         }
+    }
+
+    /**
+     * Finds files inside that workspace.
+     * 
+     * @param {deploy_contracts.FileFilter} filter The filter to use.
+     * 
+     * @return {Promise<string[]>} The promise with the found files.
+     */
+    public async findFilesByFilter(filter: deploy_contracts.FileFilter) {
+        if (!filter) {
+            filter = <any>{};
+        }
+
+        let patterns = deploy_helpers.asArray(filter.files).map(p => {
+            return deploy_helpers.toStringSafe(p);
+        }).filter(p => !deploy_helpers.isEmptyString(p));
+
+        let exclude = deploy_helpers.asArray(filter.exclude).map(e => {
+            return deploy_helpers.toStringSafe(e);
+        }).filter(e => !deploy_helpers.isEmptyString(e));
+    
+        if (exclude.length < 1) {
+            exclude = undefined;
+        }
+
+        return await deploy_helpers.glob(patterns, {
+            absolute: true,
+            cwd: this.FOLDER.uri.fsPath,
+            dot: true,
+            ignore: exclude,
+            nodir: true,
+            nonull: true,
+            nosort: false,
+            root: this.FOLDER.uri.fsPath,
+            sync: false,
+        });
     }
 
     /**
@@ -257,6 +309,16 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
             return false;
         }
 
+        const SETTINGS_FILE = Path.join(
+            this.FOLDER.uri.fsPath,
+            './.vscode/settings.json',
+        );
+
+        ME._configSource = {
+            section: 'deploy.reloaded',
+            resource: vscode.Uri.file(SETTINGS_FILE),
+        };
+
         await ME.reloadConfiguration();
 
         ME._isInitialized = true;
@@ -294,6 +356,15 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
     }
 
     /**
+     * Is invoked when configuration changes.
+     * 
+     * @param {vscode.ConfigurationChangeEvent} e The event data.
+     */
+    public async onDidChangeConfiguration(e: vscode.ConfigurationChangeEvent) {
+        await this.reloadConfiguration();
+    }
+
+    /**
      * Is invoked on a file / directory change.
      * 
      * @param {vscode.Uri} e The URI of the item.
@@ -302,10 +373,17 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
     public async onDidFileChange(e: vscode.Uri, type: deploy_contracts.FileChangeType, retry = true) {
         const ME = this;
 
+        if (!ME.isPathOf(e.fsPath)) {
+            return;
+        }
+
+        const MY_ARGS = arguments;
+
         if ('undefined' !== typeof FILES_CHANGES[e.fsPath]) {
             if (retry) {
                 await deploy_helpers.invokeAfter(async () => {
-                    await ME.onDidFileChange(e, type, retry);
+                    await ME.onDidFileChange
+                            .apply(ME, MY_ARGS);
                 });
             }
 
@@ -322,6 +400,7 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
                     break;
 
                 case deploy_contracts.FileChangeType.Deleted:
+                    await ME.removeOnChange(e.fsPath);
                     break;
             }
         }
@@ -394,13 +473,8 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
         ME._isReloadingConfig = true;
 
         try {
-            const SETTINGS_FILE = Path.join(
-                ME.FOLDER.uri.fsPath,
-                './.vscode/settings.json',
-            );
-
-            const LOADED_CFG: deploy_contracts.Configuration = vscode.workspace.getConfiguration('deploy.reloaded',
-                                                                                                 vscode.Uri.file(SETTINGS_FILE)) || <any>{};
+            const LOADED_CFG: deploy_contracts.Configuration = vscode.workspace.getConfiguration(ME.configSource.section,
+                                                                                                 ME.configSource.resource) || <any>{};
 
             const OLD_CFG = ME._config;
             ME._config = LOADED_CFG;
@@ -423,7 +497,134 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
             }
         }
         finally {
-            ME._isReloadingConfig = true;
+            ME._isReloadingConfig = false;
+        }
+    }
+
+    /**
+     * Handles a file for "remove on change" feature.
+     * 
+     * @param {string} file The file to handle.
+     */
+    protected async removeOnChange(file: string) {
+        const ME = this;
+
+        try {
+            file = deploy_helpers.replaceAllStrings(
+                Path.resolve(file),
+                Path.sep,
+                '/'
+            );
+
+            const WORKSPACE_DIR = deploy_helpers.replaceAllStrings(
+                Path.resolve(ME.FOLDER.uri.fsPath),
+                Path.sep,
+                '/'
+            );
+
+            if (!file.startsWith(WORKSPACE_DIR)) {
+                return;
+            }
+
+            let relativePath = file.substr(WORKSPACE_DIR.length);
+            while (relativePath.startsWith('/')) {
+                relativePath = relativePath.substr(1);
+            }
+            while (relativePath.endsWith('/')) {
+                relativePath = relativePath.substr(0, relativePath.length - 1);
+            }
+
+            const KNOWN_TARGETS = ME.getTargets();
+
+            let abort = false;
+            const TARGETS: deploy_targets.Target[] = [];
+            await deploy_helpers.forEachAsync(ME.getPackages(), async (pkg) => {
+                if (abort) {
+                    return;
+                }
+
+                const REMOVE_ON_CHANGE = pkg.removeOnChange;
+
+                if (deploy_helpers.isNullOrUndefined(REMOVE_ON_CHANGE)) {
+                    return;
+                }
+
+                let filter: deploy_contracts.FileFilter;
+                let targetNames: string | string[] | false = false;
+
+                if (deploy_helpers.isObject<deploy_contracts.FileFilter>(REMOVE_ON_CHANGE)) {
+                    filter = REMOVE_ON_CHANGE;
+                    targetNames = pkg.targets;
+                }
+                else if (deploy_helpers.isBool(REMOVE_ON_CHANGE)) {
+                    if (true === REMOVE_ON_CHANGE) {
+                        filter = pkg;
+                        targetNames = pkg.targets;
+                    }
+                }
+                else {
+                    filter = pkg;
+                    targetNames = REMOVE_ON_CHANGE;
+                }
+
+                if (false === targetNames) {
+                    return;
+                }
+
+                if (!filter) {
+                    filter = {
+                        files: '**'
+                    };
+                }
+
+                const MATCHING_TARGETS = deploy_targets.getTargetsByName(
+                    targetNames,
+                    KNOWN_TARGETS
+                );
+                if (false === MATCHING_TARGETS) {
+                    abort = true;
+                    return;
+                }
+
+                const DOES_MATCH = deploy_helpers.doesMatch(relativePath, filter.files, {
+                    dot: true,
+                    nonull: true,
+                });
+
+                if (DOES_MATCH) {
+                    TARGETS.push
+                           .apply(TARGETS, MATCHING_TARGETS);
+                }
+            });
+
+            if (abort) {
+                return;
+            }
+
+            if (TARGETS.length < 1) {
+                return;
+            }
+
+            await deploy_helpers.forEachAsync(Enumerable.from(TARGETS)
+                                                        .distinct(true),
+                async (t) => {
+                    const TARGET_NAME = deploy_targets.getTargetName(t);
+
+                    try {
+                        await ME.deleteFileIn(file, t, false);
+                    }
+                    catch (e) {
+                        //TODO: translate
+
+                        deploy_helpers.showErrorMessage(
+                            `Auto removing file '${file}' on '${TARGET_NAME}' failed: ${e}`
+                        );
+                    }
+                });
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'workspaces.Workspace.removeOnChange()');
         }
     }
 
