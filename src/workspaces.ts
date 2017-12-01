@@ -309,15 +309,87 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
             return false;
         }
 
-        const SETTINGS_FILE = Path.join(
-            this.FOLDER.uri.fsPath,
-            './.vscode/settings.json',
-        );
+        // settings file
+        {
+            interface SettingsData {
+                file: string;
+                section: string;
+            }
 
-        ME._configSource = {
-            section: 'deploy.reloaded',
-            resource: vscode.Uri.file(SETTINGS_FILE),
-        };
+            const ALTERNATIVE_FILENAME = './.vscode/deploy.json';
+            const ALTERNATIVE_SECTION_NAME = 'deploy';
+            const DEFAULT_DIR = this.FOLDER.uri.fsPath;
+            const DEFAULT_FILENAME = './.vscode/settings.json';
+            const DEFAULT_FILE = Path.join(
+                DEFAULT_DIR,
+                DEFAULT_FILENAME,
+            );
+            const DEFAULT_SECTION_NAME = 'deploy.reloaded';
+
+            let settingsData: SettingsData | false = false;
+
+            let searchForNextFile: (dir: string) => Promise<SettingsData | false>;
+            searchForNextFile = async (dir: string) => {
+                try {
+                    dir = Path.resolve(dir);
+
+                    const POSSIBLE_FILES: SettingsData[] = [
+                        // deploy.json
+                        /* TODO: implement later
+                        {
+                            section: ALTERNATIVE_SECTION_NAME,
+                            file: Path.resolve(
+                                Path.join(dir, ALTERNATIVE_FILENAME)
+                            )
+                        },*/
+
+                        // settings.json
+                        {
+                            section: DEFAULT_SECTION_NAME,
+                            file: Path.resolve(
+                                Path.join(dir, DEFAULT_FILENAME)
+                            )
+                        }
+                    ];
+
+                    for (const ITEM of POSSIBLE_FILES) {
+                        if (await deploy_helpers.exists(ITEM.file)) {
+                            if ((await deploy_helpers.lstat(ITEM.file)).isFile()) {
+                                return ITEM;  // found
+                            }
+                        }
+                    }
+
+                    const PARENT_DIR = Path.resolve(
+                        Path.join(dir, '../')
+                    );
+                    if (dir !== PARENT_DIR && !deploy_helpers.isEmptyString(PARENT_DIR)) {
+                        return await searchForNextFile(PARENT_DIR);
+                    }
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'workspaces.Workspace.initialize()');
+                }
+
+                return false;
+            };
+
+            settingsData = await searchForNextFile(DEFAULT_DIR);
+            if (false === settingsData) {
+                // use default
+
+                settingsData = {
+                    file: DEFAULT_FILE,
+                    section: DEFAULT_SECTION_NAME,
+                };
+            }
+
+            ME._configSource = {
+                section: settingsData.section,
+                resource: vscode.Uri.file(settingsData.file),
+            };
+        }
 
         await ME.reloadConfiguration();
 
