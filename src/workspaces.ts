@@ -31,9 +31,20 @@ import * as Events from 'events';
 import * as Glob from 'glob';
 import * as i18next from 'i18next';
 const MergeDeep = require('merge-deep');
+import * as OS from 'os';
 import * as Path from 'path';
 import * as vscode from 'vscode';
 
+
+/**
+ * Out value for 'Workspace.downloadFromSettingsUri()' method.
+ */
+export interface DownloadFromSettingsUriOutValue {
+    /**
+     * The download source.
+     */
+    source?: 'local';
+}
 
 /**
  * A workspace context.
@@ -107,6 +118,12 @@ export interface WorkspaceItemFromSettings {
     readonly __workspace: Workspace;
 }
 
+/**
+ * Workspace settings.
+ */
+export interface WorkspaceSettings extends deploy_contracts.Configuration, vscode.WorkspaceConfiguration {
+}
+
 
 const FILES_CHANGES: { [path: string]: deploy_contracts.FileChangeType } = {};
 
@@ -117,7 +134,7 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
     /**
      * Stores the current configuration.
      */
-    protected _config: deploy_contracts.Configuration;
+    protected _config: WorkspaceSettings;
     /**
      * Stores the source of the configuration data.
      */
@@ -174,7 +191,7 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
     /**
      * Gets the current configuration.
      */
-    public get config(): deploy_contracts.Configuration {
+    public get config(): WorkspaceSettings {
         return this._config;
     }
 
@@ -286,6 +303,28 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
     }
 
     /**
+     * Downloads setting data from an URI.
+     * 
+     * @param {vscode.Uri} uri The URI.
+     * @param {DownloadFromSettingsUriOutValue} [outVal] An object for storing additiional result data.
+     */
+    public async downloadFromSettingsUri(uri: vscode.Uri, outVal?: DownloadFromSettingsUriOutValue): Promise<Buffer | false> {
+        if (!outVal) {
+            outVal = {};
+        }
+        
+        //TODO: implement other donwload sources, like HTTP or FTP
+
+        outVal.source = 'local';
+        const LOCAL_FILE = await this.getExistingSettingPath(uri.fsPath);
+        if (false !== LOCAL_FILE) {
+            return await deploy_helpers.readFile(LOCAL_FILE);
+        }
+
+        return false;
+    }
+
+    /**
      * Finds files inside that workspace.
      * 
      * @param {deploy_contracts.FileFilter} filter The filter to use.
@@ -317,6 +356,35 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
 
         return await deploy_helpers.glob(patterns,
                                          MergeDeep(DEFAULT_OPTS, opts));
+    }
+
+    public async getExistingSettingPath(path: string): Promise<string | false> {
+        path = deploy_helpers.toStringSafe(path);
+        
+        if (!Path.isAbsolute(path)) {
+            const FROM_SETTINGS = Path.resolve(
+                Path.join(Path.dirname(this.configSource.resource.fsPath), path)
+            );
+            if (await deploy_helpers.exists(FROM_SETTINGS)) {
+                return FROM_SETTINGS;
+            }
+
+            const FROM_HOMEDIR = Path.resolve(
+                Path.join(OS.homedir(), '.vscode-deploy', path)
+            );
+            if (await deploy_helpers.exists(FROM_HOMEDIR)) {
+                return FROM_HOMEDIR;
+            }
+
+            return false;
+        }
+
+        path = Path.resolve(path);
+        if (await deploy_helpers.exists(path)) {
+            return path;
+        }
+        
+        return false;
     }
 
     /**
@@ -705,14 +773,60 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
         ME._isReloadingConfig = true;
 
         try {
-            const LOADED_CFG: deploy_contracts.Configuration = vscode.workspace.getConfiguration(ME.configSource.section,
-                                                                                                 ME.configSource.resource) || <any>{};
+            let loadedCfg: WorkspaceSettings = vscode.workspace.getConfiguration(ME.configSource.section,
+                                                                                 ME.configSource.resource) || <any>{};
+
+            // imports
+            try {
+                await deploy_helpers.forEachAsync(deploy_helpers.asArray(loadedCfg.imports), async (ie) => {
+                    let importFile: string;
+
+                    if (deploy_helpers.isObject<deploy_contracts.Import>(ie)) {
+                        importFile = deploy_helpers.toStringSafe(ie.from);
+                    }
+                    else {
+                        importFile = deploy_helpers.toStringSafe(ie);
+                    }
+
+                    if (deploy_helpers.isEmptyString(importFile)) {
+                        return;
+                    }
+
+                    const DOWNLOAD_SOURCE: DownloadFromSettingsUriOutValue = {};
+                    const DATA = await ME.downloadFromSettingsUri(vscode.Uri.parse(importFile));
+
+                    if (!Buffer.isBuffer(DATA)) {
+                        return;
+                    }
+
+                    deploy_helpers.asArray(JSON.parse(DATA.toString('utf8')))
+                        .filter(c => deploy_helpers.isObject(c))
+                        .forEach(c => {
+                                      const SUB_SUBSETTINGS = c[ME.configSource.section];
+                                      if (!deploy_helpers.isObject<deploy_contracts.Configuration>(SUB_SUBSETTINGS)) {
+                                          return; 
+                                      }
+
+                                      loadedCfg = MergeDeep(loadedCfg, SUB_SUBSETTINGS);
+                                  });
+                });
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .trace(e, 'workspaces.reloadConfiguration(3)');
+            }
+            finally {
+                (<any>loadedCfg).packages = deploy_helpers.mergeByName(loadedCfg.packages);
+                (<any>loadedCfg).targets = deploy_helpers.mergeByName(loadedCfg.targets);
+
+                delete (<any>loadedCfg).imports;
+            }
 
             const OLD_CFG = ME._config;
-            ME._config = LOADED_CFG;
+            ME._config = loadedCfg;
             try {
                 ME.emit(deploy_contracts.EVENT_CONFIG_RELOADED,
-                        ME, LOADED_CFG, OLD_CFG);
+                        ME, loadedCfg, OLD_CFG);
             }
             catch (e) {
                 deploy_log.CONSOLE

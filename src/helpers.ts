@@ -635,6 +635,53 @@ export function lstat(path: string | Buffer) {
 }
 
 /**
+ * Merges objects by their names. Last items win.
+ * 
+ * @param {TObj | TObj[]} objs The object(s) to merge.
+ * @param {Function} [nameResolver] The custom name resolver.
+ * @param {Function} [nameNormalizer] The custom name normalizer.
+ * 
+ * @return {TObj[]} The merged objects.
+ */
+export function mergeByName<TObj extends deploy_contracts.WithOptionalName = deploy_contracts.WithOptionalName>(
+    objs: TObj | TObj[],
+    nameResolver?: (obj: TObj) => string,
+    nameNormalizer?: (name: string) => string,
+) {
+    if (isNullOrUndefined(objs)) {
+        return objs;
+    }
+
+    objs = asArray(objs);
+
+    if (!nameResolver) {
+        nameResolver = (o) => o.name;
+    }
+
+    if (!nameNormalizer) {
+        nameNormalizer = (n) => normalizeString(n);
+    }
+
+    const TEMP: { [name: string]: TObj } = {};
+    objs.forEach(o => {
+        const NAME = toStringSafe(
+            nameNormalizer(
+                nameResolver(o)
+            )
+        );
+
+        TEMP[NAME] = o;
+    });
+
+    const RESULT: TObj[] = [];
+    for (const N in TEMP) {
+        RESULT.push( TEMP[N] );
+    }
+
+    return RESULT;
+}
+
+/**
  * Normalizes a value as string so that is comparable.
  * 
  * @param {any} val The value to convert.

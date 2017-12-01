@@ -29,7 +29,10 @@ export type AutoDeploySettings = boolean | string | string[] | deploy_contracts.
 /**
  * A package.
  */
-export interface Package extends deploy_contracts.FileFilter, deploy_targets.TargetProvider, deploy_workspaces.WorkspaceItemFromSettings {
+export interface Package extends deploy_contracts.FileFilter,
+                                 deploy_contracts.WithOptionalName,
+                                 deploy_targets.TargetProvider,
+                                 deploy_workspaces.WorkspaceItemFromSettings {
     /**
      * Settings for 'deploy on change' feature.
      */
@@ -42,10 +45,6 @@ export interface Package extends deploy_contracts.FileFilter, deploy_targets.Tar
      * A description.
      */
     readonly description?: string;
-    /**
-     * The (display) name.
-     */
-    readonly name?: string;
     /**
      * Deletes a file of this package, if it has been deleted from a workspace.
      */

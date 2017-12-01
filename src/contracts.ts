@@ -53,6 +53,10 @@ export interface ConfigSource {
  */
 export interface Configuration {
     /**
+     * A list of imports.
+     */
+    readonly imports?: ImportType | ImportType[];
+    /**
      * The ID of the language to use (e.g. 'en', 'de')
      */
     readonly language?: string;
@@ -97,6 +101,25 @@ export interface FileFilter {
      */
     readonly files?: string | string[];
 }
+
+/**
+ * An import entry.
+ */
+export interface Import {
+    /**
+     * An optional description for the entry.
+     */
+    description?: string;
+    /**
+     * Gets the source.
+     */
+    from: string;
+}
+
+/**
+ * Import types.
+ */
+export type ImportType = string | Import;
 
 /**
  * A message item with a value.
@@ -153,6 +176,16 @@ export interface WithNameAndPath {
      * The path.
      */
     readonly path: string;
+}
+
+/**
+ * An object that stores a (optional) name.
+ */
+export interface WithOptionalName {
+    /**
+     * The name.
+     */
+    readonly name?: string;
 }
 
 /**
