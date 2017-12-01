@@ -15,10 +15,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as deploy_contracts from './contracts';
 import * as deploy_log from './log';
 import * as Enumerable from 'node-enumerable';
 import * as FS from 'fs';
 import * as Glob from 'glob';
+const MergeDeep = require('merge-deep');
 import * as MimeTypes from 'mime-types';
 import * as Minimatch from 'minimatch';
 import * as Path from 'path';
@@ -71,6 +73,35 @@ export function asArray<T>(val: T | T[], removeEmpty = true): T[] {
 
         return true;
     });
+}
+
+/**
+ * Handles a value as string and checks if it does match a file filter.
+ * 
+ * @param {any} val The value to check.
+ * @param {deploy_contracts.FileFilter} filter The filter.
+ * 
+ * @return {boolean} Does match or not.
+ */
+export function checkIfDoesMatchByFileFilter(val: any, filter: deploy_contracts.FileFilter) {
+    if (!filter) {
+        filter = {
+            files: '**',
+        };
+    }
+
+    const OPTS: Minimatch.IOptions = {
+        dot: true,
+        nocase: true,
+        nonull: true,
+    };
+
+    const IS_EXCLUDED = doesMatch(val, filter.exclude, OPTS);
+    if (!IS_EXCLUDED) {
+        return doesMatch(val, filter.files, OPTS);
+    }
+
+    return false;
 }
 
 /**
@@ -334,6 +365,18 @@ export function formatArray(formatStr: any, args: any[]): string {
  * @return {Promise<string[]>} The promise with the matches.
  */
 export function glob(patterns: string | string[], opts?: Glob.IOptions) {
+    const DEFAULT_OPTS: Glob.IOptions = {
+        absolute: true,
+        dot: false,
+        nocase: true,
+        nodir: true,
+        nonull: true,
+        nosort: false,
+        sync: false,
+    };
+
+    opts = MergeDeep({}, DEFAULT_OPTS, opts);
+
     return new Promise<string[]>(async (resolve, reject) => {
         const COMPLETED = createCompletedAction(resolve, reject);
         
@@ -726,6 +769,47 @@ export function toBooleanSafe(val: any, defaultValue: any = false): boolean {
     }
 
     return !!val;
+}
+
+/**
+ * Converts a file filter to a 'minimatch' compatible one.
+ * 
+ * @param {TFilter} filter The filter to convert.
+ * 
+ * @return {TFilter} The converted filter.
+ */
+export function toMinimatchFileFilter<TFilter extends deploy_contracts.FileFilter = deploy_contracts.FileFilter>
+(
+    filter: TFilter
+) {
+    filter = cloneObject(filter);
+    if (filter) {
+        const NORMALIZE_PATTERNS = (patterns: string | string[]) => {
+            return asArray(patterns).map(p => {
+                return toStringSafe(p);
+            }).filter(p => {
+                return !isEmptyString(p);
+            }).map(p => {
+                if (!p.trim().startsWith('/')) {
+                    p = '/' + p;
+                }
+    
+                return p;
+            });
+        };
+
+        (<any>filter)['files'] = NORMALIZE_PATTERNS(filter.files);
+        if ((<string[]>filter.files).length < 1) {
+            (<any>filter)['files'] = '/**/*';
+        }
+
+        (<any>filter)['exclude'] = NORMALIZE_PATTERNS(filter.exclude);
+        if ((<string[]>filter.exclude).length < 1) {
+            delete (<any>filter)['exclude'];
+        }
+    }
+
+    return filter;
 }
 
 /**

@@ -361,14 +361,8 @@ async function reloadPlugins() {
         const STATS = await deploy_helpers.lstat(PLUGIN_DIR);
         if (STATS.isDirectory()) {
             const JS_FILES = await deploy_helpers.glob('*.js', {
-                absolute: true,
                 cwd: PLUGIN_DIR,
-                dot: false,
-                nodir: true,
-                nonull: true,
-                nosort: false,
                 root: PLUGIN_DIR,
-                sync: false,
             });
 
             if (JS_FILES.length > 0) {

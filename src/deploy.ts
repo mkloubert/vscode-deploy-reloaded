@@ -165,28 +165,7 @@ export async function deployPackage(pkg: deploy_packages.Package) {
         throw new Error(`Package '${deploy_packages.getPackageName(pkg)}' cannot be deployed from workspace '${ME.folder.uri.fsPath}'!`);
     }
 
-    const FILES = deploy_helpers.asArray(pkg.files).filter(f => {
-        return !deploy_helpers.isEmptyString(f);
-    });
-
-    const EXCLUDE = deploy_helpers.asArray(pkg.exclude).filter(f => {
-        return !deploy_helpers.isEmptyString(f);
-    });
-
-    const ROOT_DIR = ME.folder.uri.fsPath;
-
-    const FILES_TO_DEPLOY = await deploy_helpers.glob(FILES, {
-        absolute: true,
-        cwd: ROOT_DIR,
-        dot: false,
-        ignore: EXCLUDE,
-        nodir: true,
-        nonull: true,
-        nosort: false,
-        root: ROOT_DIR,
-        sync: false,
-    });
-
+    const FILES_TO_DEPLOY = await ME.findFilesByFilter(pkg);
     if (FILES_TO_DEPLOY.length < 1) {
         //TODO: translate
         await deploy_helpers.showWarningMessage(

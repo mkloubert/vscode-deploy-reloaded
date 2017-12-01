@@ -2,7 +2,7 @@
     "name": "vscode-deploy-reloaded",
     "displayName": "Deploy (Reloaded)",
     "description": "Deploys files of a workspace to a destination.",
-    "version": "0.0.10",
+    "version": "0.0.11",
     "publisher": "mkloubert",
     "engines": {
         "vscode": "^1.18.0"
@@ -142,6 +142,7 @@
         "fs-extra": "^4.0.2",
         "glob": "^7.1.2",
         "i18next": "^10.2.1",
+        "merge-deep": "^3.0.0",
         "mime-types": "^2.1.17",
         "minimatch": "^3.0.4",
         "moment": "^2.19.3",

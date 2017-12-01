@@ -90,10 +90,12 @@ export async function autoDeployFile(file: string,
 
             let filter: deploy_contracts.FileFilter;
             let targetNames: string | string[] | false = false;
+            let useMinimatch = false;
 
             if (deploy_helpers.isObject<deploy_contracts.FileFilter>(autoSettings)) {
                 filter = autoSettings;
                 targetNames = pkg.targets;
+                useMinimatch = true;
             }
             else if (deploy_helpers.isBool(autoSettings)) {
                 if (true === autoSettings) {
@@ -118,7 +120,25 @@ export async function autoDeployFile(file: string,
                 return;
             }
 
-            const DOES_MATCH = Enumerable.from( await ME.findFilesByFilter(filter) ).select(f => {
+            let fileList: string[];
+            if (useMinimatch) {
+                // filter all files of that package
+                // by 'minimatch'
+                fileList = (await ME.findFilesByFilter(pkg)).filter(f => {
+                    let relPath = ME.toRelativePath(f);
+                    if (false !== relPath) {
+                        return deploy_helpers.checkIfDoesMatchByFileFilter('/' + relPath,
+                                                                           deploy_helpers.toMinimatchFileFilter(filter));
+                    }
+
+                    return false;
+                });
+            }
+            else {
+                fileList = await ME.findFilesByFilter(filter);
+            }
+
+            const DOES_MATCH = Enumerable.from( fileList ).select(f => {
                 return Path.resolve(f);
             }).contains(file);
 
@@ -138,7 +158,7 @@ export async function autoDeployFile(file: string,
                 const TARGET_NAME = deploy_targets.getTargetName(t);
 
                 try {
-                    await await ME.deployFileTo(file, t);
+                    await ME.deployFileTo(file, t);
                 }
                 catch (e) {
                     deploy_helpers.showErrorMessage(

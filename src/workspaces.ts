@@ -28,7 +28,9 @@ import * as deploy_pull from './pull';
 import * as deploy_targets from './targets';
 import * as Enumerable from 'node-enumerable';
 import * as Events from 'events';
+import * as Glob from 'glob';
 import * as i18next from 'i18next';
+const MergeDeep = require('merge-deep');
 import * as Path from 'path';
 import * as vscode from 'vscode';
 
@@ -287,10 +289,11 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
      * Finds files inside that workspace.
      * 
      * @param {deploy_contracts.FileFilter} filter The filter to use.
+     * @param {Glob.IOptions} [opts] Custom options.
      * 
      * @return {Promise<string[]>} The promise with the found files.
      */
-    public async findFilesByFilter(filter: deploy_contracts.FileFilter) {
+    public async findFilesByFilter(filter: deploy_contracts.FileFilter, opts?: Glob.IOptions) {
         if (!filter) {
             filter = <any>{};
         }
@@ -302,22 +305,18 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
         let exclude = deploy_helpers.asArray(filter.exclude).map(e => {
             return deploy_helpers.toStringSafe(e);
         }).filter(e => !deploy_helpers.isEmptyString(e));
-    
         if (exclude.length < 1) {
             exclude = undefined;
         }
 
-        return await deploy_helpers.glob(patterns, {
-            absolute: true,
+        const DEFAULT_OPTS: Glob.IOptions = {
             cwd: this.folder.uri.fsPath,
-            dot: true,
             ignore: exclude,
-            nodir: true,
-            nonull: true,
-            nosort: false,
             root: this.folder.uri.fsPath,
-            sync: false,
-        });
+        };
+
+        return await deploy_helpers.glob(patterns,
+                                         MergeDeep(DEFAULT_OPTS, opts));
     }
 
     /**

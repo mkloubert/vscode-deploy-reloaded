@@ -23,6 +23,7 @@ import * as deploy_plugins from './plugins';
 import * as deploy_targets from './targets';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
+import * as Path from 'path';
 import * as vscode from 'vscode';
 
 
@@ -225,24 +226,15 @@ export async function deletePackage(pkg: deploy_packages.Package,
         return !deploy_helpers.isEmptyString(f);
     });
 
-    const EXCLUDE = deploy_helpers.asArray(pkg.exclude).filter(f => {
+    let exclude = deploy_helpers.asArray(pkg.exclude).filter(f => {
         return !deploy_helpers.isEmptyString(f);
     });
-
+    if (exclude.length < 1) {
+        exclude = undefined;
+    }
     const ROOT_DIR = ME.folder.uri.fsPath;
 
-    const FILES_TO_DELETE = await deploy_helpers.glob(FILES, {
-        absolute: true,
-        cwd: ROOT_DIR,
-        dot: false,
-        ignore: EXCLUDE,
-        nodir: true,
-        nonull: true,
-        nosort: false,
-        root: ROOT_DIR,
-        sync: false,
-    });
-
+    const FILES_TO_DELETE = await ME.findFilesByFilter(pkg);
     if (FILES_TO_DELETE.length < 1) {
         //TODO: translate
         await deploy_helpers.showWarningMessage(
@@ -349,6 +341,7 @@ export async function removeOnChange(file: string) {
 
             let filter: deploy_contracts.FileFilter;
             let targetNames: string | string[] | false = false;
+            let useMinimatch = false;
 
             if (deploy_helpers.isObject<deploy_contracts.FileFilter>(REMOVE_ON_CHANGE)) {
                 filter = REMOVE_ON_CHANGE;
@@ -358,6 +351,7 @@ export async function removeOnChange(file: string) {
                 if (true === REMOVE_ON_CHANGE) {
                     filter = pkg;
                     targetNames = pkg.targets;
+                    useMinimatch = true;
                 }
             }
             else {
@@ -383,10 +377,27 @@ export async function removeOnChange(file: string) {
                 return;
             }
 
-            const DOES_MATCH = deploy_helpers.doesMatch(<string>relativePath, filter.files, {
-                dot: true,
-                nonull: true,
-            });
+            let fileList: string[];
+            if (useMinimatch) {
+                // filter all files of that package
+                // by 'minimatch'
+                fileList = (await ME.findFilesByFilter(pkg)).filter(f => {
+                    let relPath = ME.toRelativePath(f);
+                    if (false !== relPath) {
+                        return deploy_helpers.checkIfDoesMatchByFileFilter('/' + relPath,
+                                                                           deploy_helpers.toMinimatchFileFilter(filter));
+                    }
+
+                    return false;
+                });
+            }
+            else {
+                fileList = await ME.findFilesByFilter(filter);
+            }
+
+            const DOES_MATCH = Enumerable.from( fileList ).select(f => {
+                return Path.resolve(f);
+            }).contains(file);
 
             if (DOES_MATCH) {
                 TARGETS.push

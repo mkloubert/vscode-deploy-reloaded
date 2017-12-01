@@ -94,14 +94,8 @@ export async function init(workspace: deploy_workspaces.Workspace): Promise<i18n
 
             try {
                 const FILES = await deploy_helpers.glob('*.js', {
-                    absolute: true,
                     cwd: LANG_DIR,
-                    dot: false,
-                    nodir: true,
-                    nonull: true,
-                    nosort: false,
                     root: LANG_DIR,
-                    sync: false,
                 });
 
                 for (const F of FILES) {
