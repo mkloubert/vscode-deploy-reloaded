@@ -37,9 +37,9 @@ export async function pullFileFrom(file: string, target: deploy_targets.Target) 
         return;
     }
 
-    if (target.__workspace.FOLDER.uri.fsPath !== ME.FOLDER.uri.fsPath) {
+    if (!ME.canBeHandledByMe(target)) {
         //TODO: translate
-        throw new Error(`File '${file}' cannot be pulled to workspace '${ME.FOLDER.uri.fsPath}'!`);
+        throw new Error(`File '${file}' cannot be pulled to workspace '${ME.folder.uri.fsPath}'!`);
     }
 
     await pullFilesFrom.apply(
@@ -74,7 +74,7 @@ export async function pullFilesFrom(files: string[],
     const TARGET_NAME = deploy_targets.getTargetName(target);
     const TARGET_TYPE = deploy_helpers.normalizeString(target.type);
 
-    const PLUGINS = ME.CONTEXT.plugins.filter(pi => {
+    const PLUGINS = ME.context.plugins.filter(pi => {
         return '' === pi.__type || 
                (TARGET_TYPE === pi.__type && pi.canDownload && pi.downloadFiles);
     });
@@ -92,11 +92,11 @@ export async function pullFilesFrom(files: string[],
         const PI = PLUGINS.shift();
 
         try {
-            ME.CONTEXT.outputChannel.appendLine('');
+            ME.context.outputChannel.appendLine('');
 
             // TODO: translate
             if (files.length > 1) {
-                ME.CONTEXT.outputChannel.appendLine(`Start pulling files from '${TARGET_NAME}'...`);
+                ME.context.outputChannel.appendLine(`Start pulling files from '${TARGET_NAME}'...`);
             }
 
             const CTX: deploy_plugins.DownloadContext = {
@@ -104,7 +104,7 @@ export async function pullFilesFrom(files: string[],
                     const NAME_AND_PATH = ME.toNameAndPath(f);
                     if (false === NAME_AND_PATH) {
                         // TODO: translate
-                        ME.CONTEXT.outputChannel.append(`Cannot detect path information for file '${f}'!`);
+                        ME.context.outputChannel.append(`Cannot detect path information for file '${f}'!`);
 
                         return null;
                     }
@@ -112,7 +112,7 @@ export async function pullFilesFrom(files: string[],
                     const SF = new deploy_plugins.SimpleFileToDownload(ME, f, NAME_AND_PATH);
                     SF.onBeforeDownload = async (destination?: string) => {
                         // TODO: translate
-                        ME.CONTEXT.outputChannel.append(`Pulling file '${f}' from '${TARGET_NAME}'... `);
+                        ME.context.outputChannel.append(`Pulling file '${f}' from '${TARGET_NAME}'... `);
                     };
                     SF.onDownloadCompleted = async (err?: any, downloadedFile?: deploy_plugins.DownloadedFile) => {
                         // TODO: translate
@@ -130,11 +130,11 @@ export async function pullFilesFrom(files: string[],
                                     );
                                 }
 
-                                ME.CONTEXT.outputChannel.appendLine(`[OK]`);
+                                ME.context.outputChannel.appendLine(`[OK]`);
                             }
                         }
                         catch (e) {
-                            ME.CONTEXT.outputChannel.appendLine(`[ERROR: ${e}]`);
+                            ME.context.outputChannel.appendLine(`[ERROR: ${e}]`);
                         }
                     };
 
@@ -149,12 +149,12 @@ export async function pullFilesFrom(files: string[],
 
             if (files.length > 1) {
                 // TODO: translate
-                ME.CONTEXT.outputChannel.appendLine(`Pulling files from '${TARGET_NAME}' has been finished.`);
+                ME.context.outputChannel.appendLine(`Pulling files from '${TARGET_NAME}' has been finished.`);
             }
         }
         catch (e) {
             // TODO: translate
-            ME.CONTEXT.outputChannel.appendLine(`[ERROR] Pulling from '${TARGET_NAME}' failed: ${e}`);
+            ME.context.outputChannel.appendLine(`[ERROR] Pulling from '${TARGET_NAME}' failed: ${e}`);
         }
     }
 }
@@ -171,9 +171,9 @@ export async function pullPackage(pkg: deploy_packages.Package) {
         return;
     }
 
-    if (pkg.__workspace.FOLDER.uri.fsPath !== ME.FOLDER.uri.fsPath) {
+    if (!ME.canBeHandledByMe(pkg)) {
         //TODO: translate
-        throw new Error(`Package '${deploy_packages.getPackageName(pkg)}' cannot be pulled into workspace '${ME.FOLDER.uri.fsPath}'!`);
+        throw new Error(`Package '${deploy_packages.getPackageName(pkg)}' cannot be pulled into workspace '${ME.folder.uri.fsPath}'!`);
     }
 
     const FILES = deploy_helpers.asArray(pkg.files).filter(f => {
@@ -184,7 +184,7 @@ export async function pullPackage(pkg: deploy_packages.Package) {
         return !deploy_helpers.isEmptyString(f);
     });
 
-    const ROOT_DIR = ME.FOLDER.uri.fsPath;
+    const ROOT_DIR = ME.folder.uri.fsPath;
 
     const FILES_TO_PULL = await deploy_helpers.glob(FILES, {
         absolute: true,
@@ -214,7 +214,7 @@ export async function pullPackage(pkg: deploy_packages.Package) {
                                           [ FILES_TO_PULL, t, i + 1 ]);
             },
             description: deploy_helpers.toStringSafe( t.description ).trim(),
-            detail: t.__workspace.FOLDER.uri.fsPath,
+            detail: t.__workspace.folder.uri.fsPath,
             label: deploy_targets.getTargetName(t),
         };
     });

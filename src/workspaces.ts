@@ -75,6 +75,36 @@ export interface WorkspaceItem {
     readonly workspace: Workspace;
 }
 
+/**
+ * A workspace item from settings.
+ */
+export interface WorkspaceItemFromSettings {
+    /**
+     * [INTERNAL] DO NOT DEFINE OR OVERWRITE THIS PROPERTY BY YOUR OWN!
+     * 
+     * Gets the ID of that item.
+     */
+    readonly __id: any;
+    /**
+     * [INTERNAL] DO NOT DEFINE OR OVERWRITE THIS PROPERTY BY YOUR OWN!
+     * 
+     * Gets the zero-based of that item.
+     */
+    readonly __index: number;
+    /**
+     * [INTERNAL] DO NOT DEFINE OR OVERWRITE THIS PROPERTY BY YOUR OWN!
+     * 
+     * A value for comparison.
+     */
+    readonly __searchValue: any;
+    /**
+     * [INTERNAL] DO NOT DEFINE OR OVERWRITE THIS PROPERTY BY YOUR OWN!
+     * 
+     * Gets the underlying workspace.
+     */
+    readonly __workspace: Workspace;
+}
+
 
 const FILES_CHANGES: { [path: string]: deploy_contracts.FileChangeType } = {};
 
@@ -109,12 +139,34 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
 
     /**
      * Initializes a new instance of that class.
-     * @param {vscode.WorkspaceFolder} FOLDER The underlying folder.
-     * @param {WorkspaceContext} CONTEXT the current extension context.
+     * 
+     * @param {any} id The ID.
+     * @param {vscode.WorkspaceFolder} folder The underlying folder.
+     * @param {WorkspaceContext} context the current extension context.
      */
-    constructor(public readonly FOLDER: vscode.WorkspaceFolder,
-                public readonly CONTEXT: WorkspaceContext) {
+    constructor(public readonly id: any,
+                public readonly folder: vscode.WorkspaceFolder,
+                public readonly context: WorkspaceContext) {
         super();
+    }
+
+    /**
+     * Checks if an object can be handled by that workspace.
+     * 
+     * @param {WorkspaceItem|WorkspaceItemFromSettings} obj The object to check.
+     * 
+     * @return {boolean} Can be handled or not.
+     */
+    public canBeHandledByMe(obj: WorkspaceItem | WorkspaceItemFromSettings) {
+        if (obj) {
+            const WORKSPACE = (<any>obj).__workspace || (<any>obj).workspace;
+            if (WORKSPACE instanceof Workspace) {
+                return Path.resolve(WORKSPACE.folder.uri.fsPath) ===
+                       Path.resolve(this.folder.uri.fsPath);
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -257,15 +309,37 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
 
         return await deploy_helpers.glob(patterns, {
             absolute: true,
-            cwd: this.FOLDER.uri.fsPath,
+            cwd: this.folder.uri.fsPath,
             dot: true,
             ignore: exclude,
             nodir: true,
             nonull: true,
             nosort: false,
-            root: this.FOLDER.uri.fsPath,
+            root: this.folder.uri.fsPath,
             sync: false,
         });
+    }
+
+    /**
+     * Returns the ID of a package.
+     * 
+     * @param {deploy_packages.Package} package The package.
+     * 
+     * @return {string|false} The ID or (false) if package is invalid.
+     */
+    public getPackageId(pkg: deploy_packages.Package): string | false {
+        if (!pkg) {
+            return;
+        }
+
+        if (!this.canBeHandledByMe(pkg)) {
+            return false;
+        }
+
+        return `${this.id}\n` + 
+               `${pkg.__index}\n` + 
+               `${deploy_helpers.normalizeString( deploy_packages.getPackageName(pkg) )}\n` + 
+               `${this.configSource.resource.fsPath}`;
     }
 
     /**
@@ -288,9 +362,37 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
         }).pipe(p => {
             ++index;
 
-            (<any>p['__index']) = index;
-            (<any>p['__workspace']) = ME;
+            (<any>p)['__index'] = index;
+            (<any>p)['__workspace'] = ME;
+
+            // can only be defined AFTER '__workspace'!
+            (<any>p)['__id'] = ME.getPackageId(p);
+            (<any>p)['__searchValue'] = deploy_helpers.normalizeString(
+                deploy_packages.getPackageName(p)
+            );
         }).toArray();
+    }
+
+    /**
+     * Returns the ID of a target.
+     * 
+     * @param {deploy_targets.Target} target The target.
+     * 
+     * @return {string|false} The ID or (false) if target is invalid.
+     */
+    public getTargetId(target: deploy_targets.Target): string | false {
+        if (!target) {
+            return;
+        }
+
+        if (!this.canBeHandledByMe(target)) {
+            return false;
+        }
+
+        return `${this.id}\n` + 
+               `${target.__index}\n` + 
+               `${deploy_helpers.normalizeString( deploy_targets.getTargetName(target) )}` + 
+               `${this.configSource.resource.fsPath}`;
     }
 
     /**
@@ -313,8 +415,14 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
         }).pipe(t => {
             ++index;
 
-            (<any>t['__index']) = index;
-            (<any>t['__workspace']) = ME;
+            (<any>t)['__index'] = index;
+            (<any>t)['__workspace'] = ME;
+
+            // can only be defined AFTER '__workspace'!
+            (<any>t)['__id'] = ME.getTargetId(t);
+            (<any>t)['__searchValue'] = deploy_helpers.normalizeString(
+                deploy_targets.getTargetName(t)
+            );
         }).toArray();
     }
 
@@ -339,7 +447,7 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
 
             const ALTERNATIVE_FILENAME = './.vscode/deploy.json';
             const ALTERNATIVE_SECTION_NAME = 'deploy';
-            const DEFAULT_DIR = this.FOLDER.uri.fsPath;
+            const DEFAULT_DIR = this.folder.uri.fsPath;
             const DEFAULT_FILENAME = './.vscode/settings.json';
             const DEFAULT_FILE = Path.join(
                 DEFAULT_DIR,
@@ -430,7 +538,7 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
      * 
      * @param {string} path The path to check.
      * 
-     * @return {boolean} Is in settings folder or not. 
+     * @return {boolean} Is in settings folder or not.
      */
     public isInSettingsFolder(path: string) {
         const SETTINGS_DIR = Path.resolve(
@@ -665,7 +773,7 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
             return;
         }
 
-        let workspaceDir = Path.resolve(this.FOLDER.uri.fsPath);
+        let workspaceDir = Path.resolve(this.folder.uri.fsPath);
         workspaceDir = deploy_helpers.replaceAllStrings(workspaceDir, Path.sep, '/');
 
         if (!Path.isAbsolute(file)) {
@@ -713,7 +821,7 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
 
         return Path.resolve(
             Path.join(
-                this.FOLDER.uri.fsPath,
+                this.folder.uri.fsPath,
                 RELATIVE_PATH
             )
         );
@@ -736,7 +844,7 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
         );
 
         const WORKSPACE_DIR = deploy_helpers.replaceAllStrings(
-            Path.resolve(this.FOLDER.uri.fsPath),
+            Path.resolve(this.folder.uri.fsPath),
             Path.sep,
             '/'
         );
@@ -771,6 +879,6 @@ export function getWorkspaceName(ws: Workspace): string {
     }
 
     return Path.basename(
-        ws.FOLDER.uri.fsPath
+        ws.folder.uri.fsPath
     );
 }

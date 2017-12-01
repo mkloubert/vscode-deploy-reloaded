@@ -70,7 +70,7 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
 
     dir = deploy_helpers.toStringSafe(dir);
 
-    const PLUGINS = ME.CONTEXT.plugins.filter(pi => {
+    const PLUGINS = ME.context.plugins.filter(pi => {
         const TARGET_TYPE = deploy_helpers.normalizeString(target.type);
 
         return '' === pi.__type || 

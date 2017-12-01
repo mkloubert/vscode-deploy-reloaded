@@ -35,6 +35,7 @@ let activeWorkspaces: deploy_workspaces.Workspace[] = [];
 let currentContext: vscode.ExtensionContext;
 let fileWatcher: vscode.FileSystemWatcher;
 let isDeactivating = false;
+let nextWorkspaceId = Number.MAX_SAFE_INTEGER;
 let outputChannel: vscode.OutputChannel;
 let packageFile: deploy_contracts.PackageFile;
 const PLUGINS: deploy_plugins.Plugin[] = [];
@@ -77,7 +78,7 @@ async function invokeForActiveEditor(placeHolder: string,
                     }
                 },
                 description: deploy_helpers.toStringSafe( t.description ).trim(),
-                detail: t.__workspace.FOLDER.uri.fsPath,
+                detail: t.__workspace.folder.uri.fsPath,
                 label: deploy_targets.getTargetName(t),
             };
         });
@@ -129,7 +130,7 @@ async function invokeForActivePackage(placeHolder: string,
                 }
             },
             description: deploy_helpers.toStringSafe( p.description ).trim(),
-            detail: p.__workspace.FOLDER.uri.fsPath,
+            detail: p.__workspace.folder.uri.fsPath,
             label: deploy_packages.getPackageName(p),
         };
     });
@@ -175,7 +176,7 @@ async function onDidChangeActiveTextEditor(editor: vscode.TextEditor) {
                         return;
                     }
 
-                    if (Path.resolve(DOC.fileName).startsWith( Path.resolve(ws.FOLDER.uri.fsPath) )) {
+                    if (Path.resolve(DOC.fileName).startsWith( Path.resolve(ws.folder.uri.fsPath) )) {
                         activeWorkspaces.push(ws);
 
                         await ws.onDidChangeActiveTextEditor(editor);
@@ -258,7 +259,7 @@ async function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?:
             let removeWorkspace = false;
 
             for (let rws of removed) {
-                if (Path.resolve(rws.uri.fsPath) === Path.resolve(WS.FOLDER.uri.fsPath)) {
+                if (Path.resolve(rws.uri.fsPath) === Path.resolve(WS.folder.uri.fsPath)) {
                     removeWorkspace = true;
                     break;
                 }
@@ -303,7 +304,9 @@ async function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?:
                     }
                 });
 
-                newWorkspace = new deploy_workspaces.Workspace(wsf, CTX);
+                newWorkspace = new deploy_workspaces.Workspace(
+                    nextWorkspaceId--, wsf, CTX
+                );
                 try {
                     const HAS_BEEN_INITIALIZED = await newWorkspace.initialize();
                     if (HAS_BEEN_INITIALIZED) {
@@ -700,7 +703,7 @@ export async function activate(context: vscode.ExtensionContext) {
                     const TARGETS: deploy_targets.Target[] = [];
                     activeWorkspaces.forEach(ws => {
                         const WORKSPACE_TARGETS = ws.getTargets().filter(t => {
-                            const PLUGINS = t.__workspace.CONTEXT.plugins.filter(pi => {
+                            const PLUGINS = t.__workspace.context.plugins.filter(pi => {
                                 const TARGET_TYPE = deploy_helpers.normalizeString(t.type);
 
                                 return '' === pi.__type || 
@@ -741,7 +744,7 @@ export async function activate(context: vscode.ExtensionContext) {
                         return {
                             label: deploy_workspaces.getWorkspaceName(ws),
                             description: Path.dirname(
-                                ws.FOLDER.uri.fsPath
+                                ws.folder.uri.fsPath
                             ),
 
                             action: async () => {

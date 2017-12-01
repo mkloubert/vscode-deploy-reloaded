@@ -78,7 +78,7 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
 
     public async listDirectory(context: deploy_plugins.ListDirectoryContext<TestTarget>) {
         const WORKSPACE_DIR = Path.resolve(
-            context.workspace.FOLDER.uri.fsPath
+            context.workspace.folder.uri.fsPath
         );
 
         let targetDir = Path.join(

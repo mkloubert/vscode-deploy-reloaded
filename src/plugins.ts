@@ -371,9 +371,9 @@ export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_
     /**
      * Initializes a new instance of that class.
      * 
-     * @param {PluginContext} CONTEXT The underlying context.
+     * @param {PluginContext} context The underlying context.
      */
-    constructor(public readonly CONTEXT: PluginContext) {
+    constructor(public readonly context: PluginContext) {
         super();
     }
 

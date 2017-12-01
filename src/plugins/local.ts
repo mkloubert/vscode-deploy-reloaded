@@ -250,7 +250,7 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
         }
 
         if (!Path.isAbsolute(dir)) {
-            dir = Path.join(wsi.workspace.FOLDER.uri.fsPath, dir);
+            dir = Path.join(wsi.workspace.folder.uri.fsPath, dir);
         }
         dir = Path.resolve(dir);
 

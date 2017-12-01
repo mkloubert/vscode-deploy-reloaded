@@ -25,20 +25,7 @@ import * as vscode from 'vscode';
 /**
  * A target.
  */
-export interface Target {
-    /**
-     * [INTERNAL] DO NOT DEFINE OR OVERWRITE THIS PROPERTY BY YOUR OWN!
-     * 
-     * Gets the zero-based of that target.
-     */
-    readonly __index: number;
-    /**
-     * [INTERNAL] DO NOT DEFINE OR OVERWRITE THIS PROPERTY BY YOUR OWN!
-     * 
-     * Gets the underlying workspace.
-     */
-    readonly __workspace: deploy_workspaces.Workspace;
-
+export interface Target extends deploy_workspaces.WorkspaceItemFromSettings {
     /**
      * A description.
      */
@@ -166,7 +153,7 @@ export async function showTargetQuickPick<TTarget extends Target = Target, TResu
                 }
             },
             description: deploy_helpers.toStringSafe( t.description ).trim(),
-            detail: t.__workspace.FOLDER.uri.fsPath,
+            detail: t.__workspace.folder.uri.fsPath,
             label: getTargetName(t),
         };
     });
