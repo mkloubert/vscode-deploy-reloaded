@@ -211,33 +211,40 @@ async function onDidChangeConfiguration(e: vscode.ConfigurationChangeEvent) {
     });
 }
 
-function onDidFileChange(e: vscode.Uri, type: deploy_contracts.FileChangeType) {
+async function onDidFileChange(e: vscode.Uri, type: deploy_contracts.FileChangeType) {
     if (isDeactivating) {
         return;
     }
 
-    try {
-        WORKSPACES.forEach(ws => {
-            try {
-                if (Path.resolve(e.fsPath).startsWith( Path.resolve(ws.FOLDER.uri.fsPath) )) {
-                    ws.onDidFileChange(e, type).then(() => {
-                        // OK
-                    }).catch((err) => {
-                        deploy_log.CONSOLE
-                                  .err(e, 'extension.onDidFileChange(3)');
-                    });
-                }
+    deploy_helpers.forEachAsync(WORKSPACES, async (ws) => {
+        try {
+            if (ws.isPathOf(e.fsPath)) {
+                await ws.onDidFileChange(e, type);
             }
-            catch (e) {
-                deploy_log.CONSOLE
-                          .err(e, 'extension.onDidFileChange(2)');
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .err(e, 'extension.onDidFileChange()');
+        }
+    });
+}
+
+async function onDidSaveTextDocument(e: vscode.TextDocument) {
+    if (isDeactivating) {
+        return;
+    }
+
+    deploy_helpers.forEachAsync(WORKSPACES, async (ws) => {
+        try {
+            if (ws.isPathOf(e.fileName)) {
+                await ws.onDidSaveTextDocument(e);
             }
-        });
-    }
-    catch (e) {
-        deploy_log.CONSOLE
-                  .err(e, 'extension.onDidFileChange(1)');
-    }
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .err(e, 'extension.onDidSaveTextDocument()');
+        }
+    });
 }
 
 async function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?: vscode.WorkspaceFolder[]) {
@@ -832,6 +839,14 @@ export async function activate(context: vscode.ExtensionContext) {
                               .trace(err, 'vscode.workspace.onDidChangeConfiguration');
                 });
             }),
+
+            vscode.workspace.onDidSaveTextDocument((e) => {
+                onDidSaveTextDocument(e).then(() => {
+                }).catch((err) => {
+                    deploy_log.CONSOLE
+                              .trace(err, 'vscode.workspace.onDidSaveTextDocument');
+                });
+            }),
         );
     });
 
@@ -849,14 +864,22 @@ export async function activate(context: vscode.ExtensionContext) {
             newWatcher = vscode.workspace.createFileSystemWatcher('**',
                                                                   false, false, false);
 
+            const TRIGGER_CHANGE_EVENT = (e: vscode.Uri, type: deploy_contracts.FileChangeType) => {
+                onDidFileChange(e, type).then(() => {
+                }).catch((err) => {
+                    deploy_log.CONSOLE
+                              .trace(e, 'extension.activate(file system watcher #2)');
+                });
+            };
+
             newWatcher.onDidChange((e) => {
-                onDidFileChange(e, deploy_contracts.FileChangeType.Changed);
+                TRIGGER_CHANGE_EVENT(e, deploy_contracts.FileChangeType.Changed);
             });
             newWatcher.onDidCreate((e) => {
-                onDidFileChange(e, deploy_contracts.FileChangeType.Created);
+                TRIGGER_CHANGE_EVENT(e, deploy_contracts.FileChangeType.Created);
             });
             newWatcher.onDidDelete((e) => {
-                onDidFileChange(e, deploy_contracts.FileChangeType.Deleted);
+                TRIGGER_CHANGE_EVENT(e, deploy_contracts.FileChangeType.Deleted);
             });
 
             deploy_helpers.tryDispose(fileWatcher);
@@ -864,7 +887,7 @@ export async function activate(context: vscode.ExtensionContext) {
         }
         catch (e) {
             deploy_log.CONSOLE
-                      .trace(e, 'extension.activate(file system watcher)');
+                      .trace(e, 'extension.activate(file system watcher #1)');
 
             deploy_helpers.tryDispose(newWatcher);
         }

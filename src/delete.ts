@@ -17,10 +17,12 @@
 
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
+import * as deploy_log from './log';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
 import * as deploy_targets from './targets';
 import * as deploy_workspaces from './workspaces';
+import * as Enumerable from 'node-enumerable';
 import * as vscode from 'vscode';
 
 
@@ -318,5 +320,103 @@ export async function deletePackage(pkg: deploy_packages.Package,
         await Promise.resolve(
             selectedItem.action()
         );
+    }
+}
+
+/**
+ * Handles a file for "remove on change" feature.
+ * 
+ * @param {string} file The file to check.
+ */
+export async function removeOnChange(file: string) {
+    const ME: deploy_workspaces.Workspace = this;
+
+    try {
+        let relativePath = ME.toRelativePath(file);
+        if (false === relativePath) {
+            return;
+        }
+
+        const KNOWN_TARGETS = ME.getTargets();
+
+        const TARGETS: deploy_targets.Target[] = [];
+        for (let pkg of ME.getPackages()) {
+            const REMOVE_ON_CHANGE = pkg.removeOnChange;
+
+            if (deploy_helpers.isNullOrUndefined(REMOVE_ON_CHANGE)) {
+                continue;
+            }
+
+            let filter: deploy_contracts.FileFilter;
+            let targetNames: string | string[] | false = false;
+
+            if (deploy_helpers.isObject<deploy_contracts.FileFilter>(REMOVE_ON_CHANGE)) {
+                filter = REMOVE_ON_CHANGE;
+                targetNames = pkg.targets;
+            }
+            else if (deploy_helpers.isBool(REMOVE_ON_CHANGE)) {
+                if (true === REMOVE_ON_CHANGE) {
+                    filter = pkg;
+                    targetNames = pkg.targets;
+                }
+            }
+            else {
+                filter = pkg;
+                targetNames = REMOVE_ON_CHANGE;
+            }
+
+            if (false === targetNames) {
+                continue;
+            }
+
+            if (!filter) {
+                filter = {
+                    files: '**'
+                };
+            }
+
+            const MATCHING_TARGETS = deploy_targets.getTargetsByName(
+                targetNames,
+                KNOWN_TARGETS
+            );
+            if (false === MATCHING_TARGETS) {
+                return;
+            }
+
+            const DOES_MATCH = deploy_helpers.doesMatch(<string>relativePath, filter.files, {
+                dot: true,
+                nonull: true,
+            });
+
+            if (DOES_MATCH) {
+                TARGETS.push
+                       .apply(TARGETS, MATCHING_TARGETS);
+            }
+        };
+
+        if (TARGETS.length < 1) {
+            return;
+        }
+
+        await deploy_helpers.forEachAsync(Enumerable.from(TARGETS)
+                                                    .distinct(true),
+            async (t) => {
+                const TARGET_NAME = deploy_targets.getTargetName(t);
+
+                try {
+                    await ME.deleteFileIn(file, t, false);
+                }
+                catch (e) {
+                    //TODO: translate
+
+                    deploy_helpers.showErrorMessage(
+                        `Auto removing file '${file}' in '${TARGET_NAME}' failed: ${e}`
+                    );
+                }
+            });
+    }
+    catch (e) {
+        deploy_log.CONSOLE
+                    .trace(e, 'delete.removeOnChange()');
     }
 }

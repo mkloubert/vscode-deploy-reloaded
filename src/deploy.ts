@@ -233,3 +233,43 @@ export async function deployPackage(pkg: deploy_packages.Package) {
         );
     }
 }
+
+/**
+ * Deploys a file when is has been changed.
+ * 
+ * @param {string} file The file to check. 
+ */
+export async function deployOnChange(file: string) {
+    const ME: deploy_workspaces.Workspace = this;
+
+    const ARGS = [
+        file,
+        async (pkg: deploy_packages.Package) => {
+            return pkg.deployOnChange;
+        },
+        "Deploy ON CHANGE from '{0}' to '{1}' failed: '{2}'",
+    ];
+
+    return await deploy_packages.autoDeployFile
+                                .apply(ME, ARGS);
+}
+
+/**
+ * Deploys a file when is has been saved.
+ * 
+ * @param {string} file The file to check. 
+ */
+export async function deployOnSave(file: string) {
+    const ME: deploy_workspaces.Workspace = this;
+
+    const ARGS = [
+        file,
+        async (pkg: deploy_packages.Package) => {
+            return pkg.deployOnSave;
+        },
+        "Deploy ON SAVE from '{0}' to '{1}' failed: '{2}'",
+    ];
+
+    return await deploy_packages.autoDeployFile
+                                .apply(ME, ARGS);
+}

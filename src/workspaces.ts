@@ -181,6 +181,34 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
     }
 
     /**
+     * Deploys a file when is has been changed.
+     * 
+     * @param {string} file The file to check. 
+     */
+    protected async deployOnChange(file: string) {
+        if (!deploy_helpers.isEmptyString(file)) {
+            if (!this.isInSettingsFolder(file)) {
+                return await deploy_deploy.deployOnChange
+                                          .apply(this, arguments);
+            }
+        }
+    }
+
+    /**
+     * Deploys a file when is has been saved.
+     * 
+     * @param {string} file The file to check. 
+     */
+    protected async deployOnSave(file: string) {
+        if (!deploy_helpers.isEmptyString(file)) {
+            if (!this.isInSettingsFolder(file)) {
+                return await deploy_deploy.deployOnSave
+                                          .apply(this, arguments);
+            }
+        }
+    }
+
+    /**
      * Deploys a package.
      * 
      * @param {deploy_packages.Package} pkg The package to deploy. 
@@ -291,13 +319,6 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
     }
 
     /**
-     * Gets if the workspace has been initialized or not.
-     */
-    public get isInitialized() {
-        return this._isInitialized;
-    }
-
-    /**
      * Initializes that workspace.
      * 
      * @return {Promise<boolean>} The promise that indicates if operation was successful or not.
@@ -398,6 +419,34 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
     }
 
     /**
+     * Gets if the workspace has been initialized or not.
+     */
+    public get isInitialized() {
+        return this._isInitialized;
+    }
+
+    /**
+     * Checks if a path is inside the settings folder.
+     * 
+     * @param {string} path The path to check.
+     * 
+     * @return {boolean} Is in settings folder or not. 
+     */
+    public isInSettingsFolder(path: string) {
+        const SETTINGS_DIR = Path.resolve(
+            Path.dirname(this.configSource.resource.fsPath)
+        );
+        
+        path = deploy_helpers.toStringSafe(path);
+        if (!Path.isAbsolute(path)) {
+            return true;
+        }
+        path = Path.resolve(path);
+
+        return path.startsWith(SETTINGS_DIR);
+    }
+
+    /**
      * Checks if a path is part of that workspace.
      * 
      * @param {string} path The path to check.
@@ -405,18 +454,7 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
      * @return {boolean} Is part of that workspace or not. 
      */
     public isPathOf(path: string) {
-        if (!deploy_helpers.isEmptyString(path)) {
-            if (!Path.isAbsolute(path)) {
-                path = Path.join(this.FOLDER.uri.fsPath, path);
-            }
-            path = Path.resolve(path);
-
-            return path.startsWith(
-                Path.resolve(this.FOLDER.uri.fsPath)
-            );
-        }
-
-        return false;
+        return false !== this.toFullPath(path);
     }
 
     /**
@@ -466,9 +504,11 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
         try {
             switch (type) {
                 case deploy_contracts.FileChangeType.Changed:
+                    await this.deployOnChange(e.fsPath);
                     break;
 
                 case deploy_contracts.FileChangeType.Created:
+                    await this.deployOnChange(e.fsPath);
                     break;
 
                 case deploy_contracts.FileChangeType.Deleted:
@@ -479,6 +519,19 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
         finally {
             delete FILES_CHANGES[e.fsPath];
         }
+    }
+
+    /**
+     * Is invoked when a text document has been changed.
+     * 
+     * @param {vscode.TextDocument} e The underlying text document.
+     */
+    public async onDidSaveTextDocument(e: vscode.TextDocument) {
+        if (!e) {
+            return;
+        }
+        
+        await this.deployOnSave(e.fileName);
     }
 
     /**
@@ -576,127 +629,14 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
     /**
      * Handles a file for "remove on change" feature.
      * 
-     * @param {string} file The file to handle.
+     * @param {string} file The file to check.
      */
     protected async removeOnChange(file: string) {
-        const ME = this;
-
-        try {
-            file = deploy_helpers.replaceAllStrings(
-                Path.resolve(file),
-                Path.sep,
-                '/'
-            );
-
-            const WORKSPACE_DIR = deploy_helpers.replaceAllStrings(
-                Path.resolve(ME.FOLDER.uri.fsPath),
-                Path.sep,
-                '/'
-            );
-
-            if (!file.startsWith(WORKSPACE_DIR)) {
-                return;
+        if (!deploy_helpers.isEmptyString(file)) {
+            if (!this.isInSettingsFolder(file)) {
+                await deploy_delete.removeOnChange
+                                   .apply(this, arguments);
             }
-
-            let relativePath = file.substr(WORKSPACE_DIR.length);
-            while (relativePath.startsWith('/')) {
-                relativePath = relativePath.substr(1);
-            }
-            while (relativePath.endsWith('/')) {
-                relativePath = relativePath.substr(0, relativePath.length - 1);
-            }
-
-            const KNOWN_TARGETS = ME.getTargets();
-
-            let abort = false;
-            const TARGETS: deploy_targets.Target[] = [];
-            await deploy_helpers.forEachAsync(ME.getPackages(), async (pkg) => {
-                if (abort) {
-                    return;
-                }
-
-                const REMOVE_ON_CHANGE = pkg.removeOnChange;
-
-                if (deploy_helpers.isNullOrUndefined(REMOVE_ON_CHANGE)) {
-                    return;
-                }
-
-                let filter: deploy_contracts.FileFilter;
-                let targetNames: string | string[] | false = false;
-
-                if (deploy_helpers.isObject<deploy_contracts.FileFilter>(REMOVE_ON_CHANGE)) {
-                    filter = REMOVE_ON_CHANGE;
-                    targetNames = pkg.targets;
-                }
-                else if (deploy_helpers.isBool(REMOVE_ON_CHANGE)) {
-                    if (true === REMOVE_ON_CHANGE) {
-                        filter = pkg;
-                        targetNames = pkg.targets;
-                    }
-                }
-                else {
-                    filter = pkg;
-                    targetNames = REMOVE_ON_CHANGE;
-                }
-
-                if (false === targetNames) {
-                    return;
-                }
-
-                if (!filter) {
-                    filter = {
-                        files: '**'
-                    };
-                }
-
-                const MATCHING_TARGETS = deploy_targets.getTargetsByName(
-                    targetNames,
-                    KNOWN_TARGETS
-                );
-                if (false === MATCHING_TARGETS) {
-                    abort = true;
-                    return;
-                }
-
-                const DOES_MATCH = deploy_helpers.doesMatch(relativePath, filter.files, {
-                    dot: true,
-                    nonull: true,
-                });
-
-                if (DOES_MATCH) {
-                    TARGETS.push
-                           .apply(TARGETS, MATCHING_TARGETS);
-                }
-            });
-
-            if (abort) {
-                return;
-            }
-
-            if (TARGETS.length < 1) {
-                return;
-            }
-
-            await deploy_helpers.forEachAsync(Enumerable.from(TARGETS)
-                                                        .distinct(true),
-                async (t) => {
-                    const TARGET_NAME = deploy_targets.getTargetName(t);
-
-                    try {
-                        await ME.deleteFileIn(file, t, false);
-                    }
-                    catch (e) {
-                        //TODO: translate
-
-                        deploy_helpers.showErrorMessage(
-                            `Auto removing file '${file}' on '${TARGET_NAME}' failed: ${e}`
-                        );
-                    }
-                });
-        }
-        catch (e) {
-            deploy_log.CONSOLE
-                      .trace(e, 'workspaces.Workspace.removeOnChange()');
         }
     }
 
@@ -756,6 +696,64 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
             name: NAME,
             path: relativePath,
         };
+    }
+
+    /**
+     * Converts to a full path.
+     * 
+     * @param {string} path The path to convert.
+     * 
+     * @return {string|false} The pull path or (false) if 'path' could not be converted.
+     */
+    public toFullPath(path: string): string | false {
+        const RELATIVE_PATH = this.toRelativePath(path);
+        if (false === RELATIVE_PATH) {
+            return false;
+        }
+
+        return Path.resolve(
+            Path.join(
+                this.FOLDER.uri.fsPath,
+                RELATIVE_PATH
+            )
+        );
+    }
+
+    /**
+     * Converts to a relative path.
+     * 
+     * @param {string} path The path to convert.
+     * 
+     * @return {string|false} The relative path or (false) if 'path' could not be converted.
+     */
+    public toRelativePath(path: string): string | false {
+        path = deploy_helpers.toStringSafe(path);
+
+        path = deploy_helpers.replaceAllStrings(
+            Path.resolve(path),
+            Path.sep,
+            '/'
+        );
+
+        const WORKSPACE_DIR = deploy_helpers.replaceAllStrings(
+            Path.resolve(this.FOLDER.uri.fsPath),
+            Path.sep,
+            '/'
+        );
+
+        if (!path.startsWith(WORKSPACE_DIR)) {
+            return false;
+        }
+
+        let relativePath = path.substr(WORKSPACE_DIR.length);
+        while (relativePath.startsWith('/')) {
+            relativePath = relativePath.substr(1);
+        }
+        while (relativePath.endsWith('/')) {
+            relativePath = relativePath.substr(0, relativePath.length - 1);
+        }
+
+        return relativePath;
     }
 }
 
