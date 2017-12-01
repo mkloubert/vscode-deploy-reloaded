@@ -416,6 +416,7 @@ export function glob(patterns: string | string[], opts?: Glob.IOptions) {
 
             COMPLETED(null,
                       Enumerable.from( <string[]>(await WF.start()) )
+                                .select(f => Path.resolve(f))
                                 .distinct()
                                 .toArray());
         }

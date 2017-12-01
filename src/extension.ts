@@ -362,17 +362,16 @@ async function reloadPlugins() {
         if (STATS.isDirectory()) {
             const JS_FILES = await deploy_helpers.glob('*.js', {
                 cwd: PLUGIN_DIR,
+                nocase: false,
                 root: PLUGIN_DIR,
             });
 
             if (JS_FILES.length > 0) {
-                for (let js of JS_FILES) {
+                for (const JS of JS_FILES) {
                     try {
-                        js = Path.resolve(js);
+                        delete require.cache[JS];
 
-                        delete require.cache[js];
-
-                        const MODULE: deploy_plugins.PluginModule = require(js);
+                        const MODULE: deploy_plugins.PluginModule = require(JS);
                         if (MODULE) {
                             const CREATE_PLUGINS = MODULE.createPlugins;
                             if (CREATE_PLUGINS) {
@@ -395,11 +394,11 @@ async function reloadPlugins() {
                                             ++index;
 
                                             PI.__index = index;
-                                            PI.__file = Path.basename(js);
-                                            PI.__filePath = Path.resolve(js);
+                                            PI.__file = Path.basename(JS);
+                                            PI.__filePath = Path.resolve(JS);
                                             PI.__type = deploy_helpers.toStringSafe(
-                                                Path.basename(js,
-                                                              Path.extname(js))
+                                                Path.basename(JS,
+                                                              Path.extname(JS))
                                             ).toLowerCase().trim();
 
                                             let isInitialized: boolean;
@@ -425,7 +424,7 @@ async function reloadPlugins() {
                                         catch (e) {
                                             //TODO: translate
                                             deploy_helpers.showErrorMessage(
-                                                `Error while initializing plugin '${js}' (s. debug output 'CTRL + Y')!`
+                                                `Error while initializing plugin '${JS}' (s. debug output 'CTRL + Y')!`
                                             );
 
                                             deploy_log.CONSOLE
@@ -437,21 +436,21 @@ async function reloadPlugins() {
                             else {
                                 //TODO: translate
                                 deploy_helpers.showWarningMessage(
-                                    `Plugin module '${js}' contains NO factory function!`
+                                    `Plugin module '${JS}' contains NO factory function!`
                                 );
                             }
                         }
                         else {
                             //TODO: translate
                             deploy_helpers.showWarningMessage(
-                                `Plugin '${js}' contains NO module!`
+                                `Plugin '${JS}' contains NO module!`
                             );
                         }
                     }
                     catch (e) {
                         //TODO: translate
                         deploy_helpers.showErrorMessage(
-                            `Error while loading '${js}' (s. debug output 'CTRL + Y')!`
+                            `Error while loading '${JS}' (s. debug output 'CTRL + Y')!`
                         );
 
                         deploy_log.CONSOLE

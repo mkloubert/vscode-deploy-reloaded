@@ -95,16 +95,13 @@ export async function init(workspace: deploy_workspaces.Workspace): Promise<i18n
             try {
                 const FILES = await deploy_helpers.glob('*.js', {
                     cwd: LANG_DIR,
+                    nocase: false,
                     root: LANG_DIR,
                 });
 
                 for (const F of FILES) {
                     try {
                         const FILENAME = Path.basename(F);
-                        if ('.js' !== FILENAME.substr(FILENAME.length - 3)) {
-                            continue;  // no JavaScript file
-                        }
-
                         const LANG_NAME = normalizeLangName( FILENAME.substr(0, FILENAME.length - 3) );
                         if ('' === LANG_NAME) {
                             continue;  // no language name available
@@ -114,14 +111,12 @@ export async function init(workspace: deploy_workspaces.Workspace): Promise<i18n
                             continue;  // no file
                         }
 
-                        const FULLPATH = Path.resolve(F);
-
                         // deleted cached data
                         // and load current translation
                         // from file
-                        delete require.cache[FULLPATH];
+                        delete require.cache[F];
                         RESOURCES[LANG_NAME] = {
-                            translation: require(FULLPATH).translation,
+                            translation: require(F).translation,
                         };
                     }
                     catch (e) {
