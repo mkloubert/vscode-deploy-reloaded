@@ -59,10 +59,6 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
 
     public async deleteFiles(context: deploy_plugins.DeleteContext<LocalTarget>) {
         for (const F of context.files) {
-            if (context.isCancelling) {
-                return;
-            }
-
             try {
                 const SETTINGS = await this.getTargetSettings(context, F);
 
@@ -72,7 +68,10 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
                 );
                 targetDir = Path.resolve(targetDir);
 
-                F.onBeforeDelete(targetDir);
+                await F.onBeforeDelete(targetDir);
+                if (context.isCancelling) {
+                    break;
+                }
 
                 const TARGET_FILE = Path.join(
                     targetDir,
@@ -101,10 +100,6 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
 
     public async downloadFiles(context: deploy_plugins.DownloadContext<LocalTarget>) {
         for (const F of context.files) {
-            if (context.isCancelling) {
-                return;
-            }
-
             try {
                 const SETTINGS = await this.getTargetSettings(context, F);
 
@@ -115,6 +110,9 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
                 targetDir = Path.resolve(targetDir);
 
                 await F.onBeforeDownload(targetDir);
+                if (context.isCancelling) {
+                    break;
+                }
 
                 const TARGET_FILE = Path.join(
                     targetDir,
@@ -268,10 +266,6 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
     public async uploadFiles(context: deploy_plugins.UploadContext<LocalTarget>) {
         const ALREADY_CHECKED = {};
         for (const F of context.files) {
-            if (context.isCancelling) {
-                return;
-            }
-
             try {
                 const SETTINGS = await this.getTargetSettings(context, F);
 
@@ -282,6 +276,9 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
                 targetDir = Path.resolve(targetDir);
 
                 await F.onBeforeUpload(targetDir);
+                if (context.isCancelling) {
+                    break;
+                }
 
                 if (true !== ALREADY_CHECKED[targetDir]) {
                     if (await deploy_helpers.exists(targetDir)) {

@@ -370,6 +370,50 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     }
 
     /**
+     * Returns all 'delete' plugins by target.
+     * 
+     * @param {deploy_targets.Target} target The target.
+     * 
+     * @return {deploy_plugins.Plugin[]} The plugins.
+     */
+    public getDeletePlugins(target: deploy_targets.Target) {
+        if (!target) {
+            return;
+        }
+
+        const TARGET_TYPE = deploy_helpers.normalizeString(target.type);
+
+        return this.context.plugins.filter(pi => {
+            const PLUGIN_TYPE = deploy_helpers.normalizeString(pi.__type);
+
+            return '' === PLUGIN_TYPE || 
+                   (TARGET_TYPE === PLUGIN_TYPE && pi.canDelete && pi.deleteFiles);
+        });
+    }
+
+    /**
+     * Returns all download plugins by target.
+     * 
+     * @param {deploy_targets.Target} target The target.
+     * 
+     * @return {deploy_plugins.Plugin[]} The plugins.
+     */
+    public getDownloadPlugins(target: deploy_targets.Target) {
+        if (!target) {
+            return;
+        }
+
+        const TARGET_TYPE = deploy_helpers.normalizeString(target.type);
+
+        return this.context.plugins.filter(pi => {
+            const PLUGIN_TYPE = deploy_helpers.normalizeString(pi.__type);
+
+            return '' === PLUGIN_TYPE || 
+                   (TARGET_TYPE === PLUGIN_TYPE && pi.canDownload && pi.downloadFiles);
+        });
+    }
+
+    /**
      * Returns an existing path based on the settings folder.
      * 
      * @param {string} path The path.
@@ -403,6 +447,28 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         }
         
         return false;
+    }
+
+    /**
+     * Returns all 'list directory' plugins by target.
+     * 
+     * @param {deploy_targets.Target} target The target.
+     * 
+     * @return {deploy_plugins.Plugin[]} The plugins.
+     */
+    public getListPlugins(target: deploy_targets.Target) {
+        if (!target) {
+            return;
+        }
+
+        const TARGET_TYPE = deploy_helpers.normalizeString(target.type);
+
+        return this.context.plugins.filter(pi => {
+            const PLUGIN_TYPE = deploy_helpers.normalizeString(pi.__type);
+
+            return '' === PLUGIN_TYPE || 
+                   (TARGET_TYPE === PLUGIN_TYPE && pi.canList && pi.listDirectory);
+        });
     }
 
     /**
@@ -517,6 +583,28 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         targets = deploy_helpers.filterConditionalItems(targets);
 
         return targets;
+    }
+
+    /**
+     * Returns all upload plugins by target.
+     * 
+     * @param {deploy_targets.Target} target The target.
+     * 
+     * @return {deploy_plugins.Plugin[]} The plugins.
+     */
+    public getUploadPlugins(target: deploy_targets.Target) {
+        if (!target) {
+            return;
+        }
+
+        const TARGET_TYPE = deploy_helpers.normalizeString(target.type);
+
+        return this.context.plugins.filter(pi => {
+            const PLUGIN_TYPE = deploy_helpers.normalizeString(pi.__type);
+
+            return '' === PLUGIN_TYPE || 
+                   (TARGET_TYPE === PLUGIN_TYPE && pi.canUpload && pi.uploadFiles);
+        });
     }
 
     /**

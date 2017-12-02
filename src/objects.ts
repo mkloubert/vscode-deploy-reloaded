@@ -48,11 +48,7 @@ export abstract class DisposableBase extends Events.EventEmitter implements vsco
 
     /** @inheritdoc */
     public dispose() {
-        if (this.isDisposing) {
-            return;
-        }
-
-        if (this.isDisposed) {
+        if (this.isInFinalizeState) {
             return;
         }
 
@@ -63,9 +59,9 @@ export abstract class DisposableBase extends Events.EventEmitter implements vsco
             this.removeAllListeners();
 
             while (this._DISPOSABLES.length > 0) {
-                const DISP = this._DISPOSABLES.pop();
-
-                deploy_helpers.tryDispose(DISP);
+                deploy_helpers.tryDispose(
+                    this._DISPOSABLES.shift()
+                );
             }
 
             this.onDispose();

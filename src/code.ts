@@ -19,7 +19,7 @@
 /**
  * Execute code.
  * 
- * @param {any} The code to execute.
+ * @param {any} code The code to execute.
  * 
  * @return {TResult} The result of the execution.
  */

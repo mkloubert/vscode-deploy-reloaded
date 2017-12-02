@@ -75,13 +75,7 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
 
     dir = deploy_helpers.toStringSafe(dir);
 
-    const PLUGINS = ME.context.plugins.filter(pi => {
-        const TARGET_TYPE = deploy_helpers.normalizeString(target.type);
-
-        return '' === pi.__type || 
-               (TARGET_TYPE === pi.__type && pi.canList && pi.listDirectory);
-    });
-
+    const PLUGINS = ME.getListPlugins(target);
     if (PLUGINS.length < 1) {
         //TODO: translate
         await deploy_helpers.showWarningMessage(

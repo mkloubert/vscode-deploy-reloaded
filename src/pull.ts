@@ -82,13 +82,8 @@ export async function pullFilesFrom(files: string[],
     }
 
     const TARGET_NAME = deploy_targets.getTargetName(target);
-    const TARGET_TYPE = deploy_helpers.normalizeString(target.type);
 
-    const PLUGINS = ME.context.plugins.filter(pi => {
-        return '' === pi.__type || 
-               (TARGET_TYPE === pi.__type && pi.canDownload && pi.downloadFiles);
-    });
-
+    const PLUGINS = ME.getDownloadPlugins(target);
     if (PLUGINS.length < 1) {
         //TODO: translate
         await deploy_helpers.showWarningMessage(
@@ -108,15 +103,48 @@ export async function pullFilesFrom(files: string[],
     const CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
     try {
         // cancel button
+        let isCancelling = false;
         {
             cancelBtn = vscode.window.createStatusBarItem();
 
             const CANCEL_BTN_COMMAND_ID = `extension.deploy.reloaded.buttons.cancelPullFilesFrom${nextCancelBtnCommandId++}`;
-            cancelBtnCommand = vscode.commands.registerCommand(CANCEL_BTN_COMMAND_ID, () => {
-                cancelBtn.command = undefined;
-                cancelBtn.text = `Cancelling pull operation...`;  //TODO: translate
+            
+            cancelBtnCommand = vscode.commands.registerCommand(CANCEL_BTN_COMMAND_ID, async () => {
+                try {
+                    isCancelling = true;
 
-                CANCELLATION_SOURCE.cancel();
+                    cancelBtn.command = undefined;
+                    cancelBtn.text = `Cancelling pull operation...`;  //TODO: translate
+
+                    const POPUP_BTNS: deploy_contracts.MessageItemWithValue[] = [
+                        {
+                            isCloseAffordance: true,
+                            title: ME.t('no'),
+                            value: 0,
+                        },
+                        {
+                            title: ME.t('yes'),
+                            value: 1,
+                        }
+                    ];
+
+                    //TODO: translate
+                    const PRESSED_BTN = await ME.showWarningMessage.apply(
+                        null,
+                        [ <any>`You are about to cancel the pull operation from '${TARGET_NAME}'. Are you sure?` ].concat(
+                            POPUP_BTNS
+                        )
+                    );
+
+                    if (PRESSED_BTN) {
+                        if (1 === PRESSED_BTN) {
+                            CANCELLATION_SOURCE.cancel();
+                        }
+                    }
+                }
+                finally {
+                    isCancelling = false;
+                }
             });
             
             cancelBtn.command = CANCEL_BTN_COMMAND_ID;
@@ -127,7 +155,13 @@ export async function pullFilesFrom(files: string[],
             cancelBtn.show();
         }
 
+        const WAIT_WHILE_CANCELLING = async () => {
+            await deploy_helpers.waitWhile(() => isCancelling);
+        };
+
         while (PLUGINS.length > 0) {
+            await WAIT_WHILE_CANCELLING();            
+
             if (CANCELLATION_SOURCE.token.isCancellationRequested) {
                 break;
             }
@@ -135,6 +169,8 @@ export async function pullFilesFrom(files: string[],
             const PI = PLUGINS.shift();
 
             try {
+                await deploy_helpers.waitWhile(() => isCancelling);
+
                 ME.context.outputChannel.appendLine('');
 
                 // TODO: translate
@@ -157,6 +193,12 @@ export async function pullFilesFrom(files: string[],
                         SF.onBeforeDownload = async (destination?: string) => {
                             // TODO: translate
                             ME.context.outputChannel.append(`Pulling file '${f}' from '${TARGET_NAME}'... `);
+
+                            await WAIT_WHILE_CANCELLING();
+
+                            if (CANCELLATION_SOURCE.token.isCancellationRequested) {
+                                ME.context.outputChannel.appendLine(`[Canceled]`);  //TODO: translate
+                            }
                         };
                         SF.onDownloadCompleted = async (err?: any, downloadedFile?: deploy_plugins.DownloadedFile) => {
                             // TODO: translate
@@ -174,11 +216,11 @@ export async function pullFilesFrom(files: string[],
                                         );
                                     }
 
-                                    ME.context.outputChannel.appendLine(`[OK]`);
+                                    ME.context.outputChannel.appendLine(`[OK]`);  //TODO: translate
                                 }
                             }
                             catch (e) {
-                                ME.context.outputChannel.appendLine(`[ERROR: ${e}]`);
+                                ME.context.outputChannel.appendLine(`[ERROR: ${e}]`);  //TODO: translate
                             }
                         };
 

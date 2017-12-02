@@ -81,15 +81,48 @@ export async function deployFilesTo(files: string[],
     const CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
     try {
         // cancel button
+        let isCancelling = false;
         {
             cancelBtn = vscode.window.createStatusBarItem();
 
             const CANCEL_BTN_COMMAND_ID = `extension.deploy.reloaded.buttons.cancelDeployFilesTo${nextCancelBtnCommandId++}`;
-            cancelBtnCommand = vscode.commands.registerCommand(CANCEL_BTN_COMMAND_ID, () => {
-                cancelBtn.command = undefined;
-                cancelBtn.text = `Cancelling deploy operation...`;  //TODO: translate
+            
+            cancelBtnCommand = vscode.commands.registerCommand(CANCEL_BTN_COMMAND_ID, async () => {
+                try {
+                    isCancelling = true;
 
-                CANCELLATION_SOURCE.cancel();
+                    cancelBtn.command = undefined;
+                    cancelBtn.text = `Cancelling deploy operation...`;  //TODO: translate
+
+                    const POPUP_BTNS: deploy_contracts.MessageItemWithValue[] = [
+                        {
+                            isCloseAffordance: true,
+                            title: ME.t('no'),
+                            value: 0,
+                        },
+                        {
+                            title: ME.t('yes'),
+                            value: 1,
+                        }
+                    ];
+
+                    //TODO: translate
+                    const PRESSED_BTN = await ME.showWarningMessage.apply(
+                        null,
+                        [ <any>`You are about to cancel the deploy operation to '${TARGET_NAME}'. Are you sure?` ].concat(
+                            POPUP_BTNS
+                        )
+                    );
+
+                    if (PRESSED_BTN) {
+                        if (1 === PRESSED_BTN) {
+                            CANCELLATION_SOURCE.cancel();
+                        }
+                    }
+                }
+                finally {
+                    isCancelling = false;
+                }
             });
             
             cancelBtn.command = CANCEL_BTN_COMMAND_ID;
@@ -100,7 +133,13 @@ export async function deployFilesTo(files: string[],
             cancelBtn.show();
         }
 
+        const WAIT_WHILE_CANCELLING = async () => {
+            await deploy_helpers.waitWhile(() => isCancelling);
+        };
+
         while (PLUGINS.length > 0) {
+            await WAIT_WHILE_CANCELLING();
+
             if (CANCELLATION_SOURCE.token.isCancellationRequested) {
                 break;
             }
@@ -130,6 +169,12 @@ export async function deployFilesTo(files: string[],
                         LF.onBeforeUpload = async (destination?: string) => {
                             // TODO: translate
                             ME.context.outputChannel.append(`Deploying file '${f}' to '${TARGET_NAME}'... `);
+
+                            await WAIT_WHILE_CANCELLING();
+
+                            if (CANCELLATION_SOURCE.token.isCancellationRequested) {
+                                ME.context.outputChannel.appendLine(`[Canceled]`);  //TODO: translate
+                            }
                         };
                         LF.onUploadCompleted = async (err?: any) => {
                             // TODO: translate

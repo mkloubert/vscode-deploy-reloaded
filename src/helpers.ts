@@ -1150,6 +1150,26 @@ export function unlink(path: string | Buffer) {
 }
 
 /**
+ * Waits while a predicate matches.
+ * 
+ * @param {Function} predicate The predicate. 
+ */
+export async function waitWhile(predicate: () => boolean | PromiseLike<boolean>) {
+    if (!predicate) {
+        return;
+    }
+
+    let wait: boolean;
+    do
+    {
+        wait = await Promise.resolve(
+            predicate()
+        );
+    }
+    while ( toBooleanSafe(wait) )
+}
+
+/**
  * Runs a task with progress information.
  * 
  * @param {ProgressTask<TResult>} task The task to execute.

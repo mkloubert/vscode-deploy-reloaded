@@ -44,12 +44,11 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
 
     public async deleteFiles(context: deploy_plugins.DeleteContext<TestTarget>) {
         for (const F of context.files) {
-            if (context.isCancelling) {
-                return;
-            }
-            
             try {
                 await F.onBeforeDelete();
+                if (context.isCancelling) {
+                    break;
+                }
 
                 await deploy_helpers.readFile(
                     F.file,
@@ -65,12 +64,11 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
 
     public async downloadFiles(context: deploy_plugins.DownloadContext<TestTarget>) {
         for (const F of context.files) {
-            if (context.isCancelling) {
-                return;
-            }
-
             try {
                 await F.onBeforeDownload();
+                if (context.isCancelling) {
+                    break;
+                }
 
                 await deploy_helpers.readFile(
                     F.file,
@@ -187,12 +185,11 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
 
     public async uploadFiles(context: deploy_plugins.UploadContext<TestTarget>) {
         for (const F of context.files) {
-            if (context.isCancelling) {
-                return;
-            }
-            
             try {
                 await F.onBeforeUpload();
+                if (context.isCancelling) {
+                    break;
+                }
 
                 await F.read();
 
