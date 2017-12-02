@@ -4,4 +4,5 @@ out/test/**
 out/**/*.map
 src/**
 .gitignore
+package-lock.json
 tsconfig.json
