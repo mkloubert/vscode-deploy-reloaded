@@ -362,7 +362,7 @@ export class ActionLogger extends LoggerBase {
                         doLog = deploy_helpers.toBooleanSafe(
                             await Promise.resolve(
                                 LOG_FILTER(context)
-                            )
+                            ), true
                         );
                     }
                     catch (e) {
