@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.18",
+ "version": "0.0.19",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.18.0"
@@ -180,7 +180,181 @@
        "type": "array",
        "items": {
         "type": "object",
-        "properties": {}
+        "properties": {
+         "deployOnChange": {
+          "description": "Defines if 'deploy on change' should be used for that package.",
+          "oneOf": [
+           {
+            "description": "Defines if 'deploy on change' feature should be used for that packages, by using its file defintions and targets.",
+            "type": "boolean",
+            "default": false
+           },
+           {
+            "type": "array",
+            "items": {
+             "description": "The names of one or more custom targets to deploy to.",
+             "type": "string"
+            }
+           },
+           {
+            "type": "object",
+            "properties": {
+             "exclude": {
+              "description": "One or more (glob) patterns, that describe what files should be EXCLUDED.",
+              "type": "array",
+              "items": {
+               "description": "A (glob) pattern",
+               "type": "string"
+              }
+             },
+             "files": {
+              "description": "One or more (glob) patterns, that describe what files should be EXCLUDED.",
+              "type": "array",
+              "items": {
+               "description": "A (glob) pattern",
+               "type": "string"
+              },
+              "default": [
+               "**"
+              ]
+             }
+            }
+           }
+          ]
+         },
+         "deployOnSave": {
+          "description": "Defines if 'deploy on save' should be used for that package.",
+          "oneOf": [
+           {
+            "description": "Defines if 'deploy on save' feature should be used for that packages, by using its file defintions and targets.",
+            "type": "boolean",
+            "default": false
+           },
+           {
+            "type": "array",
+            "items": {
+             "description": "The names of one or more custom targets to deploy to.",
+             "type": "string"
+            }
+           },
+           {
+            "type": "object",
+            "properties": {
+             "exclude": {
+              "description": "One or more (glob) patterns, that describe what files should be EXCLUDED.",
+              "type": "array",
+              "items": {
+               "description": "A (glob) pattern",
+               "type": "string"
+              }
+             },
+             "files": {
+              "description": "One or more (glob) patterns, that describe what files should be EXCLUDED.",
+              "type": "array",
+              "items": {
+               "description": "A (glob) pattern",
+               "type": "string"
+              },
+              "default": [
+               "**"
+              ]
+             }
+            }
+           }
+          ]
+         },
+         "description": {
+          "description": "A description for that package.",
+          "type": "string"
+         },
+         "name": {
+          "description": "A (display) name for that package.",
+          "type": "string"
+         },
+         "removeOnChange": {
+          "description": "Defines if 'remove on change' should be used for that package.",
+          "oneOf": [
+           {
+            "description": "Defines if 'remove on change' feature should be used for that packages, by using its file defintions and targets.",
+            "type": "boolean",
+            "default": false
+           },
+           {
+            "type": "array",
+            "items": {
+             "description": "The names of one or more custom targets to deploy to.",
+             "type": "string"
+            }
+           },
+           {
+            "type": "object",
+            "properties": {
+             "exclude": {
+              "description": "One or more (glob) patterns, that describe what files should be EXCLUDED.",
+              "type": "array",
+              "items": {
+               "description": "A (glob) pattern",
+               "type": "string"
+              }
+             },
+             "files": {
+              "description": "One or more (glob) patterns, that describe what files should be EXCLUDED.",
+              "type": "array",
+              "items": {
+               "description": "A (glob) pattern",
+               "type": "string"
+              },
+              "default": [
+               "**"
+              ]
+             }
+            }
+           }
+          ]
+         },
+         "syncWhenOpen": {
+          "description": "Defines if 'sync when open' should be used for that package.",
+          "oneOf": [
+           {
+            "description": "Defines if 'sync when open' feature should be used for that packages, by using its file defintions and targets.",
+            "type": "boolean",
+            "default": false
+           },
+           {
+            "description": "The name of the target from where to sync.",
+            "type": "string"
+           },
+           {
+            "description": "The name of the target from where to sync.",
+            "type": "object"
+           },
+           {
+            "type": "object",
+            "properties": {
+             "exclude": {
+              "description": "One or more (glob) patterns, that describe what files should be EXCLUDED.",
+              "type": "array",
+              "items": {
+               "description": "A (glob) pattern",
+               "type": "string"
+              }
+             },
+             "files": {
+              "description": "One or more (glob) patterns, that describe what files should be EXCLUDED.",
+              "type": "array",
+              "items": {
+               "description": "A (glob) pattern",
+               "type": "string"
+              },
+              "default": [
+               "**"
+              ]
+             }
+            }
+           }
+          ]
+         }
+        }
        }
       },
       "removeOnChange": {

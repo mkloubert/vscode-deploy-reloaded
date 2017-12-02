@@ -24,6 +24,9 @@ import * as Enumerable from 'node-enumerable';
 import * as Path from 'path';
 
 
+/**
+ * Types of an 'auto deploy' setting value.
+ */
 export type AutoDeploySettings = boolean | string | string[] | deploy_contracts.FileFilter;
 
 /**
@@ -120,6 +123,12 @@ export async function autoDeployFile(file: string,
 
             if (false === targetNames) {
                 continue;
+            }
+
+            if (!filter) {
+                filter = {
+                    files: '**'
+                };
             }
 
             const MATCHING_TARGETS = deploy_targets.getTargetsByName(
