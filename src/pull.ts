@@ -20,6 +20,7 @@ import * as deploy_helpers from './helpers';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
 import * as deploy_targets from './targets';
+import * as deploy_transformers from './transformers';
 import * as deploy_workspaces from './workspaces';
 import * as vscode from 'vscode';
 
@@ -91,6 +92,12 @@ export async function pullFilesFrom(files: string[],
         );
 
         return;
+    }
+
+    const TRANSFORMER = await ME.loadDataTransformer(target);
+    if (false === TRANSFORMER) {
+        // TODO: translate
+        throw new Error(`Could not load data transformer for target '${TARGET_NAME}'!`);
     }
 
     let cancelBtn: vscode.StatusBarItem;
@@ -207,12 +214,28 @@ export async function pullFilesFrom(files: string[],
                                     throw err;
                                 }
                                 else {
+                                    let dataToWrite: Buffer;
+
                                     if (downloadedFile) {
+                                        dataToWrite = await Promise.resolve(
+                                            downloadedFile.read()
+                                        );
+
+                                        if (TRANSFORMER) {
+                                            const CONTEXT: deploy_transformers.DataTransformerContext = {
+                                                mode: deploy_transformers.DataTransformerMode.Restore,
+                                                options: this.transformerOptions,
+                                            };
+
+                                            dataToWrite = await TRANSFORMER(
+                                                dataToWrite, CONTEXT
+                                            );
+                                        }
+                                    }
+
+                                    if (dataToWrite) {
                                         await deploy_helpers.writeFile(
-                                            f,
-                                            await Promise.resolve(
-                                                downloadedFile.read()
-                                            ),
+                                            f, dataToWrite
                                         );
                                     }
 

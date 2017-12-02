@@ -19,6 +19,7 @@ import * as deploy_contracts from './contracts';
 import * as deploy_files from './files';
 import * as deploy_helpers from './helpers';
 import * as deploy_targets from './targets';
+import * as deploy_transformers from './transformers';
 import * as deploy_workspaces from './workspaces';
 import * as Events from 'events';
 import * as vscode from 'vscode';
@@ -333,7 +334,41 @@ export abstract class FileToUploadBase implements FileToUpload {
     }
 
     /** @inheritdoc */
-    public abstract async read();
+    public async read() {
+        let data = await this.onRead();
+
+        if (this.transformer) {
+            const CONTEXT: deploy_transformers.DataTransformerContext = {
+                mode: deploy_transformers.DataTransformerMode.Transform,
+                options: this.transformerOptions,
+            };
+            
+            data = await Promise.resolve(
+                this.transformer(
+                    data, CONTEXT
+                )
+            );
+        }
+
+        return data;
+    }
+
+    /**
+     * The logic for the 'read()' method.
+     * 
+     * @return {Promise<Buffer>} The promise with the read data.
+     */
+    protected abstract async onRead();
+
+    /**
+     * The data transformer.
+     */
+    public transformer: deploy_transformers.DataTransformer;
+
+    /**
+     * The options for the data transformer.
+     */
+    public transformerOptions: any;
 }
 
 /**
@@ -354,8 +389,8 @@ export class LocalFileToUpload extends FileToUploadBase {
     }
 
     /** @inheritdoc */
-    public async read() {
-        return deploy_helpers.readFile(this.file);
+    protected async onRead() {
+        return await deploy_helpers.readFile(this.file);
     }
 }
 

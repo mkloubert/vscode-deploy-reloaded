@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.20",
+ "version": "0.0.21",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.18.0"
@@ -100,6 +100,7 @@
   "configuration": {
    "properties": {
     "deploy.reloaded": {
+     "type": "object",
      "scope": "resource",
      "properties": {
       "clearOutputOnStartup": {
@@ -361,6 +362,21 @@
        "description": "Activates or deactivates 'remove on change' feature for all packages.",
        "type": "boolean",
        "default": true
+      },
+      "runBuildTaskOnStartup": {
+       "description": "Indicates if build task should be run on startup or not.",
+       "oneOf": [
+        {
+         "type": "boolean",
+         "description": "Indicates if build task should be run on startup or not.",
+         "default": false
+        },
+        {
+         "type": "integer",
+         "description": "Defines the number of milliseconds to wait, before the build task is run.",
+         "minimum": 0
+        }
+       ]
       },
       "syncWhenOpen": {
        "description": "Activates or deactivates 'sync when open' feature for all packages.",

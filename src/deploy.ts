@@ -71,6 +71,12 @@ export async function deployFilesTo(files: string[],
         return;
     }
 
+    const TRANSFORMER = await ME.loadDataTransformer(target);
+    if (false === TRANSFORMER) {
+        // TODO: translate
+        throw new Error(`Could not load data transformer for target '${TARGET_NAME}'!`);
+    }
+
     const SYNC_WHEN_STATES = ME.syncWhenOpenStates;
 
     let cancelBtn: vscode.StatusBarItem;
@@ -156,46 +162,51 @@ export async function deployFilesTo(files: string[],
                     ME.context.outputChannel.appendLine(`Start deploying files to '${TARGET_NAME}'...`);
                 }
 
+                const FILES_TO_UPLOAD: deploy_plugins.LocalFileToUpload[] = [];
+                for (const F of files) {
+                    const NAME_AND_PATH = ME.toNameAndPath(F);
+                    if (false === NAME_AND_PATH) {
+                        // TODO: translate
+                        ME.context.outputChannel.append(`Cannot detect path information for file '${F}'!`);
+                        continue;
+                    }
+
+                    const LF = new deploy_plugins.LocalFileToUpload(ME, F, NAME_AND_PATH);
+                    LF.onBeforeUpload = async (destination?: string) => {
+                        // TODO: translate
+                        ME.context.outputChannel.append(`Deploying file '${F}' to '${TARGET_NAME}'... `);
+
+                        await WAIT_WHILE_CANCELLING();
+
+                        if (CANCELLATION_SOURCE.token.isCancellationRequested) {
+                            ME.context.outputChannel.appendLine(`[Canceled]`);  //TODO: translate
+                        }
+                    };
+                    LF.onUploadCompleted = async (err?: any) => {
+                        // TODO: translate
+                        if (err) {
+                            ME.context.outputChannel.appendLine(`[ERROR: ${err}]`);
+                        }
+                        else {
+                            const SYNC_WHEN_OPEN_ID = ME.getSyncWhenOpenKey(target);
+                            if (false !== SYNC_WHEN_OPEN_ID) {
+                                // reset 'sync when open' state
+                                delete SYNC_WHEN_STATES[SYNC_WHEN_OPEN_ID];
+                            }
+
+                            ME.context.outputChannel.appendLine(`[OK]`);
+                        }
+                    };
+
+                    LF.transformer = TRANSFORMER;
+                    LF.transformerOptions = deploy_helpers.cloneObject(target.transformerOptions);
+
+                    FILES_TO_UPLOAD.push(LF);
+                }
+
                 const CTX: deploy_plugins.UploadContext = {
                     cancellationToken: CANCELLATION_SOURCE.token,
-                    files: files.map(f => {
-                        const NAME_AND_PATH = ME.toNameAndPath(f);
-                        if (false === NAME_AND_PATH) {
-                            // TODO: translate
-                            ME.context.outputChannel.append(`Cannot detect path information for file '${f}'!`);
-
-                            return null;
-                        }
-
-                        const LF = new deploy_plugins.LocalFileToUpload(ME, f, NAME_AND_PATH);
-                        LF.onBeforeUpload = async (destination?: string) => {
-                            // TODO: translate
-                            ME.context.outputChannel.append(`Deploying file '${f}' to '${TARGET_NAME}'... `);
-
-                            await WAIT_WHILE_CANCELLING();
-
-                            if (CANCELLATION_SOURCE.token.isCancellationRequested) {
-                                ME.context.outputChannel.appendLine(`[Canceled]`);  //TODO: translate
-                            }
-                        };
-                        LF.onUploadCompleted = async (err?: any) => {
-                            // TODO: translate
-                            if (err) {
-                                ME.context.outputChannel.appendLine(`[ERROR: ${err}]`);
-                            }
-                            else {
-                                const SYNC_WHEN_OPEN_ID = ME.getSyncWhenOpenKey(target);
-                                if (false !== SYNC_WHEN_OPEN_ID) {
-                                    // reset 'sync when open' state
-                                    delete SYNC_WHEN_STATES[SYNC_WHEN_OPEN_ID];
-                                }
-
-                                ME.context.outputChannel.appendLine(`[OK]`);
-                            }
-                        };
-
-                        return LF;
-                    }).filter(f => null !== f),
+                    files: FILES_TO_UPLOAD,
                     isCancelling: undefined,
                     target: target,
                 };

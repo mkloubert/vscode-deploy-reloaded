@@ -17,6 +17,7 @@
 
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
+import * as deploy_transformers from './transformers';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
 import * as vscode from 'vscode';
@@ -25,7 +26,8 @@ import * as vscode from 'vscode';
 /**
  * A target.
  */
-export interface Target extends deploy_contracts.ConditionalItem,
+export interface Target extends deploy_transformers.CanTransformData,
+                                deploy_contracts.ConditionalItem,
                                 deploy_contracts.WithOptionalName,
                                 deploy_workspaces.WorkspaceItemFromSettings
 {

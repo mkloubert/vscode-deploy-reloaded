@@ -28,6 +28,7 @@ import * as deploy_plugins from './plugins';
 import * as deploy_pull from './pull';
 import * as deploy_sync from './sync';
 import * as deploy_targets from './targets';
+import * as deploy_transformers from './transformers';
 import * as deploy_tasks from './tasks';
 import * as Enumerable from 'node-enumerable';
 import * as Glob from 'glob';
@@ -142,7 +143,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     /**
      * Stores the current configuration.
      */
-    protected _config: WorkspaceSettings;
+    protected _config: deploy_contracts.Configuration;
     /**
      * Stores the source of the configuration data.
      */
@@ -223,7 +224,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     /**
      * Gets the current configuration.
      */
-    public get config(): WorkspaceSettings {
+    public get config(): deploy_contracts.Configuration {
         return this._config;
     }
 
@@ -831,6 +832,47 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     }
 
     /**
+     * Loads a data transformer for an object.
+     * 
+     * @param {deploy_transformers.CanTransformData} transformable An object that can transform data.
+     * 
+     * @return {Promise<deploy_transformers.DataTransformer|false>} The loaded transformer or (false) if script could not be loaded.
+     */
+    public async loadDataTransformer(transformable: deploy_transformers.CanTransformData): Promise<deploy_transformers.DataTransformer | false> {
+        const ME = this;
+        
+        if (!transformable) {
+            return null;
+        }
+        
+        const SCRIPT = deploy_helpers.toStringSafe(transformable.transformer);
+        if (deploy_helpers.isEmptyString(SCRIPT)) {
+            return;
+        }
+
+        const SCRIPT_FILE = await ME.getExistingSettingPath(SCRIPT);
+        if (false === SCRIPT_FILE) {
+            return false;
+        }
+
+        delete require.cache[SCRIPT_FILE];
+        const SCRIPT_MODULE: deploy_transformers.DataTransformerModule = require(SCRIPT_FILE);
+
+        if (SCRIPT_MODULE) {
+            const TRANSFORMER = SCRIPT_MODULE.transform;
+            if (TRANSFORMER) {
+                return async function() {
+                    return await TRANSFORMER.apply(SCRIPT_MODULE,
+                                                   arguments);
+                };
+            }
+            else {
+                return TRANSFORMER;
+            }
+        }
+    }
+
+    /**
      * Is invoked when the active text editor changed.
      * 
      * @param {vscode.TextEditor} editor The new editor.
@@ -1018,35 +1060,36 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             ME._isDeployOnChangeFreezed = false;
             ME._isRemoveOnChangeFreezed = false;
 
-            let loadedCfg: WorkspaceSettings = vscode.workspace.getConfiguration(ME.configSource.section,
-                                                                                 ME.configSource.resource) || <any>{};
+            let loadedCfg: deploy_contracts.Configuration = vscode.workspace.getConfiguration(ME.configSource.section,
+                                                                                              ME.configSource.resource) || <any>{};
+            loadedCfg = deploy_helpers.cloneObjectWithoutFunctions(loadedCfg);
 
             // imports
             try {
                 let allImports = deploy_helpers.asArray(loadedCfg.imports);
 
-                await deploy_helpers.forEachAsync(allImports, async (ie) => {
+                for (const IE of allImports) {
                     let importFile: string;
 
-                    if (deploy_helpers.isObject<deploy_contracts.Import>(ie)) {
-                        const CI = deploy_helpers.filterConditionalItems(ie);
+                    if (deploy_helpers.isObject<deploy_contracts.Import>(IE)) {
+                        const CI = deploy_helpers.filterConditionalItems(IE);
                         if (1 === CI.length) {
                             importFile = deploy_helpers.toStringSafe(CI[0].from);
                         }
                     }
                     else {
-                        importFile = deploy_helpers.toStringSafe(ie);
+                        importFile = deploy_helpers.toStringSafe(IE);
                     }
 
                     if (deploy_helpers.isEmptyString(importFile)) {
-                        return;
+                        continue;
                     }
 
                     const DOWNLOAD_SOURCE: DownloadFromSettingsUriOutValue = {};
                     const DATA = await ME.downloadFromSettingsUri(vscode.Uri.parse(importFile));
 
                     if (!Buffer.isBuffer(DATA)) {
-                        return;
+                        continue;
                     }
 
                     deploy_helpers.asArray(JSON.parse(DATA.toString('utf8')))
@@ -1059,7 +1102,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
                                       loadedCfg = MergeDeep(loadedCfg, SUB_SUBSETTINGS);
                                   });
-                });
+                }
             }
             finally {
                 (<any>loadedCfg).packages = deploy_helpers.mergeByName(loadedCfg.packages);

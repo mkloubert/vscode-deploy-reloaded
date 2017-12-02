@@ -109,6 +109,11 @@ export interface Configuration {
      */
     readonly removeOnChange?: boolean;
     /**
+     * Run build task on startup or define the wait time, in milliseconds, after
+     * the build task should be run after startup.
+     */
+    readonly runBuildTaskOnStartup?: boolean | number;
+    /**
      * Activates or deactivates "sync when open" feature.
      */
     readonly syncWhenOpen?: boolean;

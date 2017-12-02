@@ -193,6 +193,42 @@ export function cloneObject<T>(val: T): T {
 }
 
 /**
+ * Clones an object / value without functions deep.
+ * 
+ * @param {T} val The value / object to clone.
+ * 
+ * @return {T} The cloned value / object.
+ */
+export function cloneObjectWithoutFunctions<T>(val: T): T {
+    if (!val) {
+        return val;
+    }
+
+    const CLONED_OBJ: T = <any>{};
+    for (let P in val) {
+        let valueToSet: any = val[P];
+        if (isFunc(valueToSet)) {
+            continue;
+        }
+
+        if (Array.isArray(valueToSet)) {
+            let newArray = [];
+            for (const ITEM of valueToSet) {
+                newArray.push(
+                    cloneObject(ITEM)
+                );
+            }
+
+            valueToSet = newArray;
+        }
+
+        CLONED_OBJ[P] = valueToSet;
+    }
+
+    return CLONED_OBJ;
+}
+
+/**
  * Compares two values for a sort operation.
  * 
  * @param {T} x The left value.
@@ -672,6 +708,17 @@ export function invokeForTempFile<TResult = any>(action: (path: string) => TResu
  */
 export function isBool(val: any): val is boolean {
     return 'boolean' === typeof val;
+}
+
+/**
+ * Checks if a value is a function or not.
+ * 
+ * @param {any} val The value to check.
+ * 
+ * @return {boolean} Is function or not. 
+ */
+export function isFunc<TFunc extends Function = Function>(val: any): val is TFunc {
+    return 'function' === typeof val;
 }
 
 /**
