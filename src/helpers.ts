@@ -958,6 +958,10 @@ export async function sleep(ms = 1000) {
  * @return {boolean} The converted value.
  */
 export function toBooleanSafe(val: any, defaultValue: any = false): boolean {
+    if ('boolean' === typeof val) {
+        return val;
+    }
+
     if (isNullOrUndefined(val)) {
         return defaultValue;
     }
@@ -1030,7 +1034,7 @@ export function toStringSafe(str: any, defValue: any = ''): string {
         deploy_log.CONSOLE
                   .trace(e, 'helpers.toStringSafe()');
 
-        return '';
+        return typeof str;
     }
 }
 

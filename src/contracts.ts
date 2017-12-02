@@ -77,11 +77,15 @@ export interface ConfigSource {
  */
 export interface Configuration {
     /**
-     * Activates or deactivates "deploy on change" feature for all packages.
+     * Clear output on after config has been reloaded or not.
+     */
+    readonly clearOutputOnStartup?: boolean;
+    /**
+     * Activates or deactivates 'deploy on change' feature for all packages.
      */
     readonly deployOnChange?: boolean;
     /**
-     * Activates or deactivates "deploy on save" feature for all packages.
+     * Activates or deactivates 'deploy on save' feature for all packages.
      */
     readonly deployOnSave?: boolean;
     /**
@@ -89,9 +93,13 @@ export interface Configuration {
      */
     readonly imports?: ImportType | ImportType[];
     /**
-     * The ID of the language to use (e.g. 'en', 'de')
+     * The custom ID of the language to use (e.g. 'en', 'de').
      */
     readonly language?: string;
+    /**
+     * Open the output window after config has been reloaded or not.
+     */
+    readonly openOutputOnStartup?: boolean;
     /**
      * One or more package.
      */
@@ -154,10 +162,6 @@ export interface FileFilter {
  * An import entry.
  */
 export interface Import extends ConditionalItem {
-    /**
-     * An optional description for the entry.
-     */
-    description?: string;
     /**
      * Gets the source.
      */

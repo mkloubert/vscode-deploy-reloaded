@@ -1150,6 +1150,13 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
                     ME._isRemoveOnChangeFreezed = false;
                 }
+
+                if (deploy_helpers.toBooleanSafe(loadedCfg.clearOutputOnStartup)) {
+                    ME.context.outputChannel.clear();
+                }
+                if (deploy_helpers.toBooleanSafe(loadedCfg.openOutputOnStartup, true)) {
+                    ME.context.outputChannel.show();
+                }
             };
         }
         catch (e) {
@@ -1228,13 +1235,15 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     /**
      * Promise (and safe) version of 'vscode.window.showErrorMessage()' function.
      * 
-     * @param {string} msg The message to display.
+     * @param {any} msg The message to display.
      * @param {TItem[]} [items] The optional items.
      * 
      * @return {Promise<TItem>} The promise with the selected item.
      */
-    public async showErrorMessage<TItem extends vscode.MessageItem = vscode.MessageItem>(msg: string, ...items: TItem[]): Promise<TItem> {
+    public async showErrorMessage<TItem extends vscode.MessageItem = vscode.MessageItem>(msg: any, ...items: TItem[]): Promise<TItem> {
         try {
+            msg = deploy_helpers.toStringSafe(msg);
+
             return await vscode.window.showErrorMessage
                                       .apply(null, [ <any>`[vscode-deploy-reloaded]::[${this.name}] ${msg}`.trim() ].concat(items));
         }
@@ -1247,13 +1256,15 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     /**
      * Promise (and safe) version of 'vscode.window.showWarningMessage()' function.
      * 
-     * @param {string} msg The message to display.
+     * @param {any} msg The message to display.
      * @param {TItem[]} [items] The optional items.
      * 
      * @return {Promise<TItem>} The promise with the selected item.
      */
-    public async showWarningMessage<TItem extends vscode.MessageItem = vscode.MessageItem>(msg: string, ...items: TItem[]): Promise<TItem> {
+    public async showWarningMessage<TItem extends vscode.MessageItem = vscode.MessageItem>(msg: any, ...items: TItem[]): Promise<TItem> {
         try {
+            msg = deploy_helpers.toStringSafe(msg);
+
             return await vscode.window.showWarningMessage
                                       .apply(null, [ <any>`[vscode-deploy-reloaded]::[${this.name}] ${msg}`.trim() ].concat(items));
         }

@@ -28,6 +28,12 @@ import * as Path from 'path';
 import * as vscode from 'vscode';
 
 
+interface TargetAndLastModifiedTime {
+    target: deploy_targets.Target;
+    time: Moment.Moment;
+};
+
+
 /**
  * Synchronizes a document after it has been opened.
  * 
@@ -134,18 +140,15 @@ export async function syncDocumentWhenOpen(doc: vscode.TextDocument) {
         return;
     }
 
-    interface TargetAndLastModifiedTime {
-        target: deploy_targets.Target;
-        time: Moment.Moment;
-    };
-
     let targetWithNewestFile: TargetAndLastModifiedTime;
 
     await deploy_helpers.forEachAsync(Enumerable.from(TARGETS)
                                                 .distinct(true),
             async (t) => {
                 const SHOW_ERROR = (err: any) => {
-                    //TODO
+                    ME.showErrorMessage(
+                        err
+                    );
                 };
 
                 try {
@@ -165,13 +168,23 @@ export async function syncDocumentWhenOpen(doc: vscode.TextDocument) {
                                 workspace: ME,
                             };
 
+                            // CTX.isCancelling
+                            Object.defineProperty(CTX, 'isCancelling', {
+                                enumerable: true,
+
+                                get: () => {
+                                    return CTX.cancellationToken.isCancellationRequested;
+                                }
+                            });
+
                             const LIST = await PI.listDirectory(CTX);
                             if (!LIST) {
                                 continue;
                             }
 
                             const MATCHING_FILES = Enumerable.from(LIST.files).where(f => {
-                                return FILENAME === deploy_helpers.toStringSafe(f.name);
+                                return deploy_helpers.isObject(f) &&
+                                       FILENAME === deploy_helpers.toStringSafe(f.name);
                             }).toArray();
 
                             let allFailed: boolean | null = null;
@@ -219,7 +232,7 @@ export async function syncDocumentWhenOpen(doc: vscode.TextDocument) {
                                 }
                                 catch (e) {
                                     deploy_log.CONSOLE
-                                                .log(e, 'sync.syncDocumentWhenOpen()');
+                                              .log(e, 'sync.syncDocumentWhenOpen()');
                                 }
                             }
 
