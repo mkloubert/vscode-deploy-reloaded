@@ -26,11 +26,14 @@ import * as deploy_objects from './objects';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
 import * as deploy_pull from './pull';
+import * as deploy_sync from './sync';
 import * as deploy_targets from './targets';
+import * as deploy_tasks from './tasks';
 import * as Enumerable from 'node-enumerable';
 import * as Glob from 'glob';
 import * as i18next from 'i18next';
 const MergeDeep = require('merge-deep');
+import * as Moment from 'moment';
 import * as OS from 'os';
 import * as Path from 'path';
 import * as vscode from 'vscode';
@@ -45,6 +48,11 @@ export interface DownloadFromSettingsUriOutValue {
      */
     source?: 'local';
 }
+
+/**
+ * Object that stores the states for 'sync when open'.
+ */
+export type SyncWhenOpenStates = { [ key: string ]: Moment.Moment };
 
 /**
  * A workspace context.
@@ -155,6 +163,18 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Stores if 'remove on change' feature is freezed or not.
      */
     protected _isRemoveOnChangeFreezed = false;
+    /**
+     * Stores the last timestamp of configuration update.
+     */
+    protected _lastConfigUpdate: Moment.Moment;
+    /**
+     * Stores the start time.
+     */
+    protected _startTime: Moment.Moment;
+    /**
+     * Stores the states for 'sync when open'.
+     */
+    protected _syncWhenOpenStates: SyncWhenOpenStates;
     /**
      * The current translation function.
      */
@@ -529,6 +549,28 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     }
 
     /**
+     * Returns the state key for 'sync when open'.
+     * 
+     * @param {deploy_targets.Target} target The target.
+     * 
+     * @return {string|false} The key or (false) when failed.
+     */
+    public getSyncWhenOpenKey(target: deploy_targets.Target): string | false {
+        if (!target) {
+            return;
+        }
+        
+        if (!this.canBeHandledByMe(target)) {
+            return false;
+        }
+
+        const TARGET_NAME = deploy_targets.getTargetName(target);
+        
+        return `${target.__id}\n` + 
+               `${deploy_helpers.normalizeString(TARGET_NAME)}`;
+    }
+
+    /**
      * Returns the ID of a target.
      * 
      * @param {deploy_targets.Target} target The target.
@@ -703,7 +745,9 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
         await ME.reloadConfiguration();
 
+        ME._startTime = Moment();
         ME._isInitialized = true;
+
         return true;
     }
 
@@ -766,13 +810,22 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     public get isRemoveOnChangeFreezed() {
         return this._isRemoveOnChangeFreezed;
     }
+
+    /**
+     * Gets the last config update timestamp.
+     */
+    public get lastConfigUpdate(): Moment.Moment {
+        return this._lastConfigUpdate;
+    }
     
     /**
      * List the root directory on a target.
      * 
-     * @param {deploy_targets.Target} target The target from where to list.
+     * @param {deploy_targets.Target} target The target from where to get the list.
+     * 
+     * @return {Promise<deploy_plugins.ListDirectoryResult<TTarget>>} The promise with the result.
      */
-    public async listDirectory(target: deploy_targets.Target) {
+    public async listDirectory<TTarget extends deploy_targets.Target = deploy_targets.Target>(target: TTarget): Promise<deploy_plugins.ListDirectoryResult<TTarget>> {
         return await deploy_list.listDirectory
                                 .apply(this, [ target ]);
     }
@@ -785,6 +838,30 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     public async onDidChangeActiveTextEditor(editor: vscode.TextEditor) {
         if (!this.canDoAutoOperations) {
             return;
+        }
+
+        if (editor) {
+            const DOC = editor.document;
+
+            if (DOC) {
+                // sync when open
+                if (deploy_helpers.toBooleanSafe(this.config.syncWhenOpen, true)) {
+                    try {
+                        const FILE_TO_CHECK = DOC.fileName;
+
+                        if (!deploy_helpers.isEmptyString(FILE_TO_CHECK)) {
+                            if (!this.isInSettingsFolder(FILE_TO_CHECK)) {
+                                await deploy_sync.syncDocumentWhenOpen
+                                                 .apply(this, [ editor.document ]);
+                            }
+                        }
+                    }
+                    catch (e) {
+                        deploy_log.CONSOLE
+                                .trace(e, 'workspaces.Workspace.onDidChangeActiveTextEditor(1)');
+                    }
+                }
+            }
         }
     }
 
@@ -863,6 +940,12 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         }
         
         await this.deployOnSave(e.fileName);
+    }
+
+
+    /** @inheritdoc */
+    protected onDispose() {
+        this._syncWhenOpenStates = null;
     }
 
     /**
@@ -987,6 +1070,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
             const OLD_CFG = ME._config;
             ME._config = loadedCfg;
+            ME._lastConfigUpdate = Moment();
+
             try {
                 ME.emit(deploy_contracts.EVENT_CONFIG_RELOADED,
                         ME, loadedCfg, OLD_CFG);
@@ -1006,6 +1091,18 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             }
 
             finalizer = async () => {
+                ME._syncWhenOpenStates = {};
+
+                // runBuildTaskOnStartup
+                try {
+                    await deploy_tasks.runBuildTaskOnStartup
+                                      .apply(ME, []);
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'workspaces.reloadConfiguration(7)');
+                }
+
                 // timeToWaitBeforeActivateDeployOnChange
                 try {
                     const TIME_TO_WAIT_BEFORE_ACTIVATE_DEPLOY_ON_CHANGE = parseInt(
@@ -1036,7 +1133,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                         deploy_helpers.toStringSafe(loadedCfg.timeToWaitBeforeActivateRemoveOnChange).trim()
                     );
                     if (!isNaN(TIME_TO_WAIT_BEFORE_ACTIVATE_REMOVE_ON_CHANGE)) {
-                        // deactivate 'deploy on change'
+                        // deactivate 'remove on change'
                         // for a while
 
                         ME._isRemoveOnChangeFreezed = true;
@@ -1164,6 +1261,20 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             deploy_log.CONSOLE
                       .trace(e, 'workspaces.Workspace.showWarningMessage()');
         }
+    }
+
+    /**
+     * Gets the start time.
+     */
+    public get startTime(): Moment.Moment {
+        return this._startTime;
+    }
+
+    /**
+     * Gets the states for 'sync when open'.
+     */
+    public get syncWhenOpenStates(): SyncWhenOpenStates {
+        return this._syncWhenOpenStates;
     }
 
     /** @inheritdoc */

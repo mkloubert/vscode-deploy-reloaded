@@ -71,6 +71,8 @@ export async function deployFilesTo(files: string[],
         return;
     }
 
+    const SYNC_WHEN_STATES = ME.syncWhenOpenStates;
+
     let cancelBtn: vscode.StatusBarItem;
     let cancelBtnCommand: vscode.Disposable;
     const DISPOSE_CANCEL_BTN = () => {
@@ -182,6 +184,12 @@ export async function deployFilesTo(files: string[],
                                 ME.context.outputChannel.appendLine(`[ERROR: ${err}]`);
                             }
                             else {
+                                const SYNC_WHEN_OPEN_ID = ME.getSyncWhenOpenKey(target);
+                                if (false !== SYNC_WHEN_OPEN_ID) {
+                                    // reset 'sync when open' state
+                                    delete SYNC_WHEN_STATES[SYNC_WHEN_OPEN_ID];
+                                }
+
                                 ME.context.outputChannel.appendLine(`[OK]`);
                             }
                         };

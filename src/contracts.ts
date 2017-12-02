@@ -101,6 +101,10 @@ export interface Configuration {
      */
     readonly removeOnChange?: boolean;
     /**
+     * Activates or deactivates "sync when open" feature.
+     */
+    readonly syncWhenOpen?: boolean;
+    /**
      * One or more target.
      */
     readonly targets?: deploy_targets.Target | deploy_targets.Target[];

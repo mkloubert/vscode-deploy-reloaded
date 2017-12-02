@@ -166,19 +166,28 @@ async function onDidChangeActiveTextEditor(editor: vscode.TextEditor) {
         return;
     }
 
+    const NEW_ACTIVE_WORKSPACES: deploy_workspaces.Workspace[] = [];
     try {
-        activeWorkspaces = [];
-
         try {
             await deploy_helpers.forEachAsync(WORKSPACES, async (ws) => {
                 try {
-                    const DOC = editor.document;
-                    if (!DOC) {
-                        return;
+                    let doc: vscode.TextDocument;
+                    if (editor) {
+                        doc = editor.document;
                     }
 
-                    if (Path.resolve(DOC.fileName).startsWith( Path.resolve(ws.folder.uri.fsPath) )) {
-                        activeWorkspaces.push(ws);
+                    let isForWorkspace = !doc;
+                    if (!isForWorkspace) {
+                        isForWorkspace = deploy_helpers.isEmptyString(doc.fileName);
+                        if (!isForWorkspace) {
+                            isForWorkspace = ws.isPathOf(doc.fileName);
+                        }
+                    }
+
+                    if (!editor || isForWorkspace) {
+                        if (doc) {
+                            NEW_ACTIVE_WORKSPACES.push(ws);
+                        }
 
                         await ws.onDidChangeActiveTextEditor(editor);
                     }
@@ -196,6 +205,9 @@ async function onDidChangeActiveTextEditor(editor: vscode.TextEditor) {
     catch (e) {
         deploy_log.CONSOLE
                   .err(e, 'extension.onDidChangeActiveTextEditor(1)');
+    }
+    finally {
+        activeWorkspaces = NEW_ACTIVE_WORKSPACES;
     }
 }
 

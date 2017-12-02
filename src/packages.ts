@@ -50,6 +50,16 @@ export interface Package extends deploy_contracts.ConditionalItem,
      * Deletes a file of this package, if it has been deleted from a workspace.
      */
     readonly removeOnChange?: AutoDeploySettings;
+    /**
+     * Activates or deactivates "sync when open" feature for that package.
+     */
+    readonly syncWhenOpen?: boolean | string | SyncWhenOpenSetting;
+}
+
+/**
+ * Stores settings for 'sync when open' feature.
+ */
+export interface SyncWhenOpenSetting extends deploy_contracts.FileFilter {
 }
 
 

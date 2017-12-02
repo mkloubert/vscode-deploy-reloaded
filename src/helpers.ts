@@ -24,6 +24,7 @@ import * as Glob from 'glob';
 const MergeDeep = require('merge-deep');
 import * as MimeTypes from 'mime-types';
 import * as Minimatch from 'minimatch';
+import * as Moment from 'moment';
 import * as Path from 'path';
 import * as TMP from 'tmp';
 import * as vscode from 'vscode';
@@ -112,6 +113,37 @@ export function asArray<T>(val: T | T[], removeEmpty = true): T[] {
 
         return true;
     });
+}
+
+/**
+ * Returns a value as UTC Moment instance.
+ * 
+ * @param {Moment.Moment} val The input value.
+ * 
+ * @return {Moment.Moment} The output value.
+ */
+export function asUTC(val: any): Moment.Moment {
+    let utcTime: Moment.Moment;
+    
+    if (!isNullOrUndefined(val)) {
+        if (Moment.isMoment(val)) {
+            utcTime = val;
+        }
+        else if (Moment.isDate(val)) {
+            utcTime = Moment(val);
+        }
+        else {
+            utcTime = Moment( toStringSafe(val) );
+        }
+    }
+
+    if (utcTime) {
+        if (!utcTime.isUTC()) {
+            utcTime = utcTime.utc();
+        }
+    }
+
+    return utcTime;
 }
 
 /**

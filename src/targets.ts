@@ -99,7 +99,7 @@ export function getTargetsByName(targetNames: string | string[],
             return TARGET_NAME === tn;
         });
 
-        if (MATCHING_TARGETS.length > -1) {
+        if (MATCHING_TARGETS.length > 0) {
             EXISTING_TARGETS.push
                             .apply(EXISTING_TARGETS, MATCHING_TARGETS);
         }
