@@ -193,6 +193,42 @@ export function cloneObject<T>(val: T): T {
 }
 
 /**
+ * Clones an value flat.
+ * 
+ * @param {T} val The object to clone.
+ * @param {boolean} [useNewObjectForFunctions] Use new object as thisArgs for functions or not.
+ * 
+ * @return {T} The cloned object.
+ */
+export function cloneObjectFlat<T>(val: T,
+                                   useNewObjectForFunctions = true): T {
+    useNewObjectForFunctions = toBooleanSafe(useNewObjectForFunctions, true);
+
+    if (!val) {
+        return val;
+    }
+
+    const CLONED_OBJ: T = <any>{};
+
+    const THIS_ARGS: any = useNewObjectForFunctions ? CLONED_OBJ : val;
+
+    for (let P in val) {
+        let valueToSet: any = val[P];
+        if (isFunc(valueToSet)) {
+            const FUNC = valueToSet;
+            
+            valueToSet = function() {
+                return FUNC.apply(THIS_ARGS, arguments);
+            };
+        }
+
+        CLONED_OBJ[P] = valueToSet;
+    }
+
+    return CLONED_OBJ;
+}
+
+/**
  * Clones an object / value without functions deep.
  * 
  * @param {T} val The value / object to clone.

@@ -143,7 +143,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     /**
      * Stores the current configuration.
      */
-    protected _config: deploy_contracts.Configuration;
+    protected _config: WorkspaceSettings;
     /**
      * Stores the source of the configuration data.
      */
@@ -224,7 +224,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     /**
      * Gets the current configuration.
      */
-    public get config(): deploy_contracts.Configuration {
+    public get config(): WorkspaceSettings {
         return this._config;
     }
 
@@ -1060,9 +1060,9 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             ME._isDeployOnChangeFreezed = false;
             ME._isRemoveOnChangeFreezed = false;
 
-            let loadedCfg: deploy_contracts.Configuration = vscode.workspace.getConfiguration(ME.configSource.section,
-                                                                                              ME.configSource.resource) || <any>{};
-            loadedCfg = deploy_helpers.cloneObjectWithoutFunctions(loadedCfg);
+            let loadedCfg: WorkspaceSettings = vscode.workspace.getConfiguration(ME.configSource.section,
+                                                                                 ME.configSource.resource) || <any>{};
+            loadedCfg = deploy_helpers.cloneObjectFlat(loadedCfg);
 
             // imports
             try {
