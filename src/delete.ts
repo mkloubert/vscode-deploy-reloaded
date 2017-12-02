@@ -431,100 +431,25 @@ export async function removeOnChange(file: string) {
 
         const KNOWN_TARGETS = ME.getTargets();
 
-        const TARGETS: deploy_targets.Target[] = [];
-        for (let pkg of ME.getPackages()) {
-            const REMOVE_ON_CHANGE = pkg.removeOnChange;
+        const TARGETS = await deploy_packages.findTargetsForFileOfPackage(file,
+                                                                          (pkg) => pkg.removeOnChange);
 
-            if (deploy_helpers.isNullOrUndefined(REMOVE_ON_CHANGE)) {
-                continue;
-            }
-
-            let filter: deploy_contracts.FileFilter;
-            let targetNames: string | string[] | false = false;
-            let useMinimatch = false;
-
-            if (deploy_helpers.isObject<deploy_contracts.FileFilter>(REMOVE_ON_CHANGE)) {
-                filter = REMOVE_ON_CHANGE;
-                targetNames = pkg.targets;
-            }
-            else if (deploy_helpers.isBool(REMOVE_ON_CHANGE)) {
-                if (true === REMOVE_ON_CHANGE) {
-                    filter = pkg;
-                    targetNames = pkg.targets;
-                    useMinimatch = true;
-                }
-            }
-            else {
-                filter = pkg;
-                targetNames = REMOVE_ON_CHANGE;
-            }
-
-            if (false === targetNames) {
-                continue;
-            }
-
-            if (!filter) {
-                filter = {
-                    files: '**'
-                };
-            }
-
-            const MATCHING_TARGETS = deploy_targets.getTargetsByName(
-                targetNames,
-                KNOWN_TARGETS
-            );
-            if (false === MATCHING_TARGETS) {
-                return;
-            }
-
-            let fileList: string[];
-            if (useMinimatch) {
-                // filter all files of that package
-                // by 'minimatch'
-                fileList = (await ME.findFilesByFilter(pkg)).filter(f => {
-                    let relPath = ME.toRelativePath(f);
-                    if (false !== relPath) {
-                        return deploy_helpers.checkIfDoesMatchByFileFilter('/' + relPath,
-                                                                           deploy_helpers.toMinimatchFileFilter(filter));
-                    }
-
-                    return false;
-                });
-            }
-            else {
-                fileList = await ME.findFilesByFilter(filter);
-            }
-
-            const DOES_MATCH = Enumerable.from( fileList ).select(f => {
-                return Path.resolve(f);
-            }).contains(file);
-
-            if (DOES_MATCH) {
-                TARGETS.push
-                       .apply(TARGETS, MATCHING_TARGETS);
-            }
-        };
-
-        if (TARGETS.length < 1) {
+        if (false === TARGETS) {
             return;
         }
 
-        await deploy_helpers.forEachAsync(Enumerable.from(TARGETS)
-                                                    .distinct(true),
-            async (t) => {
-                const TARGET_NAME = deploy_targets.getTargetName(t);
+        for (const T of Enumerable.from(TARGETS).distinct(true)) {
+            const TARGET_NAME = deploy_targets.getTargetName(T);
 
-                try {
-                    await ME.deleteFileIn(file, t, false);
-                }
-                catch (e) {
-                    //TODO: translate
-
-                    deploy_helpers.showErrorMessage(
-                        `Auto removing file '${file}' in '${TARGET_NAME}' failed: ${e}`
-                    );
-                }
-            });
+            try {
+                await ME.deleteFileIn(file, T);
+            }
+            catch (e) {
+                ME.showErrorMessage(
+                    `Auto removing file '${file}' in '${TARGET_NAME}' failed: ${e}`
+                );
+            }
+        }
     }
     catch (e) {
         deploy_log.CONSOLE

@@ -25,11 +25,6 @@ import * as Path from 'path';
 
 
 /**
- * Types of an 'auto deploy' setting value.
- */
-export type AutoDeploySettings = boolean | string | string[] | deploy_contracts.FileFilter;
-
-/**
  * A package.
  */
 export interface Package extends deploy_contracts.ConditionalItem,
@@ -40,11 +35,11 @@ export interface Package extends deploy_contracts.ConditionalItem,
     /**
      * Settings for 'deploy on change' feature.
      */
-    readonly deployOnChange?: AutoDeploySettings;
+    readonly deployOnChange?: PackageDeploySettings;
     /**
      * Settings for 'deploy on save' feature.
      */
-    readonly deployOnSave?: AutoDeploySettings;
+    readonly deployOnSave?: PackageDeploySettings;
     /**
      * A description.
      */
@@ -52,12 +47,26 @@ export interface Package extends deploy_contracts.ConditionalItem,
     /**
      * Deletes a file of this package, if it has been deleted from a workspace.
      */
-    readonly removeOnChange?: AutoDeploySettings;
+    readonly removeOnChange?: PackageDeploySettings;
     /**
      * Activates or deactivates "sync when open" feature for that package.
      */
     readonly syncWhenOpen?: boolean | string | SyncWhenOpenSetting;
 }
+
+/**
+ * Types of a package deploy setting value.
+ */
+export type PackageDeploySettings = boolean | string | string[] | deploy_contracts.FileFilter;
+
+/**
+ * A function that resolves deploy settings for a package.
+ * 
+ * @param {Package} pkg The underlying package.
+ * 
+ * @return {PackageDeploySettings} The result with the settings.
+ */
+export type PackageDeploySettingsResolver = (pkg: Package) => PackageDeploySettings;
 
 /**
  * Stores settings for 'sync when open' feature.
@@ -70,124 +79,37 @@ export interface SyncWhenOpenSetting extends deploy_contracts.FileFilter {
  * Handles an "auto deploy" of a file.
  * 
  * @param {string} file The file to check. 
- * @param {Function} settingsResolver The settings resolver.
+ * @param {PackageDeploySettingsResolver} settingsResolver The settings resolver.
  * @param {string} errorMsgTemplate The template for an error message.
  */
 export async function autoDeployFile(file: string,
-                                     settingsResolver: (pkg: Package) => AutoDeploySettings | PromiseLike<AutoDeploySettings>,
+                                     settingsResolver: PackageDeploySettingsResolver,
                                      errorMsgTemplate: string) {
     const ME: deploy_workspaces.Workspace = this;
 
     try {
-        let relativePath = ME.toRelativePath(file);
-        if (false === relativePath) {
+        const TARGETS = await findTargetsForFileOfPackage(file,
+                                                          settingsResolver);
+
+        if (false === TARGETS) {
             return;
         }
 
-        file = Path.resolve(file);
+        for (const T of Enumerable.from(TARGETS).distinct(true)) {
+            const TARGET_NAME = deploy_targets.getTargetName(T);
 
-        const KNOWN_TARGETS = ME.getTargets();
-
-        const TARGETS: deploy_targets.Target[] = [];
-        for (let pkg of ME.getPackages()) {
-            let autoSettings: AutoDeploySettings;
-            if (settingsResolver) {
-                autoSettings = await Promise.resolve(
-                    settingsResolver(pkg)
+            try {
+                await ME.deployFileTo(file, T);
+            }
+            catch (e) {
+                ME.showErrorMessage(
+                    deploy_helpers.format(
+                        errorMsgTemplate,
+                        file, TARGET_NAME, e,
+                    )
                 );
             }
-            
-            if (deploy_helpers.isNullOrUndefined(autoSettings)) {
-                continue;
-            }
-
-            let filter: deploy_contracts.FileFilter;
-            let targetNames: string | string[] | false = false;
-            let useMinimatch = false;
-
-            if (deploy_helpers.isObject<deploy_contracts.FileFilter>(autoSettings)) {
-                filter = autoSettings;
-                targetNames = pkg.targets;
-                useMinimatch = true;
-            }
-            else if (deploy_helpers.isBool(autoSettings)) {
-                if (true === autoSettings) {
-                    filter = pkg;
-                    targetNames = pkg.targets;
-                }
-            }
-            else {
-                filter = pkg;
-                targetNames = autoSettings;
-            }
-
-            if (false === targetNames) {
-                continue;
-            }
-
-            if (!filter) {
-                filter = {
-                    files: '**'
-                };
-            }
-
-            const MATCHING_TARGETS = deploy_targets.getTargetsByName(
-                targetNames,
-                KNOWN_TARGETS
-            );
-            if (false === MATCHING_TARGETS) {
-                return;
-            }
-
-            let fileList: string[];
-            if (useMinimatch) {
-                // filter all files of that package
-                // by 'minimatch'
-                fileList = (await ME.findFilesByFilter(pkg)).filter(f => {
-                    let relPath = ME.toRelativePath(f);
-                    if (false !== relPath) {
-                        return deploy_helpers.checkIfDoesMatchByFileFilter('/' + relPath,
-                                                                           deploy_helpers.toMinimatchFileFilter(filter));
-                    }
-
-                    return false;
-                });
-            }
-            else {
-                fileList = await ME.findFilesByFilter(filter);
-            }
-
-            const DOES_MATCH = Enumerable.from( fileList ).select(f => {
-                return Path.resolve(f);
-            }).contains(file);
-
-            if (DOES_MATCH) {
-                TARGETS.push
-                       .apply(TARGETS, MATCHING_TARGETS);
-            }
-        };
-
-        if (TARGETS.length < 1) {
-            return;
         }
-
-        await deploy_helpers.forEachAsync(Enumerable.from(TARGETS)
-                                                    .distinct(true),
-            async (t) => {
-                const TARGET_NAME = deploy_targets.getTargetName(t);
-
-                try {
-                    await ME.deployFileTo(file, t);
-                }
-                catch (e) {
-                    deploy_helpers.showErrorMessage(
-                        deploy_helpers.format(
-                            errorMsgTemplate,
-                            file, TARGET_NAME, e,
-                        )
-                    );
-                }
-            });
     }
     catch (e) {
         deploy_log.CONSOLE
@@ -195,6 +117,110 @@ export async function autoDeployFile(file: string,
     }
 }
 
+/**
+ * Finds targets for a file of a package.
+ * 
+ * @param {string} file The path to the file.
+ * @param {PackageDeploySettingsResolver} settingsResolver The resolver for the settings.
+ * 
+ * @return {Promise<deploy_targets.Target[]>|false} The List of targets or (false) if at least one target name could not be resolved.
+ */
+export async function findTargetsForFileOfPackage(
+    file: string,
+    settingsResolver: PackageDeploySettingsResolver
+): Promise<deploy_targets.Target[] | false> {
+    const ME: deploy_workspaces.Workspace = this;
+    
+    file = deploy_helpers.toStringSafe(file);
+    file = Path.resolve(file);
+    
+    if (!ME.isPathOf(file)) {
+        return false;
+    }
+
+    const KNOWN_TARGETS = ME.getTargets();
+
+    const TARGETS: deploy_targets.Target[] = [];
+    for (let pkg of ME.getPackages()) {
+        let settings: PackageDeploySettings;
+        if (settingsResolver) {
+            settings = await Promise.resolve(
+                settingsResolver(pkg)
+            );
+        }
+
+        if (deploy_helpers.isNullOrUndefined(settings)) {
+            continue;
+        }
+
+        let filter: deploy_contracts.FileFilter;
+        let targetNames: string | string[] | false = false;
+        let useMinimatch = false;
+
+        if (deploy_helpers.isObject<deploy_contracts.FileFilter>(settings)) {
+            filter = settings;
+            targetNames = pkg.targets;
+        }
+        else if (deploy_helpers.isBool(settings)) {
+            if (true === settings) {
+                filter = pkg;
+                targetNames = pkg.targets;
+                useMinimatch = true;
+            }
+        }
+        else {
+            filter = pkg;
+            targetNames = settings;
+        }
+
+        if (false === targetNames) {
+            continue;
+        }
+
+        if (!filter) {
+            filter = {
+                files: '**'
+            };
+        }
+
+        const MATCHING_TARGETS = deploy_targets.getTargetsByName(
+            targetNames,
+            KNOWN_TARGETS
+        );
+        if (false === MATCHING_TARGETS) {
+            return false;
+        }
+
+        let fileList: string[];
+        if (useMinimatch) {
+            // filter all files of that package
+            // by 'minimatch'
+            fileList = (await ME.findFilesByFilter(pkg)).filter(f => {
+                let relPath = ME.toRelativePath(f);
+                if (false !== relPath) {
+                    return deploy_helpers.checkIfDoesMatchByFileFilter('/' + relPath,
+                                                                       deploy_helpers.toMinimatchFileFilter(filter));
+                }
+
+                return false;
+            });
+        }
+        else {
+            fileList = await ME.findFilesByFilter(filter);
+        }
+
+        const DOES_MATCH = Enumerable.from( fileList ).select(f => {
+            return Path.resolve(f);
+        }).contains(file);
+
+        if (DOES_MATCH) {
+            TARGETS.push
+                   .apply(TARGETS, MATCHING_TARGETS);
+        }
+    }
+
+    return TARGETS;
+}
 
 /**
  * Returns the name for a package.
