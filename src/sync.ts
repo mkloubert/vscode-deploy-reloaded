@@ -134,6 +134,13 @@ export async function syncDocumentWhenOpen(doc: vscode.TextDocument) {
         return;
     }
 
+    interface TargetAndLastModifiedTime {
+        target: deploy_targets.Target;
+        time: Moment.Moment;
+    };
+
+    let targetWithNewestFile: TargetAndLastModifiedTime;
+
     await deploy_helpers.forEachAsync(Enumerable.from(TARGETS)
                                                 .distinct(true),
             async (t) => {
@@ -195,10 +202,18 @@ export async function syncDocumentWhenOpen(doc: vscode.TextDocument) {
                                     }
 
                                     if (remoteIsNewer) {
-                                        await ME.pullFileFrom(FILE, t);
-                                    }
+                                        let addNewer = true;
+                                        if (targetWithNewestFile) {
+                                            addNewer = REMOTE_UTC.isSameOrAfter(targetWithNewestFile.time);
+                                        }
 
-                                    STATES[KEY] = Moment();
+                                        if (addNewer) {
+                                            targetWithNewestFile = {
+                                                target: t,
+                                                time: REMOTE_UTC,
+                                            };
+                                        }
+                                    }
                                     
                                     allFailed = false;
                                 }
@@ -225,4 +240,15 @@ export async function syncDocumentWhenOpen(doc: vscode.TextDocument) {
                     SHOW_ERROR(e);
                 }
             });
+
+    if (targetWithNewestFile) {
+        const TARGET = targetWithNewestFile.target;
+        const KEY = ME.getSyncWhenOpenKey(TARGET);
+
+        if (false !== KEY) {
+            await ME.pullFileFrom(FILE, TARGET);
+            
+            STATES[KEY] = Moment();
+        }
+    }
 }
