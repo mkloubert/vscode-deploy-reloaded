@@ -35,6 +35,20 @@ export interface ActionQuickPick<TState = any> extends vscode.QuickPickItem {
 }
 
 /**
+ * An object whats operation(s) can be cancelled.
+ */
+export interface Cancelable {
+    /**
+     * Gets the underlying token.
+     */
+    readonly cancellationToken: vscode.CancellationToken;
+    /**
+     * Gets if a cancellation is requested or not.
+     */
+    readonly isCancelling: boolean;
+}
+
+/**
  * An item that uses JavaScript code if it is available or not.
  */
 export interface ConditionalItem {
@@ -63,6 +77,14 @@ export interface ConfigSource {
  */
 export interface Configuration {
     /**
+     * Activates or deactivates "deploy on change" feature for all packages.
+     */
+    readonly deployOnChange?: boolean;
+    /**
+     * Activates or deactivates "deploy on save" feature for all packages.
+     */
+    readonly deployOnSave?: boolean;
+    /**
      * A list of imports.
      */
     readonly imports?: ImportType | ImportType[];
@@ -75,9 +97,21 @@ export interface Configuration {
      */
     readonly packages?: deploy_packages.Package | deploy_packages.Package[];
     /**
+     * Activates or deactivates "remove on change" feature for all packages.
+     */
+    readonly removeOnChange?: boolean;
+    /**
      * One or more target.
      */
     readonly targets?: deploy_targets.Target | deploy_targets.Target[];
+    /**
+     * The time (in milliseconds) to wait before activating 'deploy on change' feature.
+     */
+    readonly timeToWaitBeforeActivateDeployOnChange?: number;
+    /**
+     * The time (in milliseconds) to wait before activating 'remove on change' feature.
+     */
+    readonly timeToWaitBeforeActivateRemoveOnChange?: number;
 }
 
 /**

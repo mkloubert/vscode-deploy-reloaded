@@ -49,6 +49,44 @@ export interface InvokeForTempFileOptions {
 }
 
 /**
+ * A progress context.
+ */
+export interface ProgressContext {
+    /**
+     * Gets or sets the status message.
+     */
+    message: string;
+}
+
+/**
+ * Progress options.
+ */
+export interface ProgressOptions {
+    /**
+     * The location.
+     */
+    readonly location?: vscode.ProgressLocation;
+    /**
+     * The title.
+     */
+    readonly title?: string;
+}
+
+/**
+ * A progress result.
+ */
+export type ProgressResult<TResult = any> = TResult | PromiseLike<TResult>;
+
+/**
+ * A progress task.
+ * 
+ * @param {ProgressContext} context The underlying context.
+ * 
+ * @return {ProgressResult<TResult>} The result.
+ */
+export type ProgressTask<TResult = any> = (context: ProgressContext) => ProgressResult<TResult>;
+
+/**
  * Describes a simple 'completed' action.
  * 
  * @param {any} err The occurred error.
@@ -833,6 +871,25 @@ export async function showErrorMessage<TItem extends vscode.MessageItem = vscode
 }
 
 /**
+ * Promise (and safe) version of 'vscode.window.showInformationMessage()' function.
+ * 
+ * @param {string} msg The message to display.
+ * @param {TItem[]} [items] The optional items.
+ * 
+ * @return {Promise<TItem>} The promise with the selected item.
+ */
+export async function showInformationMessage<TItem extends vscode.MessageItem = vscode.MessageItem>(msg: string, ...items: TItem[]): Promise<TItem> {
+    try {
+        return await vscode.window.showInformationMessage
+                                  .apply(null, [ <any>`[vscode-deploy-reloaded] ${msg}`.trim() ].concat(items));
+    }
+    catch (e) {
+        deploy_log.CONSOLE
+                  .trace(e, 'helpers.showInformationMessage()');
+    }
+}
+
+/**
  * Promise (and safe) version of 'vscode.window.showWarningMessage()' function.
  * 
  * @param {string} msg The message to display.
@@ -849,6 +906,15 @@ export async function showWarningMessage<TItem extends vscode.MessageItem = vsco
         deploy_log.CONSOLE
                   .trace(e, 'helpers.showWarningMessage()');
     }
+}
+
+/**
+ * Waits a number of milliseconds.
+ * 
+ * @param {number} [ms] The custom time, in milliseconds, to wait.
+ */
+export async function sleep(ms = 1000) {
+    await invokeAfter(() => {}, ms);
 }
 
 /**
@@ -933,6 +999,29 @@ export function toStringSafe(str: any, defValue: any = ''): string {
                   .trace(e, 'helpers.toStringSafe()');
 
         return '';
+    }
+}
+
+/**
+ * Tries to clear a timeout.
+ * 
+ * @param {NodeJS.Timer} timeoutId The timeout (ID).
+ * 
+ * @return {boolean} Operation was successfull or not.
+ */
+export function tryClearTimeout(timeoutId: NodeJS.Timer): boolean {
+    try {
+        if (!isNullOrUndefined(timeoutId)) {
+            clearTimeout(timeoutId);
+        }
+
+        return true;
+    }
+    catch (e) {
+        deploy_log.CONSOLE
+                  .trace(e, 'helpers.tryClearTimeout()');
+
+        return false;
     }
 }
 
@@ -1056,6 +1145,60 @@ export function unlink(path: string | Buffer) {
         }
         catch (e) {
             COMPLETED(e);
+        }
+    });
+}
+
+/**
+ * Runs a task with progress information.
+ * 
+ * @param {ProgressTask<TResult>} task The task to execute.
+ * @param {ProgressOptions} [options] Additional options.
+ * 
+ * @return {Promise<TResult>} The promise with the result.
+ */
+export async function withProgress<TResult = any>(task: ProgressTask<TResult>,
+                                                  options?: ProgressOptions): Promise<TResult> {
+    if (!options) {
+        options = {};
+    }
+
+    const OPTS: vscode.ProgressOptions = {
+        location: isNullOrUndefined(options.location) ? vscode.ProgressLocation.Window : options.location,
+        title: toStringSafe(options.title),
+    };
+
+    return await vscode.window.withProgress(OPTS, async (p) => {
+        const CTX: ProgressContext = {
+            message: undefined,
+        };
+
+        // CTX.message
+        let msg: string;
+        Object.defineProperty(CTX, 'message', {
+            enumerable: true,
+
+            get: () => {
+                return msg;
+            },
+
+            set: (newValue) => {
+                if (!isNullOrUndefined(newValue)) {
+                    newValue = toStringSafe(newValue);
+                }
+
+                p.report({
+                    message: newValue,
+                });
+
+                msg = newValue;
+            }
+        });
+        
+        if (task) {
+            return await Promise.resolve(
+                task(CTX)
+            );
         }
     });
 }

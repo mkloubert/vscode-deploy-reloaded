@@ -23,6 +23,7 @@ import * as deploy_log from './log';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
 import * as deploy_targets from './targets';
+import * as deploy_workflows from './workflows';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
 import * as Moment from 'moment';
@@ -480,7 +481,6 @@ async function reloadPlugins() {
     }
 }
 
-
 async function updateWorkspaceButton() {
     const BTN = selectWorkspaceBtn;
     if (!BTN) {
@@ -501,7 +501,7 @@ async function updateWorkspaceButton() {
         }
         else {
             text += Enumerable.from( ACTIVE_WORKSPACES ).select(ws => {
-                return deploy_workspaces.getWorkspaceName(ws);
+                return ws.name;
             }).joinToString(', ');
         }
 
@@ -528,7 +528,59 @@ async function updateWorkspaceButton() {
 
 
 export async function activate(context: vscode.ExtensionContext) {
-    const WF = Workflows.create();
+    const WF = deploy_workflows.build();
+
+    WF.next(async () => {
+        const VS_DEPLOY = Enumerable.from(
+            vscode.extensions.all
+        ).firstOrDefault(x => 'mkloubert.vs-deploy' === x.id);
+
+        let doActivateTheExtension = true;
+
+        if ('symbol' !== typeof VS_DEPLOY) {
+            if (VS_DEPLOY.isActive) {
+                doActivateTheExtension = false;
+                
+                const PRESSED_BTN = await deploy_helpers.showWarningMessage<deploy_contracts.MessageItemWithValue<number>>(
+                    `'vs-deploy' extension is currently active! It is recommended to DEACTIVATE IT, before you continue and use that extension.`,
+
+                    // cancel
+                    {
+                        isCloseAffordance: true,
+                        title: 'Cancel',
+                        value: 0,
+                    },
+
+                    // continue
+                    {
+                        title: 'Continue and initialize me...',
+                        value: 1,
+                    },
+                );
+
+                if (PRESSED_BTN) {
+                    doActivateTheExtension = 1 === PRESSED_BTN.value;
+                }
+            }
+        }
+
+        if (doActivateTheExtension) {
+            await activateExtension(context);
+        }
+        else {
+            deploy_helpers.showInformationMessage(
+                'The initialization of the extension has been stopped.'
+            );
+        }
+    });
+
+    if (!isDeactivating) {
+        await WF.start();
+    }
+}
+
+async function activateExtension(context: vscode.ExtensionContext) {
+    const WF = deploy_workflows.build();
 
     WF.next(() => {
         currentContext = context;
@@ -735,7 +787,7 @@ export async function activate(context: vscode.ExtensionContext) {
                 try {
                     const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = WORKSPACES.map(ws => {
                         return {
-                            label: deploy_workspaces.getWorkspaceName(ws),
+                            label: ws.name,
                             description: Path.dirname(
                                 ws.folder.uri.fsPath
                             ),
@@ -794,19 +846,8 @@ export async function activate(context: vscode.ExtensionContext) {
     });
     
     // reload plugins
-    WF.next(() => {
-        return new Promise<void>(async (resolve, reject) => {
-            const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
-
-            try {
-                await reloadPlugins();
-
-                COMPLETED(null);
-            }
-            catch (e) {
-                COMPLETED(e);
-            }
-        });
+    WF.next(async () => {
+        await reloadPlugins();
     });
 
     // global VSCode events
@@ -920,7 +961,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
         outputChannel.appendLine(`Loaded ${PLUGINS.length} plugins:`);
         PLUGINS.forEach((pi) => {
-            outputChannel.appendLine(`- ${pi.__file}`);
+            outputChannel.appendLine(`- ${pi.__type}`);
         });
 
         outputChannel.show();
@@ -931,7 +972,9 @@ export async function activate(context: vscode.ExtensionContext) {
         await updateWorkspaceButton();
     });
 
-    await WF.start();
+    if (!isDeactivating) {
+        await WF.start();
+    }
 }
 
 export function deactivate() {
@@ -941,11 +984,12 @@ export function deactivate() {
     isDeactivating = true;
 
     deploy_helpers.tryDispose(fileWatcher);
-    deploy_helpers.tryDispose(outputChannel);
 
     while (WORKSPACES.length > 0) {
-        const WS = WORKSPACES.pop();
-
-        deploy_helpers.tryDispose(WS);
+        deploy_helpers.tryDispose(
+            WORKSPACES.pop()
+        );
     }
+
+    deploy_helpers.tryDispose(outputChannel);
 }

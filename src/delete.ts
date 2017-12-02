@@ -27,6 +27,8 @@ import * as Path from 'path';
 import * as vscode from 'vscode';
 
 
+let nextCancelBtnCommandId = Number.MIN_SAFE_INTEGER;
+
 /**
  * Deletes a file in a target.
  * 
@@ -38,6 +40,10 @@ import * as vscode from 'vscode';
 export async function deleteFileIn(file: string, target: deploy_targets.Target,
                                    askForDeleteLocalFile = true) {
     const ME: deploy_workspaces.Workspace = this;
+
+    if (ME.isInFinalizeState) {
+        return;
+    }
 
     if (!target) {
         return;
@@ -130,76 +136,126 @@ export async function deleteFilesIn(files: string[],
         return;
     }
 
-    while (PLUGINS.length > 0) {
-        const PI = PLUGINS.shift();
+    let cancelBtn: vscode.StatusBarItem;
+    let cancelBtnCommand: vscode.Disposable;
+    const DISPOSE_CANCEL_BTN = () => {
+        deploy_helpers.tryDispose(cancelBtn);
+        deploy_helpers.tryDispose(cancelBtnCommand);
+    };
 
-        try {
-            ME.context.outputChannel.appendLine('');
+    const CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
+    try {
+        // cancel button
+        {
+            cancelBtn = vscode.window.createStatusBarItem();
 
-            // TODO: translate
-            if (files.length > 1) {
-                ME.context.outputChannel.appendLine(`Start deleting files in '${TARGET_NAME}'...`);
+            const CANCEL_BTN_COMMAND_ID = `extension.deploy.reloaded.buttons.cancelDeleteFilesIn${nextCancelBtnCommandId++}`;
+            cancelBtnCommand = vscode.commands.registerCommand(CANCEL_BTN_COMMAND_ID, () => {
+                cancelBtn.command = undefined;
+                cancelBtn.text = `Cancelling delete operation...`;  //TODO: translate
+
+                CANCELLATION_SOURCE.cancel();
+            });
+            
+            cancelBtn.command = CANCEL_BTN_COMMAND_ID;
+            //TODO: translate
+            cancelBtn.text = `Deleting files in '${TARGET_NAME}'...`;
+            cancelBtn.tooltip = 'Click here to cancel...';
+
+            cancelBtn.show();
+        }
+
+        while (PLUGINS.length > 0) {
+            if (CANCELLATION_SOURCE.token.isCancellationRequested) {
+                break;
             }
 
-            const CTX: deploy_plugins.DeleteContext = {
-                files: files.map(f => {
-                    const NAME_AND_PATH = ME.toNameAndPath(f);
-                    if (false === NAME_AND_PATH) {
-                        // TODO: translate
-                        ME.context.outputChannel.append(`Cannot detect path information for file '${f}'!`);
+            const PI = PLUGINS.shift();
 
-                        return null;
-                    }
+            try {
+                ME.context.outputChannel.appendLine('');
 
-                    const SF = new deploy_plugins.SimpleFileToDelete(ME, f, NAME_AND_PATH);
-                    SF.onBeforeDelete = async (destination?: string) => {
-                        // TODO: translate
-                        ME.context.outputChannel.append(`Deleting file '${f}' in '${TARGET_NAME}'... `);
-                    };
-                    SF.onDeleteCompleted = async (err?: any, deleteLocal?: boolean) => {
-                        // TODO: translate
-                        if (err) {
-                            ME.context.outputChannel.appendLine(`[ERROR: ${err}]`);
-                        }
-                        else {
-                            try {
-                                let doDeleteLocalFiles = deploy_helpers.toBooleanSafe(deleteLocalFiles);
-                                if (doDeleteLocalFiles) {
-                                    doDeleteLocalFiles = deploy_helpers.toBooleanSafe(deleteLocal, true);
-                                }
-
-                                if (doDeleteLocalFiles) {
-                                    if (await deploy_helpers.exists(SF.file)) {
-                                        await deploy_helpers.unlink(SF.file);
-                                    }
-                                }
-
-                                ME.context.outputChannel.appendLine(`[OK]`);
-                            }
-                            catch (e) {
-                                ME.context.outputChannel.appendLine(`[WARNING: ${e}]`);
-                            }
-                        }
-                    };
-
-                    return SF;
-                }).filter(f => null !== f),
-                target: target,
-            };
-
-            await Promise.resolve(
-                PI.deleteFiles(CTX)
-            );
-
-            if (files.length > 1) {
                 // TODO: translate
-                ME.context.outputChannel.appendLine(`Deleting files in '${TARGET_NAME}' has been finished.`);
+                if (files.length > 1) {
+                    ME.context.outputChannel.appendLine(`Start deleting files in '${TARGET_NAME}'...`);
+                }
+
+                const CTX: deploy_plugins.DeleteContext = {
+                    cancellationToken: CANCELLATION_SOURCE.token,
+                    files: files.map(f => {
+                        const NAME_AND_PATH = ME.toNameAndPath(f);
+                        if (false === NAME_AND_PATH) {
+                            // TODO: translate
+                            ME.context.outputChannel.append(`Cannot detect path information for file '${f}'!`);
+
+                            return null;
+                        }
+
+                        const SF = new deploy_plugins.SimpleFileToDelete(ME, f, NAME_AND_PATH);
+                        SF.onBeforeDelete = async (destination?: string) => {
+                            // TODO: translate
+                            ME.context.outputChannel.append(`Deleting file '${f}' in '${TARGET_NAME}'... `);
+                        };
+                        SF.onDeleteCompleted = async (err?: any, deleteLocal?: boolean) => {
+                            // TODO: translate
+                            if (err) {
+                                ME.context.outputChannel.appendLine(`[ERROR: ${err}]`);
+                            }
+                            else {
+                                try {
+                                    let doDeleteLocalFiles = deploy_helpers.toBooleanSafe(deleteLocalFiles);
+                                    if (doDeleteLocalFiles) {
+                                        doDeleteLocalFiles = deploy_helpers.toBooleanSafe(deleteLocal, true);
+                                    }
+
+                                    if (doDeleteLocalFiles) {
+                                        if (await deploy_helpers.exists(SF.file)) {
+                                            await deploy_helpers.unlink(SF.file);
+                                        }
+                                    }
+
+                                    ME.context.outputChannel.appendLine(`[OK]`);
+                                }
+                                catch (e) {
+                                    ME.context.outputChannel.appendLine(`[WARNING: ${e}]`);
+                                }
+                            }
+                        };
+
+                        return SF;
+                    }).filter(f => null !== f),
+                    isCancelling: undefined,
+                    target: target,
+                };
+
+                // CTX.isCancelling
+                Object.defineProperty(CTX, 'isCancelling', {
+                    enumerable: true,
+
+                    get: () => {
+                        return CTX.cancellationToken.isCancellationRequested;
+                    }
+                });
+
+                await Promise.resolve(
+                    PI.deleteFiles(CTX)
+                );
+
+                if (files.length > 1) {
+                    // TODO: translate
+                    ME.context.outputChannel.appendLine(`Deleting files in '${TARGET_NAME}' has been finished.`);
+                }
+            }
+            catch (e) {
+                // TODO: translate
+                ME.context.outputChannel.appendLine(`[ERROR] Deleting files in '${TARGET_NAME}' failed: ${e}`);
             }
         }
-        catch (e) {
-            // TODO: translate
-            ME.context.outputChannel.appendLine(`[ERROR] Deleting files in '${TARGET_NAME}' failed: ${e}`);
-        }
+    }
+    finally {
+        DISPOSE_CANCEL_BTN();
+
+        deploy_helpers.tryDispose(CANCELLATION_SOURCE);
     }
 }
 
@@ -212,6 +268,10 @@ export async function deleteFilesIn(files: string[],
 export async function deletePackage(pkg: deploy_packages.Package,
                                     askForDeleteLocalFiles = true) {
     const ME: deploy_workspaces.Workspace = this;
+
+    if (ME.isInFinalizeState) {
+        return;
+    }
 
     if (!pkg) {
         return;

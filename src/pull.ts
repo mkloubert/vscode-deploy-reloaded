@@ -24,6 +24,8 @@ import * as deploy_workspaces from './workspaces';
 import * as vscode from 'vscode';
 
 
+let nextCancelBtnCommandId = Number.MIN_SAFE_INTEGER;
+
 /**
  * Pulls a file from a target.
  * 
@@ -32,6 +34,10 @@ import * as vscode from 'vscode';
  */
 export async function pullFileFrom(file: string, target: deploy_targets.Target) {
     const ME: deploy_workspaces.Workspace = this;
+
+    if (ME.isInFinalizeState) {
+        return;
+    }
 
     if (!target) {
         return;
@@ -58,6 +64,10 @@ export async function pullFileFrom(file: string, target: deploy_targets.Target) 
 export async function pullFilesFrom(files: string[],
                                     target: deploy_targets.Target, targetNr?: number) {
     const ME: deploy_workspaces.Workspace = this;
+
+    if (ME.isInFinalizeState) {
+        return;
+    }
     
     if (!files || files.length < 1) {
         return;
@@ -88,74 +98,124 @@ export async function pullFilesFrom(files: string[],
         return;
     }
 
-    while (PLUGINS.length > 0) {
-        const PI = PLUGINS.shift();
+    let cancelBtn: vscode.StatusBarItem;
+    let cancelBtnCommand: vscode.Disposable;
+    const DISPOSE_CANCEL_BTN = () => {
+        deploy_helpers.tryDispose(cancelBtn);
+        deploy_helpers.tryDispose(cancelBtnCommand);
+    };
 
-        try {
-            ME.context.outputChannel.appendLine('');
+    const CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
+    try {
+        // cancel button
+        {
+            cancelBtn = vscode.window.createStatusBarItem();
 
-            // TODO: translate
-            if (files.length > 1) {
-                ME.context.outputChannel.appendLine(`Start pulling files from '${TARGET_NAME}'...`);
+            const CANCEL_BTN_COMMAND_ID = `extension.deploy.reloaded.buttons.cancelPullFilesFrom${nextCancelBtnCommandId++}`;
+            cancelBtnCommand = vscode.commands.registerCommand(CANCEL_BTN_COMMAND_ID, () => {
+                cancelBtn.command = undefined;
+                cancelBtn.text = `Cancelling pull operation...`;  //TODO: translate
+
+                CANCELLATION_SOURCE.cancel();
+            });
+            
+            cancelBtn.command = CANCEL_BTN_COMMAND_ID;
+            //TODO: translate
+            cancelBtn.text = `Pulling files from '${TARGET_NAME}'...`;
+            cancelBtn.tooltip = 'Click here to cancel...';
+
+            cancelBtn.show();
+        }
+
+        while (PLUGINS.length > 0) {
+            if (CANCELLATION_SOURCE.token.isCancellationRequested) {
+                break;
             }
 
-            const CTX: deploy_plugins.DownloadContext = {
-                files: files.map(f => {
-                    const NAME_AND_PATH = ME.toNameAndPath(f);
-                    if (false === NAME_AND_PATH) {
-                        // TODO: translate
-                        ME.context.outputChannel.append(`Cannot detect path information for file '${f}'!`);
+            const PI = PLUGINS.shift();
 
-                        return null;
-                    }
+            try {
+                ME.context.outputChannel.appendLine('');
 
-                    const SF = new deploy_plugins.SimpleFileToDownload(ME, f, NAME_AND_PATH);
-                    SF.onBeforeDownload = async (destination?: string) => {
-                        // TODO: translate
-                        ME.context.outputChannel.append(`Pulling file '${f}' from '${TARGET_NAME}'... `);
-                    };
-                    SF.onDownloadCompleted = async (err?: any, downloadedFile?: deploy_plugins.DownloadedFile) => {
-                        // TODO: translate
-                        try {
-                            if (err) {
-                                throw err;
-                            }
-                            else {
-                                if (downloadedFile) {
-                                    await deploy_helpers.writeFile(
-                                        f,
-                                        await Promise.resolve(
-                                            downloadedFile.read()
-                                        ),
-                                    );
-                                }
-
-                                ME.context.outputChannel.appendLine(`[OK]`);
-                            }
-                        }
-                        catch (e) {
-                            ME.context.outputChannel.appendLine(`[ERROR: ${e}]`);
-                        }
-                    };
-
-                    return SF;
-                }).filter(f => null !== f),
-                target: target,
-            };
-
-            await Promise.resolve(
-                PI.downloadFiles(CTX)
-            );
-
-            if (files.length > 1) {
                 // TODO: translate
-                ME.context.outputChannel.appendLine(`Pulling files from '${TARGET_NAME}' has been finished.`);
+                if (files.length > 1) {
+                    ME.context.outputChannel.appendLine(`Start pulling files from '${TARGET_NAME}'...`);
+                }
+
+                const CTX: deploy_plugins.DownloadContext = {
+                    cancellationToken: CANCELLATION_SOURCE.token,
+                    files: files.map(f => {
+                        const NAME_AND_PATH = ME.toNameAndPath(f);
+                        if (false === NAME_AND_PATH) {
+                            // TODO: translate
+                            ME.context.outputChannel.append(`Cannot detect path information for file '${f}'!`);
+
+                            return null;
+                        }
+
+                        const SF = new deploy_plugins.SimpleFileToDownload(ME, f, NAME_AND_PATH);
+                        SF.onBeforeDownload = async (destination?: string) => {
+                            // TODO: translate
+                            ME.context.outputChannel.append(`Pulling file '${f}' from '${TARGET_NAME}'... `);
+                        };
+                        SF.onDownloadCompleted = async (err?: any, downloadedFile?: deploy_plugins.DownloadedFile) => {
+                            // TODO: translate
+                            try {
+                                if (err) {
+                                    throw err;
+                                }
+                                else {
+                                    if (downloadedFile) {
+                                        await deploy_helpers.writeFile(
+                                            f,
+                                            await Promise.resolve(
+                                                downloadedFile.read()
+                                            ),
+                                        );
+                                    }
+
+                                    ME.context.outputChannel.appendLine(`[OK]`);
+                                }
+                            }
+                            catch (e) {
+                                ME.context.outputChannel.appendLine(`[ERROR: ${e}]`);
+                            }
+                        };
+
+                        return SF;
+                    }).filter(f => null !== f),
+                    isCancelling: undefined,
+                    target: target,
+                };
+
+                // CTX.isCancelling
+                Object.defineProperty(CTX, 'isCancelling', {
+                    enumerable: true,
+
+                    get: () => {
+                        return CTX.cancellationToken.isCancellationRequested;
+                    }
+                });
+
+                await Promise.resolve(
+                    PI.downloadFiles(CTX)
+                );
+
+                if (files.length > 1) {
+                    // TODO: translate
+                    ME.context.outputChannel.appendLine(`Pulling files from '${TARGET_NAME}' has been finished.`);
+                }
+            }
+            catch (e) {
+                // TODO: translate
+                ME.context.outputChannel.appendLine(`[ERROR] Pulling from '${TARGET_NAME}' failed: ${e}`);
             }
         }
-        catch (e) {
-            // TODO: translate
-            ME.context.outputChannel.appendLine(`[ERROR] Pulling from '${TARGET_NAME}' failed: ${e}`);
-        }
+    }
+    finally {
+        DISPOSE_CANCEL_BTN();
+        
+        deploy_helpers.tryDispose(CANCELLATION_SOURCE);
     }
 }
 
@@ -166,6 +226,10 @@ export async function pullFilesFrom(files: string[],
  */
 export async function pullPackage(pkg: deploy_packages.Package) {
     const ME: deploy_workspaces.Workspace = this;
+
+    if (ME.isInFinalizeState) {
+        return;
+    }
 
     if (!pkg) {
         return;

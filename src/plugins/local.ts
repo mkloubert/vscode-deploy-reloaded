@@ -58,75 +58,79 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
     }
 
     public async deleteFiles(context: deploy_plugins.DeleteContext<LocalTarget>) {
-        const ME = this;
+        for (const F of context.files) {
+            if (context.isCancelling) {
+                return;
+            }
 
-        await deploy_helpers.forEachAsync(context.files, async (f) => {
             try {
-                const SETTINGS = await ME.getTargetSettings(context, f);
+                const SETTINGS = await this.getTargetSettings(context, F);
 
                 let targetDir = Path.join(
                     SETTINGS.dir,
-                    f.path
+                    F.path
                 );
                 targetDir = Path.resolve(targetDir);
 
-                f.onBeforeDelete(targetDir);
+                F.onBeforeDelete(targetDir);
 
-                let targetFile = Path.join(
+                const TARGET_FILE = Path.join(
                     targetDir,
-                    f.name,
+                    F.name,
                 );
 
-                if (await deploy_helpers.exists(targetFile)) {
-                    if ((await deploy_helpers.lstat(targetFile)).isFile()) {
-                        await deploy_helpers.unlink(targetFile);
+                if (await deploy_helpers.exists(TARGET_FILE)) {
+                    if ((await deploy_helpers.lstat(TARGET_FILE)).isFile()) {
+                        await deploy_helpers.unlink(TARGET_FILE);
                     }
                     else {
                         //TODO: translate
                         throw new Error(
-                            `'${targetFile}' is NO file!`
+                            `'${TARGET_FILE}' is NO file!`
                         );
                     }
                 }
 
-                await f.onDeleteCompleted(null);
+                await F.onDeleteCompleted(null);
             }
             catch (e) {
-                await f.onDeleteCompleted(e);
+                await F.onDeleteCompleted(e);
             }
-        });
+        }
     }
 
     public async downloadFiles(context: deploy_plugins.DownloadContext<LocalTarget>) {
-        const ME = this;
+        for (const F of context.files) {
+            if (context.isCancelling) {
+                return;
+            }
 
-        await deploy_helpers.forEachAsync(context.files, async (f) => {
             try {
-                const SETTINGS = await ME.getTargetSettings(context, f);
+                const SETTINGS = await this.getTargetSettings(context, F);
 
                 let targetDir = Path.join(
                     SETTINGS.dir,
-                    f.path
+                    F.path
                 );
                 targetDir = Path.resolve(targetDir);
 
-                await f.onBeforeDownload(targetDir);
+                await F.onBeforeDownload(targetDir);
 
-                let targetFile = Path.join(
+                const TARGET_FILE = Path.join(
                     targetDir,
-                    f.name,
+                    F.name,
                 );
 
                 const DOWNLOADED_FILE = deploy_plugins.createDownloadedFileFromBuffer(
-                    f, await deploy_helpers.readFile(targetFile),
+                    F, await deploy_helpers.readFile(TARGET_FILE),
                 );
 
-                await f.onDownloadCompleted(null, DOWNLOADED_FILE);
+                await F.onDownloadCompleted(null, DOWNLOADED_FILE);
             }
             catch (e) {
-                await f.onDownloadCompleted(e);
+                await F.onDownloadCompleted(e);
             }
-        });
+        }
     }
 
     protected async getTargetSettings(context: deploy_plugins.FilesContext<LocalTarget>,
@@ -184,6 +188,10 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
             others: [],
             target: context.target,
         };
+
+        if (context.isCancelling) {
+            return;
+        }
 
         const FILES_AND_FOLDERS = await deploy_helpers.readDir(targetDir);
         await deploy_helpers.forEachAsync(FILES_AND_FOLDERS, async (f) => {
@@ -258,20 +266,22 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
     }
 
     public async uploadFiles(context: deploy_plugins.UploadContext<LocalTarget>) {
-        const ME = this;
-        
         const ALREADY_CHECKED = {};
-        await deploy_helpers.forEachAsync(context.files, async (f) => {
+        for (const F of context.files) {
+            if (context.isCancelling) {
+                return;
+            }
+
             try {
-                const SETTINGS = await ME.getTargetSettings(context, f);
+                const SETTINGS = await this.getTargetSettings(context, F);
 
                 let targetDir = Path.join(
                     SETTINGS.dir,
-                    f.path
+                    F.path
                 );
                 targetDir = Path.resolve(targetDir);
 
-                await f.onBeforeUpload(targetDir);
+                await F.onBeforeUpload(targetDir);
 
                 if (true !== ALREADY_CHECKED[targetDir]) {
                     if (await deploy_helpers.exists(targetDir)) {
@@ -295,25 +305,25 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
                     ALREADY_CHECKED[targetDir] = true;
                 }
 
-                let targetFile = Path.join(
+                const TARGET_FILE = Path.join(
                     targetDir,
-                    f.name,
+                    F.name,
                 );
 
-                const DATA = await f.read();
+                const DATA = await F.read();
                 if (DATA) {
                     await deploy_helpers.writeFile(
-                        targetFile,
+                        TARGET_FILE,
                         DATA,
                     );
                 }
 
-                await f.onUploadCompleted();
+                await F.onUploadCompleted();
             }
             catch (e) {
-                await f.onUploadCompleted(e);
+                await F.onUploadCompleted(e);
             }
-        });
+        }
     }
 }
 

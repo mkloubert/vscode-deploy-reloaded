@@ -22,12 +22,12 @@ import * as deploy_helpers from './helpers';
 import * as deploy_i18 from './i18';
 import * as deploy_list from './list';
 import * as deploy_log from './log';
+import * as deploy_objects from './objects';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
 import * as deploy_pull from './pull';
 import * as deploy_targets from './targets';
 import * as Enumerable from 'node-enumerable';
-import * as Events from 'events';
 import * as Glob from 'glob';
 import * as i18next from 'i18next';
 const MergeDeep = require('merge-deep');
@@ -130,7 +130,7 @@ const FILES_CHANGES: { [path: string]: deploy_contracts.FileChangeType } = {};
 /**
  * A workspace.
  */
-export class Workspace extends Events.EventEmitter implements deploy_contracts.Translator, vscode.Disposable {
+export class Workspace extends deploy_objects.DisposableBase implements deploy_contracts.Translator, vscode.Disposable {
     /**
      * Stores the current configuration.
      */
@@ -140,9 +140,9 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
      */
     protected _configSource: deploy_contracts.ConfigSource;
     /**
-     * Stores all disposable items.
+     * Stores if 'deploy on change' feature is freezed or not.
      */
-    protected readonly _DISPOSABLES: vscode.Disposable[] = [];
+    protected _isDeployOnChangeFreezed = false;
     /**
      * Stores if workspace has been initialized or not.
      */
@@ -151,6 +151,10 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
      * Stores if configuration is currently reloaded or not.
      */
     protected _isReloadingConfig = false;
+    /**
+     * Stores if 'remove on change' feature is freezed or not.
+     */
+    protected _isRemoveOnChangeFreezed = false;
     /**
      * The current translation function.
      */
@@ -186,6 +190,14 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
         }
 
         return false;
+    }
+
+    /**
+     * Gets if the workspace can do automatic (background) operations or not.
+     */
+    public get canDoAutoOperations() {
+        return !this.isInFinalizeState &&
+               !this.isReloadingConfig;
     }
 
     /**
@@ -257,6 +269,14 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
      * @param {string} file The file to check. 
      */
     protected async deployOnChange(file: string) {
+        if (this.isDeployOnChangeFreezed) {
+            return;  // freezed
+        }
+
+        if (!deploy_helpers.toBooleanSafe(this.config.deployOnChange, true)) {
+            return;  // deactivated
+        }
+
         if (!deploy_helpers.isEmptyString(file)) {
             if (!this.isInSettingsFolder(file)) {
                 return await deploy_deploy.deployOnChange
@@ -271,6 +291,10 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
      * @param {string} file The file to check. 
      */
     protected async deployOnSave(file: string) {
+        if (!deploy_helpers.toBooleanSafe(this.config.deployOnSave, true)) {
+            return;  // deactivated
+        }
+        
         if (!deploy_helpers.isEmptyString(file)) {
             if (!this.isInSettingsFolder(file)) {
                 return await deploy_deploy.deployOnSave
@@ -285,21 +309,8 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
      * @param {deploy_packages.Package} pkg The package to deploy. 
      */
     public async deployPackage(pkg: deploy_packages.Package) {
-        return await deploy_deploy.deployPackage
-                                  .apply(this, arguments);
-    }
-
-    /** @inheritdoc */
-    public dispose() {
-        const ME = this;
-
-        ME.removeAllListeners();
-
-        while (ME._DISPOSABLES.length > 0) {
-            const DISP = ME._DISPOSABLES.pop();
-
-            deploy_helpers.tryDispose(DISP);
-        }
+        await deploy_deploy.deployPackage
+                           .apply(this, arguments);
     }
 
     /**
@@ -609,6 +620,13 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
     }
 
     /**
+     * Gets if 'deploy on change' is currently freezed or not.
+     */
+    public get isDeployOnChangeFreezed() {
+        return this._isDeployOnChangeFreezed;
+    }
+
+    /**
      * Gets if the workspace has been initialized or not.
      */
     public get isInitialized() {
@@ -648,11 +666,38 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
     }
 
     /**
+     * Gets if the configuration for that workspace is currently reloaded or not.
+     */
+    public get isReloadingConfig(): boolean {
+        return this._isReloadingConfig;
+    }
+
+    /**
+     * Gets if 'remove on change' is currently freezed or not.
+     */
+    public get isRemoveOnChangeFreezed() {
+        return this._isRemoveOnChangeFreezed;
+    }
+    
+    /**
+     * List the root directory on a target.
+     * 
+     * @param {deploy_targets.Target} target The target from where to list.
+     */
+    public async listDirectory(target: deploy_targets.Target) {
+        return await deploy_list.listDirectory
+                                .apply(this, [ target ]);
+    }
+
+    /**
      * Is invoked when the active text editor changed.
      * 
      * @param {vscode.TextEditor} editor The new editor.
      */
     public async onDidChangeActiveTextEditor(editor: vscode.TextEditor) {
+        if (!this.canDoAutoOperations) {
+            return;
+        }
     }
 
     /**
@@ -672,6 +717,10 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
      */
     public async onDidFileChange(e: vscode.Uri, type: deploy_contracts.FileChangeType, retry = true) {
         const ME = this;
+
+        if (!ME.canDoAutoOperations) {
+            return;
+        }
 
         if (!ME.isPathOf(e.fsPath)) {
             return;
@@ -717,21 +766,15 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
      * @param {vscode.TextDocument} e The underlying text document.
      */
     public async onDidSaveTextDocument(e: vscode.TextDocument) {
+        if (!this.canDoAutoOperations) {
+            return;
+        }
+
         if (!e) {
             return;
         }
         
         await this.deployOnSave(e.fileName);
-    }
-
-    /**
-     * List the root directory on a target.
-     * 
-     * @param {deploy_targets.Target} target The target from where to list.
-     */
-    public async listDirectory(target: deploy_targets.Target) {
-        return await deploy_list.listDirectory
-                                .apply(this, [ target ]);
     }
 
     /**
@@ -785,7 +828,7 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
 
         const MY_ARGS = arguments;
 
-        if (ME._isReloadingConfig) {
+        if (ME.isReloadingConfig) {
             if (retry) {
                 await deploy_helpers.invokeAfter(async () => {
                     ME.reloadConfiguration
@@ -799,6 +842,11 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
 
         let finalizer: () => any;
         try {
+            ME.cleanupTimers();
+
+            ME._isDeployOnChangeFreezed = false;
+            ME._isRemoveOnChangeFreezed = false;
+
             let loadedCfg: WorkspaceSettings = vscode.workspace.getConfiguration(ME.configSource.section,
                                                                                  ME.configSource.resource) || <any>{};
 
@@ -868,6 +916,56 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
                 deploy_log.CONSOLE
                           .trace(e, 'workspaces.reloadConfiguration(2)');
             }
+
+            finalizer = async () => {
+                // timeToWaitBeforeActivateDeployOnChange
+                try {
+                    const TIME_TO_WAIT_BEFORE_ACTIVATE_DEPLOY_ON_CHANGE = parseInt(
+                        deploy_helpers.toStringSafe(loadedCfg.timeToWaitBeforeActivateDeployOnChange).trim()
+                    );
+                    if (!isNaN(TIME_TO_WAIT_BEFORE_ACTIVATE_DEPLOY_ON_CHANGE)) {
+                        // deactivate 'deploy on change'
+                        // for a while
+
+                        ME._isDeployOnChangeFreezed = true;
+                        ME._TIMERS.push(
+                            setTimeout(() => {
+                                ME._isDeployOnChangeFreezed = false;
+                            }, TIME_TO_WAIT_BEFORE_ACTIVATE_DEPLOY_ON_CHANGE)
+                        );
+                    }
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'workspaces.reloadConfiguration(5)');
+
+                    ME._isDeployOnChangeFreezed = false;
+                }
+
+                // timeToWaitBeforeActivateRemoveOnChange
+                try {
+                    const TIME_TO_WAIT_BEFORE_ACTIVATE_REMOVE_ON_CHANGE = parseInt(
+                        deploy_helpers.toStringSafe(loadedCfg.timeToWaitBeforeActivateRemoveOnChange).trim()
+                    );
+                    if (!isNaN(TIME_TO_WAIT_BEFORE_ACTIVATE_REMOVE_ON_CHANGE)) {
+                        // deactivate 'deploy on change'
+                        // for a while
+
+                        ME._isRemoveOnChangeFreezed = true;
+                        ME._TIMERS.push(
+                            setTimeout(() => {
+                                ME._isRemoveOnChangeFreezed = false;
+                            }, TIME_TO_WAIT_BEFORE_ACTIVATE_REMOVE_ON_CHANGE)
+                        );
+                    }
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'workspaces.reloadConfiguration(6)');
+
+                    ME._isRemoveOnChangeFreezed = false;
+                }
+            };
         }
         catch (e) {
             deploy_log.CONSOLE
@@ -926,6 +1024,14 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
      * @param {string} file The file to check.
      */
     protected async removeOnChange(file: string) {
+        if (this.isRemoveOnChangeFreezed) {
+            return;  // freezed
+        }
+
+        if (!deploy_helpers.toBooleanSafe(this.config.removeOnChange, true)) {
+            return;  // deactivated
+        }
+
         if (!deploy_helpers.isEmptyString(file)) {
             if (!this.isInSettingsFolder(file)) {
                 await deploy_delete.removeOnChange
@@ -1087,22 +1193,4 @@ export class Workspace extends Events.EventEmitter implements deploy_contracts.T
 
         return relativePath;
     }
-}
-
-
-/**
- * Returns the display name of a workspace.
- * 
- * @param {Workspace} ws The workspace.
- * 
- * @return {string} The name.
- */
-export function getWorkspaceName(ws: Workspace): string {
-    if (!ws) {
-        return;
-    }
-
-    return Path.basename(
-        ws.folder.uri.fsPath
-    );
 }

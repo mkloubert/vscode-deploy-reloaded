@@ -18,6 +18,7 @@
 import * as deploy_contracts from './contracts';
 import * as deploy_files from './files';
 import * as deploy_helpers from './helpers';
+import * as deploy_plugins from './plugins';
 import * as deploy_targets from './targets';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
@@ -66,6 +67,10 @@ function createSelectFileAction(file: deploy_files.FileInfo) {
 export async function listDirectory(target: deploy_targets.Target, dir?: string) {
     const ME: deploy_workspaces.Workspace = this;
 
+    if (ME.isInFinalizeState) {
+        return;
+    }
+
     const TARGET_NAME = deploy_targets.getTargetName(target);
 
     dir = deploy_helpers.toStringSafe(dir);
@@ -86,45 +91,89 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
         return;
     }
 
-    const FILES_AND_FILES: deploy_files.FileSystemInfo[] = [];
+    let displayDir = dir;
+    if (deploy_helpers.isEmptyString(displayDir)) {
+        displayDir = '/';
+    }
 
-    while (PLUGINS.length > 0) {
-        const PI = PLUGINS.shift();
+    const FILES_AND_FOLDERS = await deploy_helpers.withProgress(async (ctx) => {
+        const CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
+        try {
+            const LOADED_FILES_AND_FILES: deploy_files.FileSystemInfo[] = [];
 
-        const ITEMS = await PI.listDirectory({
-            dir: dir,
-            target: target,
-            workspace: ME,
-        });
+            let index = -1;
+            const TOTAL_COUNT = PLUGINS.length;
+            while (PLUGINS.length > 0) {
+                ++index;
 
-        if (ITEMS) {
-            const LOADED_ITEMS: deploy_files.FileSystemInfo[] = deploy_helpers.asArray(
-                <any>ITEMS.dirs,
-            ).concat(
-                <any>deploy_helpers.asArray(
-                    ITEMS.files
-                )
-            ).concat(
-                <any>deploy_helpers.asArray(
-                    ITEMS.others
-                )
-            );
+                if (CANCELLATION_SOURCE.token.isCancellationRequested) {
+                    return false;
+                }
 
-            FILES_AND_FILES.push
-                           .apply(FILES_AND_FILES, LOADED_ITEMS);
+                const PI = PLUGINS.shift();
+
+                //TODO translate
+                ctx.message = `Loading directory '${displayDir}' (${index + 1} / ${TOTAL_COUNT})...`;
+
+                const CTX: deploy_plugins.ListDirectoryContext = {
+                    cancellationToken: CANCELLATION_SOURCE.token,
+                    dir: dir,
+                    isCancelling: undefined,
+                    target: target,
+                    workspace: ME,
+                };
+
+                // CTX.isCancelling
+                Object.defineProperty(CTX, 'isCancelling', {
+                    enumerable: true,
+
+                    get: () => {
+                        return CTX.cancellationToken.isCancellationRequested;
+                    }
+                });
+
+                const ITEMS = await PI.listDirectory(CTX);
+                if (ITEMS) {
+                    const LOADED_ITEMS: deploy_files.FileSystemInfo[] = deploy_helpers.asArray(
+                        <any>ITEMS.dirs,
+                    ).concat(
+                        <any>deploy_helpers.asArray(
+                            ITEMS.files
+                        )
+                    ).concat(
+                        <any>deploy_helpers.asArray(
+                            ITEMS.others
+                        )
+                    );
+
+                    LOADED_FILES_AND_FILES.push
+                                          .apply(LOADED_FILES_AND_FILES, LOADED_ITEMS);
+                }
+            }
+
+            return LOADED_FILES_AND_FILES;
         }
+        finally {
+            deploy_helpers.tryDispose(CANCELLATION_SOURCE);
+        }
+    }, {
+        title: `[${TARGET_NAME}]`,
+    });
+
+    if (false === FILES_AND_FOLDERS) {
+        return;
     }
 
     const QUICK_PICK_ITEMS: deploy_contracts.ActionQuickPick[] = [];
 
     const LIST_DIRECTORY = async (d: string) => {
-        await listDirectory.apply(
+        listDirectory.apply(
             ME,
             [ target, d ]
         );
     };
 
-    FILES_AND_FILES.sort((x, y) => {
+    FILES_AND_FOLDERS.sort((x, y) => {
         // first by type:
         // 
         // 1. directories

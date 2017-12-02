@@ -280,7 +280,7 @@ export interface PluginModule {
 /**
  * A context based on a target.
  */
-export interface TargetContext<TTarget extends deploy_targets.Target = deploy_targets.Target> {
+export interface TargetContext<TTarget extends deploy_targets.Target = deploy_targets.Target> extends deploy_contracts.Cancelable {
     /**
      * Gets the underlying target.
      */

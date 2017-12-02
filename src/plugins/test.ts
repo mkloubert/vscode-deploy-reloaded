@@ -43,37 +43,45 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
     }
 
     public async deleteFiles(context: deploy_plugins.DeleteContext<TestTarget>) {
-        await deploy_helpers.forEachAsync(context.files, async (f) => {
+        for (const F of context.files) {
+            if (context.isCancelling) {
+                return;
+            }
+            
             try {
-                await f.onBeforeDelete();
+                await F.onBeforeDelete();
 
                 await deploy_helpers.readFile(
-                    f.file,
+                    F.file,
                 );
 
-                await f.onDeleteCompleted(null, false);
+                await F.onDeleteCompleted(null, false);
             }
             catch (e) {
-                await f.onDeleteCompleted(e);
+                await F.onDeleteCompleted(e);
             }
-        });
+        }
     }
 
     public async downloadFiles(context: deploy_plugins.DownloadContext<TestTarget>) {
-        await deploy_helpers.forEachAsync(context.files, async (f) => {
+        for (const F of context.files) {
+            if (context.isCancelling) {
+                return;
+            }
+
             try {
-                await f.onBeforeDownload();
+                await F.onBeforeDownload();
 
                 await deploy_helpers.readFile(
-                    f.file,
+                    F.file,
                 );
 
-                await f.onDownloadCompleted(null);
+                await F.onDownloadCompleted(null);
             }
             catch (e) {
-                await f.onDownloadCompleted(e);
+                await F.onDownloadCompleted(e);
             }
-        });
+        }
     }
 
     public async listDirectory(context: deploy_plugins.ListDirectoryContext<TestTarget>) {
@@ -114,6 +122,10 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
             others: [],
             target: context.target,
         };
+
+        if (context.isCancelling) {
+            return;
+        }
 
         const FILES_AND_FOLDERS = await deploy_helpers.readDir(targetDir);
         await deploy_helpers.forEachAsync(FILES_AND_FOLDERS, async (f) => {
@@ -174,18 +186,22 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
     }
 
     public async uploadFiles(context: deploy_plugins.UploadContext<TestTarget>) {
-        await deploy_helpers.forEachAsync(context.files, async (f) => {
+        for (const F of context.files) {
+            if (context.isCancelling) {
+                return;
+            }
+            
             try {
-                await f.onBeforeUpload();
+                await F.onBeforeUpload();
 
-                await f.read();
+                await F.read();
 
-                await f.onUploadCompleted();
+                await F.onUploadCompleted();
             }
             catch (e) {
-                await f.onUploadCompleted(e);
+                await F.onUploadCompleted(e);
             }
-        });
+        }
     }
 }
 
