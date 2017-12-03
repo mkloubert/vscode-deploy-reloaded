@@ -69,7 +69,7 @@ export async function deployFilesTo(files: string[],
 
     if (PLUGINS.length < 1) {
         //TODO: translate
-        await deploy_helpers.showWarningMessage(
+        await ME.showWarningMessage(
             `No matching PLUGINS found!`
         );
 
@@ -320,7 +320,7 @@ export async function deployPackage(pkg: deploy_packages.Package) {
     const FILES_TO_DEPLOY = await ME.findFilesByFilter(pkg);
     if (FILES_TO_DEPLOY.length < 1) {
         //TODO: translate
-        await deploy_helpers.showWarningMessage(
+        await ME.showWarningMessage(
             `No FILES found!`
         );
 
@@ -341,7 +341,7 @@ export async function deployPackage(pkg: deploy_packages.Package) {
 
     if (QUICK_PICK_ITEMS.length < 1) {
         //TODO: translate
-        await deploy_helpers.showWarningMessage(
+        await ME.showWarningMessage(
             `No TARGETS found!`
         );
 

@@ -133,7 +133,7 @@ export async function deleteFilesIn(files: string[],
     const PLUGINS = ME.getDeletePlugins(target);
     if (PLUGINS.length < 1) {
         //TODO: translate
-        await deploy_helpers.showWarningMessage(
+        await ME.showWarningMessage(
             `No matching PLUGINS found!`
         );
 
@@ -346,7 +346,7 @@ export async function deletePackage(pkg: deploy_packages.Package,
     const FILES_TO_DELETE = await ME.findFilesByFilter(pkg);
     if (FILES_TO_DELETE.length < 1) {
         //TODO: translate
-        await deploy_helpers.showWarningMessage(
+        await ME.showWarningMessage(
             `No FILES found!`
         );
 
@@ -400,7 +400,7 @@ export async function deletePackage(pkg: deploy_packages.Package,
 
     if (QUICK_PICK_ITEMS.length < 1) {
         //TODO: translate
-        await deploy_helpers.showWarningMessage(
+        await ME.showWarningMessage(
             `No TARGETS found!`
         );
 

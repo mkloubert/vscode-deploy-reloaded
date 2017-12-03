@@ -78,7 +78,7 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
     const PLUGINS = ME.getListPlugins(target);
     if (PLUGINS.length < 1) {
         //TODO: translate
-        await deploy_helpers.showWarningMessage(
+        await ME.showWarningMessage(
             `No matching PLUGINS found!`
         );
 

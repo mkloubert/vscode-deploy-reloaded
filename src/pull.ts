@@ -92,7 +92,7 @@ export async function pullFilesFrom(files: string[],
     const PLUGINS = ME.getDownloadPlugins(target);
     if (PLUGINS.length < 1) {
         //TODO: translate
-        await deploy_helpers.showWarningMessage(
+        await ME.showWarningMessage(
             `No matching PLUGINS found!`
         );
 
@@ -322,7 +322,7 @@ export async function pullPackage(pkg: deploy_packages.Package) {
     const FILES_TO_PULL = await ME.findFilesByFilter(pkg);
     if (FILES_TO_PULL.length < 1) {
         //TODO: translate
-        await deploy_helpers.showWarningMessage(
+        await ME.showWarningMessage(
             `No FILES found!`
         );
 
@@ -343,7 +343,7 @@ export async function pullPackage(pkg: deploy_packages.Package) {
 
     if (QUICK_PICK_ITEMS.length < 1) {
         //TODO: translate
-        await deploy_helpers.showWarningMessage(
+        await ME.showWarningMessage(
             `No TARGETS found!`
         );
 

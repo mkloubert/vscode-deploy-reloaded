@@ -355,7 +355,7 @@ export async function showTargetQuickPick<TTarget extends Target = Target, TResu
 ): Promise<TResult | TNoTargets | void>
 {
     targets = deploy_helpers.asArray(targets)
-                            .filter(t => 'object' === typeof t);
+                            .filter(t => deploy_helpers.isObject(t));
     
     const QUICK_PICK_ITEMS: deploy_contracts.ActionQuickPick[] = targets.map(t => {
         return {
