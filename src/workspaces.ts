@@ -1160,7 +1160,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
             ME._translator = null;
             try {
-                ME._translator = await deploy_i18.init(ME);
+                ME._translator = await deploy_i18.init
+                                                 .apply(ME, []);
             }
             catch (e) {
                 deploy_log.CONSOLE

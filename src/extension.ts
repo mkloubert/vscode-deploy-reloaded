@@ -29,7 +29,6 @@ import * as Enumerable from 'node-enumerable';
 import * as Moment from 'moment';
 import * as Path from 'path';
 import * as vscode from 'vscode';
-import * as Workflows from 'node-workflows';
 
 
 let activeWorkspaces: deploy_workspaces.Workspace[] = [];

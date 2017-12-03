@@ -18,11 +18,11 @@
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
+import * as deploy_workflows from './workflows';
 import * as deploy_workspaces from './workspaces';
 import * as i18next from 'i18next';
 import * as Path from 'path';
 import * as vscode from 'vscode';
-import * as Workflows from 'node-workflows';
 
 
 /**
@@ -44,12 +44,11 @@ export interface Translation {
 /**
  * Initializes the language repository for a workspace.
  * 
- * @param {deploy_workspaces.Workspace} workspace The workspace.
- * 
  * @returns {Promise<TranslationFunction>} The promise with the translation function.
  */
-export async function init(workspace: deploy_workspaces.Workspace): Promise<i18next.TranslationFunction> {
-    const CONFIG = workspace.config || <any>{};
+export async function init(): Promise<i18next.TranslationFunction> {
+    const ME: deploy_workspaces.Workspace = this;
+    const CONFIG = ME.config || <any>{};
 
     let lang = CONFIG.language;
     if (deploy_helpers.isEmptyString(lang)) {
@@ -63,79 +62,62 @@ export async function init(workspace: deploy_workspaces.Workspace): Promise<i18n
     const LANG_DIR = Path.join(__dirname, 'lang');
     const RESOURCES: any = {};
 
-    const WF = Workflows.create();
-
     let isDirectory = false;
-    WF.next((ctx) => {
-        return new Promise<void>(async (resolve, reject) => {
-            const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
 
-            try {
-                if (await deploy_helpers.exists(LANG_DIR)) {
-                    isDirectory = (await deploy_helpers.lstat(LANG_DIR)).isDirectory();
+    return await deploy_workflows.build().next(async () => {
+        try {
+            if (await deploy_helpers.exists(LANG_DIR)) {
+                isDirectory = (await deploy_helpers.lstat(LANG_DIR)).isDirectory();
+            }
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'i18.init(1)');
+        }
+    }).next(async () => {
+        if (!isDirectory) {
+            return;
+        }
+
+        try {
+            const FILES = await deploy_helpers.glob('*.js', {
+                cwd: LANG_DIR,
+                nocase: false,
+                root: LANG_DIR,
+            });
+
+            for (const F of FILES) {
+                try {
+                    const FILENAME = Path.basename(F);
+                    const LANG_NAME = normalizeLangName( FILENAME.substr(0, FILENAME.length - 3) );
+                    if ('' === LANG_NAME) {
+                        continue;  // no language name available
+                    }
+
+                    if (!(await deploy_helpers.lstat(F)).isFile()) {
+                        continue;  // no file
+                    }
+
+                    // deleted cached data
+                    // and load current translation
+                    // from file
+                    delete require.cache[F];
+                    RESOURCES[LANG_NAME] = {
+                        translation: require(F).translation,
+                    };
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'i18.init(3)');
                 }
             }
-            catch (e) {
-                deploy_log.CONSOLE
-                          .trace(e, 'i18.init(1)');
-            }
-
-            COMPLETED(null);
-        });
-    });
-
-    WF.next((ctx) => {
-        return new Promise<void>(async (resolve, reject) => {
-            const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
-            if (!isDirectory) {
-                COMPLETED(null);
-                return;
-            }
-
-            try {
-                const FILES = await deploy_helpers.glob('*.js', {
-                    cwd: LANG_DIR,
-                    nocase: false,
-                    root: LANG_DIR,
-                });
-
-                for (const F of FILES) {
-                    try {
-                        const FILENAME = Path.basename(F);
-                        const LANG_NAME = normalizeLangName( FILENAME.substr(0, FILENAME.length - 3) );
-                        if ('' === LANG_NAME) {
-                            continue;  // no language name available
-                        }
-
-                        if (!(await deploy_helpers.lstat(F)).isFile()) {
-                            continue;  // no file
-                        }
-
-                        // deleted cached data
-                        // and load current translation
-                        // from file
-                        delete require.cache[F];
-                        RESOURCES[LANG_NAME] = {
-                            translation: require(F).translation,
-                        };
-                    }
-                    catch (e) {
-                        deploy_log.CONSOLE
-                                  .trace(e, 'i18.init(3)');
-                    }
-                }
-            }
-            catch (e) {
-                deploy_log.CONSOLE
-                          .trace(e, 'i18.init(2)');
-            }
-
-            COMPLETED(null);
-        });
-    });
-
-    WF.next((ctx) => {
-        return new Promise<void>((resolve, reject) => {
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'i18.init(2)');
+        }
+    }).next((ctx) => {
+        return new Promise<i18next.TranslationFunction>((resolve, reject) => {
             const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
 
             try {
@@ -148,9 +130,7 @@ export async function init(workspace: deploy_workspaces.Workspace): Promise<i18n
                         COMPLETED(err);
                     }
                     else {
-                        ctx.result = tr;
-
-                        COMPLETED(null);
+                        COMPLETED(null, tr);
                     }
                 });
             }
@@ -158,9 +138,7 @@ export async function init(workspace: deploy_workspaces.Workspace): Promise<i18n
                 COMPLETED(e);
             }
         });
-    });
-
-    return await WF.start();
+    }).start();
 }
 
 function normalizeLangName(lang: string): string {

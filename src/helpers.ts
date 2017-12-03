@@ -18,6 +18,7 @@
 import * as deploy_code from './code';
 import * as deploy_contracts from './contracts';
 import * as deploy_log from './log';
+import * as deploy_workflows from './workflows';
 import * as Enumerable from 'node-enumerable';
 import * as FS from 'fs';
 import * as Glob from 'glob';
@@ -28,7 +29,6 @@ import * as Moment from 'moment';
 import * as Path from 'path';
 import * as TMP from 'tmp';
 import * as vscode from 'vscode';
-import * as Workflows from 'node-workflows';
 
 
 /**
@@ -550,7 +550,7 @@ export function formatArray(formatStr: any, args: any[]): string {
  * 
  * @return {Promise<string[]>} The promise with the matches.
  */
-export function glob(patterns: string | string[], opts?: Glob.IOptions) {
+export async function glob(patterns: string | string[], opts?: Glob.IOptions) {
     const DEFAULT_OPTS: Glob.IOptions = {
         absolute: true,
         dot: false,
@@ -563,53 +563,41 @@ export function glob(patterns: string | string[], opts?: Glob.IOptions) {
 
     opts = MergeDeep({}, DEFAULT_OPTS, opts);
 
-    return new Promise<string[]>(async (resolve, reject) => {
-        const COMPLETED = createCompletedAction(resolve, reject);
-        
-        try {
-            const WF = Workflows.create();
+    const WF = deploy_workflows.build();
 
-            WF.next((ctx) => {
-                ctx.result = [];
-            });
+    WF.next(() => {
+        return [];
+    });
 
-            asArray(patterns).forEach(p => {
-                WF.next((ctx) => {
-                    const ALL_MATCHES: string[] = ctx.result;
+    asArray(patterns).forEach(p => {
+        WF.next((allMachtes: string[]) => {
+            return new Promise<string[]>((res, rej) => {
+                const COMP = createCompletedAction(res, rej);
 
-                    return new Promise<void>((res, rej) => {
-                        const COMP = createCompletedAction(res, rej);
-
-                        try {
-                            Glob(p, opts, (err, matches) => {
-                                if (err) {
-                                    COMP(err);
-                                }
-                                else {
-                                    ALL_MATCHES.push
-                                               .apply(ALL_MATCHES, matches);
-
-                                    COMP(null);
-                                }
-                            });
+                try {
+                    Glob(p, opts, (err, matches) => {
+                        if (err) {
+                            COMP(err);
                         }
-                        catch (e) {
-                            COMP(e);
+                        else {
+                            allMachtes.push
+                                      .apply(allMachtes, matches);
+
+                            COMP(null, allMachtes);
                         }
                     });
-                });
+                }
+                catch (e) {
+                    COMP(e);
+                }
             });
-
-            COMPLETED(null,
-                      Enumerable.from( <string[]>(await WF.start()) )
-                                .select(f => Path.resolve(f))
-                                .distinct()
-                                .toArray());
-        }
-        catch (e) {
-            COMPLETED(e);
-        }
+        });
     });
+
+    return Enumerable.from( await WF.start<string[]>() )
+                     .select(f => Path.resolve(f))
+                     .distinct()
+                     .toArray();
 }
 
 /**
