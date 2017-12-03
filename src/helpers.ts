@@ -433,7 +433,12 @@ export function filterConditionalItems<TItem extends deploy_contracts.Conditiona
             if (!isNullOrUndefined(i)) {
                 const CONDITION = toStringSafe(i.if);
                 if ('' !== CONDITION.trim()) {
-                    return deploy_code.executeCode( CONDITION );
+                    const CTX: deploy_code.CodeExecutionContext = {
+                        code: CONDITION,
+                        values: this.othersProvider(),
+                    };
+
+                    return deploy_code.exec( CTX );
                 }
             }
 

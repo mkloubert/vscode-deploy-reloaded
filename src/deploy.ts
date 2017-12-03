@@ -374,9 +374,7 @@ export async function deployOnChange(file: string) {
     //TODO: translate
     const ARGS = [
         file,
-        async (pkg: deploy_packages.Package) => {
-            return pkg.deployOnChange;
-        },
+        (pkg: deploy_packages.Package) => pkg.deployOnChange,
         "Deploy ON CHANGE from '{0}' to '{1}' failed: '{2}'",
     ];
 
@@ -395,9 +393,7 @@ export async function deployOnSave(file: string) {
     //TODO: translate
     const ARGS = [
         file,
-        async (pkg: deploy_packages.Package) => {
-            return pkg.deployOnSave;
-        },
+        (pkg: deploy_packages.Package) => pkg.deployOnSave,
         "Deploy ON SAVE from '{0}' to '{1}' failed: '{2}'",
     ];
 

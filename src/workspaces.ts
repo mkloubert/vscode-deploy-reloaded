@@ -30,6 +30,7 @@ import * as deploy_sync from './sync';
 import * as deploy_targets from './targets';
 import * as deploy_transformers from './transformers';
 import * as deploy_tasks from './tasks';
+import * as deploy_values from './values';
 import * as Enumerable from 'node-enumerable';
 import * as Glob from 'glob';
 import * as i18next from 'i18next';
@@ -648,6 +649,13 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             return '' === PLUGIN_TYPE || 
                    (TARGET_TYPE === PLUGIN_TYPE && pi.canUpload && pi.uploadFiles);
         });
+    }
+
+    /**
+     * Returns the list of values.
+     */
+    public getValues(): deploy_values.Value[] {
+        return deploy_values.loadFromItems(this.config);
     }
 
     /**
@@ -1318,6 +1326,21 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                                    .apply(this, arguments);
             }
         }
+    }
+
+    /**
+     * Handles a value as string and replaces placeholders.
+     * 
+     * @param {any} val The value to parse.
+     * @param {boolean} [throwOnError] Throw on error or not.
+     * 
+     * @return {string} The parsed value.
+     */
+    public replaceWithValues(val: any, throwOnError = true) {
+        throwOnError = deploy_helpers.toBooleanSafe(throwOnError, true);
+
+        return deploy_values.replaceWithValues(this.getValues(),
+                                               val, throwOnError);
     }
 
     /**

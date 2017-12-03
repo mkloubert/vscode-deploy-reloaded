@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.26",
+ "version": "0.0.27",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.18.0"
@@ -663,6 +663,99 @@
        "description": "The time (in milliseconds) to wait before activating 'remove on change' feature.",
        "type": "integer",
        "minimum": 0
+      },
+      "values": {
+       "description": "One or more values to define.",
+       "type": "object",
+       "patternProperties": {
+        "(.*)": {
+         "description": "The value to define.",
+         "oneOf": [
+          {
+           "description": "A static array value.",
+           "type": "array",
+           "properties": null
+          },
+          {
+           "description": "A static bool value.",
+           "type": "boolean",
+           "properties": null
+          },
+          {
+           "description": "A static number value.",
+           "type": "number",
+           "properties": null
+          },
+          {
+           "description": "A static (null) value.",
+           "type": "null",
+           "properties": null
+          },
+          {
+           "description": "A static string value.",
+           "type": "string",
+           "properties": null
+          },
+          {
+           "type": "object",
+           "properties": {
+            "if": {
+             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+             "type": "string"
+            },
+            "name": {
+             "description": "The name of that value.",
+             "type": "string"
+            },
+            "type": {
+             "enum": [
+              "static",
+              ""
+             ],
+             "type": "string",
+             "description": "A static value."
+            },
+            "value": {
+             "description": "The value."
+            }
+           },
+           "required": [
+            "value"
+           ]
+          },
+          {
+           "type": "object",
+           "properties": {
+            "code": {
+             "description": "The code to execute.",
+             "type": "string"
+            },
+            "if": {
+             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+             "type": "string"
+            },
+            "name": {
+             "description": "The name of that value.",
+             "type": "string"
+            },
+            "type": {
+             "enum": [
+              "code",
+              "ecmascript",
+              "javascript",
+              "js"
+             ],
+             "type": "string",
+             "description": "A value based on (JavaScript) code."
+            }
+           },
+           "required": [
+            "code"
+           ]
+          }
+         ]
+        }
+       }
       }
      }
     }

@@ -15,6 +15,27 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as deploy_values from './values';
+
+
+ /**
+ * A code execution context.
+ */
+export interface CodeExecutionContext<TContext = any> {
+    /**
+     * The code to execute.
+     */
+    readonly code: string;
+    /**
+     * The context.
+     */
+    readonly context?: TContext;
+    /**
+     * One or more values.
+     */
+    readonly values?: deploy_values.Value | deploy_values.Value[];
+}
+
 
 /**
  * Execute code.
@@ -23,13 +44,18 @@
  * 
  * @return {TResult} The result of the execution.
  */
-export function executeCode<TResult = any>(code: any): TResult {
-    const $helpers = require('./helpers');
-    const $require = (id) => {
-        return $helpers.requireFromExtension(id);
+export function exec<TResult = any, TContext = any>(context: CodeExecutionContext<TContext>): TResult {
+    if (!context) {
+        return;
+    }
+    
+    const $h = require('./helpers');
+    const $r = (id) => {
+        return $h.requireFromExtension(id);
     };
+    const $v = deploy_values.toValueStorage(context.values);
 
     return eval(
-        $helpers.toStringSafe(code)
+        $h.toStringSafe(context.code)
     );
 }

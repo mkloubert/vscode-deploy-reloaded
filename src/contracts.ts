@@ -17,6 +17,7 @@
 
 import * as deploy_packages from './packages';
 import * as deploy_targets from './targets';
+import * as deploy_values from './values';
 import * as vscode from 'vscode';
 
 
@@ -55,7 +56,7 @@ export interface ConditionalItem {
     /**
      * One or more (JavaScript) conditions that check if that item is available or not.
      */
-    if?: string | string[];
+    readonly if?: string | string[];
 }
 
 /**
@@ -75,7 +76,7 @@ export interface ConfigSource {
 /**
  * Deploy settings.
  */
-export interface Configuration {
+export interface Configuration extends deploy_values.WithValueItems {
     /**
      * Clear output on after config has been reloaded or not.
      */
@@ -148,15 +149,15 @@ export enum FileChangeType {
     /**
      * New / created
      */
-    Created,
+    Created = 0,
     /**
      * Changed / updated
      */
-    Changed,
+    Changed = 1,
     /**
      * Deleted
      */
-    Deleted,
+    Deleted = 2,
 }
 
 /**
@@ -180,7 +181,7 @@ export interface Import extends ConditionalItem {
     /**
      * Gets the source.
      */
-    from: string;
+    readonly from: string;
 }
 
 /**
@@ -195,7 +196,7 @@ export interface MessageItemWithValue<TValue = any> extends vscode.MessageItem {
     /**
      * The value.
      */
-    value?: TValue;
+    readonly value?: TValue;
 }
 
 /**
