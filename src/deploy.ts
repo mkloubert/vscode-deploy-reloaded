@@ -82,6 +82,8 @@ export async function deployFilesTo(files: string[],
         throw new Error(`Could not load data transformer for target '${TARGET_NAME}'!`);
     }
 
+    const TRANSFORMER_OPTIONS = deploy_helpers.cloneObject(target.transformerOptions);
+
     const SYNC_WHEN_STATES = ME.syncWhenOpenStates;
 
     let cancelBtn: vscode.StatusBarItem;
@@ -204,7 +206,7 @@ export async function deployFilesTo(files: string[],
                     };
 
                     LF.transformer = TRANSFORMER;
-                    LF.transformerOptions = deploy_helpers.cloneObject(target.transformerOptions);
+                    LF.transformerOptions = TRANSFORMER_OPTIONS;
 
                     FILES_TO_UPLOAD.push(LF);
                 }

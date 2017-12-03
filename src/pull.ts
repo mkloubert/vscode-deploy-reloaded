@@ -105,6 +105,8 @@ export async function pullFilesFrom(files: string[],
         throw new Error(`Could not load data transformer for target '${TARGET_NAME}'!`);
     }
 
+    const TRANSFORMER_OPTIONS = deploy_helpers.cloneObject(target.transformerOptions);
+
     let cancelBtn: vscode.StatusBarItem;
     let cancelBtnCommand: vscode.Disposable;
     const DISPOSE_CANCEL_BTN = () => {
@@ -230,7 +232,7 @@ export async function pullFilesFrom(files: string[],
                                             const CONTEXT: deploy_transformers.DataTransformerContext = {
                                                 globals: ME.globals,
                                                 mode: deploy_transformers.DataTransformerMode.Restore,
-                                                options: this.transformerOptions,
+                                                options: TRANSFORMER_OPTIONS,
                                                 require: (id) => {
                                                     return deploy_helpers.requireFromExtension(id);
                                                 },
