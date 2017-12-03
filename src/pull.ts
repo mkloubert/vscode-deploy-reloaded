@@ -254,6 +254,9 @@ export async function pullFilesFrom(files: string[],
                             catch (e) {
                                 ME.context.outputChannel.appendLine(`[ERROR: ${e}]`);  //TODO: translate
                             }
+                            finally {
+                                deploy_helpers.tryDispose(downloadedFile);
+                            }
                         };
 
                         return SF;
