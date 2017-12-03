@@ -17,6 +17,7 @@
 
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
+import * as deploy_targets_operations_open from './targets/operations/open';
 import * as deploy_transformers from './transformers';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
@@ -32,6 +33,16 @@ export interface Target extends deploy_transformers.CanTransformData,
                                 deploy_workspaces.WorkspaceItemFromSettings
 {
     /**
+     * One or more target operations that should be invoked
+     * BEFORE a deployment to that target starts.
+     */
+    readonly beforeDeploy?: TargetOperationValue | TargetOperationValue[];
+    /**
+     * One or more target operations that should be invoked
+     * AFTER a deployment to that target has been done.
+     */
+    readonly deployed?: TargetOperationValue | TargetOperationValue[];
+    /**
      * A description.
      */
     readonly description?: string;
@@ -40,6 +51,90 @@ export interface Target extends deploy_transformers.CanTransformData,
      */
     readonly type?: string;
 }
+
+/**
+ * A target operation.
+ */
+export interface TargetOperation extends deploy_contracts.ConditionalItem {
+    /**
+     * The type.
+     */
+    readonly type?: string;
+}
+
+/**
+ * Target operation event types.
+ */
+export enum TargetOperationEvent {
+    /**
+     * Before deploy
+     */
+    BeforeDeploy = 0,
+    /**
+     * After deployed
+     */
+    AfterDeployed = 1,
+}
+
+/**
+ * A target operation execution context.
+ */
+export interface TargetOperationExecutionContext<TOperation extends TargetOperation = TargetOperation> {
+    /**
+     * Additional arguments for the execution.
+     */
+    readonly args: any[];
+    /**
+     * The event (type).
+     */
+    readonly event: TargetOperationEvent;
+    /**
+     * The underlying operation.
+     */
+    readonly operation: TOperation;
+    /**
+     * The previous operation (context).
+     */
+    readonly previousOperation: TargetOperationExecutionContext;
+    /**
+     * The underlying target.
+     */
+    readonly target: Target;
+    /**
+     * The normalized type.
+     */
+    readonly type: string;
+}
+
+/**
+ * A target operation executor.
+ * 
+ * @param {TargetOperationExecutionContext<TOperation>} context The context.
+ * 
+ * @return {TargetOperationExecutorResult|PromiseLike<TargetOperationExecutorResult>} The result.
+ */
+export type TargetOperationExecutor<TOperation extends TargetOperation = TargetOperation> =
+    (context: TargetOperationExecutionContext<TOperation>) => TargetOperationExecutionResult | PromiseLike<TargetOperationExecutionResult>;
+
+/**
+ * Possible results for a target operation executor.
+ */
+export type TargetOperationExecutionResult = void | null| boolean;
+
+/**
+ * A target operation module.
+ */
+export interface TargetOperationModule<TOperation extends TargetOperation = TargetOperation> {
+    /**
+     * The execution method.
+     */
+    readonly execute: TargetOperationExecutor<TOperation>;
+}
+
+/**
+ * A possible target operation (setting) value.
+ */
+export type TargetOperationValue = TargetOperation | string;
 
 /**
  * An object that provides target names.
@@ -51,6 +146,106 @@ export interface TargetProvider {
     readonly targets?: string | string[];
 }
 
+
+/**
+ * Executes operations for a target.
+ * 
+ * @param {Target} target the underlying target.
+ * @param {TargetOperationEvent} operationEvent The event type.
+ * 
+ * @return {boolean} Operation has been cancelled (false) or not (true).
+ */
+export async function executeTargetOperations(target: Target, operationEvent: TargetOperationEvent) {
+    if (!target) {
+        return;
+    }
+
+    const WORKSPACE = target.__workspace;
+
+    let operationsFromTarget: TargetOperationValue | TargetOperationValue[];
+    switch (operationEvent) {
+        case TargetOperationEvent.AfterDeployed:
+            operationsFromTarget = target.deployed;
+            break;
+
+        case TargetOperationEvent.BeforeDeploy:
+            operationsFromTarget = target.beforeDeploy;
+            break;
+    }
+
+    let prevOperation: TargetOperationExecutionContext;
+    for (const OPERATION_VAL of deploy_helpers.asArray(operationsFromTarget)) {
+        if (WORKSPACE.isInFinalizeState) {
+            return false;
+        }
+
+        let operationToExecute: TargetOperation;
+
+        if (deploy_helpers.isObject<TargetOperation>(OPERATION_VAL)) {
+            operationToExecute = OPERATION_VAL;
+        }
+        else {
+            const APP = deploy_helpers.toStringSafe(OPERATION_VAL);
+            if (!deploy_helpers.isEmptyString(APP)) {
+                const APP_OPERATION: deploy_targets_operations_open.OpenTargetOperation = {
+                    target: APP,
+                    type: ''
+                };
+
+                operationToExecute = APP_OPERATION;
+            }
+        }
+
+        operationToExecute = Enumerable.from(
+            deploy_helpers.filterConditionalItems(
+                [ operationToExecute ], true
+            )).firstOrDefault(null);
+
+        if (!deploy_helpers.isObject<TargetOperation>(operationToExecute)) {
+            continue;
+        }
+
+        let executor: TargetOperationExecutor;
+        let executorArgs: any[];
+        
+        const TYPE = deploy_helpers.normalizeString(operationToExecute.type);
+        switch (TYPE) {
+            case '':
+            case 'open':
+                executor = deploy_targets_operations_open.execute;
+                break;
+        }
+
+        if (!executor) {
+            continue;
+        }
+
+        const CTX: TargetOperationExecutionContext = {
+            args: executorArgs || [],
+            event: operationEvent,
+            operation: operationToExecute,
+            previousOperation: prevOperation,
+            target: target,
+            type: TYPE,
+        };
+
+        prevOperation = CTX;
+
+        const ABORT = !deploy_helpers.toBooleanSafe(
+            await Promise.resolve(
+                executor.apply(null,
+                            [ CTX ])
+            ),
+            true
+        );
+
+        if (ABORT) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 /**
  * Returns the name for a target.

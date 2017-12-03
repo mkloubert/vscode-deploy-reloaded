@@ -15,6 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as ChildProcess from 'child_process';
 import * as deploy_code from './code';
 import * as deploy_contracts from './contracts';
 import * as deploy_log from './log';
@@ -47,6 +48,29 @@ export interface InvokeForTempFileOptions {
      * Keep file after execution or not.
      */
     readonly keep?: boolean;
+}
+
+/**
+ * Options for open function.
+ */
+export interface OpenOptions {
+    /**
+     * The app (or options) to open.
+     */
+    app?: string | string[];
+    /**
+     * The custom working directory.
+     */
+    cwd?: string;
+    /**
+     * An optional list of environment variables
+     * to submit to the new process.
+     */
+    env?: any;
+    /**
+     * Wait until exit or not.
+     */
+    wait?: boolean;
 }
 
 /**
@@ -883,6 +907,127 @@ export function normalizeString(val: any, normalizer?: (str: string) => string):
 }
 
 /**
+ * Opens a target.
+ * 
+ * @param {string} target The target to open.
+ * @param {OpenOptions} [opts] The custom options to set.
+ * 
+ * @param {Promise<ChildProcess.ChildProcess>} The promise with the child process.
+ */
+export function open(target: string, opts?: OpenOptions): Promise<ChildProcess.ChildProcess> {
+    if (!opts) {
+        opts = {};
+    }
+
+    target = toStringSafe(target);
+    const WAIT = toBooleanSafe(opts.wait, true);
+    
+    return new Promise((resolve, reject) => {
+        const COMPLETED = createCompletedAction(resolve, reject);
+        
+        try {
+            let app = opts.app;
+            let cmd: string;
+            let appArgs: string[] = [];
+            let args: string[] = [];
+            let cpOpts: ChildProcess.SpawnOptions = {
+                cwd: opts.cwd,
+                env: opts.env,
+            };
+
+            if (Array.isArray(app)) {
+                appArgs = app.slice(1);
+                app = opts.app[0];
+            }
+
+            if (process.platform === 'darwin') {
+                // Apple
+
+                cmd = 'open';
+
+                if (WAIT) {
+                    args.push('-W');
+                }
+
+                if (app) {
+                    args.push('-a', app);
+                }
+            }
+            else if (process.platform === 'win32') {
+                // Microsoft
+
+                cmd = 'cmd';
+                args.push('/c', 'start', '""');
+                target = target.replace(/&/g, '^&');
+
+                if (WAIT) {
+                    args.push('/wait');
+                }
+
+                if (app) {
+                    args.push(app);
+                }
+
+                if (appArgs.length > 0) {
+                    args = args.concat(appArgs);
+                }
+            }
+            else {
+                // Unix / Linux
+
+                if (app) {
+                    cmd = app;
+                } else {
+                    cmd = Path.join(__dirname, 'xdg-open');
+                }
+
+                if (appArgs.length > 0) {
+                    args = args.concat(appArgs);
+                }
+
+                if (!WAIT) {
+                    // xdg-open will block the process unless
+                    // stdio is ignored even if it's unref'd
+                    cpOpts.stdio = 'ignore';
+                }
+            }
+
+            args.push(target);
+
+            if (process.platform === 'darwin' && appArgs.length > 0) {
+                args.push('--args');
+                args = args.concat(appArgs);
+            }
+
+            let cp = ChildProcess.spawn(cmd, args, cpOpts);
+
+            if (WAIT) {
+                cp.once('error', (err) => {
+                    COMPLETED(err);
+                });
+
+                cp.once('close', function (code) {
+                    if (code > 0) {
+                        COMPLETED(new Error('Exited with code ' + code));
+                        return;
+                    }
+
+                    COMPLETED(null, cp);
+                });
+            }
+            else {
+                cp.unref();
+
+                COMPLETED(null, cp);
+            }
+        }
+        catch (e) {
+            COMPLETED(e);
+        }
+    });
+}
+
+/**
  * Promise version of 'FS.readdir()' function.
  * 
  * @param {string|Buffer} path The path.
@@ -952,6 +1097,19 @@ export function replaceAllStrings(str: string, searchValue: string, replaceValue
 
     return str.split(searchValue)
               .join(replaceValue);
+}
+
+/**
+ * Imports a module from extension context.
+ * 
+ * @param {any} id The ID of the module.
+ * 
+ * @return {TModule} The imported module.
+ */
+export function requireFromExtension<TModule = any>(id: any): TModule {
+    return require(
+        toStringSafe(id)
+    );
 }
 
 /**

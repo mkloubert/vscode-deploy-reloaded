@@ -225,9 +225,26 @@ export async function deployFilesTo(files: string[],
                     }
                 });
 
+                const SHOW_CANCELED_BY_OPERATIONS_MESSAGE = () => {
+                    // TODO: translate
+                    ME.context.outputChannel.appendLine(`Deploying files to '${TARGET_NAME}' has been cancelled by target operation.`);
+                };
+
+                // beforeDeploy
+                if (!(await deploy_targets.executeTargetOperations(target, deploy_targets.TargetOperationEvent.BeforeDeploy))) {
+                    SHOW_CANCELED_BY_OPERATIONS_MESSAGE();
+                    continue;
+                }
+
                 await Promise.resolve(
                     PI.uploadFiles(CTX)
                 );
+
+                // deployed
+                if (!(await deploy_targets.executeTargetOperations(target, deploy_targets.TargetOperationEvent.AfterDeployed))) {
+                    SHOW_CANCELED_BY_OPERATIONS_MESSAGE();
+                    continue;
+                }
 
                 if (files.length > 1) {
                     // TODO: translate

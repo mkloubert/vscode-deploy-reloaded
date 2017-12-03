@@ -25,6 +25,9 @@
  */
 export function executeCode<TResult = any>(code: any): TResult {
     const $helpers = require('./helpers');
+    const $require = (id) => {
+        return $helpers.requireFromExtension(id);
+    };
 
     return eval(
         $helpers.toStringSafe(code)

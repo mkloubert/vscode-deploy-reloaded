@@ -781,8 +781,18 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             return true;  // is not part of that workspace
         }
 
+        const IGNORE_PATTERNS = deploy_helpers.asArray(this.config.ignore).map(i => {
+            return deploy_helpers.toStringSafe(i);
+        }).filter(i => {
+            return !deploy_helpers.isEmptyString(i);
+        });
+
+        if (IGNORE_PATTERNS.length < 1) {
+            return false;
+        }
+
         const FILTER: deploy_contracts.FileFilter = {
-            files: this.config.ignore,
+            files: IGNORE_PATTERNS,
         };
 
         return deploy_helpers.checkIfDoesMatchByFileFilter('/' + RELATIVE_PATH,
