@@ -299,7 +299,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         }
 
         if (!deploy_helpers.isEmptyString(file)) {
-            if (!this.isInSettingsFolder(file)) {
+            if (!this.isFileIgnored(file)) {
                 return await deploy_deploy.deployOnChange
                                           .apply(this, arguments);
             }
@@ -317,7 +317,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         }
         
         if (!deploy_helpers.isEmptyString(file)) {
-            if (!this.isInSettingsFolder(file)) {
+            if (!this.isFileIgnored(file)) {
                 return await deploy_deploy.deployOnSave
                                           .apply(this, arguments);
             }
@@ -760,6 +760,36 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     }
 
     /**
+     * Checks if a file is ignored by that workspace.
+     * 
+     * @param {string} file The file to check.
+     * 
+     * @return {boolean} Is ignored or not. 
+     */
+    public isFileIgnored(file: string): boolean {
+        file = deploy_helpers.toStringSafe(file);
+        if (deploy_helpers.isEmptyString(file)) {
+            return true;  // no (valid) file path
+        }
+
+        if (this.isInSettingsFolder(file)) {
+            return true;  // not from settings folder
+        }
+
+        const RELATIVE_PATH = this.toRelativePath(file);
+        if (false === RELATIVE_PATH) {
+            return true;  // is not part of that workspace
+        }
+
+        const FILTER: deploy_contracts.FileFilter = {
+            files: this.config.ignore,
+        };
+
+        return deploy_helpers.checkIfDoesMatchByFileFilter('/' + RELATIVE_PATH,
+                                                           deploy_helpers.toMinimatchFileFilter(FILTER));
+    }
+
+    /**
      * Gets if the workspace has been initialized or not.
      */
     public get isInitialized() {
@@ -892,7 +922,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                         const FILE_TO_CHECK = DOC.fileName;
 
                         if (!deploy_helpers.isEmptyString(FILE_TO_CHECK)) {
-                            if (!this.isInSettingsFolder(FILE_TO_CHECK)) {
+                            if (!this.isFileIgnored(FILE_TO_CHECK)) {
                                 await deploy_sync.syncDocumentWhenOpen
                                                  .apply(this, [ editor.document ]);
                             }
@@ -1272,7 +1302,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         }
 
         if (!deploy_helpers.isEmptyString(file)) {
-            if (!this.isInSettingsFolder(file)) {
+            if (!this.isFileIgnored(file)) {
                 await deploy_delete.removeOnChange
                                    .apply(this, arguments);
             }

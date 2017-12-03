@@ -134,7 +134,7 @@ export async function findTargetsForFileOfPackage(
     file = deploy_helpers.toStringSafe(file);
     file = Path.resolve(file);
     
-    if (!ME.isPathOf(file)) {
+    if (ME.isFileIgnored(file)) {
         return false;
     }
 

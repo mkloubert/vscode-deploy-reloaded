@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.22",
+ "version": "0.0.23",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.18.0"
@@ -117,6 +117,14 @@
        "description": "Activates or deactivates 'deploy on save' feature for all packages.",
        "type": "boolean",
        "default": true
+      },
+      "ignore": {
+       "description": "One or more pattern of files that should be ignored even if a deploy is started for them.",
+       "type": "array",
+       "items": {
+        "description": "The patterns of files that should be ignored even if a deploy is started for them.",
+        "type": "string"
+       }
       },
       "imports": {
        "description": "Defines of or more JSON files with settings to import.",

@@ -42,7 +42,12 @@ export async function deployFilesTo(files: string[],
         return;
     }
     
-    if (!files || files.length < 1) {
+    if (!files) {
+        return;
+    }
+
+    files = files.filter(f => !ME.isFileIgnored(f));
+    if (files.length < 1) {
         return;
     }
 

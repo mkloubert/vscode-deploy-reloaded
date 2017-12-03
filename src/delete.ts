@@ -104,8 +104,17 @@ export async function deleteFilesIn(files: string[],
                                     target: deploy_targets.Target, targetNr?: number,
                                     deleteLocalFiles?: boolean) {
     const ME: deploy_workspaces.Workspace = this;
+
+    if (ME.isInFinalizeState) {
+        return;
+    }
     
-    if (!files || files.length < 1) {
+    if (!files) {
+        return;
+    }
+
+    files = files.filter(f => !ME.isFileIgnored(f));
+    if (files.length < 1) {
         return;
     }
 
@@ -423,12 +432,11 @@ export async function deletePackage(pkg: deploy_packages.Package,
 export async function removeOnChange(file: string) {
     const ME: deploy_workspaces.Workspace = this;
 
-    try {
-        let relativePath = ME.toRelativePath(file);
-        if (false === relativePath) {
-            return;
-        }
+    if (ME.isInFinalizeState) {
+        return;
+    }
 
+    try {
         const KNOWN_TARGETS = ME.getTargets();
 
         const TARGETS = await deploy_packages.findTargetsForFileOfPackage(file,

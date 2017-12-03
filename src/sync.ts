@@ -42,6 +42,10 @@ interface TargetAndLastModifiedTime {
 export async function syncDocumentWhenOpen(doc: vscode.TextDocument) {
     const ME: deploy_workspaces.Workspace = this;
 
+    if (ME.isInFinalizeState) {
+        return;
+    }
+
     if (!doc) {
         return;
     }
@@ -49,6 +53,10 @@ export async function syncDocumentWhenOpen(doc: vscode.TextDocument) {
     const FILE = Path.resolve(
         doc.fileName
     );
+    if (ME.isFileIgnored(FILE)) {
+        return;
+    }
+
     const FILENAME = Path.basename(FILE);
     const DIR = ME.toRelativePath(
         Path.dirname(FILE)

@@ -89,6 +89,11 @@ export interface Configuration {
      */
     readonly deployOnSave?: boolean;
     /**
+     * One or more (minimatch) patterns of files that should be ignored
+     * even if a deployment is started for them. 
+     */
+    readonly ignore?: string | string[];
+    /**
      * A list of imports.
      */
     readonly imports?: ImportType | ImportType[];
