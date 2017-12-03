@@ -334,7 +334,7 @@ export function normalizeTargetType(target: Target): string {
     const TARGET_TYPE = deploy_helpers.normalizeString(target.type);
     
     return '' !== TARGET_TYPE ? TARGET_TYPE
-                              : 'test';  // default
+                              : 'local';  // default
 }
 
 /**

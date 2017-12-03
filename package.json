@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.28",
+ "version": "0.0.29",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.18.0"
@@ -539,7 +539,8 @@
            },
            "type": {
             "enum": [
-             "local"
+             "local",
+             ""
             ],
             "type": "string",
             "description": "Deploys to a local folder or a shared folder (like SMB) inside your LAN."
@@ -646,8 +647,7 @@
            },
            "type": {
             "enum": [
-             "test",
-             ""
+             "test"
             ],
             "type": "string",
             "description": "A mock deployer that only checks what files will be deployed."
