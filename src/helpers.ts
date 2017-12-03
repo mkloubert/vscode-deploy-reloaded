@@ -74,6 +74,22 @@ export interface OpenOptions {
 }
 
 /**
+ * A function to setup a new button.
+ * 
+ * @param {vscode.StatusBarItem} The new button.
+ * @param {TButton} desc The description.
+ * 
+ * @return {NewButtonSetupResult|PromiseLike<NewButtonSetupResult>} The result.
+ */
+export type NewButtonSetup<TButton extends deploy_contracts.Button = deploy_contracts.Button> =
+    (newBtn: vscode.StatusBarItem, desc: TButton) => NewButtonSetupResult | PromiseLike<NewButtonSetupResult>;
+
+/**
+ * Possible results for NewButtonSetup<TButton> function.
+ */
+export type NewButtonSetupResult = void | boolean | null | undefined;
+
+/**
  * A progress context.
  */
 export interface ProgressContext {
@@ -332,6 +348,83 @@ export function compareValuesBy<T, U>(x: T, y: T,
 }
 
 /**
+ * Creates a new status bar button.
+ * 
+ * @param {TButton} buttonDesc The description for the button.
+ * @param {Function} [setup] On optional function which setups the new button.
+ *                           If you return an explicit (false), the button will be disposed.
+ * 
+ * @return {Promise<vscode.StatusBarItem>} The promise with new new button.
+ */
+export async function createButton<TButton extends deploy_contracts.Button = deploy_contracts.Button>(
+    buttonDesc: TButton,
+    setup?: NewButtonSetup<TButton>
+): Promise<vscode.StatusBarItem> {
+    if (!buttonDesc) {
+        return;
+    }
+
+    if (!toBooleanSafe(buttonDesc.enabled, true)) {
+        return;
+    }
+
+    let newBtn: vscode.StatusBarItem;
+    try {
+        let alignment = toBooleanSafe(buttonDesc.isRight) ? vscode.StatusBarAlignment.Right
+                                                          : vscode.StatusBarAlignment.Left;
+
+        let color = normalizeString(buttonDesc.color);
+        if ('' === color) {
+            color = '#ffffff';
+        }
+
+        let prio = parseInt( toStringSafe(buttonDesc.priority).trim() );
+        if (isNaN(prio)) {
+            prio = undefined;
+        }
+
+        let text = toStringSafe(buttonDesc.text);
+        if (isEmptyString(text)) {
+            text = undefined;
+        }
+
+        let tooltip = toStringSafe(buttonDesc.tooltip);
+        if (isEmptyString(tooltip)) {
+            tooltip = undefined;
+        }
+
+        newBtn = vscode.window.createStatusBarItem(alignment, prio);
+        newBtn.color = color;
+        newBtn.text = text;
+        newBtn.tooltip = tooltip;
+
+        let dispose = false;
+
+        if (setup) {
+            dispose = !toBooleanSafe(
+                await Promise.resolve(
+                    setup(newBtn, buttonDesc)
+                ),
+                true
+            );
+        }
+
+        if (dispose) {
+            if (tryDispose(newBtn)) {
+                newBtn = null;
+            }
+        }
+
+        return newBtn;
+    }
+    catch (e) {
+        tryDispose(newBtn);
+
+        throw e;
+    }
+}
+
+/**
  * Creates a simple 'completed' callback for a promise.
  * 
  * @param {Function} resolve The 'succeeded' callback.
@@ -435,7 +528,7 @@ export function filterConditionalItems<TItem extends deploy_contracts.Conditiona
                 if ('' !== CONDITION.trim()) {
                     const CTX: deploy_code.CodeExecutionContext = {
                         code: CONDITION,
-                        values: this.othersProvider(),
+                        values: [],
                     };
 
                     return deploy_code.exec( CTX );
@@ -764,17 +857,6 @@ export function isBool(val: any): val is boolean {
 }
 
 /**
- * Checks if a value is a function or not.
- * 
- * @param {any} val The value to check.
- * 
- * @return {boolean} Is function or not. 
- */
-export function isFunc<TFunc extends Function = Function>(val: any): val is TFunc {
-    return 'function' === typeof val;
-}
-
-/**
  * Checks if the string representation of a value is empty
  * or contains whitespaces only.
  * 
@@ -784,6 +866,17 @@ export function isFunc<TFunc extends Function = Function>(val: any): val is TFun
  */
 export function isEmptyString(val: any) {
     return '' === toStringSafe(val).trim();
+}
+
+/**
+ * Checks if a value is a function or not.
+ * 
+ * @param {any} val The value to check.
+ * 
+ * @return {boolean} Is function or not. 
+ */
+export function isFunc<TFunc extends Function = Function>(val: any): val is TFunc {
+    return 'function' === typeof val;
 }
 
 /**
@@ -806,7 +899,8 @@ export function isNullOrUndefined(val: any): boolean {
  * @return {boolean} Is object or not. 
  */
 export function isObject<TObj = Object>(val: any): val is TObj {
-    return !Array.isArray(val) &&
+    return !isNullOrUndefined(val) &&
+           !Array.isArray(val) &&
            'object' === typeof val;
 }
 
@@ -819,6 +913,17 @@ export function isObject<TObj = Object>(val: any): val is TObj {
  */
 export function isString(val: any): val is string {
     return 'string' === typeof val;
+}
+
+/**
+ * Checks if a value is a symbol or not.
+ * 
+ * @param {any} val The value to check.
+ * 
+ * @return {boolean} Is symbol or not. 
+ */
+export function isSymbol(val: any): val is symbol {
+    return 'symbol' === typeof val;
 }
 
 /**

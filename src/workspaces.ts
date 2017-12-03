@@ -51,6 +51,12 @@ export interface DownloadFromSettingsUriOutValue {
     source?: 'local';
 }
 
+interface PackageWithButton {
+    readonly button: vscode.StatusBarItem;
+    readonly command: vscode.Disposable;
+    readonly package: deploy_packages.Package;
+}
+
 /**
  * Object that stores the states for 'sync when open'.
  */
@@ -136,6 +142,7 @@ export interface WorkspaceSettings extends deploy_contracts.Configuration, vscod
 
 
 const FILES_CHANGES: { [path: string]: deploy_contracts.FileChangeType } = {};
+let nextPackageButtonId = Number.MIN_SAFE_INTEGER;
 
 /**
  * A workspace.
@@ -169,6 +176,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Stores the last timestamp of configuration update.
      */
     protected _lastConfigUpdate: Moment.Moment;
+    private _PACKAGE_BUTTONS: PackageWithButton[] = [];
     /**
      * Stores the start time.
      */
@@ -220,6 +228,15 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     public get canDoAutoOperations() {
         return !this.isInFinalizeState &&
                !this.isReloadingConfig;
+    }
+
+    private cleanupPackageButtons() {
+        while (this._PACKAGE_BUTTONS.length > 0) {
+            const PBTN = this._PACKAGE_BUTTONS.shift();
+
+            deploy_helpers.tryDispose(PBTN.button);
+            deploy_helpers.tryDispose(PBTN.command);
+        }
     }
 
     /**
@@ -543,6 +560,17 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             (<any>p)['__searchValue'] = deploy_helpers.normalizeString(
                 deploy_packages.getPackageName(p)
             );
+
+            Object.defineProperty(p, '__button', {
+                enumerable: true,
+
+                get: () => {
+                    return Enumerable.from(ME._PACKAGE_BUTTONS).where(pwb => {
+                        return pwb.package.__id === p.__id;
+                    }).select(pwb => pwb.button)
+                      .singleOrDefault(undefined);
+                }
+            });
         }).toArray();
 
         packages = deploy_helpers.filterConditionalItems(packages);
@@ -1260,6 +1288,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 if (deploy_helpers.toBooleanSafe(loadedCfg.openOutputOnStartup, true)) {
                     ME.context.outputChannel.show();
                 }
+
+                await ME.reloadPackageButtons();
             };
         }
         catch (e) {
@@ -1310,6 +1340,94 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             }
 
             ME._isReloadingConfig = false;
+        }
+    }
+
+    private async reloadPackageButtons() {
+        const ME = this;
+
+        ME.cleanupPackageButtons();
+
+        for (const P of ME.getPackages()) {
+            let buttonDesc: deploy_packages.PackageButton;
+
+            const DEFAULT_BTN_TEXT = `Deploy package '${ deploy_packages.getPackageName(P) }'`;
+            const DEFAULT_BTN_TOOLTIP = `Click here to start deployment...`;
+            
+            if (!deploy_helpers.isNullOrUndefined(P.button)) {
+                if (deploy_helpers.isObject<deploy_packages.PackageButton>(P.button)) {
+                    buttonDesc = P.button;
+                }
+                else {
+                    if (deploy_helpers.toBooleanSafe(P.button, true)) {
+                        //TODO: translate
+                        buttonDesc = {
+                            text: DEFAULT_BTN_TEXT,
+                            tooltip: DEFAULT_BTN_TOOLTIP,
+                        };
+                    }
+                }
+            }
+
+            if (!buttonDesc) {
+                continue;
+            }
+
+            if (!deploy_helpers.toBooleanSafe(buttonDesc.enabled, true)) {
+                continue;
+            }
+
+            let newBtn: vscode.StatusBarItem;
+            let newBtnCommand: vscode.Disposable;
+            try {
+                newBtn = await deploy_helpers.createButton(buttonDesc, async (b, pb) => {
+                    const PACKAGE_TO_DEPLOY = P;
+
+                    let newCmdId = deploy_helpers.toStringSafe(pb.command);
+                    if (deploy_helpers.isEmptyString(newCmdId)) {
+                        newCmdId = `extension.deploy.reloaded.buttons.deployPackage${nextPackageButtonId++}`;
+                    }
+
+                    if ((await vscode.commands.getCommands()).indexOf(newCmdId) < 0) {
+                        newBtnCommand = vscode.commands.registerCommand(newCmdId, async () => {
+                            try {
+                                await ME.deployPackage(PACKAGE_TO_DEPLOY);
+                            }
+                            catch (e) {
+                                //TODO: translate
+                                await ME.showErrorMessage(
+                                    `Could not deploy package '${deploy_packages.getPackageName(PACKAGE_TO_DEPLOY)}': '${deploy_helpers.toStringSafe(e)}'`
+                                );
+                            }
+                        });
+                    }
+
+                    if (deploy_helpers.isEmptyString(b.text)) {
+                        b.text = DEFAULT_BTN_TEXT;
+                    }
+
+                    if (deploy_helpers.isEmptyString(b.tooltip)) {
+                        b.tooltip = DEFAULT_BTN_TOOLTIP;
+                    }
+
+                    b.command = newCmdId;
+
+                    ME._PACKAGE_BUTTONS.push({
+                        button: b,
+                        command: newBtnCommand,
+                        package: PACKAGE_TO_DEPLOY,
+                    });
+
+                    b.show();
+                });
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .trace(e, 'workspaces.Workspace.reloadPackageButtons()');
+
+                deploy_helpers.tryDispose(newBtn);
+                deploy_helpers.tryDispose(newBtnCommand);
+            }
         }
     }
 

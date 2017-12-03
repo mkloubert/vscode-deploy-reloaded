@@ -45,7 +45,7 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
     }
 
     const WORKSPACE = context.target.__workspace;
-    const WAIT = deploy_helpers.toBooleanSafe(context.operation.wait);
+    const WAIT = deploy_helpers.toBooleanSafe(context.operation.wait, true);
 
     await deploy_helpers.open(TARGET_TO_OPEN, {
         cwd: WORKSPACE.folder.uri.fsPath,

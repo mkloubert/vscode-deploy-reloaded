@@ -36,6 +36,46 @@ export interface ActionQuickPick<TState = any> extends vscode.QuickPickItem {
 }
 
 /**
+ * A button.
+ */
+export interface Button {
+    /**
+     * The custom (text) color.
+     */
+    color?: string;
+    /**
+     * Enable button or not.
+     */
+    enabled?: boolean;
+    /**
+     * Put button on the right side or not.
+     */
+    isRight?: boolean;
+    /**
+     * The priority.
+     */
+    priority?: number;
+    /**
+     * A custom text for the button.
+     */
+    text?: string;
+    /**
+     * A custom tooltip for the button.
+     */
+    tooltip?: string;
+}
+
+/**
+ * A button with a custom command.
+ */
+export interface ButtonWithCustomCommand extends Button {
+    /**
+     * The custom command.
+     */
+    readonly command?: string;
+}
+
+/**
  * An object whats operation(s) can be cancelled.
  */
 export interface Cancelable {

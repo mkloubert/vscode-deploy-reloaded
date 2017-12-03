@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.29",
+ "version": "0.0.30",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.18.0"
@@ -193,6 +193,52 @@
        "items": {
         "type": "object",
         "properties": {
+         "button": {
+          "oneOf": [
+           {
+            "description": "Indicates if a button should be created for that package in the status bar or not.",
+            "type": "boolean",
+            "default": false
+           },
+           {
+            "description": "Defines a button for the status bar.",
+            "type": "object",
+            "properties": {
+             "color": {
+              "description": "The (text) color for the button.",
+              "type": "string",
+              "default": "#ffffff"
+             },
+             "command": {
+              "description": "The custom ID for the command.",
+              "type": "string"
+             },
+             "enable": {
+              "description": "Enable button or not.",
+              "type": "boolean",
+              "default": true
+             },
+             "isRight": {
+              "description": "Put button on the right side or not.",
+              "type": "boolean",
+              "default": false
+             },
+             "priority": {
+              "description": "The priority.",
+              "type": "integer"
+             },
+             "text": {
+              "description": "The custom display text.",
+              "type": "string"
+             },
+             "tooltip": {
+              "description": "The custom tooltip.",
+              "type": "string"
+             }
+            }
+           }
+          ]
+         },
          "deployOnChange": {
           "description": "Defines if 'deploy on change' should be used for that package.",
           "oneOf": [

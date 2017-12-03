@@ -22,6 +22,7 @@ import * as deploy_targets from './targets';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
 import * as Path from 'path';
+import * as vscode from 'vscode';
 
 
 /**
@@ -32,6 +33,17 @@ export interface Package extends deploy_contracts.ConditionalItem,
                                  deploy_contracts.WithOptionalName,
                                  deploy_targets.TargetProvider,
                                  deploy_workspaces.WorkspaceItemFromSettings {
+    /**
+     * [INTERNAL] DO NOT DEFINE OR OVERWRITE THIS PROPERTY BY YOUR OWN!
+     * 
+     * The optional status bar button.
+     */
+    readonly __button: vscode.StatusBarItem;
+
+    /**
+     * Deines a package button for the status bar.
+     */
+    readonly button?: PackageButton | boolean;
     /**
      * Settings for 'deploy on change' feature.
      */
@@ -52,6 +64,12 @@ export interface Package extends deploy_contracts.ConditionalItem,
      * Activates or deactivates "sync when open" feature for that package.
      */
     readonly syncWhenOpen?: boolean | string | SyncWhenOpenSetting;
+}
+
+/**
+ * A package button.
+ */
+export interface PackageButton extends deploy_contracts.ButtonWithCustomCommand {
 }
 
 /**
