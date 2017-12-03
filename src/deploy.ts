@@ -60,7 +60,7 @@ export async function deployFilesTo(files: string[],
     }
 
     const TARGET_NAME = deploy_targets.getTargetName(target);
-    const TARGET_TYPE = deploy_helpers.normalizeString(target.type);
+    const TARGET_TYPE = deploy_targets.normalizeTargetType(target);
 
     const PLUGINS = ME.context.plugins.filter(pi => {
         return '' === pi.__type || 

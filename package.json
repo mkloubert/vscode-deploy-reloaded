@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.23",
+ "version": "0.0.24",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.18.0"
@@ -276,6 +276,24 @@
           "description": "A description for that package.",
           "type": "string"
          },
+         "exclude": {
+          "description": "A list of one or more (glob) patterns of files, that should be execluded from deployment.",
+          "type": "array",
+          "items": {
+           "type": "string"
+          }
+         },
+         "files": {
+          "description": "A list of one or more (glob) patterns of files that should be deployed. By default ALL files will be deployed.",
+          "type": "array",
+          "items": {
+           "type": "string"
+          }
+         },
+         "if": {
+          "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+          "type": "string"
+         },
          "name": {
           "description": "A (display) name for that package.",
           "type": "string"
@@ -362,6 +380,13 @@
             }
            }
           ]
+         },
+         "targets": {
+          "description": "One or more explicit targets.",
+          "type": "array",
+          "items": {
+           "type": "string"
+          }
          }
         }
        }
@@ -410,8 +435,71 @@
        "description": "One or more targets to define.",
        "type": "array",
        "items": {
-        "type": "object",
-        "properties": {}
+        "oneOf": [
+         {
+          "type": "object",
+          "properties": {
+           "description": {
+            "description": "A description for that target.",
+            "type": "string"
+           },
+           "if": {
+            "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+            "type": "string"
+           },
+           "name": {
+            "description": "The (display) name of that target.",
+            "type": "string"
+           },
+           "transformer": {
+            "description": "The path (or URI) to the data transformer script.",
+            "type": "string"
+           },
+           "transformerOptions": {
+            "description": "Options for the data transformer script."
+           },
+           "type": {
+            "enum": [
+             "local"
+            ],
+            "type": "string",
+            "description": "Deploys to a local folder or a shared folder (like SMB) inside your LAN."
+           }
+          }
+         },
+         {
+          "type": "object",
+          "properties": {
+           "description": {
+            "description": "A description for that target.",
+            "type": "string"
+           },
+           "if": {
+            "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+            "type": "string"
+           },
+           "name": {
+            "description": "The (display) name of that target.",
+            "type": "string"
+           },
+           "transformer": {
+            "description": "The path (or URI) to the data transformer script.",
+            "type": "string"
+           },
+           "transformerOptions": {
+            "description": "Options for the data transformer script."
+           },
+           "type": {
+            "enum": [
+             "test",
+             ""
+            ],
+            "type": "string",
+            "description": "A mock deployer that only checks what files will be deployed."
+           }
+          }
+         }
+        ]
        }
       },
       "timeToWaitBeforeActivateDeployOnChange": {

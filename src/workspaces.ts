@@ -402,7 +402,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             return;
         }
 
-        const TARGET_TYPE = deploy_helpers.normalizeString(target.type);
+        const TARGET_TYPE = deploy_targets.normalizeTargetType(target);
 
         return this.context.plugins.filter(pi => {
             const PLUGIN_TYPE = deploy_helpers.normalizeString(pi.__type);
@@ -424,7 +424,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             return;
         }
 
-        const TARGET_TYPE = deploy_helpers.normalizeString(target.type);
+        const TARGET_TYPE = deploy_targets.normalizeTargetType(target);
 
         return this.context.plugins.filter(pi => {
             const PLUGIN_TYPE = deploy_helpers.normalizeString(pi.__type);
@@ -482,7 +482,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             return;
         }
 
-        const TARGET_TYPE = deploy_helpers.normalizeString(target.type);
+        const TARGET_TYPE = deploy_targets.normalizeTargetType(target);
 
         return this.context.plugins.filter(pi => {
             const PLUGIN_TYPE = deploy_helpers.normalizeString(pi.__type);
@@ -640,7 +640,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             return;
         }
 
-        const TARGET_TYPE = deploy_helpers.normalizeString(target.type);
+        const TARGET_TYPE = deploy_targets.normalizeTargetType(target);
 
         return this.context.plugins.filter(pi => {
             const PLUGIN_TYPE = deploy_helpers.normalizeString(pi.__type);
@@ -1090,13 +1090,13 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             ME._isDeployOnChangeFreezed = false;
             ME._isRemoveOnChangeFreezed = false;
 
-            // runGitPullOnStartup
-            await deploy_tasks.runGitPullOnStartup
-                              .apply(ME, []);
-
             let loadedCfg: WorkspaceSettings = vscode.workspace.getConfiguration(ME.configSource.section,
                                                                                  ME.configSource.resource) || <any>{};
             loadedCfg = deploy_helpers.cloneObjectFlat(loadedCfg);
+
+            // runGitPullOnStartup
+            await deploy_tasks.runGitPullOnStartup
+                              .apply(ME, [ loadedCfg ]);
 
             // imports
             try {

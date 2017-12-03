@@ -91,14 +91,14 @@ export async function runBuildTaskOnStartup() {
 /**
  * Runs the git pull, if defined in config.
  */
-export async function runGitPullOnStartup() {
+export async function runGitPullOnStartup(cfg?: deploy_workspaces.WorkspaceSettings) {
     if (gitPullAlreadyRun) {
         return;
     }
     gitPullAlreadyRun = true;
 
     const ME: deploy_workspaces.Workspace = this;
-    const CFG = ME.config;
+    const CFG = cfg || ME.config;
 
     // close old timer (if defined)
     try {

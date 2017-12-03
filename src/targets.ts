@@ -125,6 +125,24 @@ export function getTargetsByName(targetNames: string | string[],
 }
 
 /**
+ * Normalizes the type of a target.
+ * 
+ * @param {Target} target The target.
+ * 
+ * @return {string} The normalized target type.
+ */
+export function normalizeTargetType(target: Target): string {
+    if (!target) {
+        return <any>target;
+    }
+
+    const TARGET_TYPE = deploy_helpers.normalizeString(target.type);
+    
+    return '' !== TARGET_TYPE ? TARGET_TYPE
+                              : 'test';  // default
+}
+
+/**
  * Shows a quick for targets.
  * 
  * @param {TTarget|TTarget[]} targets One or more target.

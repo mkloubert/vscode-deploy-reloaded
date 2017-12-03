@@ -20,7 +20,7 @@
  */
 export interface CanTransformData {
     /**
-     * The path to the transformer script.
+     * The path (or URI) to the transformer script.
      */
     readonly transformer?: string;
     /**
