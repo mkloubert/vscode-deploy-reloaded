@@ -339,8 +339,12 @@ export abstract class FileToUploadBase implements FileToUpload {
 
         if (this.transformer) {
             const CONTEXT: deploy_transformers.DataTransformerContext = {
+                globals: this.workspace.globals,
                 mode: deploy_transformers.DataTransformerMode.Transform,
                 options: this.transformerOptions,
+                require: (id) => {
+                    return deploy_helpers.requireFromExtension(id);
+                },
             };
             
             data = await Promise.resolve(

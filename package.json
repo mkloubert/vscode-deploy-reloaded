@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.27",
+ "version": "0.0.28",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.18.0"
@@ -117,6 +117,9 @@
        "description": "Activates or deactivates 'deploy on save' feature for all packages.",
        "type": "boolean",
        "default": true
+      },
+      "globals": {
+       "description": "Global data to define, which can be access by scripts, e.g."
       },
       "ignore": {
        "description": "One or more pattern of files that should be ignored even if a deploy is started for them.",

@@ -90,6 +90,10 @@ export interface Configuration extends deploy_values.WithValueItems {
      */
     readonly deployOnSave?: boolean;
     /**
+     * Global data to define.
+     */
+    readonly globals?: any;
+    /**
      * One or more (minimatch) patterns of files that should be ignored
      * even if a deployment is started for them. 
      */
@@ -215,6 +219,20 @@ export interface PackageFile {
      * The version string.
      */
     readonly version: string;
+}
+
+/**
+ * Arguments for a script.
+ */
+export interface ScriptArguments {
+    /**
+     * Global data.
+     */
+    readonly globals: any;
+    /**
+     * Imports a module from the extension context.
+     */
+    readonly require: (id: any) => any;
 }
 
 /**

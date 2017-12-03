@@ -659,6 +659,13 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     }
 
     /**
+     * Global data as defined in the settings.
+     */
+    public get globals(): any {
+        return deploy_helpers.cloneObject(this.config.globals);
+    }
+
+    /**
      * Initializes that workspace.
      * 
      * @return {Promise<boolean>} The promise that indicates if operation was successful or not.

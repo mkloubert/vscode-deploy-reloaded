@@ -15,6 +15,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as deploy_contracts from './contracts';
+
+
 /**
  * An object that can transform data.
  */
@@ -41,7 +44,7 @@ export type DataTransformer = (input: Buffer, context: DataTransformerContext) =
 /**
  * A data transformer context.
  */
-export interface DataTransformerContext {
+export interface DataTransformerContext extends deploy_contracts.ScriptArguments {
     /**
      * The sub context.
      */

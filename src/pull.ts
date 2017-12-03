@@ -228,8 +228,12 @@ export async function pullFilesFrom(files: string[],
 
                                         if (TRANSFORMER) {
                                             const CONTEXT: deploy_transformers.DataTransformerContext = {
+                                                globals: ME.globals,
                                                 mode: deploy_transformers.DataTransformerMode.Restore,
                                                 options: this.transformerOptions,
+                                                require: (id) => {
+                                                    return deploy_helpers.requireFromExtension(id);
+                                                },
                                             };
 
                                             dataToWrite = await TRANSFORMER(
