@@ -23,6 +23,8 @@ import * as vscode from 'vscode';
 
 let buildTaskAlreadyRun = false;
 let buildTaskTimer: NodeJS.Timer;
+let gitPullAlreadyRun = false;
+let gitPullTimer: NodeJS.Timer;
 
 /**
  * Runs build task on startup.
@@ -45,7 +47,7 @@ export async function runBuildTaskOnStartup() {
     }
     catch (e) {
         deploy_log.CONSOLE
-                  .trace(e, 'tasks.runBuildTask(1)');
+                  .trace(e, 'tasks.runBuildTaskOnStartup(1)');
     }
     finally {
         buildTaskTimer = null;
@@ -54,7 +56,7 @@ export async function runBuildTaskOnStartup() {
     let doRun = false;
     let timeToWait: number;
     if (!deploy_helpers.isNullOrUndefined(CFG.runBuildTaskOnStartup)) {
-        if ('boolean' === typeof CFG.runBuildTaskOnStartup) {
+        if (deploy_helpers.isBool(CFG.runBuildTaskOnStartup)) {
             doRun = CFG.runBuildTaskOnStartup;
         }
         else {
@@ -68,7 +70,7 @@ export async function runBuildTaskOnStartup() {
         vscode.commands.executeCommand('workbench.action.tasks.build').then(() => {
         }, (err) => {
             deploy_log.CONSOLE
-                      .trace(err, 'tasks.runBuildTask(1)');
+                      .trace(err, 'tasks.runBuildTaskOnStartup(2)');
         });
     };
 
@@ -82,6 +84,68 @@ export async function runBuildTaskOnStartup() {
     else {
         buildTaskTimer = setTimeout(() => {
             RUN_BUILD();
+        }, timeToWait);
+    }
+}
+
+/**
+ * Runs the git pull, if defined in config.
+ */
+export async function runGitPullOnStartup() {
+    if (gitPullAlreadyRun) {
+        return;
+    }
+    gitPullAlreadyRun = true;
+
+    const ME: deploy_workspaces.Workspace = this;
+    const CFG = ME.config;
+
+    // close old timer (if defined)
+    try {
+        let gpt = gitPullTimer;
+        if (gpt) {
+            clearTimeout(gpt);
+        }
+    }
+    catch (e) {
+        deploy_log.CONSOLE
+                  .trace(e, 'tasks.runGitPullOnStartup(1)');
+    }
+    finally {
+        gitPullTimer = null;
+    }
+
+    let doRun = false;
+    let timeToWait: number;
+    if (!deploy_helpers.isNullOrUndefined(CFG.runGitPullOnStartup)) {
+        if (deploy_helpers.isBool(CFG.runGitPullOnStartup)) {
+            doRun = CFG.runGitPullOnStartup;
+        }
+        else {
+            doRun = true;
+
+            timeToWait = parseInt(deploy_helpers.toStringSafe(CFG.runGitPullOnStartup));
+        }
+    }
+
+    const RUN_PULL = () => {
+        vscode.commands.executeCommand('git.pull').then(() => {
+        }, (err) => {
+            deploy_log.CONSOLE
+                      .trace(err, 'tasks.runGitPullOnStartup(2)');
+        });
+    };
+
+    if (!doRun) {
+        return;
+    }
+
+    if (isNaN(timeToWait)) {
+        RUN_PULL();
+    }
+    else {
+        gitPullTimer = setTimeout(() => {
+            RUN_PULL();
         }, timeToWait);
     }
 }

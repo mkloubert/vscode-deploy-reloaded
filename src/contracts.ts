@@ -114,6 +114,11 @@ export interface Configuration {
      */
     readonly runBuildTaskOnStartup?: boolean | number;
     /**
+     * Run Git pull on startup or define the wait time, in milliseconds, after
+     * Git pull should be run after startup.
+     */
+    readonly runGitPullOnStartup?: boolean | number;
+    /**
      * Activates or deactivates "sync when open" feature.
      */
     readonly syncWhenOpen?: boolean;

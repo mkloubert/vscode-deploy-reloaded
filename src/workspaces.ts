@@ -1060,6 +1060,10 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             ME._isDeployOnChangeFreezed = false;
             ME._isRemoveOnChangeFreezed = false;
 
+            // runGitPullOnStartup
+            await deploy_tasks.runGitPullOnStartup
+                              .apply(ME, []);
+
             let loadedCfg: WorkspaceSettings = vscode.workspace.getConfiguration(ME.configSource.section,
                                                                                  ME.configSource.resource) || <any>{};
             loadedCfg = deploy_helpers.cloneObjectFlat(loadedCfg);
