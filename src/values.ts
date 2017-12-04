@@ -192,6 +192,28 @@ export class StaticValue extends ValueBase<StaticValueItem> {
     }
 }
 
+/**
+ * Returns value instances of the current list of environment variables.
+ * 
+ * @return {Value[]} Placeholders of process's environment variables.
+ */
+export function getEnvVars(): Value[] {
+    const ENV_VARS: Value[] = [];
+    const APPEND_VAR = (name: string) => {
+        ENV_VARS.push(new FunctionValue(() => {
+            return process.env[name];
+        }, name));
+    };
+    
+    const ENV = process.env;
+    if (ENV) {
+        for (const N in ENV) {
+            APPEND_VAR(N);
+        }
+    }
+
+    return ENV_VARS;
+}
 
 /**
  * Loads values from value item settings.

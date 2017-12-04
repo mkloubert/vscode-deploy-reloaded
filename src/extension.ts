@@ -167,39 +167,34 @@ async function onDidChangeActiveTextEditor(editor: vscode.TextEditor) {
 
     const NEW_ACTIVE_WORKSPACES: deploy_workspaces.Workspace[] = [];
     try {
-        try {
-            await deploy_helpers.forEachAsync(WORKSPACES, async (ws) => {
-                try {
-                    let doc: vscode.TextDocument;
-                    if (editor) {
-                        doc = editor.document;
-                    }
+        await deploy_helpers.forEachAsync(WORKSPACES, async (ws) => {
+            try {
+                let doc: vscode.TextDocument;
+                if (editor) {
+                    doc = editor.document;
+                }
 
-                    let isForWorkspace = !doc;
+                let isForWorkspace = !doc;
+                if (!isForWorkspace) {
+                    isForWorkspace = deploy_helpers.isEmptyString(doc.fileName);
                     if (!isForWorkspace) {
-                        isForWorkspace = deploy_helpers.isEmptyString(doc.fileName);
-                        if (!isForWorkspace) {
-                            isForWorkspace = ws.isPathOf(doc.fileName);
-                        }
-                    }
-
-                    if (!editor || isForWorkspace) {
-                        if (doc) {
-                            NEW_ACTIVE_WORKSPACES.push(ws);
-                        }
-
-                        await ws.onDidChangeActiveTextEditor(editor);
+                        isForWorkspace = ws.isPathOf(doc.fileName);
                     }
                 }
-                catch (e) {
-                    deploy_log.CONSOLE
-                            .err(e, 'extension.onDidChangeActiveTextEditor(2)');
+
+                if (!editor || isForWorkspace) {
+                    if (doc) {
+                        NEW_ACTIVE_WORKSPACES.push(ws);
+                    }
+
+                    await ws.onDidChangeActiveTextEditor(editor);
                 }
-            });
-        }
-        finally {
-            await updateWorkspaceButton();
-        }
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                        .err(e, 'extension.onDidChangeActiveTextEditor(2)');
+            }
+        });
     }
     catch (e) {
         deploy_log.CONSOLE
@@ -207,6 +202,8 @@ async function onDidChangeActiveTextEditor(editor: vscode.TextEditor) {
     }
     finally {
         activeWorkspaces = NEW_ACTIVE_WORKSPACES;
+
+        await updateActiveWorkspaces();
     }
 }
 
@@ -354,7 +351,7 @@ async function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?:
         );
     }
 
-    await updateWorkspaceButton();
+    await updateActiveWorkspaces();
 }
 
 async function reloadPlugins() {
@@ -490,6 +487,20 @@ async function reloadPlugins() {
             `Plugin folder '${PLUGIN_DIR}' does NOT exist!`
         );
     }
+}
+
+async function updateActiveWorkspaces() {
+    try {
+        deploy_helpers.asArray(activeWorkspaces).forEach((ws) => {
+            ws.reloadEnvVars();
+        });    
+    }
+    catch (e) {
+        deploy_log.CONSOLE
+                  .trace(e, 'extension.updateActiveWorkspaces()');
+    }
+
+    await updateWorkspaceButton();
 }
 
 async function updateWorkspaceButton() {
@@ -805,8 +816,6 @@ async function activateExtension(context: vscode.ExtensionContext) {
 
                             action: async () => {
                                 activeWorkspaces = [ ws ];
-
-                                await updateWorkspaceButton();
                             }
                         };
                     });
@@ -850,7 +859,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
                     );
                 }
                 finally {
-                    await updateWorkspaceButton();
+                    await updateActiveWorkspaces();
                 }
             }),
         );
@@ -980,7 +989,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
 
     // update 'select workspace' button
     WF.next(async () => {
-        await updateWorkspaceButton();
+        await updateActiveWorkspaces();
     });
 
     if (!isDeactivating) {

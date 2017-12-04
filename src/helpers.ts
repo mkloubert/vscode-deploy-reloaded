@@ -1452,11 +1452,21 @@ export function toStringSafe(str: any, defValue: any = ''): string {
     }
 
     try {
+        try {
+            if (Array.isArray(str) || isObject(str)) {
+                return JSON.stringify(str);
+            }
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'helpers.toStringSafe(2)');
+        }
+
         return '' + str;
     }
     catch (e) {
         deploy_log.CONSOLE
-                  .trace(e, 'helpers.toStringSafe()');
+                  .trace(e, 'helpers.toStringSafe(1)');
 
         return typeof str;
     }

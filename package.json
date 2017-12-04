@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.33",
+ "version": "0.0.34",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.18.0"
@@ -117,6 +117,26 @@
        "description": "Activates or deactivates 'deploy on save' feature for all packages.",
        "type": "boolean",
        "default": true
+      },
+      "env": {
+       "description": "Settings for the process's environment.",
+       "type": "object",
+       "properties": {
+        "importVarsAsPlaceholders": {
+         "description": "Automatically import environment variables as placesholders / values.",
+         "type": "boolean",
+         "default": true
+        },
+        "vars": {
+         "description": "One or more variables for the process to define.",
+         "type": "object",
+         "patternProperties": {
+          "(.*)": {
+           "description": "A value for that variable."
+          }
+         }
+        }
+       }
       },
       "globals": {
        "description": "Global data to define, which can be access by scripts, e.g."

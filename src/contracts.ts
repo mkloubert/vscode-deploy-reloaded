@@ -130,6 +130,19 @@ export interface Configuration extends deploy_values.WithValueItems {
      */
     readonly deployOnSave?: boolean;
     /**
+     * Settings for the process's environment.
+     */
+    readonly env?: {
+        /**
+         * Automatically import environment variables as placesholders / values.
+         */
+        readonly importVarsAsPlaceholders?: boolean;
+        /**
+         * One or more variable for the process to define.
+         */
+        readonly vars?: KeyValuePairs;
+    };
+    /**
      * Global data to define.
      */
     readonly globals?: any;
@@ -232,6 +245,11 @@ export interface Import extends ConditionalItem {
  * Import types.
  */
 export type ImportType = string | Import;
+
+/**
+ * A key value paris.
+ */
+export type KeyValuePairs<TValue = any> = { [key: string]: TValue };
 
 /**
  * A message item with a value.

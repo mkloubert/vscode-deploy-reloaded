@@ -176,6 +176,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Stores the last timestamp of configuration update.
      */
     protected _lastConfigUpdate: Moment.Moment;
+    private _OLD_ENV_VARS: deploy_contracts.KeyValuePairs = {};
     private _PACKAGE_BUTTONS: PackageWithButton[] = [];
     /**
      * Stores the start time.
@@ -753,7 +754,31 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Returns the list of values.
      */
     public getValues(): deploy_values.Value[] {
-        return deploy_values.loadFromItems(this.config);
+        const CFG = this.config;
+        
+        let values: deploy_values.Value[] = [];
+
+        // process's environment variables
+        try {
+            let importEnvVars = true;
+            if (CFG.env) {
+                importEnvVars = deploy_helpers.toBooleanSafe(CFG.env.importVarsAsPlaceholders, true);
+            }
+
+            if (importEnvVars) {
+                values = values.concat( deploy_values.getEnvVars() );
+            }
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'workspaces.Workspace.getValues(1)');
+        }
+
+        values = values.concat(
+            deploy_values.loadFromItems(this.config)
+        );
+
+        return values;
     }
 
     /**
@@ -1410,6 +1435,41 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             }
 
             ME._isReloadingConfig = false;
+        }
+    }
+
+    /**
+     * Reloads the environment variables as defined in the settings.
+     */
+    public reloadEnvVars() {
+        const CFG = this.config;
+
+        try {
+            // restore old values
+            const OLD_VARS: string[] = [];
+            for (const OV in this._OLD_ENV_VARS) {
+                OLD_VARS.push( OV );
+            }
+            for (const OV of OLD_VARS) {
+                process.env[OV] = this._OLD_ENV_VARS[OV]; 
+                delete this._OLD_ENV_VARS[OV];
+            }
+
+            if (CFG.env) {
+                const VARS = CFG.env.vars;
+                if (VARS) {
+                    // set own
+
+                    for (const OV in VARS) {
+                        this._OLD_ENV_VARS[OV] = process.env[OV];
+                        process.env[OV] = deploy_helpers.toStringSafe(VARS[OV]);
+                    }
+                }
+            }
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'workspaces.Workspace.reloadEnvVars()');
         }
     }
 
