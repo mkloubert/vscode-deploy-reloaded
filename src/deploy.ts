@@ -171,11 +171,9 @@ export async function deployFilesTo(files: string[],
 
                 const FILES_TO_UPLOAD: deploy_plugins.LocalFileToUpload[] = [];
                 for (const F of files) {
-                    const NAME_AND_PATH = ME.toNameAndPath(F);
+                    const NAME_AND_PATH = ME.getNameAndPathForFileDeployment(F, target);
                     if (false === NAME_AND_PATH) {
-                        // TODO: translate
-                        ME.context.outputChannel.append(`Cannot detect path information for file '${F}'!`);
-                        continue;
+                        return null;
                     }
 
                     const LF = new deploy_plugins.LocalFileToUpload(ME, F, NAME_AND_PATH);

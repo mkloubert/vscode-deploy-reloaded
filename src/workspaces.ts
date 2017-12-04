@@ -511,6 +511,46 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     }
 
     /**
+     * Returns the name and path for a file deployment.
+     * 
+     * @param {string} file The file.
+     * @param {deploy_targets.Target} target The target.
+     */
+    public getNameAndPathForFileDeployment(file: string, target: deploy_targets.Target) {
+        file = deploy_helpers.toStringSafe(file);
+
+        if (!target) {
+            return;
+        }
+
+        if (!this.canBeHandledByMe) {
+            // TODO: translate
+            this.context.outputChannel.append(`Target '${deploy_targets.getTargetName(target)}' cannot be used for file '${file}'!`);
+            return false;
+        }
+
+        const NAME_AND_PATH = this.toNameAndPath(file);
+        if (false === NAME_AND_PATH) {
+            // TODO: translate
+            this.context.outputChannel.append(`Cannot detect path information for file '${file}'!`);
+            return false;
+        }
+
+        const MAPPED_PATH = deploy_targets.getMappedTargetFilePath(target,
+                                                                   NAME_AND_PATH.path,
+                                                                   NAME_AND_PATH.name);
+
+        const MAPPED_NAME_AND_PATH = this.toNameAndPath(MAPPED_PATH);
+        if (false === MAPPED_NAME_AND_PATH) {
+            // TODO: translate
+            this.context.outputChannel.append(`Cannot detect mapped path information for file '${file}'!`);
+            return false;
+        }
+
+        return MAPPED_NAME_AND_PATH;
+    }
+
+    /**
      * Returns the ID of a package.
      * 
      * @param {deploy_packages.Package} package The package.
@@ -1631,7 +1671,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         workspaceDir = deploy_helpers.replaceAllStrings(workspaceDir, Path.sep, '/');
 
         if (!Path.isAbsolute(file)) {
-            Path.join(workspaceDir, file);
+            file = Path.join(workspaceDir, file);
         }
         file = Path.resolve(file);
         file = deploy_helpers.replaceAllStrings(file, Path.sep, '/');

@@ -17,11 +17,14 @@
 
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
+import * as deploy_mappings from './mappings';
 import * as deploy_packages from './packages';
 import * as deploy_targets_operations_open from './targets/operations/open';
 import * as deploy_transformers from './transformers';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
+import * as Minimatch from 'minimatch';
+import * as Path from 'path';
 import * as vscode from 'vscode';
 
 
@@ -52,6 +55,10 @@ export interface Target extends deploy_transformers.CanTransformData,
      * if that target is hidden from GUI if one of the package(s) has been selected.
      */
     readonly hideIf?: string | string[];
+    /**
+     * Defines folder mappings.
+     */
+    readonly mappings?: deploy_mappings.FolderMappings;
     /**
      * A list of one or more package names that indicates
      * if that target is only shown in GUI if one of the package(s) has been selected.
@@ -157,6 +164,50 @@ export interface TargetProvider {
     readonly targets?: string | string[];
 }
 
+
+/**
+ * Returns the mapped file path by a target.
+ * 
+ * @param {Target} target The target.
+ * @param {string} dir The path / directory of the file.
+ * @param {string} fileName The name of the underlying file.
+ * @param {Minimatch.IOptions} [opts] Custom options.
+ * 
+ * @return {string} The mapped (directory) path.
+ */
+export function getMappedTargetFilePath(target: Target,
+                                        dir: string, fileName: string,
+                                        opts?: Minimatch.IOptions) {
+    const REMOVE_SURROUNDING_SEPS = (str: string) => {
+        str = deploy_helpers.replaceAllStrings(str, Path.sep, '/').trim();
+        while (str.startsWith('/')) {
+            str = str.substr(1).trim();
+        }
+        while (str.endsWith('/')) {
+            str = str.substr(0, str.length - 1).trim();
+        }
+
+        return str;
+    };
+
+    dir = '/' + REMOVE_SURROUNDING_SEPS(dir);
+    fileName = REMOVE_SURROUNDING_SEPS(fileName);
+
+    let mappings: deploy_mappings.FolderMappings;
+    if (target) {
+        mappings = target.mappings;
+    }
+
+    let mappedPath = deploy_helpers.getMappedPath(mappings,
+                                                  '/' + REMOVE_SURROUNDING_SEPS(dir + '/' + fileName));
+    if (false === mappedPath) {
+        mappedPath = dir;
+    }
+
+    return REMOVE_SURROUNDING_SEPS(
+        REMOVE_SURROUNDING_SEPS(mappedPath + '/' + fileName)
+    );
+}
 
 /**
  * Executes operations for a target.

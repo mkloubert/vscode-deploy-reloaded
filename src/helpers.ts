@@ -19,6 +19,7 @@ import * as ChildProcess from 'child_process';
 import * as deploy_code from './code';
 import * as deploy_contracts from './contracts';
 import * as deploy_log from './log';
+import * as deploy_mappings from './mappings';
 import * as deploy_workflows from './workflows';
 import * as Enumerable from 'node-enumerable';
 import * as FS from 'fs';
@@ -681,6 +682,53 @@ export function formatArray(formatStr: any, args: any[]): string {
 
         return toStringSafe(resultValue);        
     });
+}
+
+/**
+ * Returns a mapped path (if possible).
+ * 
+ * @param {deploy_mappings.FolderMappings} mappings The folder mappings.
+ * @param {string} path The path to check. 
+ * @param {Minimatch.IOptions} [opts] Custom options.
+ * 
+ * @return {string|false} The new path or (false) if path could not be mapped.
+ */
+export function getMappedPath(mappings: deploy_mappings.FolderMappings, path: string,
+                              opts?: Minimatch.IOptions): string | false {
+    path = toStringSafe(path);
+    if (!path.trim().startsWith('/')) {
+        path = '/' + path;
+    }
+    
+    if (!opts) {
+        opts = {
+            dot: true,
+            nocase: false,
+            nonull: true,
+        };
+    }
+
+    if (mappings) {
+        for (const P in mappings) {
+            let pattern = toStringSafe(P);
+            if (!pattern.trim().startsWith('/')) {
+                pattern = '/' + pattern;
+            }
+
+            let entry = mappings[P];
+            if (!isObject<deploy_mappings.FolderMappingSettings>(entry)) {
+                entry = {
+                    to: toStringSafe(entry),
+                };
+            }
+
+            if (doesMatch(path, pattern, opts)) {
+                return toStringSafe(entry.to);
+            }
+        }
+    }
+    
+    return false;
 }
 
 /**

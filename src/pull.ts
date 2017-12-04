@@ -195,11 +195,8 @@ export async function pullFilesFrom(files: string[],
                 const CTX: deploy_plugins.DownloadContext = {
                     cancellationToken: CANCELLATION_SOURCE.token,
                     files: files.map(f => {
-                        const NAME_AND_PATH = ME.toNameAndPath(f);
+                        const NAME_AND_PATH = ME.getNameAndPathForFileDeployment(f, target);
                         if (false === NAME_AND_PATH) {
-                            // TODO: translate
-                            ME.context.outputChannel.append(`Cannot detect path information for file '${f}'!`);
-
                             return null;
                         }
 

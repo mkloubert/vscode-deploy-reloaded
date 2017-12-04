@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.32",
+ "version": "0.0.33",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.18.0"
@@ -580,6 +580,34 @@
             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
             "type": "string"
            },
+           "mappings": {
+            "description": "Defines one or more folder mappings by minimatch patterns.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The mapping to define",
+              "oneOf": [
+               {
+                "description": "The target folder.",
+                "type": "string"
+               },
+               {
+                "description": "Settings for the target folder.",
+                "type": "object",
+                "properties": {
+                 "to": {
+                  "description": "The target folder.",
+                  "type": "string"
+                 }
+                },
+                "required": [
+                 "to"
+                ]
+               }
+              ]
+             }
+            }
+           },
            "name": {
             "description": "The (display) name of that target.",
             "type": "string"
@@ -714,6 +742,34 @@
             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
             "type": "string"
            },
+           "mappings": {
+            "description": "Defines one or more folder mappings by minimatch patterns.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The mapping to define",
+              "oneOf": [
+               {
+                "description": "The target folder.",
+                "type": "string"
+               },
+               {
+                "description": "Settings for the target folder.",
+                "type": "object",
+                "properties": {
+                 "to": {
+                  "description": "The target folder.",
+                  "type": "string"
+                 }
+                },
+                "required": [
+                 "to"
+                ]
+               }
+              ]
+             }
+            }
+           },
            "name": {
             "description": "The (display) name of that target.",
             "type": "string"
@@ -837,6 +893,34 @@
            "if": {
             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
             "type": "string"
+           },
+           "mappings": {
+            "description": "Defines one or more folder mappings by minimatch patterns.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The mapping to define",
+              "oneOf": [
+               {
+                "description": "The target folder.",
+                "type": "string"
+               },
+               {
+                "description": "Settings for the target folder.",
+                "type": "object",
+                "properties": {
+                 "to": {
+                  "description": "The target folder.",
+                  "type": "string"
+                 }
+                },
+                "required": [
+                 "to"
+                ]
+               }
+              ]
+             }
+            }
            },
            "name": {
             "description": "The (display) name of that target.",
