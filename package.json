@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.31",
+ "version": "0.0.32",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.18.0"
@@ -568,6 +568,14 @@
             "description": "A description for that target.",
             "type": "string"
            },
+           "hideIf": {
+            "description": "Defines a list of one or more package names, which will hide this target from GUI, if one of them is selected.",
+            "type": "array",
+            "items": {
+             "description": "A name of a package.",
+             "type": "string"
+            }
+           },
            "if": {
             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
             "type": "string"
@@ -575,6 +583,14 @@
            "name": {
             "description": "The (display) name of that target.",
             "type": "string"
+           },
+           "showIf": {
+            "description": "Defines a list of one or more package names, which will show this target in GUI, if one of them is selected.",
+            "type": "array",
+            "items": {
+             "description": "A name of a package.",
+             "type": "string"
+            }
            },
            "targets": {
             "description": "One or more names of other targets.",
@@ -686,6 +702,14 @@
             "description": "A description for that target.",
             "type": "string"
            },
+           "hideIf": {
+            "description": "Defines a list of one or more package names, which will hide this target from GUI, if one of them is selected.",
+            "type": "array",
+            "items": {
+             "description": "A name of a package.",
+             "type": "string"
+            }
+           },
            "if": {
             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
             "type": "string"
@@ -693,6 +717,14 @@
            "name": {
             "description": "The (display) name of that target.",
             "type": "string"
+           },
+           "showIf": {
+            "description": "Defines a list of one or more package names, which will show this target in GUI, if one of them is selected.",
+            "type": "array",
+            "items": {
+             "description": "A name of a package.",
+             "type": "string"
+            }
            },
            "transformer": {
             "description": "The path (or URI) to the data transformer script.",
@@ -794,6 +826,14 @@
             "description": "A description for that target.",
             "type": "string"
            },
+           "hideIf": {
+            "description": "Defines a list of one or more package names, which will hide this target from GUI, if one of them is selected.",
+            "type": "array",
+            "items": {
+             "description": "A name of a package.",
+             "type": "string"
+            }
+           },
            "if": {
             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
             "type": "string"
@@ -801,6 +841,14 @@
            "name": {
             "description": "The (display) name of that target.",
             "type": "string"
+           },
+           "showIf": {
+            "description": "Defines a list of one or more package names, which will show this target in GUI, if one of them is selected.",
+            "type": "array",
+            "items": {
+             "description": "A name of a package.",
+             "type": "string"
+            }
            },
            "transformer": {
             "description": "The path (or URI) to the data transformer script.",

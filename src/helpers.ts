@@ -137,6 +137,25 @@ export type SimpleCompletedAction<TResult> = (err: any, result?: TResult) => voi
 
 
 /**
+ * Applies a function for a specific object / value.
+ * 
+ * @param {TFunc} func The function. 
+ * @param {any} [thisArgs] The object to apply to the function.
+ */
+export function applyFuncFor<TFunc extends Function = Function>(
+    func: TFunc,
+    thisArgs: any
+): TFunc {
+    if (!func) {
+        return <any>func;
+    }
+
+    return <any>function() {
+        return func.apply(thisArgs, arguments);
+    };
+}
+
+/**
  * Returns a value as array.
  * 
  * @param {T|T[]} val The value.

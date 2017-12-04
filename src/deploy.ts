@@ -333,8 +333,7 @@ export async function deployPackage(pkg: deploy_packages.Package) {
             return;
         }
 
-        const TARGETS: deploy_targets.Target[] | false = deploy_packages.getTargetsOfPackage
-                                                                        .apply(ME, [ pkg ]);
+        const TARGETS = deploy_helpers.applyFuncFor(deploy_packages.getTargetsOfPackage, ME)(pkg);
         if (false === TARGETS) {
             return;
         }
@@ -348,8 +347,9 @@ export async function deployPackage(pkg: deploy_packages.Package) {
                 description: deploy_helpers.toStringSafe( t.description ).trim(),
                 detail: t.__workspace.folder.uri.fsPath,
                 label: deploy_targets.getTargetName(t),
+                state: t,
             };
-        });
+        }).filter(qp => deploy_targets.isVisibleForPackage(qp.state, pkg));
 
         if (QUICK_PICK_ITEMS.length < 1) {
             //TODO: translate

@@ -17,6 +17,7 @@
 
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
+import * as deploy_packages from './packages';
 import * as deploy_targets_operations_open from './targets/operations/open';
 import * as deploy_transformers from './transformers';
 import * as deploy_workspaces from './workspaces';
@@ -46,6 +47,16 @@ export interface Target extends deploy_transformers.CanTransformData,
      * A description.
      */
     readonly description?: string;
+    /**
+     * A list of one or more package names that indicates
+     * if that target is hidden from GUI if one of the package(s) has been selected.
+     */
+    readonly hideIf?: string | string[];
+    /**
+     * A list of one or more package names that indicates
+     * if that target is only shown in GUI if one of the package(s) has been selected.
+     */
+    readonly showIf?: string | string[];
     /**
      * The type.
      */
@@ -317,6 +328,49 @@ export function getTargetsByName(targetNames: string | string[],
     }
 
     return EXISTING_TARGETS;
+}
+
+/**
+ * Checks if a target is visible for a package.
+ * 
+ * @param {Target} target The target.
+ * @param {deploy_packages.Package} pkg The package.
+ * 
+ * @return {boolean} Is visible or not.
+ */
+export function isVisibleForPackage(target: Target, pkg: deploy_packages.Package) {
+    if (!target) {
+        return false;
+    }
+
+    if (!pkg) {
+        return true;
+    }
+
+    const PACKAGE_NAME = deploy_helpers.normalizeString(
+        deploy_packages.getPackageName(pkg)
+    );
+
+    const IS_HIDDEN = deploy_helpers.asArray(
+        deploy_helpers.asArray(target.hideIf)
+    ).map(hif => deploy_helpers.normalizeString(hif))
+     .filter(hif => '' !== hif)
+     .indexOf(PACKAGE_NAME) > -1;
+
+    if (IS_HIDDEN) {
+        return false;
+    }
+
+    const SHOW_IF = deploy_helpers.asArray(
+        deploy_helpers.asArray(target.hideIf)
+    ).map(sif => deploy_helpers.normalizeString(sif))
+     .filter(sif => '' !== sif);
+
+    if (SHOW_IF.length < 1) {
+        return true;
+    }
+
+    return SHOW_IF.indexOf(PACKAGE_NAME) > -1;
 }
 
 /**
