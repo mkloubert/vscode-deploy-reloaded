@@ -658,6 +658,36 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     }
 
     /**
+     * Returns the targets of a package.
+     * 
+     * @param {deploy_packages.Package} pkg The package.
+     * 
+     * @return {deploy_targets.Target[]|false} The targets or (false) if at least one target could not be found
+     *                                         or (false) if package cannot be handled by that workspace.
+     */
+    public getTargetsOfPackage(pkg: deploy_packages.Package): deploy_targets.Target[] | false {
+        if (!pkg) {
+            return;
+        }
+
+        if (!this.canBeHandledByMe(pkg)) {
+            return false;
+        }
+
+        const TARGET_NAMES = deploy_helpers.asArray(pkg.targets).map(tn => {
+            return deploy_helpers.normalizeString(tn);
+        }).filter(tn => {
+            return '' !== tn;
+        });
+
+        if (TARGET_NAMES.length < 1) {
+            return [];
+        }
+
+        return deploy_targets.getTargetsByName(TARGET_NAMES, this.getTargets());
+    }
+
+    /**
      * Returns all upload plugins by target.
      * 
      * @param {deploy_targets.Target} target The target.
@@ -1382,6 +1412,23 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             try {
                 newBtn = await deploy_helpers.createButton(buttonDesc, async (b, pb) => {
                     const PACKAGE_TO_DEPLOY = P;
+                    const PACKAGE_NAME = deploy_packages.getPackageName(PACKAGE_TO_DEPLOY);
+
+                    const VALUES: deploy_values.Value[] = [
+                        new deploy_values.StaticValue({
+                                value: PACKAGE_NAME
+                            },
+                            'package'
+                        ),
+                        new deploy_values.FunctionValue(
+                            () => ME.name,
+                            'workspace'
+                        ),
+                        new deploy_values.FunctionValue(
+                            () => Path.resolve(ME.folder.uri.fsPath),
+                            'workspace_folder'
+                        )
+                    ];
 
                     let newCmdId = deploy_helpers.toStringSafe(pb.command);
                     if (deploy_helpers.isEmptyString(newCmdId)) {
@@ -1400,14 +1447,29 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                                 );
                             }
                         });
+
+                        deploy_log.CONSOLE
+                                  .info(`Registrated command '${newCmdId}' for button of package '${PACKAGE_NAME}'.`,
+                                        'workspaces.Workspace.reloadPackageButtons()');
+                    }
+                    else {
+                        deploy_log.CONSOLE
+                                  .warn(`Button of package '${PACKAGE_NAME}' will use the existing command '${newCmdId}'.`,
+                                        'workspaces.Workspace.reloadPackageButtons()');
                     }
 
                     if (deploy_helpers.isEmptyString(b.text)) {
                         b.text = DEFAULT_BTN_TEXT;
                     }
+                    else {
+                        b.text = ME.replaceWithValues(b.text, VALUES);
+                    }
 
                     if (deploy_helpers.isEmptyString(b.tooltip)) {
                         b.tooltip = DEFAULT_BTN_TOOLTIP;
+                    }
+                    else {
+                        b.tooltip = ME.replaceWithValues(b.tooltip);
                     }
 
                     b.command = newCmdId;
@@ -1457,14 +1519,30 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Handles a value as string and replaces placeholders.
      * 
      * @param {any} val The value to parse.
+     * @param {deploy_values.Value|deploy_values.Value[]|boolean} additionalValuesOrThrowOnError Additional values or if less than 3 arguments are defined: it
+     *                                                                                           does the work of 'throwOnError'
      * @param {boolean} [throwOnError] Throw on error or not.
      * 
      * @return {string} The parsed value.
      */
-    public replaceWithValues(val: any, throwOnError = true) {
-        throwOnError = deploy_helpers.toBooleanSafe(throwOnError, true);
+    public replaceWithValues(val: any,
+                             additionalValuesOrThrowOnError: deploy_values.Value | deploy_values.Value[] | boolean = true,
+                             throwOnError = true) {
+        if (deploy_helpers.isObject<deploy_values.Value>(additionalValuesOrThrowOnError) ||
+            Array.isArray(additionalValuesOrThrowOnError)) {
 
-        return deploy_values.replaceWithValues(this.getValues(),
+            additionalValuesOrThrowOnError = deploy_helpers.asArray(additionalValuesOrThrowOnError);
+            throwOnError = deploy_helpers.toBooleanSafe(throwOnError, true);
+        }
+        else {
+            throwOnError = deploy_helpers.toBooleanSafe(additionalValuesOrThrowOnError, true) &&
+                           deploy_helpers.toBooleanSafe(throwOnError, true);
+
+            additionalValuesOrThrowOnError = [];
+        }
+
+        return deploy_values.replaceWithValues(this.getValues()
+                                                   .concat(additionalValuesOrThrowOnError),
                                                val, throwOnError);
     }
 

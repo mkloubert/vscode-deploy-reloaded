@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.30",
+ "version": "0.0.31",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.18.0"
@@ -576,6 +576,124 @@
             "description": "The (display) name of that target.",
             "type": "string"
            },
+           "targets": {
+            "description": "One or more names of other targets.",
+            "type": "array",
+            "items": {
+             "description": "The name of another target.",
+             "type": "string"
+            }
+           },
+           "transformer": {
+            "description": "The path (or URI) to the data transformer script.",
+            "type": "string"
+           },
+           "transformerOptions": {
+            "description": "Options for the data transformer script."
+           },
+           "type": {
+            "enum": [
+             "batch"
+            ],
+            "type": "string",
+            "description": "Deploys to a list of other targets."
+           }
+          },
+          "required": [
+           "targets"
+          ]
+         },
+         {
+          "type": "object",
+          "properties": {
+           "beforeDeploy": {
+            "description": "One or more target operation to define.",
+            "type": "array",
+            "items": {
+             "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "target": {
+                 "description": "The thing to open.",
+                 "type": "string",
+                 "pattern": "\\S+"
+                },
+                "type": {
+                 "enum": [
+                  "open",
+                  ""
+                 ],
+                 "type": "string",
+                 "description": "Opens something, like an app or URL on the current machine."
+                },
+                "wait": {
+                 "description": "Wait until operation has been finished or not.",
+                 "type": "boolean",
+                 "default": true
+                }
+               },
+               "required": [
+                "target"
+               ]
+              }
+             ]
+            }
+           },
+           "deployed": {
+            "description": "One or more target operation to define.",
+            "type": "array",
+            "items": {
+             "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "target": {
+                 "description": "The thing to open.",
+                 "type": "string",
+                 "pattern": "\\S+"
+                },
+                "type": {
+                 "enum": [
+                  "open",
+                  ""
+                 ],
+                 "type": "string",
+                 "description": "Opens something, like an app or URL on the current machine."
+                },
+                "wait": {
+                 "description": "Wait until operation has been finished or not.",
+                 "type": "boolean",
+                 "default": true
+                }
+               },
+               "required": [
+                "target"
+               ]
+              }
+             ]
+            }
+           },
+           "description": {
+            "description": "A description for that target.",
+            "type": "string"
+           },
+           "if": {
+            "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+            "type": "string"
+           },
+           "name": {
+            "description": "The (display) name of that target.",
+            "type": "string"
+           },
            "transformer": {
             "description": "The path (or URI) to the data transformer script.",
             "type": "string"
@@ -828,6 +946,7 @@
   "@types/mocha": "^2.2.42",
   "@types/node": "^7.0.43",
   "@types/tmp": "0.0.33",
+  "@types/uuid": "^3.4.3",
   "typescript": "^2.6.1",
   "vscode": "^1.1.6"
  },
@@ -853,6 +972,7 @@
   "minimatch": "^3.0.4",
   "moment": "^2.19.3",
   "node-enumerable": "^3.8.0",
-  "tmp": "0.0.33"
+  "tmp": "0.0.33",
+  "uuid": "^3.1.0"
  }
 }

@@ -333,7 +333,13 @@ export async function deployPackage(pkg: deploy_packages.Package) {
             return;
         }
 
-        const QUICK_PICK_ITEMS: deploy_contracts.ActionQuickPick[] = ME.getTargets().map((t, i) => {
+        const TARGETS: deploy_targets.Target[] | false = deploy_packages.getTargetsOfPackage
+                                                                        .apply(ME, [ pkg ]);
+        if (false === TARGETS) {
+            return;
+        }
+
+        const QUICK_PICK_ITEMS: deploy_contracts.ActionQuickPick[] = TARGETS.map((t, i) => {
             return {
                 action: async () => {
                     await deployFilesTo.apply(ME,

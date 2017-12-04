@@ -386,7 +386,13 @@ export async function deletePackage(pkg: deploy_packages.Package,
         deleteLocalFiles = 2 === PRESSED_BTN.value;
     }
 
-    const QUICK_PICK_ITEMS: deploy_contracts.ActionQuickPick[] = ME.getTargets().map((t, i) => {
+    const TARGETS: deploy_targets.Target[] | false = deploy_packages.getTargetsOfPackage
+                                                                    .apply(ME, [ pkg ]);
+    if (false === TARGETS) {
+        return;
+    }
+
+    const QUICK_PICK_ITEMS: deploy_contracts.ActionQuickPick[] = TARGETS.map((t, i) => {
         return {
             action: async () => {
                 await deleteFilesIn.apply(ME,

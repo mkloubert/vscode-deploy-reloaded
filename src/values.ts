@@ -29,16 +29,12 @@ export interface CodeValueItem extends ValueItem {
      * The code to execute.
      */
     readonly code: string;
-    /** @inheritdoc */
-    readonly type: "code" | "ecmascript" | "javascript" | "js";
 }
 
 /**
  * An item of a static value.
  */
 export interface StaticValueItem extends ValueItem {
-    /** @inheritdoc */
-    readonly type: "" | "static";
     /**
      * The value.
      */
@@ -109,12 +105,7 @@ export abstract class ValueBase<TItem extends ValueItem = ValueItem> implements 
      */
     constructor(public readonly item: TItem,
                 name?: string) {
-        name = deploy_helpers.toStringSafe(name).trim();
-        if ('' === name) {
-            name = undefined;
-        }
-
-        this._NAME = name;
+        this._NAME = normalizeValueName(name);
     }
 
     /** @inheritdoc */
@@ -148,6 +139,46 @@ export class CodeValue extends ValueBase<CodeValueItem> {
         };
 
         return deploy_code.exec(CTX);
+    }
+}
+
+/**
+ * A value based on a function.
+ */
+export class FunctionValue implements Value {
+    private readonly _NAME: string;
+
+    /**
+     * Initializes a new instance of that class.
+     * 
+     * @param {Function} func The function that provides the value.
+     * @param {string} [name] The optional name.
+     * @param {any} [thisArgs] The underlying object / value for the function.
+     */
+    constructor(public readonly func: Function,
+                name?: string,
+                thisArgs?: any) {
+        this._NAME = normalizeValueName(name);
+
+        this.thisArgs = arguments.length < 3 ? this : thisArgs;
+    }
+
+    /** @inheritdoc */
+    public get name() {
+        return this._NAME;
+    }
+
+    /**
+     * The underlying object / value for the function.
+     */
+    public thisArgs: any;
+
+    /** @inheritdoc */
+    public get value() {
+        if (this.func) {
+            return this.func
+                       .apply(this.thisArgs, []);
+        }
     }
 }
 
@@ -186,11 +217,13 @@ export function loadFromItems(items: WithValueItems) {
         VALUES.push(newValue);
     };
 
-    if (items) {
-        let valueItems = deploy_helpers.filterConditionalItems(items.values, true);
+    if (items && items.values) {
+        for (const NAME in items.values) {
+            const VI: ValueItem = items.values[NAME];
 
-        for (const NAME in valueItems) {
-            const VI = items.values[NAME];
+            if (deploy_helpers.filterConditionalItems(VI).length < 1) {
+                continue;
+            }
 
             let newValue: ValueBase;
 
@@ -224,6 +257,15 @@ export function loadFromItems(items: WithValueItems) {
     }
 
     return VALUES;
+}
+
+function normalizeValueName(name: any): string {
+    name = deploy_helpers.toStringSafe(name).trim();
+    if ('' === name) {
+        name = undefined;
+    }
+
+    return name;
 }
 
 /**

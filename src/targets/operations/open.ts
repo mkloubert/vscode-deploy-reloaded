@@ -28,8 +28,6 @@ export interface OpenTargetOperation extends deploy_targets.TargetOperation {
      * The target to open.
      */
     readonly target: string;
-    /** @inheritdoc */
-    readonly type: 'open' | '';
     /**
      * Wait until operation has been finished or not.
      */

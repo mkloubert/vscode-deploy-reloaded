@@ -21,7 +21,9 @@ import * as deploy_log from './log';
 import * as deploy_targets from './targets';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
+import * as Moment from 'moment';
 import * as Path from 'path';
+import * as UUID from 'uuid';
 import * as vscode from 'vscode';
 
 
@@ -264,4 +266,48 @@ export function getPackageName(pkg: Package): string {
     }
 
     return name;
+}
+
+/**
+ * Returns the targets of a package.
+ * 
+ * @param {pkg: Package} pkg The package.
+ * 
+ * @return {deploy_targets.Target[] | false} The targets or (false) if at least one target could not be found.
+ */
+export function getTargetsOfPackage(pkg: Package): deploy_targets.Target[] | false {
+    const ME: deploy_workspaces.Workspace = this;
+
+    if (!pkg) {
+        return;
+    }
+
+    let targets = ME.getTargetsOfPackage(pkg);
+
+    if (false !== targets) {
+        if (targets.length < 1) {
+            targets = ME.getTargets();
+        }
+        else if (targets.length > 1) {
+            const ID = `${pkg.__id}\n` + 
+                       `${UUID.v4()}\n` + 
+                       `${Moment.utc().unix()}`;
+
+            //TODO: translate
+            const BATCH_TARGET = {
+                __id: ID,
+                __index: -1,
+                __searchValue: deploy_helpers.normalizeString(ID),
+                __workspace: ME,
+
+                name: `Virtual target for package '${getPackageName(pkg)}'`,
+                type: 'batch',
+                targets: targets.map(t => t.name),
+            };
+            
+            targets = [ BATCH_TARGET ];
+        }
+    }
+
+    return targets;
 }
