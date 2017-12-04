@@ -131,8 +131,8 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
         }
     }
 
-    protected async getTargetSettings(context: deploy_plugins.FilesContext<LocalTarget>,
-                                      file: deploy_workspaces.WorkspaceFile): Promise<TargetSettings> {
+    private async getTargetSettings(context: deploy_plugins.FilesContext<LocalTarget>,
+                                    file: deploy_workspaces.WorkspaceFile): Promise<TargetSettings> {
         const DIR = this.normalizeDir(context.target, file);
 
         if (await deploy_helpers.exists(DIR)) {

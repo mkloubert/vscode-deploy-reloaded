@@ -201,9 +201,16 @@ export async function pullFilesFrom(files: string[],
                         }
 
                         const SF = new deploy_plugins.SimpleFileToDownload(ME, f, NAME_AND_PATH);
-                        SF.onBeforeDownload = async (destination?: string) => {
+                        SF.onBeforeDownload = async function(destination?: string) {
+                            if (arguments.length < 1) {
+                                destination = `'${deploy_helpers.toDisplayablePath(NAME_AND_PATH.path)}' (${TARGET_NAME})`;
+                            }
+                            else {
+                                destination = `'${deploy_helpers.toStringSafe(destination)}'`;
+                            }
+    
                             // TODO: translate
-                            ME.context.outputChannel.append(`Pulling file '${f}' from '${TARGET_NAME}'... `);
+                            ME.context.outputChannel.append(`Pulling file '${f}' from ${destination}... `);
 
                             await WAIT_WHILE_CANCELLING();
 

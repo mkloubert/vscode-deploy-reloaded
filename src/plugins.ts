@@ -300,6 +300,135 @@ export interface UploadContext<TTarget extends deploy_targets.Target = deploy_ta
 
 
 /**
+ * Wraps another 'FileToDelete' object.
+ */
+export class FileToDeleteWrapper implements FileToDelete {
+    /**
+     * Initializes a new instance of that class.
+     * 
+     * @param {FileToDelete} baseFile The file to wrap.
+     */
+    constructor(public readonly baseFile: FileToDelete) {
+        this.onBeforeDelete = this.baseFile.onBeforeDelete;
+        this.onDeleteCompleted = this.baseFile.onDeleteCompleted;
+    }
+
+    /** @inheritdoc */
+    public get file() {
+        return this.baseFile.file;
+    }
+
+    /** @inheritdoc */
+    public get name() {
+        return this.baseFile.name;
+    }
+
+    /** @inheritdoc */
+    public onBeforeDelete;
+
+    /** @inheritdoc */
+    public onDeleteCompleted;
+
+    /** @inheritdoc */
+    public get path() {
+        return this.baseFile.path;
+    }
+
+    /** @inheritdoc */
+    public get workspace() {
+        return this.baseFile.workspace;
+    }
+}
+
+/**
+ * Wraps another 'FileToDownload' object.
+ */
+export class FileToDownloadWrapper implements FileToDownload {
+    /**
+     * Initializes a new instance of that class.
+     * 
+     * @param {FileToDownload} baseFile The file to wrap.
+     */
+    constructor(public readonly baseFile: FileToDownload) {
+        this.onBeforeDownload = this.baseFile.onBeforeDownload;
+        this.onDownloadCompleted = this.baseFile.onDownloadCompleted;
+    }
+
+    /** @inheritdoc */
+    public get file() {
+        return this.baseFile.file;
+    }
+
+    /** @inheritdoc */
+    public get name() {
+        return this.baseFile.name;
+    }
+
+    /** @inheritdoc */
+    public onBeforeDownload;
+
+    /** @inheritdoc */
+    public onDownloadCompleted;
+
+    /** @inheritdoc */
+    public get path() {
+        return this.baseFile.path;
+    }
+
+    /** @inheritdoc */
+    public get workspace() {
+        return this.baseFile.workspace;
+    }
+}
+
+/**
+ * Wraps another 'FileToUpload' object.
+ */
+export class FileToUploadWrapper implements FileToUpload {
+    /**
+     * Initializes a new instance of that class.
+     * 
+     * @param {FileToUpload} baseFile The file to wrap.
+     */
+    constructor(public readonly baseFile: FileToUpload) {
+        this.onBeforeUpload = this.baseFile.onBeforeUpload;
+        this.onUploadCompleted = this.baseFile.onUploadCompleted;
+    }
+
+    /** @inheritdoc */
+    public get file() {
+        return this.baseFile.file;
+    }
+
+    /** @inheritdoc */
+    public get name() {
+        return this.baseFile.name;
+    }
+
+    /** @inheritdoc */
+    public onBeforeUpload;
+
+    /** @inheritdoc */
+    public onUploadCompleted;
+
+    /** @inheritdoc */
+    public get path() {
+        return this.baseFile.path;
+    }
+
+    /** @inheritdoc */
+    public async read() {
+        return await this.baseFile.read();
+    }
+
+    /** @inheritdoc */
+    public get workspace() {
+        return this.baseFile.workspace;
+    }
+}
+
+
+/**
  * A local file to upload.
  */
 export abstract class FileToUploadBase implements FileToUpload {

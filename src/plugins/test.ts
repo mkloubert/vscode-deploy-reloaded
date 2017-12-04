@@ -45,7 +45,10 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
     public async deleteFiles(context: deploy_plugins.DeleteContext<TestTarget>) {
         for (const F of context.files) {
             try {
-                await F.onBeforeDelete();
+                await F.onBeforeDelete(
+                    deploy_helpers.toDisplayablePath(F.path)
+                );
+
                 if (context.isCancelling) {
                     break;
                 }
@@ -65,7 +68,10 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
     public async downloadFiles(context: deploy_plugins.DownloadContext<TestTarget>) {
         for (const F of context.files) {
             try {
-                await F.onBeforeDownload();
+                await F.onBeforeDownload(
+                    deploy_helpers.toDisplayablePath(F.path)
+                );
+
                 if (context.isCancelling) {
                     break;
                 }
@@ -186,7 +192,10 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
     public async uploadFiles(context: deploy_plugins.UploadContext<TestTarget>) {
         for (const F of context.files) {
             try {
-                await F.onBeforeUpload();
+                await F.onBeforeUpload(
+                    deploy_helpers.toDisplayablePath(F.path)
+                );
+
                 if (context.isCancelling) {
                     break;
                 }

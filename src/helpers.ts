@@ -1376,6 +1376,24 @@ export function toBooleanSafe(val: any, defaultValue: any = false): boolean {
 }
 
 /**
+ * Converts a path to a "displayable" one.
+ * 
+ * @param {string} path The input value.
+ * 
+ * @return {string} The output value. 
+ */
+export function toDisplayablePath(path: string): string {
+    path = toStringSafe(path);
+    path = replaceAllStrings(path, Path.sep, '/');
+
+    if (!path.trim().startsWith('/')) {
+        path = '/' + path;
+    }
+
+    return path;
+}
+
+/**
  * Converts a file filter to a 'minimatch' compatible one.
  * 
  * @param {TFilter} filter The filter to convert.
@@ -1425,15 +1443,15 @@ export function toMinimatchFileFilter<TFilter extends deploy_contracts.FileFilte
  * @return {string} The output value.
  */
 export function toStringSafe(str: any, defValue: any = ''): string {
+    if ('string' === typeof str) {
+        return str;
+    }
+
+    if (isNullOrUndefined(str)) {
+        return defValue;
+    }
+
     try {
-        if ('string' === typeof str) {
-            return str;
-        }
-
-        if (isNullOrUndefined(str)) {
-            return defValue;
-        }
-
         return '' + str;
     }
     catch (e) {
