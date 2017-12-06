@@ -364,6 +364,20 @@ export interface WithOptionalName {
 }
 
 /**
+ * Something that can work with a password.
+ */
+export interface WithPassword {
+    /**
+     * The password.
+     */
+    readonly password?: string;
+    /**
+     * The custom password algorithm to use.
+     */
+    readonly passwordAlgorithm?: string;
+}
+
+/**
  * The name of the event that is raised after workspace config has been reloaded.
  */
 export const EVENT_CONFIG_RELOADED = 'workspace.config.reloaded';

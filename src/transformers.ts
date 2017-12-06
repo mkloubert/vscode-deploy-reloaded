@@ -15,7 +15,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as Crypto from 'crypto';
 import * as deploy_contracts from './contracts';
+import * as deploy_helpers from './helpers';
 
 
 /**
@@ -82,4 +84,90 @@ export interface DataTransformerModule {
      * The transformer.
      */
     readonly transform: DataTransformer;
+}
+
+
+/**
+ * Creates wrapper for a data transformer for encrypting data by password.
+ * 
+ * @param {DataTransformer} baseTransformer The transformer to wrap.
+ * @param {deploy_contracts.WithPassword} opts The options.
+ * 
+ * @return {DataTransformer} The wrapper.
+ */
+export function toPasswortTransformer(baseTransformer: DataTransformer, opts: deploy_contracts.WithPassword): DataTransformer {
+    if (!opts) {
+        opts = <any>{};
+    }
+
+    let pwd = deploy_helpers.toStringSafe(opts.password);
+
+    let algo = deploy_helpers.normalizeString(opts.passwordAlgorithm);
+    if ('' === algo) {
+        algo = 'aes-256-ctr';
+    }
+
+    return async function(input: Buffer, context: DataTransformerContext) {
+        if (!input) {
+            return input;
+        }
+
+        let result = input;
+
+        const INVOKE_TRANSFORMER_FOR = async (buff: Buffer) => {
+            if (baseTransformer) {
+                buff = await Promise.resolve(
+                    baseTransformer(buff, context)
+                );
+            }
+
+            return buff;
+        };
+
+        let invokeTransformer = true;
+
+        if (result) {
+            if ('' !== pwd) {
+                invokeTransformer = false;
+
+                switch (context.mode) {
+                    case DataTransformerMode.Restore:
+                        {
+                            const DECIPHER = Crypto.createDecipher(algo, pwd);
+
+                            // 1. UNcrypt
+                            result = Buffer.concat([
+                                DECIPHER.update(result),
+                                DECIPHER.final()
+                            ]);
+
+                            // 2. UNtransform
+                            result = await INVOKE_TRANSFORMER_FOR(result);
+                        }
+                        break;
+
+                    case DataTransformerMode.Transform:
+                        {
+                            const CIPHER = Crypto.createCipher(algo, pwd);
+
+                            // 1. transform
+                            result = await INVOKE_TRANSFORMER_FOR(result);
+
+                            // 2. crypt
+                            result = Buffer.concat([
+                                CIPHER.update(result),
+                                CIPHER.final()
+                            ]);
+                        }
+                        break;
+                }
+            }
+        }
+
+        if (invokeTransformer) {
+            result = await INVOKE_TRANSFORMER_FOR(result);
+        }
+
+        return result;
+    };
 }

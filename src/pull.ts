@@ -99,11 +99,13 @@ export async function pullFilesFrom(files: string[],
         return;
     }
 
-    const TRANSFORMER = await ME.loadDataTransformer(target);
-    if (false === TRANSFORMER) {
+    let transformer = await ME.loadDataTransformer(target);
+    if (false === transformer) {
         // TODO: translate
         throw new Error(`Could not load data transformer for target '${TARGET_NAME}'!`);
     }
+
+    transformer = deploy_transformers.toPasswortTransformer(transformer, target);
 
     const TRANSFORMER_OPTIONS = deploy_helpers.cloneObject(target.transformerOptions);
 
@@ -232,20 +234,18 @@ export async function pullFilesFrom(files: string[],
                                             downloadedFile.read()
                                         );
 
-                                        if (TRANSFORMER) {
-                                            const CONTEXT: deploy_transformers.DataTransformerContext = {
-                                                globals: ME.globals,
-                                                mode: deploy_transformers.DataTransformerMode.Restore,
-                                                options: TRANSFORMER_OPTIONS,
-                                                require: (id) => {
-                                                    return deploy_helpers.requireFromExtension(id);
-                                                },
-                                            };
+                                        const CONTEXT: deploy_transformers.DataTransformerContext = {
+                                            globals: ME.globals,
+                                            mode: deploy_transformers.DataTransformerMode.Restore,
+                                            options: TRANSFORMER_OPTIONS,
+                                            require: (id) => {
+                                                return deploy_helpers.requireFromExtension(id);
+                                            },
+                                        };
 
-                                            dataToWrite = await TRANSFORMER(
-                                                dataToWrite, CONTEXT
-                                            );
-                                        }
+                                        dataToWrite = await (<deploy_transformers.DataTransformer>transformer)(
+                                            dataToWrite, CONTEXT
+                                        );
                                     }
 
                                     if (dataToWrite) {

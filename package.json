@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.35",
+ "version": "0.0.36",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.18.0"
@@ -665,6 +665,15 @@
             "description": "The (display) name of that target.",
             "type": "string"
            },
+           "password": {
+            "description": "An optional password for data encryption to use.",
+            "type": "string"
+           },
+           "passwordAlgorithm": {
+            "description": "The algorithm for data encryption to use.",
+            "type": "string",
+            "default": "aes-256-ctr"
+           },
            "showIf": {
             "description": "Defines a list of one or more package names, which will show this target in GUI, if one of them is selected.",
             "type": "array",
@@ -827,6 +836,15 @@
             "description": "The (display) name of that target.",
             "type": "string"
            },
+           "password": {
+            "description": "An optional password for data encryption to use.",
+            "type": "string"
+           },
+           "passwordAlgorithm": {
+            "description": "The algorithm for data encryption to use.",
+            "type": "string",
+            "default": "aes-256-ctr"
+           },
            "showIf": {
             "description": "Defines a list of one or more package names, which will show this target in GUI, if one of them is selected.",
             "type": "array",
@@ -978,6 +996,15 @@
            "name": {
             "description": "The (display) name of that target.",
             "type": "string"
+           },
+           "password": {
+            "description": "An optional password for data encryption to use.",
+            "type": "string"
+           },
+           "passwordAlgorithm": {
+            "description": "The algorithm for data encryption to use.",
+            "type": "string",
+            "default": "aes-256-ctr"
            },
            "showIf": {
             "description": "Defines a list of one or more package names, which will show this target in GUI, if one of them is selected.",

@@ -20,6 +20,7 @@ import * as deploy_helpers from './helpers';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
 import * as deploy_targets from './targets';
+import * as deploy_transformers from './transformers';
 import * as deploy_workspaces from './workspaces';
 import * as Path from 'path';
 import * as vscode from 'vscode';
@@ -76,11 +77,13 @@ export async function deployFilesTo(files: string[],
         return;
     }
 
-    const TRANSFORMER = await ME.loadDataTransformer(target);
-    if (false === TRANSFORMER) {
+    let transformer = await ME.loadDataTransformer(target);
+    if (false === transformer) {
         // TODO: translate
         throw new Error(`Could not load data transformer for target '${TARGET_NAME}'!`);
     }
+
+    transformer = deploy_transformers.toPasswortTransformer(transformer, target);
 
     const TRANSFORMER_OPTIONS = deploy_helpers.cloneObject(target.transformerOptions);
 
@@ -210,7 +213,7 @@ export async function deployFilesTo(files: string[],
                         }
                     };
 
-                    LF.transformer = TRANSFORMER;
+                    LF.transformer = transformer;
                     LF.transformerOptions = TRANSFORMER_OPTIONS;
 
                     FILES_TO_UPLOAD.push(LF);
