@@ -18,6 +18,7 @@
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
 import * as deploy_logs from './log';
+import * as deploy_values from './values';
 import * as deploy_workspaces from './workspaces';
 import * as vscode from 'vscode';
 
@@ -26,6 +27,10 @@ import * as vscode from 'vscode';
  * A script command.
  */
 export interface ScriptCommand {
+    /**
+     * A button for the command.
+     */
+    readonly button?: ScriptCommandButton;
     /**
      * Cache script module or not.
      */
@@ -41,9 +46,23 @@ export interface ScriptCommand {
 }
 
 /**
+ * A button for a script button.
+ */
+export interface ScriptCommandButton extends deploy_contracts.Button {
+    /**
+     * Show button at beginning or not.
+     */
+    readonly show?: boolean;
+}
+
+/**
  * An execution context for a script command.
  */
 export interface ScriptCommandExecutionContext extends deploy_contracts.ScriptArguments {
+    /**
+     * The underlying button, if defined.
+     */
+    readonly button: vscode.Disposable;
     /**
      * The ID of the underling command.
      */
@@ -78,6 +97,10 @@ export interface WorkspaceCommand {
      * The function for the command.
      */
     readonly action: Function;
+    /**
+     * The button for this command.
+     */
+    readonly button: vscode.Disposable;
     /**
      * The command (ID).
      */
@@ -115,6 +138,8 @@ export function cleanupCommands() {
 
             if (CMD.workspace.id === ME.id) {
                 COMMANDS.splice(i, 1);
+
+                deploy_helpers.tryDispose(CMD.button);
             }
         }
     }
@@ -125,14 +150,14 @@ export function cleanupCommands() {
  * 
  * @param {deploy_contracts.Configuration} newCfg The new config.
  */
-export function reloadCommands(newCfg: deploy_contracts.Configuration) {
+export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
     const ME: deploy_workspaces.Workspace = this;
 
     if (!newCfg.commands) {
         return;
     }
 
-    const CREATE_ACTION = (id: string, sc: ScriptCommand) => {
+    const CREATE_ACTION = (id: string, sc: ScriptCommand, btn: vscode.Disposable) => {
         return async function() {
             const CACHE = deploy_helpers.toBooleanSafe(sc.cache);
             
@@ -152,6 +177,7 @@ export function reloadCommands(newCfg: deploy_contracts.Configuration) {
                 const EXECUTE = SCRIPT_MODULE.execute;
                 if (EXECUTE) {
                     const CTX: ScriptCommandExecutionContext = {
+                        button: btn,
                         command: id,
                         globals: ME.globals,
                         options: deploy_helpers.cloneObject(sc.options),
@@ -217,6 +243,7 @@ export function reloadCommands(newCfg: deploy_contracts.Configuration) {
 
     for (const ID in newCfg.commands) {
         let newCommand: vscode.Disposable;
+        let newCommandBtn: vscode.Disposable;
         try {
             const CMD = newCfg.commands[ID];
 
@@ -234,9 +261,64 @@ export function reloadCommands(newCfg: deploy_contracts.Configuration) {
                 newCommand = REGISTER_NEW_COMMAND(ID);
             }
 
+            let enableBtn = false;
+            if (!deploy_helpers.isNullOrUndefined(scriptCmd.button)) {
+                enableBtn = deploy_helpers.toBooleanSafe(scriptCmd.button.enabled, true);
+
+                if (enableBtn) {
+                    newCommandBtn = await deploy_helpers.createButton(scriptCmd.button, async (btn, opts) => {
+                        const BTN_CMD = ID;
+
+                        const VALUES: deploy_values.Value[] = [
+                            new deploy_values.StaticValue({
+                                    value: BTN_CMD
+                                },
+                                'command'
+                            ),
+                            new deploy_values.StaticValue({
+                                    value: opts
+                                },
+                                'options'
+                            ),
+                            new deploy_values.FunctionValue(
+                                () => ME.name,
+                                'workspace'
+                            ),
+                            new deploy_values.FunctionValue(
+                                () => ME.rootPath,
+                                'workspace_folder'
+                            )
+                        ];
+
+                        btn.text = ME.replaceWithValues(
+                            deploy_helpers.toStringSafe(opts.text),
+                            VALUES
+                        );
+                        if (deploy_helpers.isEmptyString(btn.text)) {
+                            btn.text = `${BTN_CMD}`;
+                        }
+
+                        btn.tooltip = ME.replaceWithValues(
+                            deploy_helpers.toStringSafe(opts.tooltip),
+                            VALUES
+                        );
+                        if (deploy_helpers.isEmptyString(btn.tooltip)) {
+                            btn.tooltip = `${ME.name}`;
+                        }
+
+                        btn.command = BTN_CMD;
+
+                        if (deploy_helpers.toBooleanSafe(scriptCmd.button.show, true)) {
+                            btn.show();
+                        }
+                    });
+                }
+            }
+
             ME.context.commands[ID].push(
                 {
-                    action: CREATE_ACTION(ID, scriptCmd),
+                    action: CREATE_ACTION(ID, scriptCmd, newCommandBtn),
+                    button: newCommandBtn,
                     command: ID,
                     thisArgs: ME,
                     workspace: ME,
@@ -249,6 +331,7 @@ export function reloadCommands(newCfg: deploy_contracts.Configuration) {
             }
         }
         catch (e) {
+            deploy_helpers.tryDispose(newCommandBtn);
             deploy_helpers.tryDispose(newCommand);
 
             throw e;

@@ -1299,7 +1299,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 delete (<any>loadedCfg).imports;
             }
 
-            deploy_helpers.applyFuncFor(deploy_commands.reloadCommands, ME)(loadedCfg);
+            await deploy_helpers.applyFuncFor(deploy_commands.reloadCommands, ME)(loadedCfg);
 
             const OLD_CFG = ME._config;
             ME._config = loadedCfg;
@@ -1524,6 +1524,11 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
                     const VALUES: deploy_values.Value[] = [
                         new deploy_values.StaticValue({
+                                value: pb
+                            },
+                            'options'
+                        ),
+                        new deploy_values.StaticValue({
                                 value: PACKAGE_NAME
                             },
                             'package'
@@ -1533,7 +1538,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                             'workspace'
                         ),
                         new deploy_values.FunctionValue(
-                            () => Path.resolve(ME.folder.uri.fsPath),
+                            () => ME.rootPath,
                             'workspace_folder'
                         )
                     ];

@@ -43,27 +43,27 @@ export interface Button {
     /**
      * The custom (text) color.
      */
-    color?: string;
+    readonly color?: string;
     /**
      * Enable button or not.
      */
-    enabled?: boolean;
+    readonly enabled?: boolean;
     /**
      * Put button on the right side or not.
      */
-    isRight?: boolean;
+    readonly isRight?: boolean;
     /**
      * The priority.
      */
-    priority?: number;
+    readonly priority?: number;
     /**
      * A custom text for the button.
      */
-    text?: string;
+    readonly text?: string;
     /**
      * A custom tooltip for the button.
      */
-    tooltip?: string;
+    readonly tooltip?: string;
 }
 
 /**
