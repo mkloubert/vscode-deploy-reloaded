@@ -36,6 +36,10 @@ export interface ScriptCommand {
      */
     readonly cache?: boolean;
     /**
+     * Do not submit a 'ScriptCommandExecutionContext' object as first argument.
+     */
+    readonly noFirstArgument?: boolean;
+    /**
      * The options for the script.
      */
     readonly options?: any;
@@ -187,7 +191,9 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
                     };
 
                     let args: any[] = [];
-                    args.push(CTX);
+                    if (!deploy_helpers.toBooleanSafe(sc.noFirstArgument)) {
+                        args.push(CTX);
+                    }
 
                     return await Promise.resolve(
                         EXECUTE.apply(SCRIPT_MODULE,

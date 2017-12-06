@@ -91,18 +91,18 @@ export interface DataTransformerModule {
  * Creates wrapper for a data transformer for encrypting data by password.
  * 
  * @param {DataTransformer} baseTransformer The transformer to wrap.
- * @param {deploy_contracts.WithPassword} opts The options.
+ * @param {deploy_contracts.Encryptable} opts The options.
  * 
  * @return {DataTransformer} The wrapper.
  */
-export function toPasswortTransformer(baseTransformer: DataTransformer, opts: deploy_contracts.WithPassword): DataTransformer {
+export function toPasswordTransformer(baseTransformer: DataTransformer, opts: deploy_contracts.Encryptable): DataTransformer {
     if (!opts) {
         opts = <any>{};
     }
 
-    let pwd = deploy_helpers.toStringSafe(opts.password);
+    let pwd = deploy_helpers.toStringSafe(opts.encryptWith);
 
-    let algo = deploy_helpers.normalizeString(opts.passwordAlgorithm);
+    let algo = deploy_helpers.normalizeString(opts.encryptBy);
     if ('' === algo) {
         algo = 'aes-256-ctr';
     }

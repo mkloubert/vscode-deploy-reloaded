@@ -33,8 +33,8 @@ import * as vscode from 'vscode';
  */
 export interface Target extends deploy_transformers.CanTransformData,
                                 deploy_contracts.ConditionalItem,
+                                deploy_contracts.Encryptable,
                                 deploy_contracts.WithOptionalName,
-                                deploy_contracts.WithPassword,
                                 deploy_workspaces.WorkspaceItemFromSettings
 {
     /**

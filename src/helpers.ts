@@ -24,6 +24,7 @@ import * as deploy_workflows from './workflows';
 import * as Enumerable from 'node-enumerable';
 import * as FS from 'fs';
 import * as Glob from 'glob';
+const IsBinaryFile = require("isbinaryfile");
 const MergeDeep = require('merge-deep');
 import * as MimeTypes from 'mime-types';
 import * as Minimatch from 'minimatch';
@@ -903,6 +904,38 @@ export function invokeForTempFile<TResult = any>(action: (path: string) => TResu
                     catch (e) {
                         COMPLETED(e);
                     }
+                }
+            });
+        }
+        catch (e) {
+            COMPLETED(e);
+        }
+    });
+}
+
+/**
+ * Checks if data is binary or text content.
+ * 
+ * @param {Buffer} data The data to check.
+ * 
+ * @returns {Promise<boolean>} The promise.
+ */
+export function isBinaryContent(data: Buffer): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+        const COMPLETED = createCompletedAction<boolean>(resolve, reject);
+
+        if (!data) {
+            COMPLETED(null, <any>data);
+            return;
+        }
+
+        try {
+            IsBinaryFile(data, data.length, (err, result) => {
+                if (err) {
+                    COMPLETED(err);
+                }
+                else {
+                    COMPLETED(null, toBooleanSafe(result));
                 }
             });
         }

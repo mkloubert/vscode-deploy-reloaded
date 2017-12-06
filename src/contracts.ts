@@ -227,6 +227,20 @@ export enum DeployOperation {
 }
 
 /**
+ * Something that can work with a password.
+ */
+export interface Encryptable {
+    /**
+     * The custom password algorithm to use.
+     */
+    readonly encryptBy?: string;
+    /**
+     * The password.
+     */
+    readonly encryptWith?: string;
+}
+
+/**
  * List of file change types.
  */
 export enum FileChangeType {
@@ -361,20 +375,6 @@ export interface WithOptionalName {
      * The name.
      */
     readonly name?: string;
-}
-
-/**
- * Something that can work with a password.
- */
-export interface WithPassword {
-    /**
-     * The password.
-     */
-    readonly password?: string;
-    /**
-     * The custom password algorithm to use.
-     */
-    readonly passwordAlgorithm?: string;
 }
 
 /**
