@@ -994,6 +994,33 @@ export function isSymbol(val: any): val is symbol {
 }
 
 /**
+ * Loads a module from a script.
+ * 
+ * @param {string} file The path to the script. 
+ * @param {boolean} [fromCache] Cache module or not.
+ * 
+ * @return {TModule} The loaded module.
+ */
+export function loadModule<TModule = any>(file: string, fromCache = false): TModule {
+    file = toStringSafe(file);
+    if (isEmptyString(file)) {
+        file = './module.js';
+    }
+    if (!Path.isAbsolute(file)) {
+        file = Path.join(__dirname, file);
+    }
+    file = Path.resolve(file);
+
+    fromCache = toBooleanSafe(fromCache);
+
+    if (!fromCache) {
+        delete require.cache[file];
+    }
+
+    return require(file);
+}
+
+/**
  * Promise version of 'FS.lstat()' function.
  * 
  * @param {string|Buffer} path The path.
@@ -1353,6 +1380,31 @@ export async function showWarningMessage<TItem extends vscode.MessageItem = vsco
  */
 export async function sleep(ms = 1000) {
     await invokeAfter(() => {}, ms);
+}
+
+/**
+ * Returns an array like object as new array.
+ * 
+ * @param {ArrayLike<T>} arr The input object. 
+ * @param {boolean} [normalize] Returns an empty array, if input object is (null) / undefined.
+ * 
+ * @return {T[]} The input object as array. 
+ */
+export function toArray<T>(arr: ArrayLike<T>, normalize = true): T[] {
+    if (isNullOrUndefined(arr)) {
+        if (toBooleanSafe(normalize, true)) {
+            return [];
+        }
+        
+        return <any>arr;
+    }
+
+    const NEW_ARRAY: T[] = [];
+    for (let i = 0; i < arr.length; i++) {
+        NEW_ARRAY.push(arr[i]);
+    }
+
+    return NEW_ARRAY;
 }
 
 /**

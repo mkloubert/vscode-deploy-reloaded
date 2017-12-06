@@ -17,6 +17,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as deploy_commands from './commands';
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
@@ -40,7 +41,9 @@ let outputChannel: vscode.OutputChannel;
 let packageFile: deploy_contracts.PackageFile;
 const PLUGINS: deploy_plugins.Plugin[] = [];
 let selectWorkspaceBtn: vscode.StatusBarItem;
+const WORKSPACE_COMMANDS: deploy_commands.WorkspaceCommandRepository = {};
 const WORKSPACES: deploy_workspaces.Workspace[] = [];
+
 
 function getActivePackages() {
     const PACKAGES: deploy_packages.Package[] = [];
@@ -287,6 +290,7 @@ async function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?:
             let newWorkspace: deploy_workspaces.Workspace;
             try {
                 const CTX: deploy_workspaces.WorkspaceContext = {
+                    commands: WORKSPACE_COMMANDS,
                     extension: currentContext,
                     outputChannel: outputChannel,
                     plugins: undefined,

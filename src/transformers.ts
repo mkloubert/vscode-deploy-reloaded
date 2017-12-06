@@ -53,10 +53,6 @@ export interface DataTransformerContext extends deploy_contracts.ScriptArguments
      * The mode.
      */
     readonly mode: DataTransformerMode;
-    /**
-     * The options.
-     */
-    readonly options?: any;
 }
 
 /**

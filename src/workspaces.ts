@@ -15,6 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as deploy_commands from './commands';
 import * as deploy_contracts from './contracts';
 import * as deploy_delete from './delete';
 import * as deploy_deploy from './deploy';
@@ -66,6 +67,10 @@ export type SyncWhenOpenStates = { [ key: string ]: Moment.Moment };
  * A workspace context.
  */
 export interface WorkspaceContext {
+    /**
+     * The repository of commands.
+     */
+    readonly commands: deploy_commands.WorkspaceCommandRepository;
     /**
      * The underlying extension context.
      */
@@ -1234,6 +1239,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         let finalizer: () => any;
         try {
             ME.cleanupTimers();
+            deploy_helpers.applyFuncFor(deploy_commands.cleanupCommands, ME)();
 
             ME._isDeployOnChangeFreezed = false;
             ME._isRemoveOnChangeFreezed = false;
@@ -1292,6 +1298,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
                 delete (<any>loadedCfg).imports;
             }
+
+            deploy_helpers.applyFuncFor(deploy_commands.reloadCommands, ME)(loadedCfg);
 
             const OLD_CFG = ME._config;
             ME._config = loadedCfg;
@@ -1644,6 +1652,15 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         return deploy_values.replaceWithValues(this.getValues()
                                                    .concat(additionalValuesOrThrowOnError),
                                                val, throwOnError);
+    }
+
+    /**
+     * Gets the root path of that workspace.
+     */
+    public get rootPath(): string {
+        return Path.resolve(
+            this.folder.uri.fsPath
+        );
     }
 
     /**

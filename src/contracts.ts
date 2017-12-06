@@ -15,6 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as deploy_commands from './commands';
 import * as deploy_packages from './packages';
 import * as deploy_targets from './targets';
 import * as deploy_values from './values';
@@ -122,6 +123,10 @@ export interface Configuration extends deploy_values.WithValueItems {
      */
     readonly clearOutputOnStartup?: boolean;
     /**
+     * Defines of or more command for the editor to register.
+     */
+    readonly commands?: { [command: string]: deploy_commands.ScriptCommand | string };
+    /**
      * Activates or deactivates 'deploy on change' feature for all packages.
      */
     readonly deployOnChange?: boolean;
@@ -197,6 +202,28 @@ export interface Configuration extends deploy_values.WithValueItems {
      * The time (in milliseconds) to wait before activating 'remove on change' feature.
      */
     readonly timeToWaitBeforeActivateRemoveOnChange?: number;
+}
+
+/**
+ * List of deploy operations.
+ */
+export enum DeployOperation {
+    /**
+     * Delete / remove
+     */
+    Delete = 0,
+    /**
+     * Deploy / upload
+     */
+    Deploy = 1,
+    /**
+     * List directory
+     */
+    ListDirectory = 2,
+    /**
+     * Pull / download
+     */
+    Pull = 3,
 }
 
 /**
@@ -287,6 +314,10 @@ export interface ScriptArguments {
      * Global data.
      */
     readonly globals: any;
+    /**
+     * Options for the script.
+     */
+    readonly options?: any;
     /**
      * Imports a module from the extension context.
      */

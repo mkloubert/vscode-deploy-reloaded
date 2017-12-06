@@ -18,12 +18,34 @@
 import * as deploy_contracts from './contracts';
 import * as deploy_files from './files';
 import * as deploy_helpers from './helpers';
+import * as deploy_objects from './objects';
 import * as deploy_targets from './targets';
 import * as deploy_transformers from './transformers';
 import * as deploy_workspaces from './workspaces';
 import * as Events from 'events';
 import * as vscode from 'vscode';
 
+
+/**
+ * A function / method that is called BEFORE a file is going to be deleted.
+ * 
+ * @param {string} [destination] The custom destination to display.
+ */
+export type BeforeDeleteFileCallback = (destination?: string) => PromiseLike<void>;
+
+/**
+ * A function / method that is called BEFORE a file is going to be downloaded.
+ * 
+ * @param {string} [destination] The custom destination to display.
+ */
+export type BeforeDownloadFileCallback = (destination?: string) => PromiseLike<void>;
+
+/**
+ * A function / method that is called BEFORE a file is going to be uploaded.
+ * 
+ * @param {string} [destination] The custom destination to display.
+ */
+export type BeforeUploadFileCallback = (destination?: string) => PromiseLike<void>;
 
 /**
  * A delete context.
@@ -34,6 +56,14 @@ export interface DeleteContext<TTarget extends deploy_targets.Target = deploy_ta
      */
     readonly files: FileToDelete[];
 }
+
+/**
+ * A function / method that is called AFTER a delete operation for a file has been finished.
+ * 
+ * @param {any} [err] The error (if occurred).
+ * @param {boolean} [deleteLocal] Tells the calling "client" that it should delete its local version or not.
+ */
+export type DeleteFileCompletedCallback = (err?: any, deleteLocal?: boolean) => PromiseLike<void>;
 
 /**
  * A download context.
@@ -58,6 +88,14 @@ export interface DownloadedFile extends vscode.Disposable, deploy_contracts.With
 }
 
 /**
+ * A function / method that is called AFTER a download operation for a file has been finished.
+ * 
+ * @param {any} err The error (if occurred).
+ * @param {DownloadedFile} [file] The downloaded file (if available).
+ */
+export type DownloadFileCompletedCallback = (err: any, file?: DownloadedFile) => PromiseLike<void>;
+
+/**
  * A context for handling files.
  */
 export interface FilesContext<TTarget extends deploy_targets.Target = deploy_targets.Target> extends TargetContext<TTarget> {
@@ -69,17 +107,12 @@ export interface FilesContext<TTarget extends deploy_targets.Target = deploy_tar
 export interface FileToDelete extends deploy_workspaces.WorkspaceFile {
     /**
      * The method that should be invoked BEFORE a deletion of that file starts.
-     * 
-     * @param {string} [destination] A custom value for the destination.
      */
-    readonly onBeforeDelete: (destination?: string) => PromiseLike<void>;
+    readonly onBeforeDelete: BeforeDeleteFileCallback;
     /**
      * The method that should be invoked AFTER a deletion of that file has been finished.
-     * 
-     * @param {any} [err] The error (if occurred).
-     * @param {boolean} [deleteLocalFiles] Delete local version or not.
      */
-    readonly onDeleteCompleted: (err?: any, deleteLocal?: boolean) => PromiseLike<void>;
+    readonly onDeleteCompleted: DeleteFileCompletedCallback;
     /**
      * The underlying workspace.
      */
@@ -92,17 +125,12 @@ export interface FileToDelete extends deploy_workspaces.WorkspaceFile {
 export interface FileToDownload extends deploy_workspaces.WorkspaceFile {
     /**
      * The method that should be invoked BEFORE a download of that file starts.
-     * 
-     * @param {string} [destination] A custom value for the destination.
      */
-    readonly onBeforeDownload: (destination?: string) => PromiseLike<void>;
+    readonly onBeforeDownload: BeforeDownloadFileCallback;
     /**
      * The method that should be invoked AFTER a download of that file has been finished.
-     * 
-     * @param {any} err The error (if occurred).
-     * @param {DownloadedFile} [file] The downloaded file (if available).
      */
-    readonly onDownloadCompleted: (err: any, file?: DownloadedFile) => PromiseLike<void>;
+    readonly onDownloadCompleted: DownloadFileCompletedCallback;
     /**
      * The underlying workspace.
      */
@@ -118,13 +146,13 @@ export interface FileToUpload extends deploy_workspaces.WorkspaceFile {
      * 
      * @param {string} [destination] A custom value for the destination.
      */
-    readonly onBeforeUpload: (destination?: string) => PromiseLike<void>;
+    readonly onBeforeUpload: BeforeUploadFileCallback;
     /**
      * The method that should be invoked AFTER an upload of that file has been finished.
      * 
      * @param {any} [err] The error (if occurred).
      */
-    readonly onUploadCompleted: (err?: any) => PromiseLike<void>;
+    readonly onUploadCompleted: UploadFileCompletedCallback;
     /**
      * Reads the complete content of that file.
      * 
@@ -298,6 +326,13 @@ export interface UploadContext<TTarget extends deploy_targets.Target = deploy_ta
     readonly files: FileToUpload[];
 }
 
+/**
+ * A function / method that is called AFTER an upload operation for a file has been finished.
+ * 
+ * @param {any} [err] The error (if occurred).
+ */
+export type UploadFileCompletedCallback = (err?: any) => PromiseLike<void>;
+
 
 /**
  * Wraps another 'FileToDelete' object.
@@ -324,10 +359,10 @@ export class FileToDeleteWrapper implements FileToDelete {
     }
 
     /** @inheritdoc */
-    public onBeforeDelete;
+    public onBeforeDelete: BeforeDeleteFileCallback;
 
     /** @inheritdoc */
-    public onDeleteCompleted;
+    public onDeleteCompleted: DeleteFileCompletedCallback;
 
     /** @inheritdoc */
     public get path() {
@@ -365,10 +400,10 @@ export class FileToDownloadWrapper implements FileToDownload {
     }
 
     /** @inheritdoc */
-    public onBeforeDownload;
+    public onBeforeDownload: BeforeDownloadFileCallback;
 
     /** @inheritdoc */
-    public onDownloadCompleted;
+    public onDownloadCompleted: DownloadFileCompletedCallback;
 
     /** @inheritdoc */
     public get path() {
@@ -406,10 +441,10 @@ export class FileToUploadWrapper implements FileToUpload {
     }
 
     /** @inheritdoc */
-    public onBeforeUpload;
+    public onBeforeUpload: BeforeUploadFileCallback;
 
     /** @inheritdoc */
-    public onUploadCompleted;
+    public onUploadCompleted: UploadFileCompletedCallback;
 
     /** @inheritdoc */
     public get path() {
@@ -450,11 +485,11 @@ export abstract class FileToUploadBase implements FileToUpload {
     }
 
     /** @inheritdoc */
-    public onBeforeUpload = async () => {
+    public onBeforeUpload: BeforeUploadFileCallback = async () => {
     };
 
     /** @inheritdoc */
-    public onUploadCompleted = async () => {
+    public onUploadCompleted: UploadFileCompletedCallback = async () => {
     };
 
     /** @inheritdoc */
@@ -530,12 +565,10 @@ export class LocalFileToUpload extends FileToUploadBase {
 /**
  * A basic plugin.
  */
-export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_targets.Target> extends Events.EventEmitter implements Plugin {
-    /**
-     * Stores all disposable items.
-     */
-    protected readonly _DISPOSABLES: vscode.Disposable[] = [];
-
+export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_targets.Target>
+    extends deploy_objects.DisposableBase
+    implements Plugin
+{
     /**
      * Initializes a new instance of that class.
      * 
@@ -571,18 +604,6 @@ export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_
         return true;
     }
 
-    /** @inheritdoc */
-    public dispose() {
-        const ME = this;
-        
-        ME.removeAllListeners();
-
-        while (ME._DISPOSABLES.length > 0) {
-            const DISP = ME._DISPOSABLES.pop();
-
-            deploy_helpers.tryDispose(DISP);
-        }
-    }
 
     /** @inheritdoc */
     public async deleteFiles(context: DeleteContext<TTarget>): Promise<void> {
@@ -631,11 +652,11 @@ export class SimpleFileToDelete implements FileToDelete {
     }
 
     /** @inheritdoc */
-    public onBeforeDelete = async () => {
+    public onBeforeDelete: BeforeDeleteFileCallback = async () => {
     };
 
     /** @inheritdoc */
-    public onDeleteCompleted = async () => {
+    public onDeleteCompleted: DeleteFileCompletedCallback = async () => {
     };
 
     /** @inheritdoc */
@@ -666,11 +687,11 @@ export class SimpleFileToDownload implements FileToDownload {
     }
 
     /** @inheritdoc */
-    public onBeforeDownload = async () => {
+    public onBeforeDownload: BeforeDownloadFileCallback = async () => {
     };
 
     /** @inheritdoc */
-    public onDownloadCompleted = async () => {
+    public onDownloadCompleted: DownloadFileCompletedCallback = async () => {
     };
 
     /** @inheritdoc */
@@ -719,4 +740,301 @@ export function createDownloadedFileFromBuffer(file: deploy_workspaces.Workspace
     });
     
     return DOWNLOADED;
+}
+
+
+/**
+ * An iterable plugin.
+ */
+export abstract class IterablePluginBase<TTarget extends deploy_targets.Target & deploy_targets.TargetProvider> extends PluginBase<TTarget> {
+    /** @inheritdoc */
+    public get canDelete() {
+        return true;
+    }
+
+    /** @inheritdoc */
+    public get canDownload() {
+        return true;
+    }
+
+    /** @inheritdoc */
+    public get canList() {
+        return true;
+    }
+
+    /** @inheritdoc */
+    public async deleteFiles(context: DeleteContext<TTarget>) {
+        await this.invokeForEachTarget(
+            this.getTargets(context.target),
+            deploy_contracts.DeployOperation.Delete,
+            () => context.isCancelling,
+            async (target, plugin) => {
+                const CTX: DeleteContext = {
+                    cancellationToken: undefined,
+                    files: context.files,
+                    isCancelling: undefined,
+                    target: target,
+                };
+
+                // CTX.cancellationToken
+                Object.defineProperty(CTX, 'cancellationToken', {
+                    enumerable: true,
+
+                    get: () => {
+                        return context.cancellationToken;
+                    }
+                });
+
+                // CTX.isCancelling
+                Object.defineProperty(CTX, 'isCancelling', {
+                    enumerable: true,
+
+                    get: () => {
+                        return context.isCancelling;
+                    }
+                });
+
+                await Promise.resolve(
+                    plugin.deleteFiles(CTX)
+                );
+            }
+        );
+    }
+
+    /** @inheritdoc */
+    public async downloadFiles(context: DownloadContext<TTarget>) {
+        const ME = this;
+        
+        await ME.invokeForEachTarget(
+            ME.getFirstTarget(context.target),
+            deploy_contracts.DeployOperation.Pull,
+            () => context.isCancelling,
+            async (target, plugin) => {
+                const CTX: DownloadContext = {
+                    cancellationToken: undefined,
+                    files: context.files,
+                    isCancelling: undefined,
+                    target: target,
+                };
+
+                // CTX.cancellationToken
+                Object.defineProperty(CTX, 'cancellationToken', {
+                    enumerable: true,
+
+                    get: () => {
+                        return context.cancellationToken;
+                    }
+                });
+
+                // CTX.isCancelling
+                Object.defineProperty(CTX, 'isCancelling', {
+                    enumerable: true,
+
+                    get: () => {
+                        return context.isCancelling;
+                    }
+                });
+
+                await Promise.resolve(
+                    plugin.downloadFiles(CTX)
+                );
+            }
+        );
+    }
+
+    private getFirstTarget(target: TTarget) {
+        return this.getTargets(target, true)[0];
+    }
+
+    /**
+     * Prepares a target.
+     * 
+     * @param {deploy_targets.Target} target The input target.
+     * @param {deploy_contracts.DeployOperation} operation The underlying operation.
+     * 
+     * @return {deploy_targets.Target} The target to use.
+     */
+    protected prepareTarget(target: deploy_targets.Target, operation: deploy_contracts.DeployOperation) {
+        return target;
+    }
+
+    private getTargets(target: TTarget, throwIfNonFound = false) {
+        if (!target) {
+            return;
+        }
+
+        const TARGETS = deploy_targets.getTargetsByName(target.targets, target.__workspace.getTargets());
+        if (false === TARGETS) {
+            // TODO: translate
+            throw new Error(`At least one target could not be found!`);
+        }
+
+        if (throwIfNonFound) {
+            if (TARGETS.length < 1) {
+                // TODO: translate
+                throw new Error(`No TARGET defined!`);
+            }
+        }
+
+        const MY_NAME = deploy_helpers.normalizeString(
+            target.name
+        );
+        TARGETS.forEach(t => {
+            const OTHER_NAME = deploy_helpers.normalizeString(
+                t.name
+            );
+
+            if (MY_NAME === OTHER_NAME) {
+                throw new Error(`Cannot define '${OTHER_NAME}' as target source!`);
+            }
+        });
+
+        return TARGETS;
+    }
+
+    private async invokeForEachTarget(
+        targets: deploy_targets.Target | deploy_targets.Target[],
+        operation: deploy_contracts.DeployOperation,
+        isCancelling: () => boolean,
+        action: (target: deploy_targets.Target, plugin: Plugin) => any
+    ) {
+        const ME = this;
+
+        let pluginResolver: (target: deploy_targets.Target) => Plugin[];
+        switch (operation) {
+            case deploy_contracts.DeployOperation.Delete:
+                pluginResolver = (t) => t.__workspace.getDeletePlugins(t);
+                break;
+
+            case deploy_contracts.DeployOperation.Deploy:
+                pluginResolver = (t) => t.__workspace.getUploadPlugins(t);
+                break;
+
+            case deploy_contracts.DeployOperation.ListDirectory:
+                pluginResolver = (t) => t.__workspace.getListPlugins(t);
+                break;
+
+            case deploy_contracts.DeployOperation.Pull:
+                pluginResolver = (t) => t.__workspace.getDownloadPlugins(t);
+                break;
+        }
+
+        for (const T of deploy_helpers.asArray(targets)) {
+            if (isCancelling()) {
+                return;
+            }
+
+            const TARGET = ME.prepareTarget(T, operation);
+            if (!TARGET) {
+                continue;
+            }
+
+            for (const PI of pluginResolver(TARGET)) {
+                if (isCancelling()) {
+                    return;
+                }
+
+                await Promise.resolve(
+                    action(T, PI)
+                );
+            } 
+        }
+    }
+
+    /** @inheritdoc */
+    public async listDirectory(context: ListDirectoryContext<TTarget>) {
+        const ME = this;
+
+        let firstResult: ListDirectoryResult;
+
+        await ME.invokeForEachTarget(
+            ME.getFirstTarget(context.target),
+            deploy_contracts.DeployOperation.ListDirectory,
+            () => context.isCancelling,
+            async (target, plugin) => {
+                const CTX: ListDirectoryContext = {
+                    cancellationToken: undefined,
+                    dir: context.dir,
+                    isCancelling: undefined,
+                    target: target,
+                    workspace: target.__workspace,
+                };
+
+                // CTX.cancellationToken
+                Object.defineProperty(CTX, 'cancellationToken', {
+                    enumerable: true,
+
+                    get: () => {
+                        return context.cancellationToken;
+                    }
+                });
+
+                // CTX.isCancelling
+                Object.defineProperty(CTX, 'isCancelling', {
+                    enumerable: true,
+
+                    get: () => {
+                        return context.isCancelling;
+                    }
+                });
+
+                firstResult = await Promise.resolve(
+                    plugin.listDirectory(CTX)
+                );
+            }
+        );
+
+        let result: ListDirectoryResult<TTarget>;
+        if (firstResult) {
+            result = {
+                dirs: firstResult.dirs,
+                files: firstResult.files,
+                others: firstResult.others,
+                target: context.target,
+            };
+        }
+
+        return result;
+    }
+
+    /** @inheritdoc */
+    public async uploadFiles(context: UploadContext<TTarget>) {
+        const ME = this;
+
+        await ME.invokeForEachTarget(
+            ME.getTargets(context.target),
+            deploy_contracts.DeployOperation.Deploy,
+            () => context.isCancelling,
+            async (target, plugin) => {
+                const CTX: UploadContext = {
+                    cancellationToken: undefined,
+                    files: context.files,
+                    isCancelling: undefined,
+                    target: target,
+                };
+
+                // CTX.cancellationToken
+                Object.defineProperty(CTX, 'cancellationToken', {
+                    enumerable: true,
+
+                    get: () => {
+                        return context.cancellationToken;
+                    }
+                });
+
+                // CTX.isCancelling
+                Object.defineProperty(CTX, 'isCancelling', {
+                    enumerable: true,
+
+                    get: () => {
+                        return context.isCancelling;
+                    }
+                });
+
+                await Promise.resolve(
+                    plugin.uploadFiles(CTX)
+                );
+            }
+        );
+    }
 }
