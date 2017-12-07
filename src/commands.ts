@@ -17,7 +17,7 @@
 
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
-import * as deploy_logs from './log';
+import * as deploy_log from './log';
 import * as deploy_values from './values';
 import * as deploy_workspaces from './workspaces';
 import * as vscode from 'vscode';
@@ -184,6 +184,7 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
                         button: btn,
                         command: id,
                         globals: ME.globals,
+                        logger: deploy_log.CONSOLE,
                         options: deploy_helpers.cloneObject(sc.options),
                         require: (moduleId) => {
                             return deploy_helpers.requireFromExtension(moduleId);
@@ -201,15 +202,15 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
                     );
                 }
                 else {
-                    deploy_logs.CONSOLE
-                               .warn(`'${SCRIPT_PATH}' contains NO 'execute()' function!`,
-                                     'commands.reloadCommands()');
+                    deploy_log.CONSOLE
+                              .warn(`'${SCRIPT_PATH}' contains NO 'execute()' function!`,
+                                    'commands.reloadCommands()');
                 }
             }
             else {
-                deploy_logs.CONSOLE
-                           .warn(`'${SCRIPT_PATH}' contains NO module!`,
-                                 'commands.reloadCommands()');
+                deploy_log.CONSOLE
+                          .warn(`'${SCRIPT_PATH}' contains NO module!`,
+                                'commands.reloadCommands()');
             }
         };
     };
@@ -232,8 +233,8 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
                         // TODO: translate
                         ME.showErrorMessage(`Could not execute command '${id}'! '${deploy_helpers.toStringSafe(e)}'`).then(() => {
                         }).catch((err) => {
-                            deploy_logs.CONSOLE
-                                       .trace(err, `commands.reloadCommands().REGISTER_NEW_COMMAND(${id}).2`);
+                            deploy_log.CONSOLE
+                                      .trace(err, `commands.reloadCommands().REGISTER_NEW_COMMAND(${id}).2`);
                         });
                     }
                 }
@@ -241,8 +242,8 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
                 return lastResult;
             }
             catch (e) {
-                deploy_logs.CONSOLE
-                           .trace(e, `commands.reloadCommands().REGISTER_NEW_COMMAND(${id}).1`);
+                deploy_log.CONSOLE
+                          .trace(e, `commands.reloadCommands().REGISTER_NEW_COMMAND(${id}).1`);
             }
         });
     };

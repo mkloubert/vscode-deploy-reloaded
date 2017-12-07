@@ -16,6 +16,7 @@
  */
 
 import * as deploy_commands from './commands';
+import * as deploy_log from './log';
 import * as deploy_packages from './packages';
 import * as deploy_targets from './targets';
 import * as deploy_values from './values';
@@ -332,6 +333,10 @@ export interface ScriptArguments {
      * Options for the script.
      */
     readonly options?: any;
+    /**
+     * The logger.
+     */
+    readonly logger: deploy_log.Logger;
     /**
      * Imports a module from the extension context.
      */

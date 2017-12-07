@@ -19,6 +19,7 @@ import * as deploy_clients from './clients';
 import * as deploy_contracts from './contracts';
 import * as deploy_files from './files';
 import * as deploy_helpers from './helpers';
+import * as deploy_log from './log';
 import * as deploy_objects from './objects';
 import * as deploy_targets from './targets';
 import * as deploy_transformers from './transformers';
@@ -505,6 +506,7 @@ export abstract class FileToUploadBase implements FileToUpload {
         if (this.transformer) {
             const CONTEXT: deploy_transformers.DataTransformerContext = {
                 globals: this.workspace.globals,
+                logger: deploy_log.CONSOLE,
                 mode: deploy_transformers.DataTransformerMode.Transform,
                 options: this.transformerOptions,
                 require: (id) => {

@@ -17,6 +17,7 @@
 
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
+import * as deploy_log from './log';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
 import * as deploy_targets from './targets';
@@ -236,6 +237,7 @@ export async function pullFilesFrom(files: string[],
 
                                         const CONTEXT: deploy_transformers.DataTransformerContext = {
                                             globals: ME.globals,
+                                            logger: deploy_log.CONSOLE,
                                             mode: deploy_transformers.DataTransformerMode.Restore,
                                             options: TRANSFORMER_OPTIONS,
                                             require: (id) => {

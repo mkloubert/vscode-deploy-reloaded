@@ -145,6 +145,8 @@ export type SimpleCompletedAction<TResult> = (err: any, result?: TResult) => voi
  * 
  * @param {TFunc} func The function. 
  * @param {any} [thisArgs] The object to apply to the function.
+ * 
+ * @return {TFunc} The wrapped function.
  */
 export function applyFuncFor<TFunc extends Function = Function>(
     func: TFunc,
@@ -1106,7 +1108,7 @@ export function loadModule<TModule = any>(file: string, fromCache = false): TMod
         file = './module.js';
     }
     if (!Path.isAbsolute(file)) {
-        file = Path.join(__dirname, file);
+        file = Path.join(process.cwd(), file);
     }
     file = Path.resolve(file);
 
