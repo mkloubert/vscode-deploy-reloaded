@@ -15,6 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as deploy_clients from './clients';
 import * as deploy_contracts from './contracts';
 import * as deploy_files from './files';
 import * as deploy_helpers from './helpers';
@@ -627,6 +628,186 @@ export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_
     /** @inheritdoc */
     public async uploadFiles(context: UploadContext<TTarget>): Promise<void> {
         throw new Error(`'uploadFiles()' is NOT implemented!`);
+    }
+}
+
+/**
+ * A context for an async file client plugin.
+ */
+export interface AsyncFileClientPluginContext<TTarget extends deploy_targets.Target = deploy_targets.Target,
+                                              TClient extends deploy_clients.IAsyncFileClient = deploy_clients.IAsyncFileClient> {
+    /**
+     * The underlying client.
+     */
+    readonly client: TClient;
+    /**
+     * The underlying target.
+     */
+    readonly target: TTarget;
+}
+
+/**
+ * A plugin based on an async file client.
+ */
+export abstract class AsyncFileClientPluginBase<TTarget extends deploy_targets.Target = deploy_targets.Target,
+                                                TClient extends deploy_clients.IAsyncFileClient = deploy_clients.IAsyncFileClient,
+                                                TContext extends AsyncFileClientPluginContext<TTarget, TClient> = AsyncFileClientPluginContext<TTarget, TClient>>
+    extends PluginBase<TTarget>
+{
+    /** @inheritdoc */
+    public get canDelete() {
+        return true;
+    }
+
+    /** @inheritdoc */
+    public get canDownload() {
+        return true;
+    }
+
+    /** @inheritdoc */
+    public get canList() {
+        return true;
+    }
+
+    /**
+     * Creates a context for a target.
+     * 
+     * @param {TTarget} target The target.
+     * 
+     * @return {TContext|PromiseLike<TContext>} The created context.
+     */
+    protected abstract createContext(target: TTarget): TContext | PromiseLike<TContext>;
+
+    /** @inheritdoc */
+    public async deleteFiles(context: DeleteContext<TTarget>): Promise<void> {
+        const ME = this;
+
+        await ME.invokeForConnection(context.target, async (conn) => {
+            for (const FILE of context.files) {
+                try {
+                    const REMOTE_DIR = '/' + FILE.path;
+
+                    await FILE.onBeforeDelete(REMOTE_DIR);
+
+                    await conn.client.deleteFile(
+                        FILE.path + '/' + FILE.name,
+                    );
+
+                    await FILE.onDeleteCompleted();
+                }
+                catch (e) {
+                    await FILE.onDeleteCompleted(e);
+                }
+            }
+        });
+    }
+
+    /** @inheritdoc */
+    public async downloadFiles(context: DownloadContext<TTarget>): Promise<void> {
+        const ME = this;
+
+        await ME.invokeForConnection(context.target, async (conn) => {
+            for (const FILE of context.files) {
+                try {
+                    const REMOTE_DIR = '/' + FILE.path;
+
+                    await FILE.onBeforeDownload(REMOTE_DIR);
+
+                    const DOWNLOADED_DATA = await conn.client.downloadFile(
+                        FILE.path + '/' + FILE.name
+                    );
+                    
+                    await FILE.onDownloadCompleted(
+                        null,
+                        DOWNLOADED_DATA ? createDownloadedFileFromBuffer(FILE, DOWNLOADED_DATA) : <any>DOWNLOADED_DATA,
+                    );
+                }
+                catch (e) {
+                    await FILE.onDownloadCompleted(e);
+                }
+            }
+        });
+    }
+
+    private async invokeForConnection<TResult = any>(target: TTarget,
+                                                     action: (context: TContext) => TResult): Promise<TResult> {
+        const CTX = await Promise.resolve(
+            this.createContext(target)
+        );
+        try {
+            if (CTX) {
+                return await Promise.resolve(
+                    action(CTX)
+                );
+            }
+        }
+        finally {
+            deploy_helpers.tryDispose(CTX.client);
+        }
+    }
+
+    /** @inheritdoc */
+    public async listDirectory(context: ListDirectoryContext<TTarget>): Promise<ListDirectoryResult<TTarget>> {
+        const ME = this;
+
+        return await ME.invokeForConnection(context.target, async (conn) => {
+            const RESULT: ListDirectoryResult<TTarget> = {
+                dirs: [],
+                files: [],
+                others: [],
+                target: context.target,
+            };
+
+            const LIST = await conn.client.listDirectory(context.dir);
+            if (LIST) {
+                for (const FSI of LIST) {
+                    if (!FSI) {
+                        continue;
+                    }
+
+                    switch (FSI.type) {
+                        case deploy_files.FileSystemType.Directory:
+                            RESULT.dirs.push(<deploy_files.DirectoryInfo>FSI);
+                            break;
+
+                        case deploy_files.FileSystemType.File:
+                            RESULT.files.push(<deploy_files.FileInfo>FSI);
+                            break;
+
+                        default:
+                            RESULT.others.push(FSI);
+                            break;
+                    }
+                }
+            }
+
+            return RESULT;
+        });
+    }
+
+    /** @inheritdoc */
+    public async uploadFiles(context: UploadContext<TTarget>): Promise<void> {
+        const ME = this;
+
+        await ME.invokeForConnection(context.target, async (conn) => {
+            for (const FILE of context.files) {
+                try {
+                    const REMOTE_DIR = '/' + FILE.path;
+
+                    await FILE.onBeforeUpload(REMOTE_DIR);
+
+                    await conn.client.uploadFile(
+                        FILE.path + '/' + FILE.name,
+                        await FILE.read(),
+                    );
+
+                    await FILE.onUploadCompleted();
+                }
+                catch (e) {
+                    await FILE.onUploadCompleted(e);
+                }
+            }
+        });
     }
 }
 

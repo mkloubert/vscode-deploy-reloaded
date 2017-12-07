@@ -62,7 +62,7 @@ export const DEFAULT_HOST = '127.0.0.1';
 /**
  * A basic FTP client.
  */
-export abstract class FtpClientBase extends deploy_clients.AsyncFileListBase {
+export abstract class FTPClientBase extends deploy_clients.AsyncFileListBase {
     /**
      * Stores the internal connection object / value.
      */
@@ -197,7 +197,7 @@ export abstract class FtpClientBase extends deploy_clients.AsyncFileListBase {
     }
 }
 
-class FtpClient extends FtpClientBase {
+class FtpClient extends FTPClientBase {
     public connect(): Promise<boolean> {
         const ME = this;
 
@@ -414,7 +414,7 @@ class FtpClient extends FtpClientBase {
                                                     }
                                                     catch (e) {
                                                         deploy_log.CONSOLE
-                                                                  .trace(e, 'clients.ftp.FTPClient.list().FI.download()');
+                                                                  .trace(e, 'clients.ftp.FTPClient.listDirectory().FI.download()');
                                                     }
                                                 }
                                             },
@@ -542,7 +542,7 @@ class FtpClient extends FtpClientBase {
     }
 }
 
-class JsFTPClient extends FtpClientBase {
+class JsFTPClient extends FTPClientBase {
     public connect(): Promise<boolean> {
         const ME = this;
         
@@ -918,9 +918,9 @@ class JsFTPClient extends FtpClientBase {
  * 
  * @param {FTPConnectionOptions} opts The options.
  * 
- * @return FtpClientBase The new client.
+ * @return {FTPClientBase} The new client.
  */
-export function createClient(opts: FTPConnectionOptions): FtpClientBase {
+export function createClient(opts: FTPConnectionOptions): FTPClientBase {
     if (!opts) {
         opts = <any>opts;
     }
@@ -963,9 +963,9 @@ export function normalizePath(path: string) {
  * 
  * @param {FTPConnectionOptions} opts The options.
  * 
- * @return {Promise<FtpClientBase>} The promise with new client.
+ * @return {Promise<FTPClientBase>} The promise with new client.
  */
-export async function openConnection(opts: FTPConnectionOptions): Promise<FtpClientBase> {
+export async function openConnection(opts: FTPConnectionOptions): Promise<FTPClientBase> {
     const CLIENT = createClient(opts);
 
     if (!(await CLIENT.connect())) {

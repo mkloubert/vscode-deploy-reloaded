@@ -22,10 +22,8 @@ import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
 
 
-interface FTPContext {
-    readonly client: deploy_clients_ftp.FtpClientBase;
-    readonly getDir: (subDir: string) => string;
-    readonly target: FTPTarget;
+interface FTPContext extends deploy_plugins.AsyncFileClientPluginContext<FTPTarget,
+                                                                         deploy_clients_ftp.FTPClientBase> {
 }
 
 /**
@@ -59,188 +57,20 @@ export interface FTPTarget extends deploy_targets.Target {
 }
 
 
-class FTPPlugin extends deploy_plugins.PluginBase<FTPTarget> {
-    public get canDelete() {
-        return true;
-    }
-    public get canDownload() {
-        return true;
-    }
-    public get canList() {
-        return true;
-    }
-
-    public async deleteFiles(context: deploy_plugins.DeleteContext<FTPTarget>): Promise<void> {
-        const ME = this;
-
-        await ME.invokeForConnection(context.target, async (ftp) => {
-            for (const FILE of context.files) {
-                if (context.isCancelling) {
-                    break;
-                }
-
-                try {
-                    const REMOTE_DIR = '/' + ftp.getDir(FILE.path);
-                    
-                    await FILE.onBeforeDelete(REMOTE_DIR);
-
-                    await ftp.client.unlink(
-                        ftp.getDir(FILE.path + '/' + FILE.name)
-                    );
-                    
-                    await FILE.onDeleteCompleted();
-                }
-                catch (e) {
-                    await FILE.onDeleteCompleted(e);
-                }
-            }
-        });
-    }
-
-    public async downloadFiles(context: deploy_plugins.DownloadContext<FTPTarget>): Promise<void> {
-        const ME = this;
-
-        await ME.invokeForConnection(context.target, async (ftp) => {
-            for (const FILE of context.files) {
-                if (context.isCancelling) {
-                    break;
-                }
-
-                try {
-                    const REMOTE_DIR = '/' + ftp.getDir(FILE.path);
-                    
-                    await FILE.onBeforeDownload(REMOTE_DIR);
-
-                    const DOWNLOADED_DATA = await ftp.client.get(
-                        ftp.getDir(FILE.path + '/' + FILE.name)
-                    );
-                    
-                    await FILE.onDownloadCompleted(null,
-                                                   deploy_plugins.createDownloadedFileFromBuffer(FILE, DOWNLOADED_DATA));
-                }
-                catch (e) {
-                    await FILE.onDownloadCompleted(e);
-                }
-            }
-        });
-    }
-
-    private async invokeForConnection<TResult = any>(target: FTPTarget,
-                                                     action: (context: FTPContext) => TResult | PromiseLike<TResult>): Promise<TResult> {
-        const OPTS: deploy_clients_ftp.FTPConnectionOptions = {
-            engine: target.engine,
-            host: target.host,
-            password: target.password,
-            port: target.port,
-            user: target.user,
+class FTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<FTPTarget,
+                                                                 deploy_clients_ftp.FTPClientBase,
+                                                                 FTPContext> {
+    public async createContext(target: FTPTarget): Promise<FTPContext> {
+        return {
+            client: await deploy_clients_ftp.openConnection({
+                engine: target.engine,
+                host: target.host,
+                password: target.password,
+                port: target.port,
+                user: target.user,
+            }),
+            target: target
         };
-
-        const CLIENT = await deploy_clients_ftp.openConnection(OPTS);
-        try {
-            const CTX: FTPContext = {
-                client: CLIENT,
-                getDir: (subDir) => {
-                    return deploy_clients_ftp.normalizePath(
-                        deploy_clients_ftp.normalizePath(target.dir) + 
-                        '/' + 
-                        deploy_clients_ftp.normalizePath(subDir)
-                    );
-                },
-                target: target,
-            };
-
-            return await Promise.resolve(
-                action(CTX)
-            );
-        }
-        finally {
-            try {
-                await CLIENT.end();
-            }
-            catch (e) {
-                deploy_log.CONSOLE
-                          .trace(e, 'plugins.ftp.invokeForConnection()');
-            }
-        }
-    }
-
-    public async listDirectory(context: deploy_plugins.ListDirectoryContext<FTPTarget>): Promise<deploy_plugins.ListDirectoryResult<FTPTarget>> {
-        const ME = this;
-
-        return await ME.invokeForConnection(context.target, async (ftp) => {
-            const TARGET_DIR = '/' + ftp.getDir(context.dir);
-
-            const RESULT: deploy_plugins.ListDirectoryResult<FTPTarget> = {
-                dirs: [],
-                files: [],
-                others: [],
-                target: context.target,
-            };
-
-            const LIST = await ftp.client.list(TARGET_DIR);
-            for (const FSI of LIST) {
-                switch (FSI.type) {
-                    case deploy_files.FileSystemType.Directory:
-                        RESULT.dirs.push(<deploy_files.DirectoryInfo>FSI);
-                        break;
-
-                    case deploy_files.FileSystemType.File:
-                        RESULT.files.push(<deploy_files.FileInfo>FSI);
-                        break;
-
-                    default:
-                        RESULT.others.push(FSI);
-                        break;
-                }
-            }
-
-            return RESULT;
-        });
-    }
-
-    public async uploadFiles(context: deploy_plugins.UploadContext<FTPTarget>): Promise<void> {
-        const ME = this;
-
-        await ME.invokeForConnection(context.target, async (ftp) => {
-            const CHECKED_REMOTE_DIRS: { [name: string]: boolean } = {};
-
-            for (const FILE of context.files) {
-                if (context.isCancelling) {
-                    break;
-                }
-
-                try {
-                    const REMOTE_DIR = '/' + ftp.getDir(FILE.path);
-
-                    await FILE.onBeforeUpload(REMOTE_DIR);
-
-                    // check if remote directory exists
-                    if (true !== CHECKED_REMOTE_DIRS[REMOTE_DIR]) {
-                        try {
-                            // check if exist
-                            await ftp.client.cwd(REMOTE_DIR);
-                        }
-                        catch {
-                            // no, try to create
-                            await ftp.client.mkdir(REMOTE_DIR);
-                        }
-
-                        // mark as checked
-                        CHECKED_REMOTE_DIRS[FILE.path] = true;
-                    }
-
-                    await ftp.client.put(
-                        ftp.getDir(FILE.path + '/' + FILE.name),
-                        await FILE.read()
-                    );
-
-                    await FILE.onUploadCompleted();
-                }
-                catch (e) {
-                    await FILE.onUploadCompleted(e);
-                }
-            }
-        });
     }
 }
 

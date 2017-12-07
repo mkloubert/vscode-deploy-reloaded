@@ -23,9 +23,8 @@ import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
 
 
-interface DropboxContext {
-    readonly client: deploy_clients_dropbox.DropBoxClient;
-    readonly target: DropboxTarget;
+interface DropboxContext extends deploy_plugins.AsyncFileClientPluginContext<DropboxTarget,
+                                                                             deploy_clients_dropbox.DropBoxClient> {
 }
 
 /**
@@ -43,147 +42,16 @@ export interface DropboxTarget extends deploy_targets.Target {
 }
 
 
-class DropboxPlugin extends deploy_plugins.PluginBase<DropboxTarget> {
-    /** @inheritdoc */
-    public get canDelete() {
-        return true;
-    }
-    /** @inheritdoc */
-    public get canDownload() {
-        return true;
-    }
-    /** @inheritdoc */
-    public get canList() {
-        return true;
-    }
-
-
-    public async deleteFiles(context: deploy_plugins.DeleteContext<DropboxTarget>): Promise<void> {
-        const ME = this;
-
-        await ME.invokeForConnection(context.target, async (dropbox) => {
-            for (const FILE of context.files) {
-                try {
-                    const REMOTE_DIR = '/' + FILE.path;
-
-                    await FILE.onBeforeDelete(REMOTE_DIR);
-
-                    await dropbox.client.deleteFile(
-                        FILE.path + '/' + FILE.name,
-                    );
-
-                    await FILE.onDeleteCompleted();
-                }
-                catch (e) {
-                    await FILE.onDeleteCompleted(e);
-                }
-            }
-        });
-    }
-
-    public async downloadFiles(context: deploy_plugins.DownloadContext<DropboxTarget>): Promise<void> {
-        const ME = this;
-
-        await ME.invokeForConnection(context.target, async (dropbox) => {
-            for (const FILE of context.files) {
-                try {
-                    const REMOTE_DIR = '/' + FILE.path;
-
-                    await FILE.onBeforeDownload(REMOTE_DIR);
-
-                    const DOWNLOADED_DATA = await dropbox.client.downloadFile(
-                        FILE.path + '/' + FILE.name
-                    );
-                    
-                    await FILE.onDownloadCompleted(null,
-                                                   deploy_plugins.createDownloadedFileFromBuffer(FILE, DOWNLOADED_DATA));
-                }
-                catch (e) {
-                    await FILE.onDownloadCompleted(e);
-                }
-            }
-        });
-    }
-
-    private async invokeForConnection<TResult = any>(target: DropboxTarget,
-                                                     action: (context: DropboxContext) => TResult | PromiseLike<TResult>): Promise<TResult> {
-        let accessToken = deploy_helpers.toStringSafe(target.token).trim();
-        if ('' === accessToken) {
-            accessToken = undefined;
-        }
-        
-        const CLIENT = deploy_clients_dropbox.createClient({ 
-            accessToken: accessToken
-        });
-        try {
-            const CTX: DropboxContext = {
-                client: CLIENT,
-                target: target,
-            };
-
-            return await Promise.resolve(
-                action(CTX)
-            );
-        }
-        finally {
-            deploy_helpers.tryDispose(CLIENT);
-        }
-    }
-
-    public async listDirectory(context: deploy_plugins.ListDirectoryContext<DropboxTarget>): Promise<deploy_plugins.ListDirectoryResult<DropboxTarget>> {
-        const ME = this;
-
-        return await ME.invokeForConnection(context.target, async (dropbox) => {
-            const RESULT: deploy_plugins.ListDirectoryResult<DropboxTarget> = {
-                dirs: [],
-                files: [],
-                others: [],
-                target: context.target,
-            };
-
-            const LIST = await dropbox.client.listDirectory(context.dir);
-            for (const FSI of LIST) {
-                switch (FSI.type) {
-                    case deploy_files.FileSystemType.Directory:
-                        RESULT.dirs.push(<deploy_files.DirectoryInfo>FSI);
-                        break;
-
-                    case deploy_files.FileSystemType.File:
-                        RESULT.files.push(<deploy_files.FileInfo>FSI);
-                        break;
-
-                    default:
-                        RESULT.others.push(FSI);
-                        break;
-                }
-            }
-
-            return RESULT;
-        });
-    }
-
-    public async uploadFiles(context: deploy_plugins.UploadContext<DropboxTarget>): Promise<void> {
-        const ME = this;
-
-        await ME.invokeForConnection(context.target, async (dropbox) => {
-            for (const FILE of context.files) {
-                try {
-                    const REMOTE_DIR = '/' + FILE.path;
-
-                    await FILE.onBeforeUpload(REMOTE_DIR);
-
-                    await dropbox.client.uploadFile(
-                        FILE.path + '/' + FILE.name,
-                        await FILE.read(),
-                    );
-
-                    await FILE.onUploadCompleted();
-                }
-                catch (e) {
-                    await FILE.onUploadCompleted(e);
-                }
-            }
-        });
+class DropboxPlugin extends deploy_plugins.AsyncFileClientPluginBase<DropboxTarget,
+                                                                     deploy_clients_dropbox.DropBoxClient,
+                                                                     DropboxContext> {
+    public createContext(target: DropboxTarget): DropboxContext {
+        return {
+            client: deploy_clients_dropbox.createClient({
+                accessToken: target.token,
+            }),
+            target: target
+        };
     }
 }
 
