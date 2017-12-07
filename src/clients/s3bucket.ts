@@ -69,39 +69,13 @@ const KNOWN_CREDENTIAL_CLASSES = {
  * A S3 bucket file client.
  */
 export class S3BucketClient extends deploy_clients.AsyncFileListBase {
+    /**
+     * Initializes a new instance of that class.
+     * 
+     * @param {S3BucketOptions} options The options.
+     */
     constructor(public readonly options: S3BucketOptions) {
         super();
-    }
-
-    /** @inheritdoc */
-    public deleteFile(path: string): Promise<boolean> {
-        const ME = this;
-
-        path = toS3Path(path);
-
-        return new Promise<boolean>((resolve, reject) => {
-            const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
-
-            try {
-                const S3 = ME.createInstance();
-
-                const PARAMS: any = {
-                    Key: path,
-                };
-
-                S3.deleteObject(PARAMS, (err) => {
-                    if (err) {
-                        COMPLETED(null, false);
-                    }
-                    else {
-                        COMPLETED(null, true);
-                    }
-                });
-            }
-            catch (e) {
-                COMPLETED(e);
-            }
-        });
     }
 
     private createInstance(): AWS.S3 {
@@ -138,6 +112,37 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
                 Bucket: bucket,
                 ACL: acl,
             },
+        });
+    }
+
+    /** @inheritdoc */
+    public deleteFile(path: string): Promise<boolean> {
+        const ME = this;
+
+        path = toS3Path(path);
+
+        return new Promise<boolean>((resolve, reject) => {
+            const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
+
+            try {
+                const S3 = ME.createInstance();
+
+                const PARAMS: any = {
+                    Key: path,
+                };
+
+                S3.deleteObject(PARAMS, (err) => {
+                    if (err) {
+                        COMPLETED(null, false);
+                    }
+                    else {
+                        COMPLETED(null, true);
+                    }
+                });
+            }
+            catch (e) {
+                COMPLETED(e);
+            }
         });
     }
 
@@ -258,8 +263,8 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
 
                 let currentContinuationToken: string | false = false;
 
-                let nextSeqment: () => void;
-                nextSeqment = () => {
+                let nextSegment: () => void;
+                nextSegment = () => {
                     try {
                         if (false !== currentContinuationToken) {
                             if (deploy_helpers.isEmptyString(currentContinuationToken)) {
@@ -286,7 +291,7 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
                                     currentContinuationToken = result.NextContinuationToken;
 
                                     HANDLE_RESULT(result);
-                                    nextSeqment();
+                                    nextSegment();
                                 }
                             }
                             catch (e) {
@@ -299,7 +304,7 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
                     }
                 };
 
-                nextSeqment();
+                nextSegment();
             }
             catch (e) {
                 COMPLETED(e);
@@ -317,6 +322,10 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
         const ME = this;
 
         path = toS3Path(path);
+
+        if (!data) {
+            data = Buffer.alloc(0);
+        }
         
         return new Promise<void>((resolve, reject) => {
             const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
@@ -324,15 +333,17 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
             try {
                 const S3 = ME.createInstance();
 
-                const PARAMS: any = {
+                let contentType = MimeTypes.lookup( Path.basename(path) );
+                if (false === contentType) {
+                    contentType = 'application/octet-stream';
+                }
+
+                const PARAMS: AWS.S3.PutObjectRequest = {
+                    Bucket: undefined,
+                    ContentType: contentType,
                     Key: path,
                     Body: data,
                 };
-
-                const CONTENT_TYPE = MimeTypes.lookup( Path.basename(PARAMS.Key) );
-                if (false !== CONTENT_TYPE) {
-                    PARAMS['ContentType'] = CONTENT_TYPE;
-                }
 
                 S3.putObject(PARAMS, (err) => {
                     COMPLETED(err);
