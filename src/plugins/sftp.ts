@@ -139,6 +139,13 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
                 readyTimeout: target.readyTimeout,
                 user: target.user,
             }),
+            getDir: (subDir) => {
+                return deploy_clients_sftp.normalizePath(
+                    deploy_clients_sftp.normalizePath(target.dir) + 
+                    '/' + 
+                    deploy_clients_sftp.normalizePath(subDir)
+                );
+            },
             target: target,
         };
     }

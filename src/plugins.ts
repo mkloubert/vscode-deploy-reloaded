@@ -641,6 +641,14 @@ export interface AsyncFileClientPluginContext<TTarget extends deploy_targets.Tar
      */
     readonly client: TClient;
     /**
+     * Returns the "real" path of a sub directory.
+     * 
+     * @param {string} subDir The sub directory.
+     * 
+     * @return {string} The "real" path.
+     */
+    readonly getDir: (subDir: string) => string;
+    /**
      * The underlying target.
      */
     readonly target: TTarget;
@@ -690,7 +698,7 @@ export abstract class AsyncFileClientPluginBase<TTarget extends deploy_targets.T
                     await FILE.onBeforeDelete(REMOTE_DIR);
 
                     await conn.client.deleteFile(
-                        FILE.path + '/' + FILE.name,
+                        conn.getDir(FILE.path) + '/' + FILE.name,
                     );
 
                     await FILE.onDeleteCompleted();
@@ -714,7 +722,7 @@ export abstract class AsyncFileClientPluginBase<TTarget extends deploy_targets.T
                     await FILE.onBeforeDownload(REMOTE_DIR);
 
                     const DOWNLOADED_DATA = await conn.client.downloadFile(
-                        FILE.path + '/' + FILE.name
+                        conn.getDir(FILE.path) + '/' + FILE.name
                     );
                     
                     await FILE.onDownloadCompleted(
@@ -758,7 +766,7 @@ export abstract class AsyncFileClientPluginBase<TTarget extends deploy_targets.T
                 target: context.target,
             };
 
-            const LIST = await conn.client.listDirectory(context.dir);
+            const LIST = await conn.client.listDirectory(conn.getDir(context.dir));
             if (LIST) {
                 for (const FSI of LIST) {
                     if (!FSI) {
@@ -797,7 +805,7 @@ export abstract class AsyncFileClientPluginBase<TTarget extends deploy_targets.T
                     await FILE.onBeforeUpload(REMOTE_DIR);
 
                     await conn.client.uploadFile(
-                        FILE.path + '/' + FILE.name,
+                        conn.getDir(FILE.path) + '/' + FILE.name,
                         await FILE.read(),
                     );
 
@@ -1168,9 +1176,9 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
         let result: ListDirectoryResult<TTarget>;
         if (firstResult) {
             result = {
-                dirs: firstResult.dirs,
-                files: firstResult.files,
-                others: firstResult.others,
+                dirs: firstResult.dirs || [],
+                files: firstResult.files || [],
+                others: firstResult.others || [],
                 target: context.target,
             };
         }

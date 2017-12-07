@@ -25,11 +25,13 @@ import * as Enumerable from 'node-enumerable';
 import * as FS from 'fs';
 import * as Glob from 'glob';
 const IsBinaryFile = require("isbinaryfile");
+import * as IsStream from 'is-stream';
 const MergeDeep = require('merge-deep');
 import * as MimeTypes from 'mime-types';
 import * as Minimatch from 'minimatch';
 import * as Moment from 'moment';
 import * as Path from 'path';
+import * as Stream from "stream";
 import * as TMP from 'tmp';
 import * as vscode from 'vscode';
 
@@ -174,6 +176,70 @@ export function asArray<T>(val: T | T[], removeEmpty = true): T[] {
 
         return true;
     });
+}
+
+/**
+ * Returns a value as buffer.
+ * 
+ * @param {any} val The value to convert / cast.
+ * @param {string} enc The custom encoding for the string parsers.
+ * @param {number} [maxDepth] The custom value for the max depth of wrapped functions. Default: 63
+ * 
+ * @return {Promise<Buffer>} The promise with the buffer.
+ */
+export async function asBuffer(val: any, enc?: string, maxDepth?: number): Promise<Buffer> {
+    return await asBufferInner(val, enc, null, maxDepth);
+}
+
+async function asBufferInner(val: any, enc?: string,
+                             funcDepth?: number, maxDepth?: number) {
+    if (isNaN(funcDepth)) {
+        funcDepth = 0;
+    }
+
+    if (isNaN(maxDepth)) {
+        maxDepth = 63;
+    }
+
+    if (funcDepth > maxDepth) {
+        throw Error(`Could not go deeper than ${maxDepth}!`);
+    }
+
+    if (Buffer.isBuffer(val) || isNullOrUndefined(val)) {
+        return val;
+    }
+
+    if (isFunc(val)) {
+        // wrapped
+
+        return await asBufferInner(
+            await Promise.resolve(
+                val(enc, funcDepth, maxDepth),  
+            ),
+            enc,
+            funcDepth + 1, maxDepth,
+        );
+    }
+
+    enc = normalizeString(enc);
+    if ('' === enc) {
+        enc = undefined;
+    }
+
+    if (IsStream.readable(val)) {
+        // stream
+        return await readAll(val);
+    }
+
+    if (isObject(val) || Array.isArray(val)) {
+        // JSON object
+        return new Buffer(JSON.stringify(val),
+                          enc);
+    }
+
+    // handle as string
+    return new Buffer(toStringSafe(val),
+                      enc);
 }
 
 /**
@@ -1257,6 +1323,85 @@ export function open(target: string, opts?: OpenOptions): Promise<ChildProcess.C
 
                 COMPLETED(null, cp);
             }
+        }
+        catch (e) {
+            COMPLETED(e);
+        }
+    });
+}
+
+/**
+ * Reads the content of a stream.
+ * 
+ * @param {Stream.Readable} stream The stream.
+ * 
+ * @returns {Promise<Buffer>} The promise with the content.
+ */
+export function readAll(stream: Stream.Readable): Promise<Buffer> {
+    return new Promise<Buffer>((resolve, reject) => {
+        let buff: Buffer;
+    
+        let dataListener: (chunk: Buffer | string) => void;
+
+        let completedInvoked = false;
+        const COMPLETED = (err: any) => {
+            if (completedInvoked) {
+                return;
+            }
+            completedInvoked = true;
+
+            if (dataListener) {
+                try {
+                    stream.removeListener('data', dataListener);
+                }
+                catch (e) { 
+                    deploy_log.CONSOLE
+                              .trace(e, 'helpers.readAll()');
+                }
+            }
+
+            if (err) {
+                reject(err);
+            }
+            else {
+                resolve(buff);
+            }
+        };
+
+        if (!stream) {
+            COMPLETED(null);
+            return;
+        }
+
+        stream.once('error', (err) => {
+            if (err) {
+                COMPLETED(err);
+            }
+        });
+
+        dataListener = (chunk: Buffer | string) => {
+            try {
+                if (chunk && chunk.length > 0) {
+                    if ('string' === typeof chunk) {
+                        chunk = new Buffer(chunk);
+                    }
+
+                    buff = Buffer.concat([ buff, chunk ]);
+                }
+            }
+            catch (e) {
+                COMPLETED(e);
+            }
+        };
+
+        try {
+            buff = Buffer.alloc(0);
+
+            stream.on('data', dataListener);
+
+            stream.once('end', () => {
+                COMPLETED(null);
+            });
         }
         catch (e) {
             COMPLETED(e);

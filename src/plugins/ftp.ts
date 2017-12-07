@@ -69,6 +69,13 @@ class FTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<FTPTarget,
                 port: target.port,
                 user: target.user,
             }),
+            getDir: (subDir) => {
+                return deploy_clients_ftp.normalizePath(
+                    deploy_clients_ftp.normalizePath(target.dir) + 
+                    '/' + 
+                    deploy_clients_ftp.normalizePath(subDir)
+                );
+            },
             target: target
         };
     }
