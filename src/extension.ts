@@ -774,14 +774,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
                     const TARGETS: deploy_targets.Target[] = [];
                     activeWorkspaces.forEach(ws => {
                         const WORKSPACE_TARGETS = ws.getTargets().filter(t => {
-                            const PLUGINS = t.__workspace.context.plugins.filter(pi => {
-                                const TARGET_TYPE = deploy_targets.normalizeTargetType(t);
-
-                                return '' === pi.__type || 
-                                       (TARGET_TYPE === pi.__type && pi.canList && pi.listDirectory);
-                            });
-
-                            return PLUGINS.length > 0;
+                            return t.__workspace.getListPlugins(t).length > 0;
                         });
 
                         TARGETS.push

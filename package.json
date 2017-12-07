@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.38",
+ "version": "0.0.39",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.18.0"
@@ -837,6 +837,178 @@
            },
            "dir": {
             "type": "string",
+            "description": "The target directory.",
+            "default": ""
+           },
+           "encryptBy": {
+            "description": "The algorithm for data encryption to use.",
+            "type": "string",
+            "default": "aes-256-ctr"
+           },
+           "encryptWith": {
+            "description": "An optional password for data encryption to use.",
+            "type": "string"
+           },
+           "hideIf": {
+            "description": "Defines a list of one or more package names, which will hide this target from GUI, if one of them is selected.",
+            "type": "array",
+            "items": {
+             "description": "A name of a package.",
+             "type": "string"
+            }
+           },
+           "if": {
+            "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+            "type": "string"
+           },
+           "mappings": {
+            "description": "Defines one or more folder mappings by minimatch patterns.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The mapping to define",
+              "oneOf": [
+               {
+                "description": "The target folder.",
+                "type": "string"
+               },
+               {
+                "description": "Settings for the target folder.",
+                "type": "object",
+                "properties": {
+                 "to": {
+                  "description": "The target folder.",
+                  "type": "string"
+                 }
+                },
+                "required": [
+                 "to"
+                ]
+               }
+              ]
+             }
+            }
+           },
+           "name": {
+            "description": "The (display) name of that target.",
+            "type": "string"
+           },
+           "showIf": {
+            "description": "Defines a list of one or more package names, which will show this target in GUI, if one of them is selected.",
+            "type": "array",
+            "items": {
+             "description": "A name of a package.",
+             "type": "string"
+            }
+           },
+           "token": {
+            "type": "string",
+            "description": "The access token to use."
+           },
+           "transformer": {
+            "description": "The path (or URI) to the data transformer script.",
+            "type": "string"
+           },
+           "transformerOptions": {
+            "description": "Options for the data transformer script."
+           },
+           "type": {
+            "enum": [
+             "dropbox"
+            ],
+            "type": "string",
+            "description": "Deploys to a Dropbox folder."
+           }
+          },
+          "required": [
+           "token"
+          ]
+         },
+         {
+          "type": "object",
+          "properties": {
+           "beforeDeploy": {
+            "description": "One or more target operation to define.",
+            "type": "array",
+            "items": {
+             "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "target": {
+                 "description": "The thing to open.",
+                 "type": "string",
+                 "pattern": "\\S+"
+                },
+                "type": {
+                 "enum": [
+                  "open",
+                  ""
+                 ],
+                 "type": "string",
+                 "description": "Opens something, like an app or URL on the current machine."
+                },
+                "wait": {
+                 "description": "Wait until operation has been finished or not.",
+                 "type": "boolean",
+                 "default": true
+                }
+               },
+               "required": [
+                "target"
+               ]
+              }
+             ]
+            }
+           },
+           "deployed": {
+            "description": "One or more target operation to define.",
+            "type": "array",
+            "items": {
+             "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "target": {
+                 "description": "The thing to open.",
+                 "type": "string",
+                 "pattern": "\\S+"
+                },
+                "type": {
+                 "enum": [
+                  "open",
+                  ""
+                 ],
+                 "type": "string",
+                 "description": "Opens something, like an app or URL on the current machine."
+                },
+                "wait": {
+                 "description": "Wait until operation has been finished or not.",
+                 "type": "boolean",
+                 "default": true
+                }
+               },
+               "required": [
+                "target"
+               ]
+              }
+             ]
+            }
+           },
+           "description": {
+            "description": "A description for that target.",
+            "type": "string"
+           },
+           "dir": {
+            "type": "string",
             "description": "The remote directory on the server.",
             "default": "/"
            },
@@ -1428,6 +1600,15 @@
             "description": "A description for that target.",
             "type": "string"
            },
+           "dir": {
+            "type": "string",
+            "description": "The target directory."
+           },
+           "empty": {
+            "type": "boolean",
+            "description": "Empty target directory before deploy or not.",
+            "default": false
+           },
            "encryptBy": {
             "description": "The algorithm for data encryption to use.",
             "type": "string",
@@ -1652,6 +1833,7 @@
  },
  "readmeFilename": "README.md",
  "dependencies": {
+  "dropbox": "^2.5.12",
   "filesize": "^3.5.11",
   "fs-extra": "^4.0.2",
   "ftp": "^0.3.10",

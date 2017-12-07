@@ -15,6 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as deploy_clients from '../clients';
 import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
 import * as deploy_log from '../log';
@@ -61,7 +62,7 @@ export const DEFAULT_HOST = '127.0.0.1';
 /**
  * A basic FTP client.
  */
-export abstract class FtpClientBase {
+export abstract class FtpClientBase extends deploy_clients.AsyncFileListBase {
     /**
      * Stores the internal connection object / value.
      */
@@ -73,6 +74,8 @@ export abstract class FtpClientBase {
      * @param {FTPConnectionOptions} opts The options.
      */
     public constructor(opts: FTPConnectionOptions) {
+        super();
+
         this.options = deploy_helpers.cloneObject(opts) || <any>{};
     }
 
@@ -96,6 +99,23 @@ export abstract class FtpClientBase {
      * @param {string} dir The path to the new directory.
      */
     public abstract cwd(dir: string): Promise<void>;
+
+    /** @inheritdoc */
+    public async deleteFile(path: string): Promise<boolean> {
+        try {
+            await this.unlink(path);
+            
+            return true;
+        }
+        catch (e) {
+            return false;
+        }
+    }
+
+    /** @inheritdoc */
+    public async downloadFile(path: string): Promise<Buffer> {
+        return await this.get(path);
+    }
 
     /**
      * Ends the connections.
@@ -127,12 +147,24 @@ export abstract class FtpClientBase {
      */
     public abstract list(dir: string): Promise<deploy_files.FileSystemInfo[]>;
 
+    /** @inheritdoc */
+    public async listDirectory(path: string): Promise<deploy_files.FileSystemInfo[]> {
+        return await this.list(path);
+    }
+
     /**
      * Creates a directory.
      * 
      * @param {string} dir The path of the directory to create.
      */
     public abstract mkdir(dir: string): Promise<void>;
+
+    /** @inheritdoc */
+    protected onDispose() {
+        this.end().then(() => {
+        }).catch((err) => {
+        });
+    }
 
     /**
      * Gets the underlying options.
@@ -147,12 +179,22 @@ export abstract class FtpClientBase {
      */
     public abstract put(file: string, data: Buffer): Promise<void>;
 
+    /** @inheritdoc */
+    public get type() {
+        return 'ftp';
+    }
+
     /**
      * Deletes a file or folder.
      * 
      * @param {string} path The path to the thing to delete.
      */
     public abstract unlink(path: string): Promise<void>;
+
+    /** @inheritdoc */
+    public async uploadFile(path: string, data: Buffer): Promise<void> {
+        await this.put(path, data);
+    }
 }
 
 class FtpClient extends FtpClientBase {
