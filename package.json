@@ -835,6 +835,202 @@
             "description": "A description for that target.",
             "type": "string"
            },
+           "dir": {
+            "type": "string",
+            "description": "The remote directory on the server.",
+            "default": "/"
+           },
+           "encryptBy": {
+            "description": "The algorithm for data encryption to use.",
+            "type": "string",
+            "default": "aes-256-ctr"
+           },
+           "encryptWith": {
+            "description": "An optional password for data encryption to use.",
+            "type": "string"
+           },
+           "engine": {
+            "enum": [
+             "",
+             "jsftp",
+             "ftp"
+            ],
+            "type": "string",
+            "description": "The engine to use.",
+            "default": "jsftp"
+           },
+           "hideIf": {
+            "description": "Defines a list of one or more package names, which will hide this target from GUI, if one of them is selected.",
+            "type": "array",
+            "items": {
+             "description": "A name of a package.",
+             "type": "string"
+            }
+           },
+           "host": {
+            "type": "string",
+            "description": "The host address of the server.",
+            "default": "127.0.0.1"
+           },
+           "if": {
+            "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+            "type": "string"
+           },
+           "mappings": {
+            "description": "Defines one or more folder mappings by minimatch patterns.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The mapping to define",
+              "oneOf": [
+               {
+                "description": "The target folder.",
+                "type": "string"
+               },
+               {
+                "description": "Settings for the target folder.",
+                "type": "object",
+                "properties": {
+                 "to": {
+                  "description": "The target folder.",
+                  "type": "string"
+                 }
+                },
+                "required": [
+                 "to"
+                ]
+               }
+              ]
+             }
+            }
+           },
+           "name": {
+            "description": "The (display) name of that target.",
+            "type": "string"
+           },
+           "password": {
+            "type": "string",
+            "description": "The password."
+           },
+           "port": {
+            "type": "integer",
+            "description": "The TCP port of the server.",
+            "minimum": 0,
+            "maximum": 65535,
+            "default": 21
+           },
+           "showIf": {
+            "description": "Defines a list of one or more package names, which will show this target in GUI, if one of them is selected.",
+            "type": "array",
+            "items": {
+             "description": "A name of a package.",
+             "type": "string"
+            }
+           },
+           "transformer": {
+            "description": "The path (or URI) to the data transformer script.",
+            "type": "string"
+           },
+           "transformerOptions": {
+            "description": "Options for the data transformer script."
+           },
+           "type": {
+            "enum": [
+             "ftp"
+            ],
+            "type": "string",
+            "description": "Deploys to a FTP server."
+           },
+           "user": {
+            "type": "string",
+            "description": "The username.",
+            "default": "anonymous"
+           }
+          }
+         },
+         {
+          "type": "object",
+          "properties": {
+           "beforeDeploy": {
+            "description": "One or more target operation to define.",
+            "type": "array",
+            "items": {
+             "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "target": {
+                 "description": "The thing to open.",
+                 "type": "string",
+                 "pattern": "\\S+"
+                },
+                "type": {
+                 "enum": [
+                  "open",
+                  ""
+                 ],
+                 "type": "string",
+                 "description": "Opens something, like an app or URL on the current machine."
+                },
+                "wait": {
+                 "description": "Wait until operation has been finished or not.",
+                 "type": "boolean",
+                 "default": true
+                }
+               },
+               "required": [
+                "target"
+               ]
+              }
+             ]
+            }
+           },
+           "deployed": {
+            "description": "One or more target operation to define.",
+            "type": "array",
+            "items": {
+             "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "target": {
+                 "description": "The thing to open.",
+                 "type": "string",
+                 "pattern": "\\S+"
+                },
+                "type": {
+                 "enum": [
+                  "open",
+                  ""
+                 ],
+                 "type": "string",
+                 "description": "Opens something, like an app or URL on the current machine."
+                },
+                "wait": {
+                 "description": "Wait until operation has been finished or not.",
+                 "type": "boolean",
+                 "default": true
+                }
+               },
+               "required": [
+                "target"
+               ]
+              }
+             ]
+            }
+           },
+           "description": {
+            "description": "A description for that target.",
+            "type": "string"
+           },
            "encryptBy": {
             "description": "The algorithm for data encryption to use.",
             "type": "string",
@@ -1430,6 +1626,7 @@
  "devDependencies": {
   "@types/filesize": "^3.2.15",
   "@types/fs-extra": "^4.0.5",
+  "@types/ftp": "^0.3.29",
   "@types/glob": "^5.0.33",
   "@types/i18next": "^8.4.2",
   "@types/mime-types": "^2.1.0",
@@ -1457,14 +1654,17 @@
  "dependencies": {
   "filesize": "^3.5.11",
   "fs-extra": "^4.0.2",
+  "ftp": "^0.3.10",
   "glob": "^7.1.2",
   "i18next": "^10.2.1",
   "isbinaryfile": "^3.0.2",
+  "jsftp": "^2.1.2",
   "merge-deep": "^3.0.0",
   "mime-types": "^2.1.17",
   "minimatch": "^3.0.4",
   "moment": "^2.19.3",
   "node-enumerable": "^3.8.0",
+  "parse-listing": "^1.1.3",
   "ssh2-sftp-client": "^2.0.1",
   "tmp": "0.0.33",
   "uuid": "^3.1.0"

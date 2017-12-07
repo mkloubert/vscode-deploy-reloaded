@@ -1319,6 +1319,60 @@ export function readFile(filename: string) {
 }
 
 /**
+ * Reads the content of a stream.
+ * 
+ * @param {NodeJS.ReadableStream} stream The stream.
+ * 
+ * @returns {Promise<Buffer>} The promise with the content.
+ */
+export function readStream(stream: NodeJS.ReadableStream): Promise<Buffer> {
+    return new Promise<Buffer>(async (resolve, reject) => {
+        const COMPLETED = createCompletedAction(resolve, reject);
+
+        if (!stream) {
+            COMPLETED(null);
+            return;
+        }
+
+        stream.once('error', (err) => {;
+            COMPLETED(err);
+        });
+
+        try {
+            const DATA = await invokeForTempFile((tmpFile) => {
+                return new Promise<Buffer>((res, rej) => {
+                    const COMP = createCompletedAction(res, rej);
+
+                    try {
+                        const PIPE = stream.pipe( FS.createWriteStream(tmpFile) );
+
+                        PIPE.once('error', (err) => {;
+                            COMP(err);
+                        });
+
+                        stream.once('end', () => {
+                            readFile(tmpFile).then((d) => {
+                                COMP(null, d);
+                            }).catch((err) => {
+                                COMP(err);
+                            });
+                        });
+                    }
+                    catch (e) {
+                        COMP(e);
+                    }
+                });
+            });
+
+            COMPLETED(null, DATA);
+        }
+        catch (e) {
+            COMPLETED(e);
+        }
+    });
+}
+
+/**
  * Replaces all occurrences of a string.
  * 
  * @param {string} str The input string.

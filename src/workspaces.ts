@@ -759,9 +759,25 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Returns the list of values.
      */
     public getValues(): deploy_values.Value[] {
-        const CFG = this.config;
+        const ME = this;
+        const CFG = ME.config;
         
         let values: deploy_values.Value[] = [];
+
+        // pre defined values
+        values = values.concat(
+            deploy_values.getPredefinedValues()
+        );
+
+        // ${workspace}
+        values.push(new deploy_values.FunctionValue(() => {
+            return ME.name;
+        }, 'workspace'));
+
+        // ${workspaceRoot}
+        values.push(new deploy_values.FunctionValue(() => {
+            return ME.rootPath;
+        }, 'workspaceRoot'));
 
         // process's environment variables
         try {
@@ -780,7 +796,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         }
 
         values = values.concat(
-            deploy_values.loadFromItems(this.config)
+            deploy_values.loadFromItems(CFG)
         );
 
         return values;

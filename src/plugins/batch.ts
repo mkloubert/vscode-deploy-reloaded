@@ -20,7 +20,7 @@ import * as deploy_targets from '../targets';
 
 
 /**
- * A 'test' target.
+ * A 'batch' target.
  */
 export interface BatchTarget extends deploy_targets.Target, deploy_targets.TargetProvider {
 }

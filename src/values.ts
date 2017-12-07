@@ -19,6 +19,7 @@ import * as deploy_code from './code';
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
+import * as OS from 'os';
 
 
 /**
@@ -192,6 +193,48 @@ export class StaticValue extends ValueBase<StaticValueItem> {
     }
 }
 
+
+/**
+ * Returns a list of predefined values.
+ * 
+ * @return {Value[]} The list of values.
+ */
+export function getPredefinedValues(): Value[] {
+    const PREDEFINED_VALUES: Value[] = [];
+
+    // ${cwd}
+    PREDEFINED_VALUES.push(new FunctionValue(() => {
+        return process.cwd();
+    }, 'cwd'));
+
+    // ${EOL}
+    PREDEFINED_VALUES.push(new FunctionValue(() => {
+        return OS.EOL;
+    }, 'EOL'));
+
+    // ${homeDir}
+    PREDEFINED_VALUES.push(new FunctionValue(() => {
+        return OS.homedir();
+    }, 'homeDir'));
+
+    // ${hostName}
+    PREDEFINED_VALUES.push(new FunctionValue(() => {
+        return OS.hostname();
+    }, 'hostName'));
+
+    // ${tempDir}
+    PREDEFINED_VALUES.push(new FunctionValue(() => {
+        return OS.tmpdir();
+    }, 'tempDir'));
+
+    // ${userName}
+    PREDEFINED_VALUES.push(new FunctionValue(() => {
+        return OS.userInfo().username;
+    }, 'userName'));
+
+    return PREDEFINED_VALUES;
+}
+
 /**
  * Returns value instances of the current list of environment variables.
  * 
@@ -241,15 +284,15 @@ export function loadFromItems(items: WithValueItems) {
 
     if (items && items.values) {
         for (const NAME in items.values) {
-            const VI: ValueItem = items.values[NAME];
-
-            if (deploy_helpers.filterConditionalItems(VI).length < 1) {
-                continue;
-            }
+            const VI = items.values[NAME];
 
             let newValue: ValueBase;
 
             if (deploy_helpers.isObject<ValueItem>(VI)) {
+                if (deploy_helpers.filterConditionalItems(VI).length < 1) {
+                    continue;
+                }
+
                 const TYPE = deploy_helpers.normalizeString(VI.type);
                 switch (TYPE) {
                     case '':
@@ -267,7 +310,7 @@ export function loadFromItems(items: WithValueItems) {
             }
             else {
                 const STATIC_VALUE_ITEM: StaticValueItem = {
-                    type: '',
+                    type: 'static',
                     value: VI
                 };
 
@@ -279,6 +322,19 @@ export function loadFromItems(items: WithValueItems) {
     }
 
     return VALUES;
+}
+
+function normalizeValueList(values: Value | Value[]): ValueStorage {
+    const STORAGE: ValueItemStorage = {};
+
+    // last wins
+    for (const V of deploy_helpers.asArray(values)) {
+        const VALUE_NAME = deploy_helpers.normalizeString(V.name);
+
+        STORAGE[VALUE_NAME] = V;
+    }
+
+    return STORAGE;
 }
 
 function normalizeValueName(name: any): string {
@@ -306,9 +362,10 @@ export function replaceWithValues(values: Value | Value[], val: any,
     if (!deploy_helpers.isNullOrUndefined(val)) {
         let str = deploy_helpers.toStringSafe(val);
 
-        for (const V of deploy_helpers.asArray(values)) {
+        const STORAGE = normalizeValueList(values);
+        for (const VALUE_NAME in STORAGE) {
             try {
-                const VALUE_NAME = deploy_helpers.normalizeString(V.name);
+                const V = STORAGE[VALUE_NAME];
                 
                 // ${VALUE_NAME}
                 str = str.replace(/(\$)(\{)([^\}]*)(\})/gm, (match, varIdentifier, openBracket, varName: string, closedBracked) => {
@@ -360,7 +417,7 @@ export function toValueStorage(values: Value | Value[]): ValueStorage {
                 return v.value;
             }
         });
-    }
+    };
 
     deploy_helpers.asArray(values).forEach(v => {
         APPEND_VALUE(v);

@@ -117,22 +117,16 @@ function normalizePath(path: string) {
 }
 
 class SFTPPlugin extends deploy_plugins.PluginBase<SFTPTarget> {
-     /** @inheritdoc */
-     public get canDelete() {
+    public get canDelete() {
         return true;
     }
-    
-    /** @inheritdoc */
     public get canDownload() {
         return true;
     }
-    
-    /** @inheritdoc */
     public get canList() {
         return true;
     }
 
-    /** @inheritdoc */
     public async deleteFiles(context: deploy_plugins.DeleteContext<SFTPTarget>): Promise<void> {
         const ME = this;
 
@@ -154,7 +148,6 @@ class SFTPPlugin extends deploy_plugins.PluginBase<SFTPTarget> {
         });
     }
 
-    /** @inheritdoc */
     public async downloadFiles(context: deploy_plugins.DownloadContext<SFTPTarget>): Promise<void> {
         const ME = this;
 
@@ -247,7 +240,6 @@ class SFTPPlugin extends deploy_plugins.PluginBase<SFTPTarget> {
         }
     }
 
-    /** @inheritdoc */
     public async listDirectory(context: deploy_plugins.ListDirectoryContext<SFTPTarget>): Promise<deploy_plugins.ListDirectoryResult<SFTPTarget>> {
         const ME = this;
         
@@ -417,7 +409,6 @@ class SFTPPlugin extends deploy_plugins.PluginBase<SFTPTarget> {
         };
     }
 
-    /** @inheritdoc */
     public async uploadFiles(context: deploy_plugins.UploadContext<SFTPTarget>): Promise<void> {
         const ME = this;
 
