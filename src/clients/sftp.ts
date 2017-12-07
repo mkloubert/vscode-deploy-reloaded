@@ -207,15 +207,11 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
                     download: async () => {
                         const CLIENT = await openConnection(ME.options);
                         try {
-                            const STREAM = await CLIENT.client.get(
-                                toSFTPPath(
-                                    normalizePath(path) +
-                                    '/' +
-                                    normalizePath(FI.name)
-                                )
+                            return await CLIENT.downloadFile(
+                                normalizePath(path) +
+                                '/' +
+                                normalizePath(FI.name)
                             );
-
-                            return deploy_helpers.readStream(STREAM);
                         }
                         finally {
                             try {
