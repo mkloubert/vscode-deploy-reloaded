@@ -86,6 +86,33 @@ export interface DataTransformerModule {
     readonly transform: DataTransformer;
 }
 
+/**
+ * Creates a "safe" data transformer.
+ * 
+ * @param {DataTransformer} transformer The transformer to wrap. 
+ * @param {any} [thisArg] The custom object / value that should be applied to 'transformer'.
+ * 
+ * @return {DataTransformer} The wrapper.
+ */
+export function toDataTransformerSafe(transformer: DataTransformer, thisArg?: any): DataTransformer {
+    if (!transformer) {
+        transformer = (data) => data;
+    }
+
+    return async function() {
+        let data: Buffer = await Promise.resolve(
+            transformer.apply(thisArg, arguments)
+        );
+
+        data = await deploy_helpers.asBuffer(data, 'binary');
+        if (!Buffer.isBuffer(data)) {
+            data = Buffer.alloc(0);
+        }
+
+        return data;
+    };
+}
+
 
 /**
  * Creates wrapper for a data transformer for encrypting data by password.

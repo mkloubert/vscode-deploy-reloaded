@@ -106,7 +106,9 @@ export async function pullFilesFrom(files: string[],
         throw new Error(`Could not load data transformer for target '${TARGET_NAME}'!`);
     }
 
-    transformer = deploy_transformers.toPasswordTransformer(transformer, target);
+    transformer = deploy_transformers.toDataTransformerSafe(
+        deploy_transformers.toPasswordTransformer(transformer, target)
+    );
 
     const TRANSFORMER_OPTIONS = deploy_helpers.cloneObject(target.transformerOptions);
 
