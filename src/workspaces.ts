@@ -183,6 +183,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     protected _lastConfigUpdate: Moment.Moment;
     private _OLD_ENV_VARS: deploy_contracts.KeyValuePairs = {};
     private _PACKAGE_BUTTONS: PackageWithButton[] = [];
+    private _packages: deploy_packages.Package[];
     /**
      * Stores the start time.
      */
@@ -191,6 +192,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Stores the states for 'sync when open'.
      */
     protected _syncWhenOpenStates: SyncWhenOpenStates;
+    private _targets: deploy_targets.Target[];
     /**
      * The current translation function.
      */
@@ -582,46 +584,11 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Returns the list of packages as defined in the settings.
      */
     public getPackages(): deploy_packages.Package[] {
-        const ME = this;
+        let packages = this._packages;
 
-        const CFG = ME.config;
-        if (!CFG) {
-            return;
-        }
-
-        let packages = Enumerable.from( deploy_helpers.asArray(CFG.packages) ).where(p => {
-            return 'object' === typeof p;
-        }).select(p => {
-            return deploy_helpers.cloneObject(p);
-        }).toArray()
-
-        packages = deploy_helpers.filterPlatformItems(packages);
         packages = deploy_helpers.filterConditionalItems(packages);
 
-        let index = -1;
-        return Enumerable.from(packages).pipe(p => {
-            ++index;
-
-            (<any>p)['__index'] = index;
-            (<any>p)['__workspace'] = ME;
-
-            // can only be defined AFTER '__workspace'!
-            (<any>p)['__id'] = ME.getPackageId(p);
-            (<any>p)['__searchValue'] = deploy_helpers.normalizeString(
-                deploy_packages.getPackageName(p)
-            );
-
-            Object.defineProperty(p, '__button', {
-                enumerable: true,
-
-                get: () => {
-                    return Enumerable.from(ME._PACKAGE_BUTTONS).where(pwb => {
-                        return pwb.package.__id === p.__id;
-                    }).select(pwb => pwb.button)
-                      .singleOrDefault(undefined);
-                }
-            });
-        }).toArray();
+        return packages;
     }
 
     /**
@@ -672,35 +639,11 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Returns the list of targets as defined in the settings.
      */
     public getTargets(): deploy_targets.Target[] {
-        const ME = this;
+        let targets = this._targets;
 
-        const CFG = ME.config;
-        if (!CFG) {
-            return;
-        }
-
-        let targets = Enumerable.from( deploy_helpers.asArray(CFG.targets) ).where(t => {
-            return 'object' === typeof t;
-        }).select(t => {
-            return deploy_helpers.cloneObject(t);
-        }).toArray();
-
-        targets = deploy_helpers.filterPlatformItems(targets);
         targets = deploy_helpers.filterConditionalItems(targets);
 
-        let index = -1;
-        return Enumerable.from(targets).pipe(t => {
-            ++index;
-
-            (<any>t)['__index'] = index;
-            (<any>t)['__workspace'] = ME;
-
-            // can only be defined AFTER '__workspace'!
-            (<any>t)['__id'] = ME.getTargetId(t);
-            (<any>t)['__searchValue'] = deploy_helpers.normalizeString(
-                deploy_targets.getTargetName(t)
-            );
-        }).toArray();
+        return targets;
     }
 
     /**
@@ -1317,6 +1260,9 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
             await deploy_helpers.applyFuncFor(deploy_commands.reloadCommands, ME)(loadedCfg);
 
+            await ME.reloadTargets(loadedCfg);
+            await ME.reloadPackages(loadedCfg);
+
             const OLD_CFG = ME._config;
             ME._config = loadedCfg;
             ME._lastConfigUpdate = Moment();
@@ -1620,6 +1566,81 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 deploy_helpers.tryDispose(newBtnCommand);
             }
         }
+    }
+
+    private async reloadPackages(cfg: deploy_contracts.Configuration) {
+        const ME = this;
+
+        if (!cfg) {
+            return;
+        }
+
+        let packages = Enumerable.from( deploy_helpers.asArray(cfg.packages) ).where(p => {
+            return 'object' === typeof p;
+        }).select(p => {
+            return deploy_helpers.cloneObject(p);
+        }).toArray()
+
+        packages = deploy_helpers.filterPlatformItems(packages);
+
+        let index = -1;
+        packages = Enumerable.from(packages).pipe(p => {
+            ++index;
+
+            (<any>p)['__index'] = index;
+            (<any>p)['__workspace'] = ME;
+
+            // can only be defined AFTER '__workspace'!
+            (<any>p)['__id'] = ME.getPackageId(p);
+            (<any>p)['__searchValue'] = deploy_helpers.normalizeString(
+                deploy_packages.getPackageName(p)
+            );
+
+            Object.defineProperty(p, '__button', {
+                enumerable: true,
+
+                get: () => {
+                    return Enumerable.from(ME._PACKAGE_BUTTONS).where(pwb => {
+                        return pwb.package.__id === p.__id;
+                    }).select(pwb => pwb.button)
+                      .singleOrDefault(undefined);
+                }
+            });
+        }).toArray();
+
+        ME._packages = packages;
+    }
+
+    private async reloadTargets(cfg: deploy_contracts.Configuration) {
+        const ME = this;
+
+        if (!cfg) {
+            return;
+        }
+
+        let targets = Enumerable.from( deploy_helpers.asArray(cfg.targets) ).where(t => {
+            return 'object' === typeof t;
+        }).select(t => {
+            return deploy_helpers.cloneObject(t);
+        }).toArray();
+
+        targets = deploy_helpers.filterPlatformItems(targets);
+
+        let index = -1;
+        targets = Enumerable.from(targets).pipe(t => {
+            ++index;
+
+            (<any>t)['__index'] = index;
+            (<any>t)['__workspace'] = ME;
+
+            // can only be defined AFTER '__workspace'!
+            (<any>t)['__id'] = ME.getTargetId(t);
+            (<any>t)['__searchValue'] = deploy_helpers.normalizeString(
+                deploy_targets.getTargetName(t)
+            );
+        }).toArray();
+
+        ME._targets = targets;
     }
 
     /**
