@@ -41,6 +41,10 @@ import * as vscode from 'vscode';
  */
 export interface InvokeForTempFileOptions {
     /**
+     * The initial data.
+     */
+    readonly data?: any;
+    /**
      * The custom prefix.
      */
     readonly prefix?: string;
@@ -242,6 +246,37 @@ async function asBufferInner(val: any, enc?: string,
     // handle as string
     return new Buffer(toStringSafe(val),
                       enc);
+}
+
+/**
+ * Returns a value as local Moment instance.
+ * 
+ * @param {Moment.Moment} val The input value.
+ * 
+ * @return {Moment.Moment} The output value.
+ */
+export function asLocalTime(val: any): Moment.Moment {
+    let localTime: Moment.Moment;
+    
+    if (!isNullOrUndefined(val)) {
+        if (Moment.isMoment(val)) {
+            localTime = val;
+        }
+        else if (Moment.isDate(val)) {
+            localTime = Moment(val);
+        }
+        else {
+            localTime = Moment( toStringSafe(val) );
+        }
+    }
+
+    if (localTime) {
+        if (!localTime.isLocal()) {
+            localTime = localTime.local();
+        }
+    }
+
+    return localTime;
 }
 
 /**
@@ -955,19 +990,22 @@ export function invokeForTempFile<TResult = any>(action: (path: string) => TResu
                     COMPLETED(err);
                 }
                 else {
-                    tempFile = tf;
-
                     try {
-                        if (action) {
-                            Promise.resolve( action(tf) ).then((result) => {
-                                COMPLETED(null, result);
-                            }).catch((e) => {
-                                COMPLETED(e);
-                            });
-                        }
-                        else {
-                            COMPLETED(null);
-                        }
+                        tempFile = Path.resolve(tf);
+
+                        deploy_workflows.build().next(async () => {
+                            if (!isNullOrUndefined(opts.data)) {
+                                await writeFile(tempFile, opts.data);
+                            }
+                        }).next(async () => {
+                            return await Promise.resolve(
+                                action(tf)
+                            );
+                        }).start().then((result) => {
+                            COMPLETED(null, result);
+                        }, (err) => {
+                            COMPLETED(err);
+                        });
                     }
                     catch (e) {
                         COMPLETED(e);
@@ -1193,6 +1231,31 @@ export function mergeByName<TObj extends deploy_contracts.WithOptionalName = dep
     }
 
     return RESULT;
+}
+
+/**
+ * Normalizes a path.
+ * 
+ * @param {string} path The path to normalize.
+ * 
+ * @return {string} The normalized path. 
+ */
+export function normalizePath(path: string) {
+    path = toStringSafe(path);
+    path = replaceAllStrings(path, Path.sep, '/');
+
+    if (isEmptyString(path)) {
+        path = '';
+    }
+
+    while (path.startsWith('/')) {
+        path = path.substr(1);
+    }
+    while (path.endsWith('/')) {
+        path = path.substr(0, path.length - 1);
+    }
+
+    return path;
 }
 
 /**

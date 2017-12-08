@@ -45,6 +45,14 @@ export interface FileInfo extends FileSystemInfo {
  */
 export interface FileSystemInfo {
     /**
+     * A custom icon to use.
+     */
+    readonly icon?: string;
+    /**
+     * The internal name of that item.
+     */
+    readonly internal_name?: string;
+    /**
      * The name of the item.
      */
     readonly name: string;

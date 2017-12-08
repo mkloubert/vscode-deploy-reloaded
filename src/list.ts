@@ -180,8 +180,19 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
         }
 
         // then by name
-        return deploy_helpers.compareValuesBy(x, y, (f) => {
+        const COMP1 = deploy_helpers.compareValuesBy(x, y, (f) => {
             return deploy_helpers.normalizeString(f.name);
+        });
+        if (0 !== COMP1) {
+            return COMP1;
+        }
+
+        // then by timestamp (DESC)
+        return deploy_helpers.compareValuesBy(y, x, (f) => {
+            const LT = deploy_helpers.asLocalTime(f.time);
+            if (LT) {
+                return LT.unix();
+            }
         });
     }).forEach(f => {
         let label = deploy_helpers.toStringSafe(f.name).trim();
@@ -191,29 +202,43 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
 
         const DETAIL_ITEMS: string[] = [];
 
+        const GET_ICON_SAFE = (defaultIcon: string) => {
+            let icon = deploy_helpers.toStringSafe(f.icon).trim();
+            if ('' === icon) {
+                icon = defaultIcon;
+            }
+
+            return '$(' + icon + ')  ';
+        };
+
         let action: () => any;
         if (deploy_files.FileSystemType.Directory == f.type) {
             // directory
 
-            label = '$(file-directory)  ' + label;
+            label = GET_ICON_SAFE('file-directory') + label;
 
             action = async () => {
+                let pathPart = f.internal_name;
+                if (deploy_helpers.isEmptyString(pathPart)) {
+                    pathPart = f.name;
+                }
+
                 LIST_DIRECTORY(
-                    dir + '/' + f.name
+                    dir + '/' + pathPart,
                 );
             };
         }
         else if (deploy_files.FileSystemType.File == f.type) {
             // file
 
-            label = '$(file-binary)  ' + label;
+            label = GET_ICON_SAFE('file-binary') + label;
             
             action = createSelectFileAction(
                 <deploy_files.FileInfo>f
             );
         }
         else {
-            label = '$(question)  ' + label;
+            label = GET_ICON_SAFE('question') + label;
         }
 
         if (deploy_files.FileSystemType.Directory != f.type) {
@@ -226,11 +251,11 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
             }
         }
 
-        if (f.time && f.time.isValid()) {
+        const LOCAL_TIME = deploy_helpers.asLocalTime(f.time);
+        if (LOCAL_TIME && LOCAL_TIME.isValid()) {
             //TODO: translate
-
             DETAIL_ITEMS.push(
-                `Last modified: ${f.time.format('YYYY-MM-DD HH:mm:ss')}`
+                `Last modified: ${LOCAL_TIME.format('YYYY-MM-DD HH:mm:ss')}`
             );
         }
 
@@ -238,7 +263,6 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
             label: label,
             description: '',
             detail: DETAIL_ITEMS.join(', '),
-
             action: action,
         });
     });
