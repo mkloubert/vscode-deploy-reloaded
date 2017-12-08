@@ -31,6 +31,7 @@ import * as Path from 'path';
 export interface TestTarget extends deploy_targets.Target {
 }
 
+
 class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
     public get canDelete() {
         return true;

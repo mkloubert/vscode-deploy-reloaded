@@ -32,6 +32,7 @@ import * as vscode from 'vscode';
  */
 export interface Package extends deploy_contracts.ConditionalItem,
                                  deploy_contracts.FileFilter,
+                                 deploy_contracts.PlatformItem,
                                  deploy_contracts.WithOptionalName,
                                  deploy_targets.TargetProvider,
                                  deploy_workspaces.WorkspaceItemFromSettings {

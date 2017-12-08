@@ -322,6 +322,16 @@ export interface PackageFile {
 }
 
 /**
+ * An object that is filtered by platform.
+ */
+export interface PlatformItem {
+    /**
+     * One or more platform names, the object is available for.
+     */
+    readonly platforms?: string | string[];
+}
+
+/**
  * Arguments for a script.
  */
 export interface ScriptArguments {

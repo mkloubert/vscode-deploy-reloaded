@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.43",
+ "version": "0.0.44",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.18.0"
@@ -443,6 +443,21 @@
           "description": "A (display) name for that package.",
           "type": "string"
          },
+         "platforms": {
+          "description": "One or more platform names the package is available for.",
+          "type": "array",
+          "items": {
+           "description": "The name of the platform.",
+           "type": "string",
+           "enum": [
+            "darwin",
+            "freebsd",
+            "linux",
+            "sunos",
+            "win32"
+           ]
+          }
+         },
          "removeOnChange": {
           "description": "Defines if 'remove on change' should be used for that package.",
           "oneOf": [
@@ -743,6 +758,21 @@
             "description": "The (display) name of that target.",
             "type": "string"
            },
+           "platforms": {
+            "description": "One or more platform names the target is available for.",
+            "type": "array",
+            "items": {
+             "description": "The name of the platform.",
+             "type": "string",
+             "enum": [
+              "darwin",
+              "freebsd",
+              "linux",
+              "sunos",
+              "win32"
+             ]
+            }
+           },
            "showIf": {
             "description": "Defines a list of one or more package names, which will show this target in GUI, if one of them is selected.",
             "type": "array",
@@ -907,6 +937,21 @@
            "name": {
             "description": "The (display) name of that target.",
             "type": "string"
+           },
+           "platforms": {
+            "description": "One or more platform names the target is available for.",
+            "type": "array",
+            "items": {
+             "description": "The name of the platform.",
+             "type": "string",
+             "enum": [
+              "darwin",
+              "freebsd",
+              "linux",
+              "sunos",
+              "win32"
+             ]
+            }
            },
            "showIf": {
             "description": "Defines a list of one or more package names, which will show this target in GUI, if one of them is selected.",
@@ -1083,6 +1128,21 @@
            "name": {
             "description": "The (display) name of that target.",
             "type": "string"
+           },
+           "platforms": {
+            "description": "One or more platform names the target is available for.",
+            "type": "array",
+            "items": {
+             "description": "The name of the platform.",
+             "type": "string",
+             "enum": [
+              "darwin",
+              "freebsd",
+              "linux",
+              "sunos",
+              "win32"
+             ]
+            }
            },
            "showIf": {
             "description": "Defines a list of one or more package names, which will show this target in GUI, if one of them is selected.",
@@ -1275,6 +1335,21 @@
             "type": "string",
             "description": "The password."
            },
+           "platforms": {
+            "description": "One or more platform names the target is available for.",
+            "type": "array",
+            "items": {
+             "description": "The name of the platform.",
+             "type": "string",
+             "enum": [
+              "darwin",
+              "freebsd",
+              "linux",
+              "sunos",
+              "win32"
+             ]
+            }
+           },
            "port": {
             "type": "integer",
             "description": "The TCP port of the server.",
@@ -1446,6 +1521,21 @@
            "name": {
             "description": "The (display) name of that target.",
             "type": "string"
+           },
+           "platforms": {
+            "description": "One or more platform names the target is available for.",
+            "type": "array",
+            "items": {
+             "description": "The name of the platform.",
+             "type": "string",
+             "enum": [
+              "darwin",
+              "freebsd",
+              "linux",
+              "sunos",
+              "win32"
+             ]
+            }
            },
            "showIf": {
             "description": "Defines a list of one or more package names, which will show this target in GUI, if one of them is selected.",
@@ -1658,6 +1748,21 @@
             "description": "The (display) name of that target.",
             "type": "string"
            },
+           "platforms": {
+            "description": "One or more platform names the target is available for.",
+            "type": "array",
+            "items": {
+             "description": "The name of the platform.",
+             "type": "string",
+             "enum": [
+              "darwin",
+              "freebsd",
+              "linux",
+              "sunos",
+              "win32"
+             ]
+            }
+           },
            "showIf": {
             "description": "Defines a list of one or more package names, which will show this target in GUI, if one of them is selected.",
             "type": "array",
@@ -1828,6 +1933,21 @@
            },
            "options": {
             "description": "Options for the script."
+           },
+           "platforms": {
+            "description": "One or more platform names the target is available for.",
+            "type": "array",
+            "items": {
+             "description": "The name of the platform.",
+             "type": "string",
+             "enum": [
+              "darwin",
+              "freebsd",
+              "linux",
+              "sunos",
+              "win32"
+             ]
+            }
            },
            "script": {
             "type": "string",
@@ -2044,6 +2164,21 @@
             "type": "string",
             "description": "The password."
            },
+           "platforms": {
+            "description": "One or more platform names the target is available for.",
+            "type": "array",
+            "items": {
+             "description": "The name of the platform.",
+             "type": "string",
+             "enum": [
+              "darwin",
+              "freebsd",
+              "linux",
+              "sunos",
+              "win32"
+             ]
+            }
+           },
            "port": {
             "type": "integer",
             "description": "The TCP port of the server.",
@@ -2243,6 +2378,21 @@
             "description": "The (display) name of that target.",
             "type": "string"
            },
+           "platforms": {
+            "description": "One or more platform names the target is available for.",
+            "type": "array",
+            "items": {
+             "description": "The name of the platform.",
+             "type": "string",
+             "enum": [
+              "darwin",
+              "freebsd",
+              "linux",
+              "sunos",
+              "win32"
+             ]
+            }
+           },
            "showIf": {
             "description": "Defines a list of one or more package names, which will show this target in GUI, if one of them is selected.",
             "type": "array",
@@ -2422,6 +2572,21 @@
             "description": "The (display) name of that target.",
             "type": "string"
            },
+           "platforms": {
+            "description": "One or more platform names the target is available for.",
+            "type": "array",
+            "items": {
+             "description": "The name of the platform.",
+             "type": "string",
+             "enum": [
+              "darwin",
+              "freebsd",
+              "linux",
+              "sunos",
+              "win32"
+             ]
+            }
+           },
            "showIf": {
             "description": "Defines a list of one or more package names, which will show this target in GUI, if one of them is selected.",
             "type": "array",
@@ -2502,6 +2667,21 @@
              "description": "The name of that value.",
              "type": "string"
             },
+            "platforms": {
+             "description": "One or more platform names the value is available for.",
+             "type": "array",
+             "items": {
+              "description": "The name of the platform.",
+              "type": "string",
+              "enum": [
+               "darwin",
+               "freebsd",
+               "linux",
+               "sunos",
+               "win32"
+              ]
+             }
+            },
             "type": {
              "enum": [
               "static",
@@ -2532,6 +2712,21 @@
             "name": {
              "description": "The name of that value.",
              "type": "string"
+            },
+            "platforms": {
+             "description": "One or more platform names the value is available for.",
+             "type": "array",
+             "items": {
+              "description": "The name of the platform.",
+              "type": "string",
+              "enum": [
+               "darwin",
+               "freebsd",
+               "linux",
+               "sunos",
+               "win32"
+              ]
+             }
             },
             "type": {
              "enum": [

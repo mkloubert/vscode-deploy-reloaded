@@ -65,18 +65,20 @@ class AzureBlobPlugin extends deploy_plugins.AsyncFileClientPluginBase<AzureBlob
                                                                        deploy_clients_azureblob.AzureBlobClient,
                                                                        AzureBlobContext> {
     public async createContext(target: AzureBlobTarget): Promise<AzureBlobContext> {
+        const DIR = this.replaceWithValues(target, target.dir);
+
         return {
             client: await deploy_clients_azureblob.createClient({
-                accessKey: target.accessKey,
-                account: target.account,
-                container: target.container,
+                accessKey: this.replaceWithValues(target, target.accessKey),
+                account: this.replaceWithValues(target, target.account),
+                container: this.replaceWithValues(target, target.container),
                 hashContent: target.hashContent,
-                host: target.host,
+                host: this.replaceWithValues(target, target.host),
                 useDevelopmentStorage: target.useDevelopmentStorage,
             }),
             getDir: (subDir) => {
                 return deploy_clients_azureblob.normalizePath(
-                    deploy_clients_azureblob.normalizePath(target.dir).trim() + 
+                    deploy_clients_azureblob.normalizePath(DIR).trim() + 
                     '/' + 
                     deploy_clients_azureblob.normalizePath(subDir).trim()
                 );

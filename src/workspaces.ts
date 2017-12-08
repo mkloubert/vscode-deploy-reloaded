@@ -589,13 +589,17 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             return;
         }
 
-        let index = -1;
-
         let packages = Enumerable.from( deploy_helpers.asArray(CFG.packages) ).where(p => {
             return 'object' === typeof p;
         }).select(p => {
             return deploy_helpers.cloneObject(p);
-        }).pipe(p => {
+        }).toArray()
+
+        packages = deploy_helpers.filterPlatformItems(packages);
+        packages = deploy_helpers.filterConditionalItems(packages);
+
+        let index = -1;
+        return Enumerable.from(packages).pipe(p => {
             ++index;
 
             (<any>p)['__index'] = index;
@@ -618,10 +622,6 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 }
             });
         }).toArray();
-
-        packages = deploy_helpers.filterConditionalItems(packages);
-
-        return packages;
     }
 
     /**
@@ -679,13 +679,17 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             return;
         }
 
-        let index = -1;
-
         let targets = Enumerable.from( deploy_helpers.asArray(CFG.targets) ).where(t => {
             return 'object' === typeof t;
         }).select(t => {
             return deploy_helpers.cloneObject(t);
-        }).pipe(t => {
+        }).toArray();
+
+        targets = deploy_helpers.filterPlatformItems(targets);
+        targets = deploy_helpers.filterConditionalItems(targets);
+
+        let index = -1;
+        return Enumerable.from(targets).pipe(t => {
             ++index;
 
             (<any>t)['__index'] = index;
@@ -697,10 +701,6 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 deploy_targets.getTargetName(t)
             );
         }).toArray();
-
-        targets = deploy_helpers.filterConditionalItems(targets);
-
-        return targets;
     }
 
     /**
@@ -1648,8 +1648,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Handles a value as string and replaces placeholders.
      * 
      * @param {any} val The value to parse.
-     * @param {deploy_values.Value|deploy_values.Value[]|boolean} additionalValuesOrThrowOnError Additional values or if less than 3 arguments are defined: it
-     *                                                                                           does the work of 'throwOnError'
+     * @param {deploy_values.Value|deploy_values.Value[]|boolean} [additionalValuesOrThrowOnError] Additional values or if less than 3 arguments are defined: it
+     *                                                                                             does the work of 'throwOnError'
      * @param {boolean} [throwOnError] Throw on error or not.
      * 
      * @return {string} The parsed value.

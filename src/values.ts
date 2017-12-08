@@ -59,7 +59,8 @@ export interface Value {
 /**
  * A value item.
  */
-export interface ValueItem extends deploy_contracts.ConditionalItem {
+export interface ValueItem extends deploy_contracts.ConditionalItem,
+                                   deploy_contracts.PlatformItem {
     /**
      * The type of the item.
      */
@@ -289,8 +290,12 @@ export function loadFromItems(items: WithValueItems) {
             let newValue: ValueBase;
 
             if (deploy_helpers.isObject<ValueItem>(VI)) {
+                if (deploy_helpers.filterPlatformItems(VI).length < 1) {
+                    continue;  // not for platform
+                }
+
                 if (deploy_helpers.filterConditionalItems(VI).length < 1) {
-                    continue;
+                    continue;  // condition failed
                 }
 
                 const TYPE = deploy_helpers.normalizeString(VI.type);

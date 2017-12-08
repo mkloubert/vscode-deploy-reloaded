@@ -23,6 +23,7 @@ import * as deploy_log from './log';
 import * as deploy_objects from './objects';
 import * as deploy_targets from './targets';
 import * as deploy_transformers from './transformers';
+import * as deploy_values from './values';
 import * as deploy_workspaces from './workspaces';
 import * as Events from 'events';
 import * as vscode from 'vscode';
@@ -625,6 +626,32 @@ export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_
     /** @inheritdoc */
     public async listDirectory(context: ListDirectoryContext<TTarget>): Promise<ListDirectoryResult<TTarget>> {
         throw new Error(`'listDirectory()' is NOT implemented!`);
+    }
+
+    /**
+     * Handles a value as string and replaces placeholders.
+     * 
+     * @param {deploy_targets.Target} target The underlying target.
+     * @param {any} val The value to parse.
+     * @param {deploy_values.Value|deploy_values.Value[]} [additionalValues] Additional values.
+     * 
+     * @return {string} The parsed value.
+     */
+    protected replaceWithValues(target: deploy_targets.Target,
+                                val: any, additionalValues?: deploy_values.Value | deploy_values.Value[]) {
+        additionalValues = deploy_helpers.asArray(additionalValues);
+
+        let workspace: deploy_workspaces.Workspace;
+        if (target) {
+            workspace = target.__workspace;
+        }
+
+        if (workspace) {
+            return workspace.replaceWithValues(val, additionalValues);
+        }
+        else {
+            return deploy_values.replaceWithValues(additionalValues, val);
+        }
     }
 
     /** @inheritdoc */

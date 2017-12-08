@@ -675,6 +675,38 @@ export function filterConditionalItems<TItem extends deploy_contracts.Conditiona
 }
 
 /**
+ * Filters platform specific objects.
+ * 
+ * @param {TItem|TItem[]} items The items to filter.
+ * @param {Function} [platformDetector] The custom platform detector.
+ * 
+ * @return {TItem[]} The filtered items.
+ */
+export function filterPlatformItems<TItem extends deploy_contracts.PlatformItem = deploy_contracts.PlatformItem>(
+    items: TItem | TItem[],
+    platformDetector?: () => string,
+): TItem[]
+{
+    if (!platformDetector) {
+        platformDetector = () => process.platform;
+    }
+
+    const CURRENT_PLATFORM = normalizeString( platformDetector() );
+
+    return asArray(items).filter(i => {
+        const PLATFORMS = asArray(i.platforms).map(p => {
+            return normalizeString(p);
+        }).filter(p => '' !== p);
+
+        if (PLATFORMS.length < 1) {
+            return true;
+        }
+
+        return PLATFORMS.indexOf(CURRENT_PLATFORM) > -1;
+    });
+}
+
+/**
  * Async 'forEach'.
  * 
  * @param {Enumerable.Sequence<T>} items The items to iterate.
