@@ -636,6 +636,46 @@ async function activateExtension(context: vscode.ExtensionContext) {
     // commands
     WF.next(() => {
         context.subscriptions.push(
+            // deploy
+            vscode.commands.registerCommand('extension.deploy.reloaded.deploy', async () => {
+                try {
+                    //TODO: translate
+                    const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = [
+                        {
+                            action: async () => {
+                                await vscode.commands.executeCommand('extension.deploy.reloaded.deployFile');
+                            },
+                            label: '$(cloud-download)  ' + 'Current file ...',
+                            description: 'Deploys the current file to a target',
+                        },
+
+                        {
+                            action: async () => {
+                                await vscode.commands.executeCommand('extension.deploy.reloaded.deployWorkspace');
+                            },
+                            label: '$(cloud-download)  ' + 'Package ...',
+                            description: 'Deploys files, as defined in a package, to a target',
+                        }
+                    ];
+
+                    const SELECTED_ITEM = await vscode.window.showQuickPick(QUICK_PICKS);
+                    if (SELECTED_ITEM) {
+                        await Promise.resolve(
+                            SELECTED_ITEM.action()
+                        );
+                    }
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'extension.deploy.reloaded.deploy');
+
+                    //TODO: translate
+                    deploy_helpers.showErrorMessage(
+                        `Selecting deploy operation failed (s. debug output 'CTRL + Y')!`
+                    );
+                }
+            }),
+
             // deploy workspace
             vscode.commands.registerCommand('extension.deploy.reloaded.deployWorkspace', async () => {
                 try {
@@ -711,11 +751,11 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 }
                 catch (e) {
                     deploy_log.CONSOLE
-                              .trace(e, 'extension.deploy.reloaded.delete');
+                              .trace(e, 'extension.deploy.reloaded.pull');
 
                     //TODO: translate
                     deploy_helpers.showErrorMessage(
-                        `Selecting delete operation failed (s. debug output 'CTRL + Y')!`
+                        `Selecting pull operation failed (s. debug output 'CTRL + Y')!`
                     );
                 }
             }),
