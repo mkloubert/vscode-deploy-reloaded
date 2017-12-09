@@ -30,6 +30,7 @@ import * as vscode from 'vscode';
  */
 export interface Translation {
     cancel?: string;
+    initializationCanceled?: string;
     no?: string;
     packages?: {
         defaultName?: string;
@@ -37,20 +38,26 @@ export interface Translation {
     targets?: {
         defaultName?: string;
     };
+    'vs-deploy'?: {
+        continueAndInitialize?: string;
+        currentlyActive?: string;
+    };
     yes?: string;
 }
 
 
+let globalTranslator: i18next.TranslationFunction;
+
+
 /**
- * Initializes the language repository for a workspace.
+ * Creates a new the language repository.
+ * 
+ * @param {string} [lang] The custom language ID to use.
  * 
  * @returns {Promise<TranslationFunction>} The promise with the translation function.
  */
-export async function init(): Promise<i18next.TranslationFunction> {
-    const ME: deploy_workspaces.Workspace = this;
-    const CONFIG = ME.config || <any>{};
-
-    let lang = CONFIG.language;
+export async function create(lang?: string): Promise<i18next.TranslationFunction> {
+    lang = deploy_helpers.toStringSafe(lang);
     if (deploy_helpers.isEmptyString(lang)) {
         lang = vscode.env.language;
     }
@@ -101,7 +108,6 @@ export async function init(): Promise<i18next.TranslationFunction> {
                     // deleted cached data
                     // and load current translation
                     // from file
-                    delete require.cache[F];
                     RESOURCES[LANG_NAME] = {
                         translation: require(F).translation,
                     };
@@ -141,9 +147,87 @@ export async function init(): Promise<i18next.TranslationFunction> {
     }).start();
 }
 
+/**
+ * Initializes the global translations.
+ * 
+ * @return {Promise<boolean>} The promise that indicates if operation was succcessful or not.
+ */
+export async function init(): Promise<boolean> {
+    try {
+        globalTranslator = await create();
+
+        return true;
+    }
+    catch (e) {
+        deploy_log.CONSOLE
+                  .trace(e, 'i18.init()');
+
+        return false;
+    }
+}
+
+/**
+ * Initializes the language repository for a workspace.
+ * 
+ * @returns {Promise<TranslationFunction>} The promise with the translation function.
+ */
+export async function initForWorkspace(): Promise<i18next.TranslationFunction> {
+    const ME: deploy_workspaces.Workspace = this;
+
+    return await create(ME.config.language);
+}
+
 function normalizeLangName(lang: string): string {
     lang = deploy_helpers.normalizeString(lang);
     lang = deploy_helpers.replaceAllStrings(lang, '-', '_');
 
     return lang;
+}
+
+/**
+ * Returns a translated string by key.
+ * 
+ * @param {string} key The key.
+ * @param {any} [args] The optional arguments.
+ * 
+ * @return {string} The "translated" string.
+ */
+export function t(key: string, ...args: any[]): string {
+    return translateWith.apply(null,
+                               [ <any>globalTranslator, null, key ].concat( args ));
+}
+
+/**
+ * Returns a translated string by key and a specific function.
+ * 
+ * @param {i18next.TranslationFunction} func The function to use.
+ * @param {Function} fallback The fallback function.
+ * @param {string} key The key.
+ * @param {any} [args] The optional arguments.
+ * 
+ * @return {string} The "translated" string.
+ */
+export function translateWith(func: i18next.TranslationFunction,
+                              fallback: () => string,
+                              key: string, ...args: any[]): string {
+    if (!fallback) {
+        fallback = () => key;
+    }
+
+    try {
+        if (func) {
+            let formatStr = func(deploy_helpers.toStringSafe(key));
+            formatStr = deploy_helpers.toStringSafe(formatStr);
+
+            return deploy_helpers.formatArray(formatStr, args);
+        }
+
+        return fallback();
+    }
+    catch (e) {
+        deploy_log.CONSOLE
+                  .trace(e, 'i18.translateWith()');
+
+        return key;
+    }
 }

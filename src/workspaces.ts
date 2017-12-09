@@ -20,7 +20,6 @@ import * as deploy_contracts from './contracts';
 import * as deploy_delete from './delete';
 import * as deploy_deploy from './deploy';
 import * as deploy_helpers from './helpers';
-import * as deploy_i18 from './i18';
 import * as deploy_list from './list';
 import * as deploy_log from './log';
 import * as deploy_objects from './objects';
@@ -34,6 +33,7 @@ import * as deploy_tasks from './tasks';
 import * as deploy_values from './values';
 import * as Enumerable from 'node-enumerable';
 import * as Glob from 'glob';
+import * as i18 from './i18';
 import * as i18next from 'i18next';
 const MergeDeep = require('merge-deep');
 import * as Moment from 'moment';
@@ -1278,8 +1278,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
             ME._translator = null;
             try {
-                ME._translator = await deploy_i18.init
-                                                 .apply(ME, []);
+                ME._translator = await deploy_helpers.applyFuncFor(i18.initForWorkspace, ME)();
             }
             catch (e) {
                 deploy_log.CONSOLE
@@ -1795,15 +1794,19 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
     /** @inheritdoc */
     public t(key: string, ...args: any[]): string {
-        const TRANSLATOR = this._translator;
-        if (TRANSLATOR) {
-            let formatStr = TRANSLATOR(deploy_helpers.toStringSafe(key));
-            formatStr = deploy_helpers.toStringSafe(formatStr);
-    
-            return deploy_helpers.formatArray(formatStr, args);
-        }
+        const MY_ARGS = deploy_helpers.toArray(arguments);
 
-        return key;
+        const ARGS: any[] = [
+            this._translator,
+            () => {
+                // global translations are the fallback
+                return i18.t
+                          .apply(null, MY_ARGS);
+            }
+        ].concat( MY_ARGS );
+
+        return i18.translateWith
+                  .apply(null, ARGS);
     }
 
     /**

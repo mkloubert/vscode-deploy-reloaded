@@ -23,12 +23,17 @@ import { Translation } from '../i18';
 // Translated by: Marcel Joachim Kloubert (https://github.com/mkloubert)
 export const translation: Translation = {
     cancel: 'Cancel',
+    initializationCanceled: 'The initialization of the extension has been stopped.',
     no: 'No',
     packages: {
         defaultName: '(Package #{0:trim})',
     },
     targets: {
         defaultName: '(Target #{0:trim})',
+    },
+    'vs-deploy': {
+        continueAndInitialize: 'Continue and initialize me...',
+        currentlyActive: "'vs-deploy' extension is currently active. It is recommended to DEACTIVATE IT, before you continue and use the new extension!",
     },
     yes: 'Yes',
 }

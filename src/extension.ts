@@ -28,6 +28,7 @@ import * as deploy_tools from './tools';
 import * as deploy_workflows from './workflows';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
+import * as i18 from './i18';
 import * as Moment from 'moment';
 import * as Path from 'path';
 import * as vscode from 'vscode';
@@ -566,6 +567,11 @@ async function updateWorkspaceButton() {
 export async function activate(context: vscode.ExtensionContext) {
     const WF = deploy_workflows.build();
 
+    // global translations
+    WF.next(async () => {
+        await i18.init();
+    });
+
     WF.next(async () => {
         const VS_DEPLOY = Enumerable.from(
             vscode.extensions.all
@@ -573,23 +579,21 @@ export async function activate(context: vscode.ExtensionContext) {
 
         let doActivateTheExtension = true;
 
-        if ('symbol' !== typeof VS_DEPLOY) {
+        if (!deploy_helpers.isSymbol(VS_DEPLOY)) {
             if (VS_DEPLOY.isActive) {
                 doActivateTheExtension = false;
                 
                 const PRESSED_BTN = await deploy_helpers.showWarningMessage<deploy_contracts.MessageItemWithValue<number>>(
-                    `'vs-deploy' extension is currently active! It is recommended to DEACTIVATE IT, before you continue and use that extension.`,
+                    i18.t('vs-deploy.currentlyActive'),
 
-                    // cancel
                     {
                         isCloseAffordance: true,
-                        title: 'Cancel',
+                        title: i18.t('cancel'),
                         value: 0,
                     },
 
-                    // continue
                     {
-                        title: 'Continue and initialize me...',
+                        title: i18.t('vs-deploy.continueAndInitialize'),
                         value: 1,
                     },
                 );
@@ -605,7 +609,7 @@ export async function activate(context: vscode.ExtensionContext) {
         }
         else {
             deploy_helpers.showInformationMessage(
-                'The initialization of the extension has been stopped.'
+                i18.t('initializationCanceled')
             );
         }
     });
