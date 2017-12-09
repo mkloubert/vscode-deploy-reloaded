@@ -724,6 +724,46 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 }
             }),
 
+            // delete
+            vscode.commands.registerCommand('extension.deploy.reloaded.delete', async () => {
+                try {
+                    //TODO: translate
+                    const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = [
+                        {
+                            action: async () => {
+                                await vscode.commands.executeCommand('extension.deploy.reloaded.deleteFile');
+                            },
+                            label: '$(trashcan)  ' + 'Current file ...',
+                            description: 'Deletes the current file in a target',
+                        },
+
+                        {
+                            action: async () => {
+                                await vscode.commands.executeCommand('extension.deploy.reloaded.deletePackage');
+                            },
+                            label: '$(trashcan)  ' + 'Package ...',
+                            description: 'Deletes files, as defined in a package, in a target',
+                        }
+                    ];
+
+                    const SELECTED_ITEM = await vscode.window.showQuickPick(QUICK_PICKS);
+                    if (SELECTED_ITEM) {
+                        await Promise.resolve(
+                            SELECTED_ITEM.action()
+                        );
+                    }
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'extension.deploy.reloaded.delete');
+
+                    //TODO: translate
+                    deploy_helpers.showErrorMessage(
+                        `Selecting delete operation failed (s. debug output 'CTRL + Y')!`
+                    );
+                }
+            }),
+
             // delete package
             vscode.commands.registerCommand('extension.deploy.reloaded.deletePackage', async () => {
                 try {
