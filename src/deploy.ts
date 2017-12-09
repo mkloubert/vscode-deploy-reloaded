@@ -242,8 +242,47 @@ export async function deployFilesTo(files: string[],
                     ME.context.outputChannel.appendLine(`Deploying files to '${TARGET_NAME}' has been cancelled by target operation.`);
                 };
 
+                let operationIndex: number;
+
+                const GET_OPERATION_NAME = (operation: deploy_targets.TargetOperation) => {
+                    let operationName = deploy_helpers.toStringSafe(operation.name).trim();
+                    if ('' === operationName) {
+                        operationName = deploy_helpers.normalizeString(operation.type);
+                        if ('' === operationName) {
+                            operationName = deploy_targets.DEFAULT_OPERATION_TYPE;
+                        }
+
+                        operationName += ' #' + (operationIndex + 1);
+                    }
+
+                    return operationName;
+                };
+
                 // beforeDeploy
-                if (!(await deploy_targets.executeTargetOperations(target, deploy_targets.TargetOperationEvent.BeforeDeploy))) {
+                operationIndex = -1;
+                ME.context.outputChannel.appendLine('');
+                const BEFORE_DEPLOY_ABORTED = !deploy_helpers.toBooleanSafe(
+                    await deploy_targets.executeTargetOperations({
+                        onBeforeExecute: async (operation) => {
+                            ++operationIndex;
+
+                            //TODO: translate
+                            ME.context.outputChannel.append(`Running BEFORE DEPLOY operation '${GET_OPERATION_NAME(operation)}'... `);
+                        },
+                        onExecutionCompleted: async (operation, err, doesContinue) => {
+                            //TODO: translate
+                            if (err) {
+                                ME.context.outputChannel.appendLine(`[FAILED: '${deploy_helpers.toStringSafe(err)}']`);
+                            }
+                            else {
+                                ME.context.outputChannel.appendLine('[OK]');
+                            }
+                        },
+                        operation: deploy_targets.TargetOperationEvent.BeforeDeploy,
+                        target: target,
+                    })
+                , true);
+                if (BEFORE_DEPLOY_ABORTED) {
                     SHOW_CANCELED_BY_OPERATIONS_MESSAGE();
                     continue;
                 }
@@ -253,7 +292,29 @@ export async function deployFilesTo(files: string[],
                 );
 
                 // deployed
-                if (!(await deploy_targets.executeTargetOperations(target, deploy_targets.TargetOperationEvent.AfterDeployed))) {
+                operationIndex = -1;
+                const AFTER_DEPLOY_ABORTED = !deploy_helpers.toBooleanSafe(
+                    await deploy_targets.executeTargetOperations({
+                        onBeforeExecute: async (operation) => {
+                            ++operationIndex;
+
+                            //TODO: translate
+                            ME.context.outputChannel.append(`Running AFTER DEPLOYED operation '${GET_OPERATION_NAME(operation)}'... `);
+                        },
+                        onExecutionCompleted: async (operation, err, doesContinue) => {
+                            //TODO: translate
+                            if (err) {
+                                ME.context.outputChannel.appendLine(`[FAILED: '${deploy_helpers.toStringSafe(err)}']`);
+                            }
+                            else {
+                                ME.context.outputChannel.appendLine('[OK]');
+                            }
+                        },
+                        operation: deploy_targets.TargetOperationEvent.AfterDeployed,
+                        target: target,
+                    })
+                , true);
+                if (AFTER_DEPLOY_ABORTED) {
                     SHOW_CANCELED_BY_OPERATIONS_MESSAGE();
                     continue;
                 }

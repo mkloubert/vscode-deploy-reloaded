@@ -17,6 +17,7 @@
 
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
+import * as deploy_log from './log';
 import * as deploy_mappings from './mappings';
 import * as deploy_packages from './packages';
 import * as deploy_targets_operations_open from './targets/operations/open';
@@ -27,6 +28,34 @@ import * as Minimatch from 'minimatch';
 import * as Path from 'path';
 import * as vscode from 'vscode';
 
+
+/**
+ * Options for executing target operations.
+ */
+export interface ExecuteTargetOperationOptions {
+    /**
+     * The callback that is invoked BEFORE an operation is going to be executed.
+     * 
+     * @param {TargetOperation} operation The operation.
+     */
+    readonly onBeforeExecute: (operation: TargetOperation) => void | PromiseLike<void>;
+    /**
+     * The callback that is invoked AFTER an operation has been executed.
+     * 
+     * @param {TargetOperation} operation The operation.
+     * @param {any} err The error (if occurred).
+     * @param {boolean} doesContinue Indicates if the execution of other operations will be done or not.
+     */
+    readonly onExecutionCompleted: (operation: TargetOperation, err: any, doesContinue: boolean) => void | PromiseLike<void>;
+    /**
+     * The operation event.
+     */
+    readonly operation: TargetOperationEvent;
+    /**
+     * The underlying target.
+     */
+    readonly target: Target;
+}
 
 /**
  * A target.
@@ -75,7 +104,12 @@ export interface Target extends deploy_transformers.CanTransformData,
 /**
  * A target operation.
  */
-export interface TargetOperation extends deploy_contracts.ConditionalItem {
+export interface TargetOperation extends deploy_contracts.ConditionalItem,
+                                         deploy_contracts.WithOptionalName {
+    /**
+     * Continue when target operation fails or not.
+     */
+    readonly ignoreIfFail?: boolean;
     /**
      * The type.
      */
@@ -166,6 +200,11 @@ export interface TargetProvider {
     readonly targets?: string | string[];
 }
 
+/**
+ * The default type or a target operation.
+ */
+export const DEFAULT_OPERATION_TYPE = 'open';
+
 
 /**
  * Returns the mapped file path by a target.
@@ -214,26 +253,23 @@ export function getMappedTargetFilePath(target: Target,
 /**
  * Executes operations for a target.
  * 
- * @param {Target} target the underlying target.
- * @param {TargetOperationEvent} operationEvent The event type.
+ * @param {ExecuteTargetOperationOptions} opts The options.
  * 
  * @return {boolean} Operation has been cancelled (false) or not (true).
  */
-export async function executeTargetOperations(target: Target, operationEvent: TargetOperationEvent) {
-    if (!target) {
-        return;
-    }
-
-    const WORKSPACE = target.__workspace;
+export async function executeTargetOperations(opts: ExecuteTargetOperationOptions) {
+    const TARGET = opts.target;
+    const WORKSPACE = TARGET.__workspace;
+    const EVENT = opts.operation;
 
     let operationsFromTarget: TargetOperationValue | TargetOperationValue[];
-    switch (operationEvent) {
+    switch (EVENT) {
         case TargetOperationEvent.AfterDeployed:
-            operationsFromTarget = target.deployed;
+            operationsFromTarget = TARGET.deployed;
             break;
 
         case TargetOperationEvent.BeforeDeploy:
-            operationsFromTarget = target.beforeDeploy;
+            operationsFromTarget = TARGET.beforeDeploy;
             break;
     }
 
@@ -269,6 +305,8 @@ export async function executeTargetOperations(target: Target, operationEvent: Ta
             continue;
         }
 
+        const IGNORE_IF_FAIL = deploy_helpers.toBooleanSafe(operationToExecute.ignoreIfFail);
+
         let executor: TargetOperationExecutor;
         let executorArgs: any[];
         
@@ -281,30 +319,54 @@ export async function executeTargetOperations(target: Target, operationEvent: Ta
         }
 
         if (!executor) {
-            continue;
+            //TODO: translate
+            throw new Error(`Operation type '${TYPE}' is NOT supported!`);
         }
 
-        const CTX: TargetOperationExecutionContext = {
-            args: executorArgs || [],
-            event: operationEvent,
-            operation: operationToExecute,
-            previousOperation: prevOperation,
-            target: target,
-            type: TYPE,
-        };
+        try {
+            const CTX: TargetOperationExecutionContext = {
+                args: executorArgs || [],
+                event: EVENT,
+                operation: operationToExecute,
+                previousOperation: prevOperation,
+                target: TARGET,
+                type: TYPE,
+            };
 
-        prevOperation = CTX;
+            prevOperation = CTX;
 
-        const ABORT = !deploy_helpers.toBooleanSafe(
             await Promise.resolve(
-                executor.apply(null,
-                            [ CTX ])
-            ),
-            true
-        );
+                opts.onBeforeExecute(operationToExecute)
+            );
 
-        if (ABORT) {
-            return false;
+            const ABORT = !deploy_helpers.toBooleanSafe(
+                await Promise.resolve(
+                    executor.apply(null,
+                                [ CTX ])
+                ),
+                true
+            );
+
+            await Promise.resolve(
+                opts.onExecutionCompleted(operationToExecute, null, ABORT)
+            );
+
+            if (ABORT) {
+                return false;
+            }
+        }
+        catch (e) {
+            await Promise.resolve(
+                opts.onExecutionCompleted(operationToExecute, e, IGNORE_IF_FAIL)
+            );
+
+            if (IGNORE_IF_FAIL) {
+                deploy_log.CONSOLE
+                          .trace(e, 'targets.executeTargetOperations()');
+            }
+            else {
+                throw e;
+            }
         }
     }
 

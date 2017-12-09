@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.50",
+ "version": "0.0.52",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.18.0"
@@ -609,6 +609,15 @@
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
                 },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -649,6 +658,15 @@
                "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
                  "type": "string"
                 },
                 "target": {
@@ -807,6 +825,15 @@
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
                 },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -843,6 +870,15 @@
                "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
                  "type": "string"
                 },
                 "target": {
@@ -993,6 +1029,15 @@
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
                 },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -1029,6 +1074,15 @@
                "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
                  "type": "string"
                 },
                 "target": {
@@ -1180,6 +1234,15 @@
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
                 },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -1216,6 +1279,15 @@
                "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
                  "type": "string"
                 },
                 "target": {
@@ -1391,6 +1463,15 @@
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
                 },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -1427,6 +1508,15 @@
                "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
                  "type": "string"
                 },
                 "target": {
@@ -1567,6 +1657,15 @@
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
                 },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -1603,6 +1702,15 @@
                "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
                  "type": "string"
                 },
                 "target": {
@@ -1814,6 +1922,15 @@
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
                 },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -1881,6 +1998,15 @@
                "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
                  "type": "string"
                 },
                 "target": {
@@ -2027,6 +2153,15 @@
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
                 },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -2068,6 +2203,15 @@
                "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
                  "type": "string"
                 },
                 "target": {
@@ -2228,6 +2372,15 @@
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
                 },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -2269,6 +2422,15 @@
                "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
                  "type": "string"
                 },
                 "target": {
@@ -2470,6 +2632,15 @@
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
                 },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -2515,6 +2686,15 @@
                "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
                  "type": "string"
                 },
                 "target": {
@@ -2664,6 +2844,15 @@
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
                 },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -2700,6 +2889,15 @@
                "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
                  "type": "string"
                 },
                 "target": {
