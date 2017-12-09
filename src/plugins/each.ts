@@ -15,36 +15,60 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as deploy_contracts from '../contracts';
+import * as deploy_download from '../download';
 import * as deploy_helpers from '../helpers';
 import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
 import * as Enumerable from 'node-enumerable';
+import * as OS from 'os';
+import * as Path from 'path';
 
 
 /**
  * A 'each' target.
  */
 export interface EachTarget extends deploy_targets.Target, deploy_targets.TargetProvider {
-    readonly from: any | any[];
+    readonly from: string | any | any[];
     readonly 'to': string | string[];
     readonly usePlaceholders?: boolean;
 }
 
 
 class EachPlugin extends deploy_plugins.IterablePluginBase<EachTarget> {
-    protected prepareTarget(eachTarget: EachTarget, target: deploy_targets.Target): deploy_targets.Target[] {
+    protected async prepareTarget(eachTarget: EachTarget, target: deploy_targets.Target): Promise<deploy_targets.Target[]> {
         const ME = this;
 
         const CLONED_TARGETS: deploy_targets.Target[] = [];
 
-        const FROM = deploy_helpers.asArray(eachTarget.from, false);
+        let from: any = eachTarget.from;
+        if (deploy_helpers.isString(from)) {
+            // download source
+
+            const DOWNLOAD_SOURCE = ME.replaceWithValues(
+                eachTarget,
+                from
+            );
+
+            const SCOPES = [
+                eachTarget.__workspace.settingFolder,
+                Path.join(OS.homedir(), deploy_contracts.HOMEDIR_SUBFOLDER),
+            ];
+
+            from = JSON.parse(
+                (await deploy_download.download(DOWNLOAD_SOURCE, SCOPES)).toString('utf8')
+            );
+        }
+
+        from = deploy_helpers.asArray(from, false);
+
         const TO = Enumerable.from(deploy_helpers.asArray(eachTarget.to)).select(t => {
             return deploy_helpers.toStringSafe(t).trim()
         }).where(t => '' !== t)
             .toArray();
         const USE_PLACE_HOLDERS = deploy_helpers.toBooleanSafe(eachTarget.usePlaceholders, true);
 
-        for (const F of FROM) {
+        for (const F of from) {
             const CT = deploy_helpers.cloneObjectFlat(target);
 
             for (const PROP of TO) {

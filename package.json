@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.55",
+ "version": "0.0.56",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.18.0"
@@ -1330,11 +1330,20 @@
             "type": "string"
            },
            "from": {
-            "type": "array",
-            "description": "One or more values to set into the target properties.",
-            "items": {
-             "description": "The value to set."
-            }
+            "description": "A list of values or a source from where to load it.",
+            "oneOf": [
+             {
+              "type": "array",
+              "description": "One or more values to set into the target properties.",
+              "items": {
+               "description": "The value to set."
+              }
+             },
+             {
+              "type": "string",
+              "description": "´The source from where to load the values."
+             }
+            ]
            },
            "hideIf": {
             "description": "Defines a list of one or more package names, which will hide this target from GUI, if one of them is selected.",

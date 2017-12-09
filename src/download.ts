@@ -18,6 +18,7 @@
 import * as deploy_helpers from './helpers';
 import * as deploy_http from './http';
 import * as HTTP from 'http';
+import * as Path from 'path';
 import * as URL from 'url';
 
 
@@ -28,10 +29,11 @@ type Downloader = (url: URL.Url) => Buffer | PromiseLike<Buffer>
  * Downloads something from a source.
  * 
  * @param {string|URL.Url} url The URL.
+ * @param {string|string[]} [scopes] One or more custom scope directories.
  * 
  * @return {Promise<Buffer>} The promise with the downloaded data.
  */
-export async function download(url: string | URL.Url): Promise<Buffer> {
+export async function download(url: string | URL.Url, scopes?: string | string[]): Promise<Buffer> {
     if (!deploy_helpers.isObject<URL.Url>(url)) {
         let urlString = deploy_helpers.toStringSafe(url);
         if (deploy_helpers.isEmptyString(urlString)) {
@@ -39,6 +41,22 @@ export async function download(url: string | URL.Url): Promise<Buffer> {
         }
 
         url = URL.parse(urlString);
+    }
+
+    scopes = deploy_helpers.asArray(scopes).map(s => {
+        return deploy_helpers.toStringSafe(s);
+    }).filter(s => {
+        return !deploy_helpers.isEmptyString(s);
+    }).map(s => {
+        if (!Path.isAbsolute(s)) {
+            s = Path.join(process.cwd(), s);
+        }
+
+        return Path.resolve(s);
+    });
+
+    if (scopes.length < 1) {
+        scopes.push( process.cwd() );
     }
 
     let downloader: Downloader;
@@ -50,10 +68,36 @@ export async function download(url: string | URL.Url): Promise<Buffer> {
         case 'https:':
             downloader = download_http;
             break;
-    }
 
-    if (!downloader) {
-        throw new Error(`Download protocol '${PROTOCOL}' is not supported!`);
+        default:
+            // handle as local file
+            downloader = async () => {
+                const LOCAL_URL = <URL.Url>url;
+
+                let file: string | false = LOCAL_URL.href;
+                if (!Path.isAbsolute(file)) {
+                    file = false;
+
+                    for (const S of scopes) {
+                        const PATH_TO_CHECK = Path.join(S, LOCAL_URL.href);
+                        if (await deploy_helpers.exists(PATH_TO_CHECK)) {
+                            if ((await deploy_helpers.lstat(PATH_TO_CHECK)).isFile()) {
+                                file = PATH_TO_CHECK;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (false === file) {
+                    throw new Error(`Local file '${LOCAL_URL.href}' not found!`);
+                }
+
+                return await deploy_helpers.readFile(
+                    Path.resolve(file)
+                );
+            };
+            break;
     }
 
     return await Promise.resolve(

@@ -396,3 +396,8 @@ export interface WithOptionalName {
  * The name of the event that is raised after workspace config has been reloaded.
  */
 export const EVENT_CONFIG_RELOADED = 'workspace.config.reloaded';
+
+/**
+ * The name of the extension's subfolder inside the home directory of the current user.
+ */
+export const HOMEDIR_SUBFOLDER = '.vscode-deploy-reloaded';

@@ -479,7 +479,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             }
 
             const FROM_HOMEDIR = Path.resolve(
-                Path.join(OS.homedir(), '.vscode-deploy', path)
+                Path.join(OS.homedir(), deploy_contracts.HOMEDIR_SUBFOLDER, path)
             );
             if (await deploy_helpers.exists(FROM_HOMEDIR)) {
                 return FROM_HOMEDIR;
