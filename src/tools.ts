@@ -274,17 +274,17 @@ function pullFiles(args) {
 
                 try {
                     file.onBeforeDownload();  // tell that we are going to start the
-                                            // pull operation for this file now
-                                            // 
-                                            // you can submit an optional string that
-                                            // is displayed as 'source' in the GUI
+                                              // pull operation for this file now
+                                              // 
+                                              // you can submit an optional string that
+                                              // is displayed as 'source' in the GUI
 
                     // do the pull operation here
                     // 
                     // we store the data in 'downloadedData' var
                     // for this example
                     // 
-                    // recommed is to load the data as buffer
+                    // recommended is to load the data as buffer
                     // or readable NodeJS stream
                     throw new Error('Not implemented!');
 
