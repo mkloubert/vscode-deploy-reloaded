@@ -29,8 +29,17 @@ import * as Path from 'path';
  * A 'each' target.
  */
 export interface EachTarget extends deploy_targets.Target, deploy_targets.TargetProvider {
+    /**
+     * A list of values or a source from where to load it.
+     */
     readonly from: string | any | any[];
+    /**
+     * One or more property names where the source values should be written to.
+     */
     readonly 'to': string | string[];
+    /**
+     * Use placeholders for string values or not.
+     */
     readonly usePlaceholders?: boolean;
 }
 
@@ -43,7 +52,7 @@ class EachPlugin extends deploy_plugins.IterablePluginBase<EachTarget> {
 
         let from: any = eachTarget.from;
         if (deploy_helpers.isString(from)) {
-            // download source
+            // extrenal source
 
             const DOWNLOAD_SOURCE = ME.replaceWithValues(
                 eachTarget,
