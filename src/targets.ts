@@ -474,7 +474,7 @@ export async function showTargetQuickPick<TTarget extends Target = Target, TResu
                 }
             },
             description: deploy_helpers.toStringSafe( t.description ).trim(),
-            detail: t.__workspace.folder.uri.fsPath,
+            detail: `${t.__workspace.name} (${t.__workspace.rootPath})`,
             label: getTargetName(t),
         };
     });
@@ -482,7 +482,7 @@ export async function showTargetQuickPick<TTarget extends Target = Target, TResu
     if (QUICK_PICK_ITEMS.length < 1) {
         //TODO: translate
         await deploy_helpers.showWarningMessage(
-            `No TARGETS found!`
+            `No targets found!`
         );
 
         return;

@@ -250,13 +250,16 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
     }
 
     private normalizeDir(target: LocalTarget, wsi: deploy_workspaces.WorkspaceItem) {
-        let dir = deploy_helpers.toStringSafe(target.dir);
+        let dir = this.replaceWithValues(
+            target,
+            target.dir
+        );
         if (deploy_helpers.isEmptyString(dir)) {
             dir = './out'
         }
 
         if (!Path.isAbsolute(dir)) {
-            dir = Path.join(wsi.workspace.folder.uri.fsPath, dir);
+            dir = Path.join(wsi.workspace.rootPath, dir);
         }
         dir = Path.resolve(dir);
 

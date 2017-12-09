@@ -54,7 +54,9 @@ class SlackPlugin extends deploy_plugins.PluginBase<SlackTarget> {
     private async invokeForClient<TResult = any>(target: SlackTarget,
                                                  action: (client: deploy_clients_slack.SlackClient, target: SlackTarget) => TResult | PromiseLike<TResult>): Promise<TResult> {
         const CLIENT = deploy_clients_slack.createClient({
-            token: deploy_helpers.toStringSafe(target.token).trim(),
+            token: deploy_helpers.toStringSafe(
+                this.replaceWithValues(target, target.token)
+            ).trim(),
         });
         try {
             return await Promise.resolve(
@@ -109,13 +111,14 @@ class SlackPlugin extends deploy_plugins.PluginBase<SlackTarget> {
             const CHANNELS = Enumerable.from(
                 deploy_helpers.asArray(t.channels)
             ).selectMany(c => {
-                return deploy_helpers.toStringSafe(c).toUpperCase()
+                return deploy_helpers.toStringSafe( ME.replaceWithValues(t, c) )
                                      .split(',');
             }).select(c => {
-                return c.trim();
+                return c.toUpperCase()
+                        .trim();
             }).where(c => {
                 return '' !== c;
-            }).distinct();
+            });
 
             for (const C of CHANNELS) {
                 const FILES_TO_UPLOAD = context.files;

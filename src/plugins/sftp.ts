@@ -99,8 +99,7 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
                                                                   deploy_clients_sftp.SFTPClient,
                                                                   SFTPContext> {
     public async createContext(target: SFTPTarget): Promise<SFTPContext> {
-        let agent = deploy_helpers.toStringSafe(target.agent);
-        agent = target.__workspace.replaceWithValues(agent);
+        let agent = this.replaceWithValues(target, target.agent);
         if (deploy_helpers.isEmptyString(agent)) {
             agent = undefined;
         }
@@ -111,8 +110,7 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
             }
         }
 
-        let privateKeyFile: string | false = deploy_helpers.toStringSafe(target.privateKey);
-        privateKeyFile = target.__workspace.replaceWithValues(privateKeyFile);
+        let privateKeyFile: string | false = this.replaceWithValues(target, target.privateKey);
         if (deploy_helpers.isEmptyString(privateKeyFile)) {
             privateKeyFile = undefined;
         }
@@ -125,23 +123,33 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
             throw new Error(`Private key file '${target.privateKey}' not found!`);
         }
 
+        const DIR = this.replaceWithValues(target, target.dir);
+
         return {
             client: await deploy_clients_sftp.openConnection({
                 agent: agent,
                 debug: target.debug,
-                hashAlgorithm: target.hashAlgorithm,
+                hashAlgorithm: this.replaceWithValues(target, target.hashAlgorithm),
                 hashes: target.hashes,
-                host: target.host,
+                host: this.replaceWithValues(target, target.host),
                 password: target.password,
-                port: target.port,
+                port: parseInt(
+                    deploy_helpers.toStringSafe(
+                        this.replaceWithValues(target, target.port)
+                    ).trim()
+                ),
                 privateKey: privateKeyFile,
                 privateKeyPassphrase: target.privateKeyPassphrase,
-                readyTimeout: target.readyTimeout,
+                readyTimeout: parseInt(
+                    deploy_helpers.toStringSafe(
+                        this.replaceWithValues(target, target.readyTimeout)
+                    ).trim()
+                ),
                 user: target.user,
             }),
             getDir: (subDir) => {
                 return deploy_clients_sftp.normalizePath(
-                    deploy_clients_sftp.normalizePath(target.dir) + 
+                    deploy_clients_sftp.normalizePath(DIR) + 
                     '/' + 
                     deploy_clients_sftp.normalizePath(subDir)
                 );

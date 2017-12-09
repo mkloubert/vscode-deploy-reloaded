@@ -46,13 +46,15 @@ class DropboxPlugin extends deploy_plugins.AsyncFileClientPluginBase<DropboxTarg
                                                                      deploy_clients_dropbox.DropBoxClient,
                                                                      DropboxContext> {
     public createContext(target: DropboxTarget): DropboxContext {
+        const DIR = this.replaceWithValues(target, target.dir);
+
         return {
             client: deploy_clients_dropbox.createClient({
-                accessToken: target.token,
+                accessToken: this.replaceWithValues(target, target.token),
             }),
             getDir: (subDir) => {
                 return deploy_clients_dropbox.normalizePath(
-                    deploy_clients_dropbox.normalizePath(target.dir).trim() + 
+                    deploy_clients_dropbox.normalizePath(DIR).trim() + 
                     '/' + 
                     deploy_clients_dropbox.normalizePath(subDir).trim()
                 );

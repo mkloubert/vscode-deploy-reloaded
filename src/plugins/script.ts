@@ -155,7 +155,10 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
     }
 
     private async executeScript(args: ScriptArguments): Promise<any> {
-        let script = deploy_helpers.toStringSafe(args.target.script);
+        let script = this.replaceWithValues(
+            args.target,
+            args.target.script
+        );
         if (deploy_helpers.isEmptyString(script)) {
             script = './deploy.js';
         }

@@ -23,6 +23,7 @@ import * as deploy_plugins from './plugins';
 import * as deploy_targets from './targets';
 import * as deploy_transformers from './transformers';
 import * as deploy_workspaces from './workspaces';
+import * as IsStream from 'is-stream';
 import * as vscode from 'vscode';
 
 
@@ -206,16 +207,16 @@ export async function pullFilesFrom(files: string[],
                         }
 
                         const SF = new deploy_plugins.SimpleFileToDownload(ME, f, NAME_AND_PATH);
-                        SF.onBeforeDownload = async function(destination?: string) {
+                        SF.onBeforeDownload = async function(source?) {
                             if (arguments.length < 1) {
-                                destination = `'${deploy_helpers.toDisplayablePath(NAME_AND_PATH.path)}' (${TARGET_NAME})`;
+                                source = `'${deploy_helpers.toDisplayablePath(NAME_AND_PATH.path)}' (${TARGET_NAME})`;
                             }
                             else {
-                                destination = `'${deploy_helpers.toStringSafe(destination)}'`;
+                                source = `'${deploy_helpers.toStringSafe(source)}'`;
                             }
     
                             // TODO: translate
-                            ME.context.outputChannel.append(`Pulling file '${f}' from ${destination}... `);
+                            ME.context.outputChannel.append(`Pulling file '${f}' from ${source}... `);
 
                             await WAIT_WHILE_CANCELLING();
 
@@ -223,18 +224,36 @@ export async function pullFilesFrom(files: string[],
                                 ME.context.outputChannel.appendLine(`[Canceled]`);  //TODO: translate
                             }
                         };
-                        SF.onDownloadCompleted = async (err?: any, downloadedFile?: deploy_plugins.DownloadedFile) => {
-                            // TODO: translate
+                        SF.onDownloadCompleted = async (err?, downloadedFile?) => {
+                            let disposeDownloadedFile = false;
                             try {
                                 if (err) {
                                     throw err;
                                 }
                                 else {
-                                    let dataToWrite: Buffer;
+                                    let dataToWrite: any;
 
                                     if (downloadedFile) {
-                                        dataToWrite = await Promise.resolve(
-                                            downloadedFile.read()
+                                        if (Buffer.isBuffer(downloadedFile)) {
+                                            dataToWrite = downloadedFile;
+                                        }
+                                        else if (IsStream(downloadedFile)) {
+                                            dataToWrite = downloadedFile;
+                                        }
+                                        else if (deploy_helpers.isObject<deploy_plugins.DownloadedFile>(downloadedFile)) {
+                                            disposeDownloadedFile = true;
+
+                                            dataToWrite = await Promise.resolve(
+                                                downloadedFile.read()
+                                            );
+                                        }
+                                        else {
+                                            dataToWrite = downloadedFile;
+                                        }
+
+                                        // keep sure we have a buffer here
+                                        dataToWrite = await deploy_helpers.asBuffer(
+                                            dataToWrite
                                         );
 
                                         const CONTEXT: deploy_transformers.DataTransformerContext = {
@@ -265,7 +284,9 @@ export async function pullFilesFrom(files: string[],
                                 ME.context.outputChannel.appendLine(`[ERROR: ${e}]`);  //TODO: translate
                             }
                             finally {
-                                deploy_helpers.tryDispose(downloadedFile);
+                                if (disposeDownloadedFile) {
+                                    deploy_helpers.tryDispose(<vscode.Disposable>downloadedFile);
+                                }
                             }
                         };
 

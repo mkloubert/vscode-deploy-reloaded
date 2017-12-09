@@ -771,19 +771,20 @@ async function activateExtension(context: vscode.ExtensionContext) {
             // list directory
             vscode.commands.registerCommand('extension.deploy.reloaded.listDirectory', async () => {
                 try {
-                    const TARGETS: deploy_targets.Target[] = [];
-                    activeWorkspaces.forEach(ws => {
-                        const WORKSPACE_TARGETS = ws.getTargets().filter(t => {
-                            return t.__workspace.getListPlugins(t).length > 0;
-                        });
+                    let workspacesWithTargets = activeWorkspaces;
+                    if (workspacesWithTargets.length < 1) {
+                        workspacesWithTargets = WORKSPACES;
+                    }
 
-                        TARGETS.push
-                               .apply(TARGETS, WORKSPACE_TARGETS);
-                    });
+                    const TARGETS = Enumerable.from(workspacesWithTargets).selectMany(ws => {
+                        return ws.getTargets();
+                    }).where(t => {
+                        return t.__workspace.getListPlugins(t).length > 0;
+                    }).toArray();
 
                     await deploy_targets.showTargetQuickPick(
                         TARGETS,
-                        'Select the TARGET from where what you would like to list...',
+                        'Select the target where you want to get a directory list from...',
                         async (target) => {
                             await target.__workspace
                                         .listDirectory(target);
@@ -801,7 +802,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 }
             }),
 
-            // list directory
+            // select workspace
             vscode.commands.registerCommand('extension.deploy.reloaded.selectWorkspace', async () => {
                 try {
                     const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = WORKSPACES.map(ws => {

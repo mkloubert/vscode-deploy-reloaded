@@ -62,15 +62,17 @@ class S3BucketPlugin extends deploy_plugins.AsyncFileClientPluginBase<S3BucketTa
                                                                       deploy_clients_s3bucket.S3BucketClient,
                                                                       S3BucketContext> {
     public async createContext(target: S3BucketTarget): Promise<S3BucketContext> {
+        const DIR = this.replaceWithValues(target, target.dir);
+        
         return {
             client: await deploy_clients_s3bucket.createClient({
-                acl: target.acl,
-                bucket: target.bucket,
+                acl: this.replaceWithValues(target, target.acl),
+                bucket: this.replaceWithValues(target, target.bucket),
                 credentials: target.credentials,
             }),
             getDir: (subDir) => {
                 return deploy_clients_s3bucket.normalizePath(
-                    deploy_clients_s3bucket.normalizePath(target.dir).trim() + 
+                    deploy_clients_s3bucket.normalizePath(DIR).trim() + 
                     '/' + 
                     deploy_clients_s3bucket.normalizePath(subDir).trim()
                 );

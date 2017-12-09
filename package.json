@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.44",
+ "version": "0.0.45",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.18.0"

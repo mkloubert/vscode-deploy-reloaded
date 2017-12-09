@@ -17,6 +17,7 @@
 
 import * as deploy_clients_ftp from '../clients/ftp';
 import * as deploy_files from '../files';
+import * as deploy_helpers from '../helpers';
 import * as deploy_log from '../log';
 import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
@@ -61,17 +62,23 @@ class FTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<FTPTarget,
                                                                  deploy_clients_ftp.FTPClientBase,
                                                                  FTPContext> {
     public async createContext(target: FTPTarget): Promise<FTPContext> {
+        const DIR = this.replaceWithValues(target, target.dir);
+
         return {
             client: await deploy_clients_ftp.openConnection({
-                engine: target.engine,
-                host: target.host,
+                engine: this.replaceWithValues(target, target.engine),
+                host: this.replaceWithValues(target, target.host),
                 password: target.password,
-                port: target.port,
+                port: parseInt(
+                    deploy_helpers.toStringSafe(
+                        this.replaceWithValues(target, target.port)
+                    ).trim()
+                ),
                 user: target.user,
             }),
             getDir: (subDir) => {
                 return deploy_clients_ftp.normalizePath(
-                    deploy_clients_ftp.normalizePath(target.dir) + 
+                    deploy_clients_ftp.normalizePath(DIR) + 
                     '/' + 
                     deploy_clients_ftp.normalizePath(subDir)
                 );

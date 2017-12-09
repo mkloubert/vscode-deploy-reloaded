@@ -26,6 +26,7 @@ import * as deploy_transformers from './transformers';
 import * as deploy_values from './values';
 import * as deploy_workspaces from './workspaces';
 import * as Events from 'events';
+import * as Stream from 'stream';
 import * as vscode from 'vscode';
 
 
@@ -39,9 +40,9 @@ export type BeforeDeleteFileCallback = (destination?: string) => PromiseLike<voi
 /**
  * A function / method that is called BEFORE a file is going to be downloaded.
  * 
- * @param {string} [destination] The custom destination to display.
+ * @param {string} [source] The custom source to display.
  */
-export type BeforeDownloadFileCallback = (destination?: string) => PromiseLike<void>;
+export type BeforeDownloadFileCallback = (source?: string) => PromiseLike<void>;
 
 /**
  * A function / method that is called BEFORE a file is going to be uploaded.
@@ -94,9 +95,9 @@ export interface DownloadedFile extends vscode.Disposable, deploy_contracts.With
  * A function / method that is called AFTER a download operation for a file has been finished.
  * 
  * @param {any} err The error (if occurred).
- * @param {DownloadedFile} [file] The downloaded file (if available).
+ * @param {DownloadedFile|Buffer|string|Stream.Stream} [file] The downloaded file (if available).
  */
-export type DownloadFileCompletedCallback = (err: any, file?: DownloadedFile) => PromiseLike<void>;
+export type DownloadFileCompletedCallback = (err: any, file?: DownloadedFile | Buffer | string | Stream.Stream) => PromiseLike<void>;
 
 /**
  * A context for handling files.
@@ -157,9 +158,9 @@ export interface FileToUpload extends deploy_workspaces.WorkspaceFile {
      */
     readonly onUploadCompleted: UploadFileCompletedCallback;
     /**
-     * Reads the complete content of that file.
+     * Reads the complete content of that file async.
      * 
-     * @return {PromiseLike<Buffer>} The loaded data.
+     * @return {PromiseLike<Buffer>} The promise with the loaded data.
      */
     readonly read: () => PromiseLike<Buffer>;
 }
