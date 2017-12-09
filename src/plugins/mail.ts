@@ -138,7 +138,7 @@ class MailPlugin extends deploy_plugins.PluginBase<MailTarget> {
         const IGNORE_TLS = deploy_helpers.toBooleanSafe(TARGET.ignoreTLS);
         const REQUIRE_TOLS = deploy_helpers.toBooleanSafe(TARGET.requireTLS);
 
-        const REJECT_UNAUTHORIZED = deploy_helpers.toBooleanSafe(TARGET.rejectUnauthorized);
+        const REJECT_UNAUTHORIZED = deploy_helpers.toBooleanSafe(TARGET.rejectUnauthorized, true);
 
         let host = deploy_helpers.normalizeString(
             ME.replaceWithValues(TARGET, TARGET.host)
