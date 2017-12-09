@@ -94,6 +94,8 @@ class MailPlugin extends deploy_plugins.PluginBase<MailTarget> {
     }
 
     public async uploadFiles(context: deploy_plugins.UploadContext<MailTarget>) {
+        const ME = this;
+
         const TARGET = context.target;
 
         const NOW_UTC = Moment.utc();
@@ -116,7 +118,7 @@ class MailPlugin extends deploy_plugins.PluginBase<MailTarget> {
         );
 
         let from = deploy_helpers.normalizeString(
-            this.replaceWithValues(TARGET, TARGET.from)
+            ME.replaceWithValues(TARGET, TARGET.from)
         );
         if ('' === from) {
             from = undefined;
@@ -125,7 +127,9 @@ class MailPlugin extends deploy_plugins.PluginBase<MailTarget> {
         const TO = Enumerable.from( deploy_helpers.asArray(TARGET.to) ).selectMany(t => {
             return deploy_helpers.toStringSafe(t)
                                  .split(',');
-        }).select(t => deploy_helpers.normalizeString(t))
+        }).select(t => deploy_helpers.normalizeString(
+                           ME.replaceWithValues(TARGET, t)
+                       ))
           .where(t => '' !== t)
           .toArray();
 
@@ -137,7 +141,7 @@ class MailPlugin extends deploy_plugins.PluginBase<MailTarget> {
         const REJECT_UNAUTHORIZED = deploy_helpers.toBooleanSafe(TARGET.rejectUnauthorized);
 
         let host = deploy_helpers.normalizeString(
-            this.replaceWithValues(TARGET, TARGET.host)
+            ME.replaceWithValues(TARGET, TARGET.host)
         );
         if ('' === host) {
             host = '127.0.0.1';
@@ -145,7 +149,7 @@ class MailPlugin extends deploy_plugins.PluginBase<MailTarget> {
 
         let port = parseInt(
             deploy_helpers.toStringSafe(
-                this.replaceWithValues(TARGET, TARGET.port)
+                ME.replaceWithValues(TARGET, TARGET.port)
             ).trim()
         );
         if (isNaN(port)) {
@@ -159,7 +163,7 @@ class MailPlugin extends deploy_plugins.PluginBase<MailTarget> {
 
         let auth: any;
         let user = deploy_helpers.toStringSafe(
-            this.replaceWithValues(TARGET, TARGET.user)
+            ME.replaceWithValues(TARGET, TARGET.user)
         );
         if (!deploy_helpers.isEmptyString(user)) {
             let password = deploy_helpers.toStringSafe(TARGET.password);
@@ -230,7 +234,7 @@ https://github.com/mkloubert/vscode-deploy-reloaded`,
             }
         }
 
-        await this.sendMail(TRANSPORTER, MAIL_OPTS);
+        await ME.sendMail(TRANSPORTER, MAIL_OPTS);
     }
 }
 
