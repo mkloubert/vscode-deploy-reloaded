@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.49",
+ "version": "0.0.50",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.18.0"
@@ -1555,6 +1555,238 @@
          {
           "type": "object",
           "properties": {
+           "beforeDeploy": {
+            "description": "One or more target operation to define.",
+            "type": "array",
+            "items": {
+             "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "target": {
+                 "description": "The thing to open.",
+                 "type": "string",
+                 "pattern": "\\S+"
+                },
+                "type": {
+                 "enum": [
+                  "open",
+                  ""
+                 ],
+                 "type": "string",
+                 "description": "Opens something, like an app or URL on the current machine."
+                },
+                "wait": {
+                 "description": "Wait until operation has been finished or not.",
+                 "type": "boolean",
+                 "default": true
+                }
+               },
+               "required": [
+                "target"
+               ]
+              }
+             ]
+            }
+           },
+           "deployed": {
+            "description": "One or more target operation to define.",
+            "type": "array",
+            "items": {
+             "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "target": {
+                 "description": "The thing to open.",
+                 "type": "string",
+                 "pattern": "\\S+"
+                },
+                "type": {
+                 "enum": [
+                  "open",
+                  ""
+                 ],
+                 "type": "string",
+                 "description": "Opens something, like an app or URL on the current machine."
+                },
+                "wait": {
+                 "description": "Wait until operation has been finished or not.",
+                 "type": "boolean",
+                 "default": true
+                }
+               },
+               "required": [
+                "target"
+               ]
+              }
+             ]
+            }
+           },
+           "description": {
+            "description": "A description for that target.",
+            "type": "string"
+           },
+           "encryptBy": {
+            "description": "The algorithm for data encryption to use.",
+            "type": "string",
+            "default": "aes-256-ctr"
+           },
+           "encryptWith": {
+            "description": "An optional password for data encryption to use.",
+            "type": "string"
+           },
+           "from": {
+            "type": "string",
+            "description": "The address that sends the mail.",
+            "pattern": "\\S+"
+           },
+           "hideIf": {
+            "description": "Defines a list of one or more package names, which will hide this target from GUI, if one of them is selected.",
+            "type": "array",
+            "items": {
+             "description": "A name of a package.",
+             "type": "string"
+            }
+           },
+           "host": {
+            "type": "string",
+            "description": "The address of the SMTP host.",
+            "default": "127.0.0.1"
+           },
+           "if": {
+            "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+            "type": "string"
+           },
+           "ignoreTLS": {
+            "type": "boolean",
+            "description": "Ignore TLS or not.",
+            "default": false
+           },
+           "mappings": {
+            "description": "Defines one or more folder mappings by minimatch patterns.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The mapping to define",
+              "oneOf": [
+               {
+                "description": "The target folder.",
+                "type": "string"
+               },
+               {
+                "description": "Settings for the target folder.",
+                "type": "object",
+                "properties": {
+                 "to": {
+                  "description": "The target folder.",
+                  "type": "string"
+                 }
+                },
+                "required": [
+                 "to"
+                ]
+               }
+              ]
+             }
+            }
+           },
+           "name": {
+            "description": "The (display) name of that target.",
+            "type": "string"
+           },
+           "password": {
+            "type": "string",
+            "description": "The password for the authentication."
+           },
+           "platforms": {
+            "description": "One or more platform names the target is available for.",
+            "type": "array",
+            "items": {
+             "description": "The name of the platform.",
+             "type": "string",
+             "enum": [
+              "darwin",
+              "freebsd",
+              "linux",
+              "sunos",
+              "win32"
+             ]
+            }
+           },
+           "port": {
+            "type": "integer",
+            "description": "The custom TCP port of the SMTP host.",
+            "maximum": 65535,
+            "minimum": 0
+           },
+           "rejectUnauthorized": {
+            "type": "boolean",
+            "description": "Reject unauthorized TLS or not.",
+            "default": false
+           },
+           "requireTLS": {
+            "type": "boolean",
+            "description": "SMTP requires TLS or not.",
+            "default": false
+           },
+           "secure": {
+            "type": "boolean",
+            "description": "Use secure connection or not.",
+            "default": true
+           },
+           "showIf": {
+            "description": "Defines a list of one or more package names, which will show this target in GUI, if one of them is selected.",
+            "type": "array",
+            "items": {
+             "description": "A name of a package.",
+             "type": "string"
+            }
+           },
+           "to": {
+            "type": "array",
+            "description": "The list of email addresses to send the file(s) to.",
+            "items": {
+             "description": "An email address to deploy to.",
+             "type": "string",
+             "pattern": "(([^<>()\\[\\]\\\\.,;:\\s@\"]+(\\.[^<>()\\[\\]\\\\.,;:\\s@\"]+)*)|(\".+\"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))"
+            }
+           },
+           "transformer": {
+            "description": "The path (or URI) to the data transformer script.",
+            "type": "string"
+           },
+           "transformerOptions": {
+            "description": "Options for the data transformer script."
+           },
+           "type": {
+            "enum": [
+             "mail"
+            ],
+            "type": "string",
+            "description": "Deploys to a SMTP mail server."
+           },
+           "user": {
+            "type": "string",
+            "description": "The user for the authentication."
+           }
+          },
+          "required": [
+           "from",
+           "to"
+          ]
+         },
+         {
+          "type": "object",
+          "properties": {
            "acl": {
             "enum": [
              "private",
@@ -2760,6 +2992,7 @@
   "@types/minimatch": "^3.0.1",
   "@types/mocha": "^2.2.42",
   "@types/node": "^7.0.43",
+  "@types/nodemailer": "^4.3.1",
   "@types/sanitize-filename": "^1.1.28",
   "@types/ssh2-sftp-client": "^2.0.0",
   "@types/tmp": "0.0.33",
@@ -2798,6 +3031,7 @@
   "moment": "^2.19.3",
   "node-enumerable": "^3.8.0",
   "node-zip": "^1.1.1",
+  "nodemailer": "^4.4.1",
   "parse-listing": "^1.1.3",
   "sanitize-filename": "^1.6.1",
   "ssh2-sftp-client": "^2.0.1",

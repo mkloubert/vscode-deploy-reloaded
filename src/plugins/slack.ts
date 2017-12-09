@@ -118,7 +118,7 @@ class SlackPlugin extends deploy_plugins.PluginBase<SlackTarget> {
                         .trim();
             }).where(c => {
                 return '' !== c;
-            });
+            }).toArray();
 
             for (const C of CHANNELS) {
                 const FILES_TO_UPLOAD = context.files;
@@ -128,9 +128,7 @@ class SlackPlugin extends deploy_plugins.PluginBase<SlackTarget> {
 
                     try {
                         FILE.onBeforeUpload(
-                            deploy_helpers.toDisplayablePath(
-                                FILE.path
-                            )
+                            CHANNELS.join(', ')
                         );
 
                         await Promise.resolve(
