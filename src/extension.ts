@@ -680,6 +680,46 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 }
             }),
 
+            // pull
+            vscode.commands.registerCommand('extension.deploy.reloaded.pull', async () => {
+                try {
+                    //TODO: translate
+                    const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = [
+                        {
+                            action: async () => {
+                                await vscode.commands.executeCommand('extension.deploy.reloaded.pullFile');
+                            },
+                            label: '$(cloud-download)  ' + 'Current file ...',
+                            description: 'Pulls the current file from a target',
+                        },
+
+                        {
+                            action: async () => {
+                                await vscode.commands.executeCommand('extension.deploy.reloaded.pullWorkspace');
+                            },
+                            label: '$(cloud-download)  ' + 'Package ...',
+                            description: 'Pulls files, as defined in a package, from a target',
+                        }
+                    ];
+
+                    const SELECTED_ITEM = await vscode.window.showQuickPick(QUICK_PICKS);
+                    if (SELECTED_ITEM) {
+                        await Promise.resolve(
+                            SELECTED_ITEM.action()
+                        );
+                    }
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'extension.deploy.reloaded.delete');
+
+                    //TODO: translate
+                    deploy_helpers.showErrorMessage(
+                        `Selecting delete operation failed (s. debug output 'CTRL + Y')!`
+                    );
+                }
+            }),
+
             // pull workspace
             vscode.commands.registerCommand('extension.deploy.reloaded.pullWorkspace', async () => {
                 try {

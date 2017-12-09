@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.46",
+ "version": "0.0.47",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.18.0"
@@ -40,13 +40,8 @@
     "category": "Deploy Reloaded"
    },
    {
-    "command": "extension.deploy.reloaded.pullWorkspace",
-    "title": "Pull workspace",
-    "category": "Deploy Reloaded"
-   },
-   {
-    "command": "extension.deploy.reloaded.pullFile",
-    "title": "Pull current file",
+    "command": "extension.deploy.reloaded.pull",
+    "title": "Pull ...",
     "category": "Deploy Reloaded"
    },
    {
