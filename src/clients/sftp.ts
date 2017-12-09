@@ -124,7 +124,7 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
 
             return true;
         }
-        catch {
+        catch (e) {
             return false;
         }
     }
@@ -267,7 +267,7 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
                 // check if exist
                 await this.client.list(REMOTE_DIR);
             }
-            catch {
+            catch (e) {
                 // no, try to create
                 await this.client.mkdir(REMOTE_DIR, true);
             }

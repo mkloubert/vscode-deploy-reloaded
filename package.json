@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.48",
+ "version": "0.0.49",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.18.0"
@@ -42,6 +42,11 @@
    {
     "command": "extension.deploy.reloaded.listDirectory",
     "title": "List directory ...",
+    "category": "Deploy Reloaded"
+   },
+   {
+    "command": "extension.deploy.reloaded.showTools",
+    "title": "Tools ...",
     "category": "Deploy Reloaded"
    }
   ],

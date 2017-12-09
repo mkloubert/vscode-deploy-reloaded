@@ -24,6 +24,7 @@ import * as deploy_log from './log';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
 import * as deploy_targets from './targets';
+import * as deploy_tools from './tools';
 import * as deploy_workflows from './workflows';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
@@ -53,6 +54,15 @@ function getActivePackages() {
     });
 
     return PACKAGES;
+}
+
+function getActiveWorkspacesOrAll() {
+    let listOfWorkspaces = deploy_helpers.asArray(activeWorkspaces);
+    if (listOfWorkspaces.length < 1) {
+        listOfWorkspaces = WORKSPACES;
+    }
+
+    return listOfWorkspaces.map(ws => ws);
 }
 
 async function invokeForActiveEditor(placeHolder: string,
@@ -645,7 +655,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
                             action: async () => {
                                 await vscode.commands.executeCommand('extension.deploy.reloaded.deployFile');
                             },
-                            label: '$(cloud-download)  ' + 'Current file ...',
+                            label: '$(rocket)  ' + 'Current file ...',
                             description: 'Deploys the current file to a target',
                         },
 
@@ -653,7 +663,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
                             action: async () => {
                                 await vscode.commands.executeCommand('extension.deploy.reloaded.deployWorkspace');
                             },
-                            label: '$(cloud-download)  ' + 'Package ...',
+                            label: '$(rocket)  ' + 'Package ...',
                             description: 'Deploys files, as defined in a package, to a target',
                         }
                     ];
@@ -978,6 +988,40 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 }
                 finally {
                     await updateActiveWorkspaces();
+                }
+            }),
+
+            // tools
+            vscode.commands.registerCommand('extension.deploy.reloaded.showTools', async () => {
+                try {
+                    //TODO: translate
+                    const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = [
+                        {
+                            action: async () => {
+                                await deploy_tools.createDeployScript(
+                                    getActiveWorkspacesOrAll()
+                                );
+                            },
+                            label: '$(plus)  ' + 'Create deploy script ...',
+                            description: 'Creates a basic deploy script',
+                        },
+                    ];
+
+                    const SELECTED_ITEM = await vscode.window.showQuickPick(QUICK_PICKS);
+                    if (SELECTED_ITEM) {
+                        await Promise.resolve(
+                            SELECTED_ITEM.action()
+                        );
+                    }
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'extension.deploy.reloaded.showTools');
+
+                    //TODO: translate
+                    deploy_helpers.showErrorMessage(
+                        `Tool operation failed (s. debug output 'CTRL + Y')!`
+                    );
                 }
             }),
         );

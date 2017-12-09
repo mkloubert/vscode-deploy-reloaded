@@ -1706,6 +1706,17 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     }
 
     /**
+     * Gets the full path of a settings folder.
+     */
+    public get settingFolder(): string {
+        return Path.resolve(
+            Path.dirname(
+                this.configSource.resource.fsPath
+            )
+        );
+    }
+
+    /**
      * Promise (and safe) version of 'vscode.window.showErrorMessage()' function.
      * 
      * @param {any} msg The message to display.
@@ -1723,6 +1734,27 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         catch (e) {
             deploy_log.CONSOLE
                       .trace(e, 'workspaces.Workspace.showErrorMessage()');
+        }
+    }
+
+    /**
+     * Promise (and safe) version of 'vscode.window.showErrorMessage()' function.
+     * 
+     * @param {any} msg The message to display.
+     * @param {TItem[]} [items] The optional items.
+     * 
+     * @return {Promise<TItem>} The promise with the selected item.
+     */
+    public async showInformationMessage<TItem extends vscode.MessageItem = vscode.MessageItem>(msg: any, ...items: TItem[]): Promise<TItem> {
+        try {
+            msg = deploy_helpers.toStringSafe(msg);
+
+            return await vscode.window.showInformationMessage
+                                      .apply(null, [ <any>`[vscode-deploy-reloaded]::[${this.name}] ${msg}`.trim() ].concat(items));
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'workspaces.Workspace.showInformationMessage()');
         }
     }
 
