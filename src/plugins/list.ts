@@ -20,7 +20,6 @@ import * as deploy_download from '../download';
 import * as deploy_helpers from '../helpers';
 import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
-import * as Enumerable from 'node-enumerable';
 const MergeDeep = require('merge-deep');
 import * as OS from 'os';
 import * as Path from 'path';
