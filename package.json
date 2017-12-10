@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.59",
+ "version": "0.0.60",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.18.0"
@@ -1794,29 +1794,45 @@
             "type": "string"
            },
            "entries": {
-            "type": "array",
-            "description": "One or more entries to show.",
-            "items": {
-             "description": "An entry with settings.",
-             "type": "object",
-             "properties": {
-              "description": {
-               "type": "string",
-               "description": "An optional description."
-              },
-              "name": {
-               "type": "string",
-               "description": "The (display) name of the entry."
-              },
-              "settings": {
+            "oneOf": [
+             {
+              "type": "array",
+              "description": "One or more entries to show.",
+              "items": {
+               "description": "An entry with settings.",
                "type": "object",
-               "description": "Settings for the 'real' target(s)"
+               "properties": {
+                "description": {
+                 "type": "string",
+                 "description": "An optional description."
+                },
+                "name": {
+                 "type": "string",
+                 "description": "The (display) name of the entry."
+                },
+                "settings": {
+                 "oneOf": [
+                  {
+                   "type": "object",
+                   "description": "Settings for the 'real' target(s)"
+                  },
+                  {
+                   "description": "A source, like a path or URI, from where to download the settings from.",
+                   "type": "string"
+                  }
+                 ]
+                }
+               },
+               "required": [
+                "settings"
+               ]
               }
              },
-             "required": [
-              "settings"
-             ]
-            }
+             {
+              "description": "A source, like a path or URI, from where to download the entries from.",
+              "type": "string"
+             }
+            ]
            },
            "hideIf": {
             "description": "Defines a list of one or more package names, which will hide this target from GUI, if one of them is selected.",

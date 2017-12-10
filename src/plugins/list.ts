@@ -32,9 +32,9 @@ import * as vscode from 'vscode';
  */
 export interface ListTarget extends deploy_targets.Target, deploy_targets.TargetProvider {
     /**
-     * One or more entries with settings to show.
+     * One or more entries with settings to show or a source from where to download them.
      */
-    readonly entries: ListTargetEntry | ListTargetEntry[];
+    readonly entries: string | ListTargetEntry | ListTargetEntry[];
 }
 
 /**
@@ -46,9 +46,9 @@ export interface ListTargetEntry extends deploy_contracts.WithOptionalName {
      */
     readonly description?: string;
     /**
-     * The settings for the "real" target.
+     * The settings for the "real" target or a source from where to download them.
      */
-    readonly settings: ListTargetSettings;
+    readonly settings: string | ListTargetSettings;
 }
 
 /**
@@ -63,20 +63,48 @@ class ListPlugin extends deploy_plugins.IterablePluginBase<ListTarget> {
 
         const CLONED_TARGETS: deploy_targets.Target[] = [];
 
-        const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = deploy_helpers.asArray(listTarget.entries).map((e, i) => {
-            let name = deploy_helpers.toStringSafe(e.name).trim();
+        let entries: string | ListTargetEntry | ListTargetEntry[];
+        if (!deploy_helpers.isObject<ListTargetEntry>(entries) && !Array.isArray(entries)) {
+            // download from source
+
+            entries =
+                <ListTargetEntry | ListTargetEntry[]>JSON.parse(
+                    (await deploy_download.download(
+                        deploy_helpers.toStringSafe(entries)
+                    )).toString('utf8')
+                );
+        }
+
+        const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = deploy_helpers.asArray(entries).map((e, i) => {
+            let name = deploy_helpers.toStringSafe(
+                ME.replaceWithValues(listTarget, e.name)
+            ).trim();
             if ('' === name) {
                 //TODO: translate
                 name = `Entry #${i + 1}`;
             }
 
-            const DESCRIPTION = deploy_helpers.toStringSafe(e.description).trim();
+            const DESCRIPTION = deploy_helpers.toStringSafe(
+                ME.replaceWithValues(listTarget, e.description)
+            ).trim();
 
             return {
                 action: async () => {
+                    let settingsToApply = e.settings;
+                    if (!deploy_helpers.isObject<ListTargetSettings>(settingsToApply)) {
+                        settingsToApply =
+                            <ListTargetSettings>JSON.parse(
+                                (await deploy_download.download(
+                                    deploy_helpers.toStringSafe(entries)
+                                )).toString('utf8')
+                            );
+                    }
+
                     for (const T of deploy_helpers.asArray(targets)) {
                         let ct = deploy_helpers.cloneObjectFlat(T);
-                        ct = MergeDeep(ct, e.settings);
+                        if (settingsToApply) {
+                            ct = MergeDeep(ct, settingsToApply);
+                        }
     
                         CLONED_TARGETS.push(ct);
                     }
