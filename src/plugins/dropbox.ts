@@ -45,7 +45,7 @@ export interface DropboxTarget extends deploy_targets.Target {
 class DropboxPlugin extends deploy_plugins.AsyncFileClientPluginBase<DropboxTarget,
                                                                      deploy_clients_dropbox.DropBoxClient,
                                                                      DropboxContext> {
-    public createContext(target: DropboxTarget): DropboxContext {
+    protected createContext(target: DropboxTarget): DropboxContext {
         const DIR = this.replaceWithValues(target, target.dir);
 
         return {

@@ -64,7 +64,7 @@ export interface AzureBlobTarget extends deploy_targets.Target {
 class AzureBlobPlugin extends deploy_plugins.AsyncFileClientPluginBase<AzureBlobTarget,
                                                                        deploy_clients_azureblob.AzureBlobClient,
                                                                        AzureBlobContext> {
-    public async createContext(target: AzureBlobTarget): Promise<AzureBlobContext> {
+    protected async createContext(target: AzureBlobTarget): Promise<AzureBlobContext> {
         const DIR = this.replaceWithValues(target, target.dir);
 
         return {

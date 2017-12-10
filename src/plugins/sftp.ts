@@ -98,7 +98,7 @@ export interface SFTPTarget extends deploy_targets.Target {
 class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
                                                                   deploy_clients_sftp.SFTPClient,
                                                                   SFTPContext> {
-    public async createContext(target: SFTPTarget): Promise<SFTPContext> {
+    protected async createContext(target: SFTPTarget): Promise<SFTPContext> {
         let agent = this.replaceWithValues(target, target.agent);
         if (deploy_helpers.isEmptyString(agent)) {
             agent = undefined;

@@ -61,7 +61,7 @@ export interface FTPTarget extends deploy_targets.Target {
 class FTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<FTPTarget,
                                                                  deploy_clients_ftp.FTPClientBase,
                                                                  FTPContext> {
-    public async createContext(target: FTPTarget): Promise<FTPContext> {
+    protected async createContext(target: FTPTarget): Promise<FTPContext> {
         const DIR = this.replaceWithValues(target, target.dir);
 
         return {
