@@ -23,6 +23,7 @@ import * as deploy_mappings from './mappings';
 import * as deploy_workflows from './workflows';
 import * as Enumerable from 'node-enumerable';
 import * as FS from 'fs';
+import * as FSExtra from 'fs-extra';
 import * as Glob from 'glob';
 const IsBinaryFile = require("isbinaryfile");
 import * as IsStream from 'is-stream';
@@ -1263,6 +1264,28 @@ export function mergeByName<TObj extends deploy_contracts.WithOptionalName = dep
     }
 
     return RESULT;
+}
+
+/**
+ * Promise version of 'FSExtra.mkdirs()' function.
+ * 
+ * @param {string} dir The directory to create.
+ */
+export function mkdirs(dir: string) {
+    dir = toStringSafe(dir);
+
+    return new Promise<void>((resolve, reject) => {
+        const COMPLETED = createCompletedAction(resolve, reject);
+
+        try {
+            FSExtra.mkdirs(dir, (err) => {
+                COMPLETED(err);
+            });
+        }
+        catch (e) {
+            COMPLETED(e);
+        }
+    });
 }
 
 /**

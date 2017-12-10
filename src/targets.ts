@@ -25,7 +25,9 @@ import * as deploy_transformers from './transformers';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
 import * as Minimatch from 'minimatch';
+import * as Moment from 'moment';
 import * as Path from 'path';
+import * as SanitizeFilename from 'sanitize-filename';
 import * as vscode from 'vscode';
 
 
@@ -204,6 +206,11 @@ export interface TargetProvider {
  * The default type or a target operation.
  */
 export const DEFAULT_OPERATION_TYPE = 'open';
+
+/**
+ * The regular expression for testing a ZIP filename for a target.
+ */
+export const REGEX_ZIP_FILENAME = /^(vscode\-ws)(.*)(_)([0-9]{8})(\-)([0-9]{6})(\.zip)$/i;
 
 
 /**
@@ -443,6 +450,47 @@ export function getTargetsByName(targetNames: string | string[],
     }
 
     return EXISTING_TARGETS;
+}
+
+/**
+ * Returns the ZIP filename for a target.
+ * 
+ * @param {Target} target The target.
+ * @param {Moment.Moment} [time] The custom timestamp to use.
+ * 
+ * @return {string} The filename.
+ */
+export function getZipFileName(target: Target, time?: Moment.Moment): string {
+    if (target) {
+        return <any>target;
+    }
+
+    time = deploy_helpers.asUTC(time);
+    if (!time) {
+        time = Moment.utc();
+    }
+
+    let workspaceName: string;
+
+    const WORKSPACE = target.__workspace;
+    if (WORKSPACE) {
+        workspaceName = deploy_helpers.normalizeString(target.__workspace.name);
+
+        if (workspaceName.length > 32) {
+            workspaceName = workspaceName.substr(0, 32).trim();
+        }
+    }
+
+    if (deploy_helpers.isEmptyString(workspaceName)) {
+        workspaceName = '';
+    }
+    else {
+        workspaceName = `_${workspaceName}`;
+    }
+
+    return SanitizeFilename(
+        `vscode-ws${workspaceName}_${time.format('YYYYMMDD-HHmmss')}.zip`
+    );
 }
 
 /**

@@ -174,14 +174,16 @@ function deleteFiles(args) {
                                             // 
                                             // you can submit an optional string that
                                             // is displayed as 'destination' in the GUI
+                                            //
+                                            // this is done async
 
                     // do the delete operation here
                     throw new Error('Not implemented!');
 
-                    file.onDeleteCompleted();  // tell that anything worked fine
+                    file.onDeleteCompleted();  // tell that anything worked fine (async)
                 }
                 catch (e) {
-                    file.onDeleteCompleted(e);  // submit the error
+                    file.onDeleteCompleted(e);  // submit the error (async)
                 }
             }
 
@@ -209,6 +211,8 @@ function deployFiles(args) {
                                             // 
                                             // you can submit an optional string that
                                             // is displayed as 'destination' in the GUI
+                                            //
+                                            // this is done async
 
                     // do the deploy operation here
                     
@@ -216,14 +220,14 @@ function deployFiles(args) {
                     // and returns a Promise with the buffer
                     // of the data to deploy
                     // 
-                    // let contentToDeploy = await file.read();
+                    let contentToDeploy = file.read();
 
                     throw new Error('Not implemented!');
 
-                    file.onUploadCompleted();  // tell that anything worked fine
+                    file.onUploadCompleted();  // tell that anything worked fine (async)
                 }
                 catch (e) {
-                    file.onUploadCompleted(e);  // submit the error
+                    file.onUploadCompleted(e);  // submit the error (async)
                 }
             }
 
@@ -278,6 +282,8 @@ function pullFiles(args) {
                                               // 
                                               // you can submit an optional string that
                                               // is displayed as 'source' in the GUI
+                                              //
+                                              // this is done async
 
                     // do the pull operation here
                     // 
@@ -290,10 +296,12 @@ function pullFiles(args) {
 
                     // tell that anything worked fine
                     // and submit the data to write
+                    // 
+                    // this is done async
                     file.onDownloadCompleted(null, downloadedData);
                 }
                 catch (e) {
-                    file.onDownloadCompleted(e);  // submit the error
+                    file.onDownloadCompleted(e);  // submit the error (async)
                 }
             }
 
