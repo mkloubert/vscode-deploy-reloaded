@@ -19,6 +19,7 @@ import * as deploy_commands from './commands';
 import * as deploy_contracts from './contracts';
 import * as deploy_delete from './delete';
 import * as deploy_deploy from './deploy';
+import * as deploy_download from './download';
 import * as deploy_helpers from './helpers';
 import * as deploy_list from './list';
 import * as deploy_log from './log';
@@ -41,16 +42,6 @@ import * as OS from 'os';
 import * as Path from 'path';
 import * as vscode from 'vscode';
 
-
-/**
- * Out value for 'Workspace.downloadFromSettingsUri()' method.
- */
-export interface DownloadFromSettingsUriOutValue {
-    /**
-     * The download source.
-     */
-    source?: 'local';
-}
 
 interface PackageWithButton {
     readonly button: vscode.StatusBarItem;
@@ -358,28 +349,6 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     public async deployPackage(pkg: deploy_packages.Package) {
         await deploy_deploy.deployPackage
                            .apply(this, arguments);
-    }
-
-    /**
-     * Downloads setting data from an URI.
-     * 
-     * @param {vscode.Uri} uri The URI.
-     * @param {DownloadFromSettingsUriOutValue} [outVal] An object for storing additiional result data.
-     */
-    public async downloadFromSettingsUri(uri: vscode.Uri, outVal?: DownloadFromSettingsUriOutValue): Promise<Buffer | false> {
-        if (!outVal) {
-            outVal = {};
-        }
-        
-        //TODO: implement other donwload sources, like HTTP or FTP
-
-        outVal.source = 'local';
-        const LOCAL_FILE = await this.getExistingSettingPath(uri.fsPath);
-        if (false !== LOCAL_FILE) {
-            return await deploy_helpers.readFile(LOCAL_FILE);
-        }
-
-        return false;
     }
 
     /**
@@ -1195,6 +1164,11 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         }
         ME._isReloadingConfig = true;
 
+        const SCOPES = [
+            ME.settingFolder,
+            Path.join(OS.homedir(), deploy_contracts.HOMEDIR_SUBFOLDER),
+        ];
+
         let finalizer: () => any;
         try {
             ME.cleanupTimers();
@@ -1232,12 +1206,9 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                         continue;
                     }
 
-                    const DOWNLOAD_SOURCE: DownloadFromSettingsUriOutValue = {};
-                    const DATA = await ME.downloadFromSettingsUri(vscode.Uri.parse(importFile));
-
-                    if (!Buffer.isBuffer(DATA)) {
-                        continue;
-                    }
+                    const DATA = await deploy_download.download(
+                        importFile, SCOPES
+                    );
 
                     deploy_helpers.asArray(JSON.parse(DATA.toString('utf8')))
                         .filter(c => deploy_helpers.isObject(c))
