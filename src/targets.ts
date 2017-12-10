@@ -461,7 +461,7 @@ export function getTargetsByName(targetNames: string | string[],
  * @return {string} The filename.
  */
 export function getZipFileName(target: Target, time?: Moment.Moment): string {
-    if (target) {
+    if (!target) {
         return <any>target;
     }
 

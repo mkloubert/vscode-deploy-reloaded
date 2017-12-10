@@ -311,6 +311,11 @@ export interface PluginModule {
 }
 
 /**
+ * A result for preparing targets.
+ */
+export type PrepareTargetsResult = deploy_targets.Target | deploy_targets.Target[] | false;
+
+/**
  * A context based on a target.
  */
 export interface TargetContext<TTarget extends deploy_targets.Target = deploy_targets.Target> extends deploy_contracts.Cancelable {
@@ -985,7 +990,7 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
     public async deleteFiles(context: DeleteContext<TTarget>) {
         await this.invokeForEachTarget(
             context.target,
-            this.getTargets(context.target),
+            await this.getTargets(context.target, deploy_contracts.DeployOperation.Delete),
             deploy_contracts.DeployOperation.Delete,
             () => context.isCancelling,
             async (target, plugin) => {
@@ -1027,7 +1032,7 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
         
         await ME.invokeForEachTarget(
             context.target,
-            ME.getFirstTarget(context.target),
+            await ME.getFirstTarget(context.target, deploy_contracts.DeployOperation.Pull),
             deploy_contracts.DeployOperation.Pull,
             () => context.isCancelling,
             async (target, plugin) => {
@@ -1063,25 +1068,21 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
         );
     }
 
-    private getFirstTarget(target: TTarget) {
-        return this.getTargets(target, true)[0];
+    private async getFirstTarget(target: TTarget, operation: deploy_contracts.DeployOperation): Promise<deploy_targets.Target | false> {
+        const TARGETS = await this.getTargets(target, operation, true);
+        if (false === TARGETS) {
+            return false;
+        }
+        
+        return deploy_helpers.asArray(
+            <any>TARGETS
+        )[0];
     }
 
-    /**
-     * Prepares a target.
-     * 
-     * @param {TTarget} myTarget The base target.
-     * @param {deploy_targets.Target} target The input target.
-     * @param {deploy_contracts.DeployOperation} operation The underlying operation.
-     * 
-     * @return {deploy_targets.Target|deploy_targets.Target[]|PromiseLike<deploy_targets.Target|deploy_targets.Target[]>} The target(s) to use.
-     */
-    protected prepareTarget(myTarget: TTarget, target: deploy_targets.Target, operation: deploy_contracts.DeployOperation)
-        : deploy_targets.Target | deploy_targets.Target[] | PromiseLike<deploy_targets.Target | deploy_targets.Target[]> {
-        return target;
-    }
-
-    private getTargets(target: TTarget, throwIfNonFound = false) {
+    
+    private async getTargets(target: TTarget, operation: deploy_contracts.DeployOperation, throwIfNonFound = false)
+        : Promise<deploy_targets.Target[] | false>
+    {
         if (!target) {
             return;
         }
@@ -1112,17 +1113,57 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
             }
         });
 
-        return TARGETS;
+        const PREPARED_TARGETS = await Promise.resolve(
+            this.prepareTargetsMany(target, TARGETS, operation)
+        );
+
+        if (false === PREPARED_TARGETS) {
+            return false;
+        }
+
+        return deploy_helpers.asArray(<any>PREPARED_TARGETS);
+    }
+
+    /**
+     * Prepares a target.
+     * 
+     * @param {TTarget} myTarget The base target.
+     * @param {deploy_targets.Target} target The input target.
+     * @param {deploy_contracts.DeployOperation} operation The underlying operation.
+     * 
+     * @return {PrepareTargetsResult|PromiseLike<PrepareTargetsResult>} The target(s) to use.
+     */
+    protected prepareTarget(myTarget: TTarget, target: deploy_targets.Target, operation: deploy_contracts.DeployOperation)
+        : PrepareTargetsResult | PromiseLike<PrepareTargetsResult> {
+        return target;
+    }
+
+    /**
+     * Prepares targets.
+     * 
+     * @param {TTarget} myTarget The base target.
+     * @param {deploy_targets.Target|deploy_targets.Target[]} targets The input targets.
+     * @param {deploy_contracts.DeployOperation} operation The underlying operation.
+     * 
+     * @return {PrepareTargetsResult|PromiseLike<PrepareTargetsResult>} The target(s) to use.
+     */
+    protected prepareTargetsMany(myTarget: TTarget, targets: deploy_targets.Target | deploy_targets.Target[], operation: deploy_contracts.DeployOperation)
+        : PrepareTargetsResult | PromiseLike<PrepareTargetsResult> {
+        return deploy_helpers.asArray(targets);
     }
 
     private async invokeForEachTarget(
         myTarget: TTarget,
-        targets: deploy_targets.Target | deploy_targets.Target[],
+        targets: deploy_targets.Target | deploy_targets.Target[] | false,
         operation: deploy_contracts.DeployOperation,
         isCancelling: () => boolean,
         action: (target: deploy_targets.Target, plugin: Plugin) => any
     ) {
         const ME = this;
+
+        if (false === targets) {
+            return;
+        }
 
         let pluginResolver: (target: deploy_targets.Target) => Plugin[];
         switch (operation) {
@@ -1148,10 +1189,16 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
                 return;
             }
 
+            const PREPARED_TARGETS = await Promise.resolve(
+                ME.prepareTarget(myTarget, T, operation)
+            );
+
+            if (false === PREPARED_TARGETS) {
+                return;
+            }
+
             const ALL_TARGETS = deploy_helpers.asArray(
-                await Promise.resolve(
-                    ME.prepareTarget(myTarget, T, operation)
-                )
+                <any>PREPARED_TARGETS
             );
 
             for (const TARGET of ALL_TARGETS) {
@@ -1176,7 +1223,7 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
 
         await ME.invokeForEachTarget(
             context.target,
-            ME.getFirstTarget(context.target),
+            await ME.getFirstTarget(context.target, deploy_contracts.DeployOperation.ListDirectory),
             deploy_contracts.DeployOperation.ListDirectory,
             () => context.isCancelling,
             async (target, plugin) => {
@@ -1231,7 +1278,7 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
 
         await ME.invokeForEachTarget(
             context.target,
-            ME.getTargets(context.target),
+            await ME.getTargets(context.target, deploy_contracts.DeployOperation.Deploy),
             deploy_contracts.DeployOperation.Deploy,
             () => context.isCancelling,
             async (target, plugin) => {
