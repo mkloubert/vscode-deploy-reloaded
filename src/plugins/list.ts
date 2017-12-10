@@ -63,14 +63,23 @@ class ListPlugin extends deploy_plugins.IterablePluginBase<ListTarget> {
 
         const CLONED_TARGETS: deploy_targets.Target[] = [];
 
+        const SCOPES = [
+            listTarget.__workspace.settingFolder,
+            Path.join(OS.homedir(), deploy_contracts.HOMEDIR_SUBFOLDER),
+        ];
+
         let entries: string | ListTargetEntry | ListTargetEntry[];
         if (!deploy_helpers.isObject<ListTargetEntry>(entries) && !Array.isArray(entries)) {
             // download from source
+            const DOWNLOAD_SOURCE = ME.replaceWithValues(
+                listTarget,
+                entries
+            );
 
             entries =
                 <ListTargetEntry | ListTargetEntry[]>JSON.parse(
                     (await deploy_download.download(
-                        deploy_helpers.toStringSafe(entries)
+                        DOWNLOAD_SOURCE, SCOPES
                     )).toString('utf8')
                 );
         }
@@ -92,10 +101,16 @@ class ListPlugin extends deploy_plugins.IterablePluginBase<ListTarget> {
                 action: async () => {
                     let settingsToApply = e.settings;
                     if (!deploy_helpers.isObject<ListTargetSettings>(settingsToApply)) {
+                        // download from source
+                        const DOWNLOAD_SOURCE = ME.replaceWithValues(
+                            listTarget,
+                            settingsToApply
+                        );
+
                         settingsToApply =
                             <ListTargetSettings>JSON.parse(
                                 (await deploy_download.download(
-                                    deploy_helpers.toStringSafe(entries)
+                                    DOWNLOAD_SOURCE, SCOPES
                                 )).toString('utf8')
                             );
                     }
