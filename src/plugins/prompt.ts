@@ -60,7 +60,13 @@ export interface PromptEntry {
      * The prompt text.
      */
     readonly text?: string;
+    /**
+     * 
+     */
+    readonly type?: string;
 }
+
+type ValueValidatorResult = string | undefined | null;
 
 
 class PromptPlugin extends deploy_plugins.IterablePluginBase<PromptTarget> {
@@ -93,7 +99,71 @@ class PromptPlugin extends deploy_plugins.IterablePluginBase<PromptTarget> {
         const PROPERTIES_AND_VALUES: deploy_contracts.KeyValuePairs = {};
 
         for (const P of deploy_helpers.asArray(prompts)) {
-            const VALUE = await vscode.window.showInputBox({
+            const VALUE_TYPE = deploy_helpers.normalizeString(
+                ME.replaceWithValues(promptTarget, P.type)
+            );
+
+            let validator: (value: string) => ValueValidatorResult | Thenable<ValueValidatorResult>;
+            switch (VALUE_TYPE) {
+                case 'bool':
+                case 'boolean':
+                    validator = (str) => {
+                        switch (deploy_helpers.normalizeString(str)) {
+                            case '':
+                            case '1':
+                            case 'true':
+                            case 'yes':
+                            case 'y':
+                            case '0':
+                            case 'false':
+                            case 'no':
+                            case 'n':
+                                // valid
+                                break;
+
+                            default:
+                                return 'Please enter a valid boolean value!';  //TODO: translate
+                        }
+                    };
+                    break;
+
+                case 'int':
+                case 'integer':
+                    validator = (str) => {
+                        if (!deploy_helpers.isEmptyString(str)) {
+                            if (isNaN( parseInt(deploy_helpers.toStringSafe(str).trim()) )) {
+                                return 'Please enter a valid integer value!';  //TODO: translate
+                            }
+                        }
+                    };
+                    break;
+
+                case 'float':
+                case 'number':
+                    validator = (str) => {
+                        if (!deploy_helpers.isEmptyString(str)) {
+                            if (isNaN( parseFloat(deploy_helpers.toStringSafe(str).trim()) )) {
+                                return 'Please enter a valid float value!';  //TODO: translate
+                            }
+                        }
+                    };
+                    break;
+
+                case 'json':
+                case 'obj':
+                case 'object':
+                    validator = (str) => {
+                        try {
+                            JSON.parse(str.trim());
+                        }
+                        catch (e) {
+                            return 'Please enter a valid JSON string!';  // TODO: translate
+                        }
+                    };
+                    break;    
+            }
+
+            let valueToSet: any = await vscode.window.showInputBox({
                 ignoreFocusOut: deploy_helpers.toBooleanSafe(P.ignoreFocusOut, true),
                 password: deploy_helpers.toBooleanSafe(P.isPassword),
                 placeHolder: deploy_helpers.toStringSafe(
@@ -101,17 +171,106 @@ class PromptPlugin extends deploy_plugins.IterablePluginBase<PromptTarget> {
                 ).trim(),
                 prompt: deploy_helpers.toStringSafe(
                     ME.replaceWithValues(promptTarget, P.text)
-                ).trim()
+                ).trim(),
+                validateInput: async (str) => {
+                    if (validator) {
+                        return await Promise.resolve(
+                            validator(str)
+                        );
+                    }
+
+                    return null;
+                }
             });
 
-            if (deploy_helpers.isNullOrUndefined(VALUE)) {
+            if (deploy_helpers.isNullOrUndefined(valueToSet)) {
                 return false;  // cancelled
+            }
+
+            let converter: (input: any) => any;
+            switch (VALUE_TYPE) {
+                case 'bool':
+                case 'boolean':
+                    converter = (i) => {
+                        if (deploy_helpers.isEmptyString(i)) {
+                            return null;
+                        }
+
+                        switch (deploy_helpers.normalizeString(i)) {
+                            case '1':
+                            case 'true':
+                            case 'yes':
+                            case 'y':
+                                return true;
+                        }
+
+                        return false;
+                    };
+                    break;
+
+                case 'file':
+                    converter = async (i) => {
+                        if (deploy_helpers.isEmptyString(i)) {
+                            return null;
+                        }
+
+                        return JSON.parse(
+                            (await deploy_download.download(
+                                i, SCOPES
+                            )).toString('utf8')
+                              .trim()
+                        );
+                    };
+                    break;
+
+                case 'float':
+                case 'number':
+                    converter = (i) => {
+                        if (deploy_helpers.isEmptyString(i)) {
+                            return null;
+                        }
+
+                        return parseFloat(deploy_helpers.toStringSafe(i).trim());
+                    };
+                    break;
+
+                case 'int':
+                case 'integer':
+                    converter = (i) => {
+                        if (deploy_helpers.isEmptyString(i)) {
+                            return null;
+                        }
+
+                        return parseInt(deploy_helpers.toStringSafe(i).trim());
+                    };
+                    break;
+
+                case 'json':
+                case 'obj':
+                case 'object':
+                    converter = (i) => {
+                        return JSON.parse(
+                            deploy_helpers.toStringSafe(i).trim()
+                        );
+                    };
+                    break;
+
+                case '':
+                case 'string':
+                case 'str':
+                    break;
+            }
+
+            if (converter) {
+                valueToSet = await Promise.resolve(
+                    converter(valueToSet)
+                );
             }
 
             const PROPERTIES = deploy_helpers.asArray(P.properties).map(p => {
                 return deploy_helpers.toStringSafe(p).trim();
             }).filter(p => '' !== p).forEach(p => {
-                PROPERTIES_AND_VALUES[p] = VALUE;
+                PROPERTIES_AND_VALUES[p] = valueToSet;
             });
         }
 

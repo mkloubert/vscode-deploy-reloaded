@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.61",
+ "version": "0.0.62",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.18.0"
@@ -2817,6 +2817,24 @@
                 "text": {
                  "description": "The prompt text.",
                  "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "",
+                  "bool",
+                  "boolean",
+                  "float",
+                  "int",
+                  "integer",
+                  "json",
+                  "number",
+                  "obj",
+                  "object",
+                  "str",
+                  "string"
+                 ],
+                 "type": "string",
+                 "description": "The target type to convert to."
                 }
                },
                "required": [
