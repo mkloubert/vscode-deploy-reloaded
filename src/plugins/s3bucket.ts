@@ -15,8 +15,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as deploy_contracts from '../contracts';
 import * as deploy_clients_s3bucket from '../clients/s3bucket';
 import * as deploy_files from '../files';
+import * as deploy_helpers from '../helpers';
 import * as deploy_log from '../log';
 import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
@@ -27,13 +29,18 @@ interface S3BucketContext extends deploy_plugins.AsyncFileClientPluginContext<S3
 }
 
 /**
+ * Filters for detecting the ACL for a file.
+ */
+export type S3BucketAclFilters = { [acl: string]: string | string[] | deploy_contracts.FileFilter };
+
+/**
  * A 'S3 bucket' target.
  */
 export interface S3BucketTarget extends deploy_targets.Target {
     /**
      * The custom ACL to set.
      */
-    readonly acl?: string;
+    readonly acl?: string | S3BucketAclFilters;
     /**
      * The name of the bucket.
      */
@@ -64,11 +71,46 @@ class S3BucketPlugin extends deploy_plugins.AsyncFileClientPluginBase<S3BucketTa
     protected createContext(target: S3BucketTarget): S3BucketContext {
         const DIR = this.replaceWithValues(target, target.dir);
         
+        const FILTERS: deploy_contracts.KeyValuePairs<deploy_contracts.FileFilter> = {};
+        if (deploy_helpers.isObject<S3BucketAclFilters>(target.acl)) {
+            for (const ACL in target.acl) {
+                const ITEM = target.acl[ACL];
+
+                let ff: deploy_contracts.FileFilter;
+                if (deploy_helpers.isObject<deploy_contracts.FileFilter>(ITEM)) {
+                    ff = ITEM;
+                }
+                else {
+                    ff = {
+                        files: deploy_helpers.asArray(ITEM)
+                                             .filter(x => '' !== x),
+                    };
+                }
+
+                FILTERS[ deploy_clients_s3bucket.getAclSafe(ACL) ] = ff;
+            }
+        }
+        else {
+            FILTERS[ deploy_clients_s3bucket.getAclSafe(target.acl) ] = {
+                files: '**'
+            };
+        }
+
         return {
             client: deploy_clients_s3bucket.createClient({
                 acl: this.replaceWithValues(target, target.acl),
                 bucket: this.replaceWithValues(target, target.bucket),
                 credentials: target.credentials,
+                fileAcl: (file, defAcl) => {
+                    for (const ACL in FILTERS) {
+                        if (deploy_helpers.checkIfDoesMatchByFileFilter('/' + file,
+                                                                        deploy_helpers.toMinimatchFileFilter(FILTERS[ACL]))) {
+                            return ACL;
+                        }
+                    }
+
+                    return defAcl;
+                }
             }),
             getDir: (subDir) => {
                 return deploy_clients_s3bucket.normalizePath(

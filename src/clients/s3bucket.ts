@@ -26,11 +26,21 @@ import * as Moment from 'moment';
 
 
 /**
+ * A function that detects the ACL for a file when uploading it.
+ * 
+ * @param {string} file The path of the file inside the bucket.
+ * @param {string} defaultAcl The default ACL of the bucket.
+ * 
+ * @return {string} The ACL.
+ */
+export type S3BucketFileAclDetector = (file: string, defaultAcl: string) => string;
+
+/**
  * Options for accessing a S3 bucket.
  */
 export interface S3BucketOptions {
     /**
-     * The custom ACL to set.
+     * The default ACL to set.
      */
     readonly acl?: string;
     /**
@@ -49,8 +59,19 @@ export interface S3BucketOptions {
          * The credential provider / type.
          */
         readonly type?: string;
-    }
+    };
+    /**
+     * A function that detects the ACL for a file
+     * when uploading it.
+     */
+    readonly fileAcl?: S3BucketFileAclDetector;
 }
+
+
+/**
+ * The default ACL for a file.
+ */
+export const DEFAULT_ACL = 'public-read';
 
 const KNOWN_CREDENTIAL_CLASSES = {
     'cognito': AWS.CognitoIdentityCredentials,
@@ -83,12 +104,7 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
         if ('' === bucket) {
             bucket = 'vscode-deploy-reloaded';
         }
-    
-        let acl = deploy_helpers.normalizeString(this.options.acl);
-        if ('' === acl) {
-            acl = 'public-read';
-        }
-    
+
         let credentialClass: any = AWS.SharedIniFileCredentials;
         let credentialConfig: any;
         let credentialType: string;
@@ -110,7 +126,7 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
             credentials: new credentialClass(credentialConfig),
             params: {
                 Bucket: bucket,
-                ACL: acl,
+                ACL: this.getDefaultAcl(),
             },
         });
     }
@@ -179,6 +195,10 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
                 COMPLETED(e);
             }
         });
+    }
+
+    private getDefaultAcl() {
+        return getAclSafe(this.options.acl);
     }
 
     /** @inheritdoc */
@@ -338,7 +358,20 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
                     contentType = 'application/octet-stream';
                 }
 
+                let acl: string;
+
+                const FILE_ACL = ME.options.fileAcl;
+                if (FILE_ACL) {
+                    acl = FILE_ACL(path, ME.getDefaultAcl());
+                }
+
+                acl = deploy_helpers.normalizeString(acl);
+                if ('' === acl) {
+                    acl = undefined;
+                }
+
                 const PARAMS: AWS.S3.PutObjectRequest = {
+                    ACL: acl,
                     Bucket: undefined,
                     ContentType: contentType,
                     Key: path,
@@ -370,6 +403,22 @@ export function createClient(opts: S3BucketOptions): S3BucketClient {
     }
 
     return new S3BucketClient(opts);
+}
+
+/**
+ * Returns the name of an ACL safe.
+ * 
+ * @param {string} acl The input value.
+ * 
+ * @return {string} The normalized, safe value. 
+ */
+export function getAclSafe(acl: string) {
+    acl = deploy_helpers.normalizeString(acl);
+    if ('' === acl) {
+        acl = DEFAULT_ACL;
+    }
+
+    return acl;
 }
 
 /**

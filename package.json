@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.62",
+ "version": "0.0.63",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.18.0"
@@ -2887,19 +2887,50 @@
           "type": "object",
           "properties": {
            "acl": {
-            "enum": [
-             "private",
-             "public-read",
-             "public-read-write",
-             "aws-exec-read",
-             "authenticated-read",
-             "bucket-owner-read",
-             "bucket-owner-full-control",
-             "log-delivery-write"
-            ],
-            "type": "string",
-            "description": "The custom ACL to set.",
-            "default": "public-read"
+            "oneOf": [
+             {
+              "type": "string",
+              "description": "The custom ACL for all files to set.",
+              "default": "public-read"
+             },
+             {
+              "type": "object",
+              "patternProperties": {
+               "(.*)": {
+                "description": "An ACL (and the filters) to define.",
+                "oneOf": [
+                 {
+                  "description": "One or more patterns for files, that should be deployed with that ACL.",
+                  "type": "array",
+                  "items": {
+                   "description": "A pattern.",
+                   "type": "string"
+                  }
+                 },
+                 {
+                  "type": "object",
+                  "properties": {
+                   "exclude": {
+                    "description": "A list of one or more patterns of files, that should not be deployed with that ACL.",
+                    "type": "array",
+                    "items": {
+                     "type": "string"
+                    }
+                   },
+                   "files": {
+                    "description": "A list of one or more patterns of files that should be deployed with that ACL.",
+                    "type": "array",
+                    "items": {
+                     "type": "string"
+                    }
+                   }
+                  }
+                 }
+                ]
+               }
+              }
+             }
+            ]
            },
            "beforeDeploy": {
             "description": "One or more target operation to define.",
