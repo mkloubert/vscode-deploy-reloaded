@@ -69,7 +69,9 @@ class S3BucketPlugin extends deploy_plugins.AsyncFileClientPluginBase<S3BucketTa
                                                                       deploy_clients_s3bucket.S3BucketClient,
                                                                       S3BucketContext> {
     protected createContext(target: S3BucketTarget): S3BucketContext {
-        const DIR = this.replaceWithValues(target, target.dir);
+        const ME = this;
+
+        const DIR = ME.replaceWithValues(target, target.dir);
         
         const FILTERS: deploy_contracts.KeyValuePairs<deploy_contracts.FileFilter> = {};
         if (deploy_helpers.isObject<S3BucketAclFilters>(target.acl)) {
@@ -82,8 +84,7 @@ class S3BucketPlugin extends deploy_plugins.AsyncFileClientPluginBase<S3BucketTa
                 }
                 else {
                     ff = {
-                        files: deploy_helpers.asArray(ITEM)
-                                             .filter(x => '' !== x),
+                        files: deploy_helpers.asArray(ITEM),
                     };
                 }
 
@@ -98,14 +99,14 @@ class S3BucketPlugin extends deploy_plugins.AsyncFileClientPluginBase<S3BucketTa
 
         return {
             client: deploy_clients_s3bucket.createClient({
-                acl: this.replaceWithValues(target, target.acl),
-                bucket: this.replaceWithValues(target, target.bucket),
+                acl: ME.replaceWithValues(target, target.acl),
+                bucket: ME.replaceWithValues(target, target.bucket),
                 credentials: target.credentials,
                 fileAcl: (file, defAcl) => {
                     for (const ACL in FILTERS) {
                         if (deploy_helpers.checkIfDoesMatchByFileFilter('/' + file,
                                                                         deploy_helpers.toMinimatchFileFilter(FILTERS[ACL]))) {
-                            return ACL;
+                            return ME.replaceWithValues(target, ACL);
                         }
                     }
 
