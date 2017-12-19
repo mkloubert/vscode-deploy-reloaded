@@ -2,10 +2,10 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.63",
+ "version": "0.0.64",
  "publisher": "mkloubert",
  "engines": {
-  "vscode": "^1.18.0"
+  "vscode": "^1.19.0"
  },
  "license": "LGPL-3.0",
  "categories": [
@@ -24,6 +24,11 @@
  "main": "./out/extension",
  "contributes": {
   "commands": [
+   {
+    "command": "extension.deploy.reloaded.compare",
+    "title": "Compare ...",
+    "category": "Deploy Reloaded"
+   },
    {
     "command": "extension.deploy.reloaded.delete",
     "title": "Delete ...",

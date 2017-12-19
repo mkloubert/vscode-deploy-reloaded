@@ -74,7 +74,7 @@ class EachPlugin extends deploy_plugins.IterablePluginBase<EachTarget> {
         const TO = Enumerable.from(deploy_helpers.asArray(eachTarget.to)).select(t => {
             return deploy_helpers.toStringSafe(t).trim()
         }).where(t => '' !== t)
-            .toArray();
+          .toArray();
         const USE_PLACE_HOLDERS = deploy_helpers.toBooleanSafe(eachTarget.usePlaceholders, true);
 
         for (const F of from) {

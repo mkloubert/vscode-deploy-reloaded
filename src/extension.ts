@@ -18,6 +18,7 @@
  */
 
 import * as deploy_commands from './commands';
+import * as deploy_compare from './compare';
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
@@ -650,6 +651,38 @@ async function activateExtension(context: vscode.ExtensionContext) {
     // commands
     WF.next(() => {
         context.subscriptions.push(
+            // compare
+            vscode.commands.registerCommand('extension.deploy.reloaded.compare', async () => {
+                try {
+                    //TODO: translate
+                    const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = [
+                        {
+                            action: async () => {
+                                await deploy_compare.compareFiles(WORKSPACES);
+                            },
+                            label: '$(diff)  ' + 'Current file ...',
+                            description: 'Compare the current file with a remote one',
+                        }
+                    ];
+
+                    const SELECTED_ITEM = await vscode.window.showQuickPick(QUICK_PICKS);
+                    if (SELECTED_ITEM) {
+                        await Promise.resolve(
+                            SELECTED_ITEM.action()
+                        );
+                    }
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'extension.deploy.reloaded.compare');
+                    
+                    //TODO: translate
+                    deploy_helpers.showErrorMessage(
+                        `Selecting compare operation failed (s. debug output 'CTRL + Y')!`
+                    );
+                }
+            }),
+
             // deploy
             vscode.commands.registerCommand('extension.deploy.reloaded.deploy', async () => {
                 try {
