@@ -30,6 +30,14 @@ import * as vscode from 'vscode';
  */
 export interface Translation {
     cancel?: string;
+    commands?: {
+        executionError?: string;
+        scriptNotFound?: string;
+    };
+    ftp?: {
+        couldNotConnect?: string;
+        couldNotConnectWithJSFTP?: string;
+    };
     initializationCanceled?: string;
     no?: string;
     packages?: {

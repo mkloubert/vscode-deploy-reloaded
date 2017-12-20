@@ -20,6 +20,7 @@ import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
 import * as deploy_log from '../log';
 import * as FTP from 'ftp';
+import * as i18 from '../i18';
 const jsFTP = require('jsftp');
 import * as Moment from 'moment';
 const ParseListening = require("parse-listing");
@@ -395,8 +396,7 @@ class FtpClient extends FTPClientBase {
                                                 const CLIENT = new JsFTPClient(ME.options);
 
                                                 if (!(await CLIENT.connect())) {
-                                                    //TODO: translate
-                                                    throw new Error(`Could not start connection via jsftp!`);
+                                                    throw new Error(i18.t('ftp.couldNotConnectWithJSFTP'));
                                                 }
 
                                                 try {
@@ -755,8 +755,7 @@ class JsFTPClient extends FTPClientBase {
                                                         const CLIENT = new JsFTPClient(ME.options);
 
                                                         if (!(await CLIENT.connect())) {
-                                                            //TODO: translate
-                                                            throw new Error(`Could not start connection via jsftp!`);
+                                                            throw new Error(i18.t('ftp.couldNotConnectWithJSFTP'));
                                                         }
 
                                                         try {
@@ -969,8 +968,7 @@ export async function openConnection(opts: FTPConnectionOptions): Promise<FTPCli
     const CLIENT = createClient(opts);
 
     if (!(await CLIENT.connect())) {
-        //TODO: translate
-        throw new Error('Could not start FTP connection!');
+        throw new Error(i18.t('ftp.couldNotConnect'));
     }
 
     return CLIENT;

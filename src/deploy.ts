@@ -62,12 +62,9 @@ export async function deployFilesTo(files: string[],
 
     const TARGET_NAME = deploy_targets.getTargetName(target);
     const TARGET_TYPE = deploy_targets.normalizeTargetType(target);
+    const STATE_KEY = deploy_helpers.toStringSafe(target.__id);
 
-    const PLUGINS = ME.context.plugins.filter(pi => {
-        return '' === pi.__type || 
-               (TARGET_TYPE === pi.__type && pi.canUpload && pi.uploadFiles);
-    });
-
+    const PLUGINS = ME.getUploadPlugins(target);
     if (PLUGINS.length < 1) {
         //TODO: translate
         await ME.showWarningMessage(
@@ -217,6 +214,9 @@ export async function deployFilesTo(files: string[],
 
                     LF.transformer = transformer;
                     LF.transformerOptions = TRANSFORMER_OPTIONS;
+                    LF.transformerStateKeyProvider = () => {
+                        return STATE_KEY;
+                    };
 
                     FILES_TO_UPLOAD.push(LF);
                 }

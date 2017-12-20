@@ -161,7 +161,11 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
         return;
     }
 
+    const GLOBAL_STATE: deploy_contracts.KeyValuePairs = {};
+
     const CREATE_ACTION = (id: string, sc: ScriptCommand, btn: vscode.Disposable) => {
+        let cmdState: any;
+
         return async function() {
             const CACHE = deploy_helpers.toBooleanSafe(sc.cache);
             
@@ -172,8 +176,7 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
 
             const SCRIPT_PATH = await ME.getExistingSettingPath(script);
             if (false === SCRIPT_PATH) {
-                //TODO: translate
-                throw new Error(`'${script}' script not found!`);
+                throw new Error(ME.t('commands.scriptNotFound', script));
             }
 
             const SCRIPT_MODULE = deploy_helpers.loadModule<ScriptCommandModule>(SCRIPT_PATH, CACHE);
@@ -184,12 +187,27 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
                         button: btn,
                         command: id,
                         globals: ME.globals,
+                        globalState: GLOBAL_STATE,
                         logger: deploy_log.CONSOLE,
                         options: deploy_helpers.cloneObject(sc.options),
                         require: (moduleId) => {
                             return deploy_helpers.requireFromExtension(moduleId);
-                        }
+                        },
+                        state: undefined,
                     };
+
+                    // CTX.state
+                    Object.defineProperty(CTX, 'state', {
+                        enumerable: true,
+
+                        get: () => {
+                            return cmdState;
+                        },
+
+                        set: (newValue) => {
+                            cmdState = newValue;
+                        }
+                    });
 
                     let args: any[] = [];
                     if (!deploy_helpers.toBooleanSafe(sc.noFirstArgument)) {
@@ -198,7 +216,7 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
 
                     return await Promise.resolve(
                         EXECUTE.apply(SCRIPT_MODULE,
-                                      args.concat( deploy_helpers.toArray(arguments) ))
+                                        args.concat( deploy_helpers.toArray(arguments) ))
                     );
                 }
                 else {
@@ -230,12 +248,9 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
                         );
                     }
                     catch (e) {
-                        // TODO: translate
-                        ME.showErrorMessage(`Could not execute command '${id}'! '${deploy_helpers.toStringSafe(e)}'`).then(() => {
-                        }).catch((err) => {
-                            deploy_log.CONSOLE
-                                      .trace(err, `commands.reloadCommands().REGISTER_NEW_COMMAND(${id}).2`);
-                        });
+                        ME.showErrorMessage(
+                            ME.t('commands.executionError', id, e)
+                        );
                     }
                 }
 

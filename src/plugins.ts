@@ -508,21 +508,51 @@ export abstract class FileToUploadBase implements FileToUpload {
 
     /** @inheritdoc */
     public async read() {
-        let data = await this.onRead();
+        const ME = this;
 
-        if (this.transformer) {
+        let data = await ME.onRead();
+
+        if (ME.transformer) {
+            let stateKeyProvider = ME.transformerStateKeyProvider;
+            if (!stateKeyProvider) {
+                stateKeyProvider = () => {
+                    return deploy_helpers.normalizePath(
+                        ME._NAME_AND_PATH.path + '/' + ME._NAME_AND_PATH.name
+                    );
+                };
+            }
+
+            const STATE_KEY = await Promise.resolve(
+                stateKeyProvider()
+            );
+
             const CONTEXT: deploy_transformers.DataTransformerContext = {
-                globals: this.workspace.globals,
+                globals: ME.workspace.globals,
+                globalState: ME.workspace.sessionState['upload']['states']['global'],
                 logger: deploy_log.CONSOLE,
                 mode: deploy_transformers.DataTransformerMode.Transform,
-                options: this.transformerOptions,
+                options: ME.transformerOptions,
                 require: (id) => {
                     return deploy_helpers.requireFromExtension(id);
                 },
+                state: undefined,
             };
+
+            // CONTEXT.state
+            Object.defineProperty(CONTEXT, 'state', {
+                enumerable: true,
+
+                get: () => {
+                    return ME.workspace.sessionState['upload']['states']['data_transformers'][STATE_KEY];
+                },
+
+                set: (newValue) => {
+                    ME.workspace.sessionState['upload']['states']['data_transformers'][STATE_KEY] = newValue;
+                }
+            });
             
             data = await Promise.resolve(
-                this.transformer(
+                ME.transformer(
                     data, CONTEXT
                 )
             );
@@ -547,6 +577,12 @@ export abstract class FileToUploadBase implements FileToUpload {
      * The options for the data transformer.
      */
     public transformerOptions: any;
+
+    /**
+     * A function that provides a key for the state value
+     * of a data transformer.
+     */
+    public transformerStateKeyProvider: () => any;
 }
 
 /**

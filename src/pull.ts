@@ -90,6 +90,7 @@ export async function pullFilesFrom(files: string[],
     }
 
     const TARGET_NAME = deploy_targets.getTargetName(target);
+    const STATE_KEY = deploy_helpers.toStringSafe(target.__id);
 
     const PLUGINS = ME.getDownloadPlugins(target);
     if (PLUGINS.length < 1) {
@@ -258,13 +259,28 @@ export async function pullFilesFrom(files: string[],
 
                                         const CONTEXT: deploy_transformers.DataTransformerContext = {
                                             globals: ME.globals,
+                                            globalState: ME.sessionState['pull']['states']['global'],
                                             logger: deploy_log.CONSOLE,
                                             mode: deploy_transformers.DataTransformerMode.Restore,
                                             options: TRANSFORMER_OPTIONS,
                                             require: (id) => {
                                                 return deploy_helpers.requireFromExtension(id);
                                             },
+                                            state: undefined,
                                         };
+
+                                        // CONTEXT.state
+                                        Object.defineProperty(CONTEXT, 'state', {
+                                            enumerable: true,
+
+                                            get: () => {
+                                                return ME.sessionState['pull']['states']['data_transformers'][STATE_KEY];
+                                            },
+
+                                            set: (newValue) => {
+                                                ME.sessionState['pull']['states']['data_transformers'][STATE_KEY] = newValue;
+                                            }
+                                        });
 
                                         dataToWrite = await (<deploy_transformers.DataTransformer>transformer)(
                                             dataToWrite, CONTEXT

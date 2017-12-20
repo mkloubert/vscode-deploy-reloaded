@@ -94,6 +94,9 @@ export interface ScriptTarget extends deploy_targets.Target {
 
 
 class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
+    private readonly _GLOBAL_STATE: deploy_contracts.KeyValuePairs = {};
+    private readonly _SCRIPT_STATES: deploy_contracts.KeyValuePairs = {};
+
     public get canDelete() {
         return true;
     }
@@ -108,11 +111,16 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
 
     private async createScriptArgsFromContext(context: deploy_plugins.TargetContext<ScriptTarget>,
                                               operation: deploy_contracts.DeployOperation): Promise<ScriptArguments> {
+        const ME = this;
+
+        const SCRIPT_STATE_KEY = deploy_helpers.toStringSafe(context.target.__id);
+        
         const ARGS: ScriptArguments = {
             cancellationToken: undefined,
             dir: context['dir'],
             files: context['files'],
             globals: context.target.__workspace.globals,
+            globalState: this._GLOBAL_STATE,
             isCancelling: undefined,
             logger: deploy_log.CONSOLE,
             operation: operation,
@@ -120,6 +128,7 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
             require: (id) => {
                 return deploy_helpers.requireFromExtension(id);
             },
+            state: undefined,
             target: context.target,
             workspace: undefined,
         };
@@ -139,6 +148,19 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
 
             get: () => {
                 return context.isCancelling;
+            }
+        });
+
+        // ARGS.state
+        Object.defineProperty(ARGS, 'state', {
+            enumerable: true,
+
+            get: () => {
+                return ME._SCRIPT_STATES[SCRIPT_STATE_KEY];
+            },
+
+            set: (newValue) => {
+                ME._SCRIPT_STATES[SCRIPT_STATE_KEY] = newValue;
             }
         });
 

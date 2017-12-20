@@ -23,6 +23,14 @@ import { Translation } from '../i18';
 // Translated by: Marcel Joachim Kloubert (https://github.com/mkloubert)
 export const translation: Translation = {
     cancel: 'Cancel',
+    commands: {
+        executionError: "Could not execute command {0:surround}:{1:trim,surround,leading_space}",
+        scriptNotFound: "{0:surround} script not found!",
+    },
+    ftp: {
+        couldNotConnect: "Could not start connection!",
+        couldNotConnectWithJSFTP: "Could not start connection via 'jsftp'!",
+    },
     initializationCanceled: 'The initialization of the extension has been stopped.',
     no: 'No',
     packages: {

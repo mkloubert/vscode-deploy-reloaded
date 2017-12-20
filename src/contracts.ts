@@ -340,6 +340,11 @@ export interface ScriptArguments {
      */
     readonly globals: any;
     /**
+     * A repository of values that can share data
+     * with other scripts of the same kind.
+     */
+    readonly globalState: KeyValuePairs;
+    /**
      * Options for the script.
      */
     readonly options?: any;
@@ -351,6 +356,10 @@ export interface ScriptArguments {
      * Imports a module from the extension context.
      */
     readonly require: (id: any) => any;
+    /**
+     * Gets or sets a state value for the underlying script.
+     */
+    state: any;
 }
 
 /**

@@ -175,6 +175,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     private _OLD_ENV_VARS: deploy_contracts.KeyValuePairs = {};
     private _PACKAGE_BUTTONS: PackageWithButton[] = [];
     private _packages: deploy_packages.Package[];
+    private _sessionState: deploy_contracts.KeyValuePairs;
     /**
      * Stores the start time.
      */
@@ -250,6 +251,22 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      */
     public get configSource(): deploy_contracts.ConfigSource {
         return this._configSource;
+    }
+
+    private createSessionState(newCfg: WorkspaceSettings) {
+        const NEW_SESSION_STATE: deploy_contracts.KeyValuePairs = {};
+            
+        NEW_SESSION_STATE['pull'] = {};
+        NEW_SESSION_STATE['pull']['states'] = {};
+        NEW_SESSION_STATE['pull']['states']['global'] = {};
+        NEW_SESSION_STATE['pull']['states']['data_transformers'] = {};
+
+        NEW_SESSION_STATE['upload'] = {};
+        NEW_SESSION_STATE['upload']['states'] = {};
+        NEW_SESSION_STATE['upload']['states']['global'] = {};
+        NEW_SESSION_STATE['upload']['states']['data_transformers'] = {};
+
+        return NEW_SESSION_STATE;
     }
 
     /**
@@ -1236,6 +1253,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
             const OLD_CFG = ME._config;
             ME._config = loadedCfg;
+            ME._sessionState = ME.createSessionState(loadedCfg);
             ME._lastConfigUpdate = Moment();
 
             try {
@@ -1673,6 +1691,13 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         return Path.resolve(
             this.folder.uri.fsPath
         );
+    }
+
+    /**
+     * Gets the current session data storage.
+     */
+    public get sessionState(): deploy_contracts.KeyValuePairs {
+        return this._sessionState;
     }
 
     /**

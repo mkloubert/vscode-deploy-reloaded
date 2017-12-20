@@ -150,7 +150,7 @@ function requestInner(url: string | URL.Url, opts: RequestOptions,
             DEFAULT_OPTS.port = port;
 
             if (deploy_helpers.isEmptyString(DEFAULT_OPTS.hostname)) {
-                DEFAULT_OPTS.hostname = '127.0.0.1';
+                DEFAULT_OPTS.hostname = DEFAULT_HOST;
             }
 
             const FINAL_REQUEST_OPTS: RequestOptions = MergeDeep(DEFAULT_OPTS, opts);
@@ -193,7 +193,7 @@ function requestInner(url: string | URL.Url, opts: RequestOptions,
                                         }
 
                                         requestInner(URL.parse(newLocation), MergeDeep(FINAL_REQUEST_OPTS, nextOpts || {}),
-                                                    redirections + 1).then((resp2) => {
+                                                     redirections + 1).then((resp2) => {
                                             COMPLETED(null, resp2);
                                         }).catch((err) => {
                                             COMPLETED(err);
@@ -209,25 +209,25 @@ function requestInner(url: string | URL.Url, opts: RequestOptions,
                                     if (deploy_helpers.toBooleanSafe(FINAL_REQUEST_OPTS.raiseOnClientError)) {
                                         if (resp.statusCode >= 400 && resp.statusCode < 500) {
                                             //TODO: translate
-                                            error = new Error(`CLIENT error '${resp.statusCode}': ${resp.statusMessage}`);
+                                            error = new Error(`Client error ${resp.statusCode}: '${resp.statusMessage}'`);
                                         }
                                     }
 
                                     if (deploy_helpers.toBooleanSafe(FINAL_REQUEST_OPTS.raiseOnServerError)) {
                                         if (resp.statusCode >= 500 && resp.statusCode < 600) {
                                             //TODO: translate
-                                            error = new Error(`SERVER error '${resp.statusCode}': ${resp.statusMessage}`);
+                                            error = new Error(`Server error ${resp.statusCode}: '${resp.statusMessage}'`);
                                         }
                                     }
 
                                     if (deploy_helpers.toBooleanSafe(FINAL_REQUEST_OPTS.raiseOnUnsupportedResponse, true)) {
                                         if (resp.statusCode < 200 || resp.statusCode >= 600) {
                                             //TODO: translate
-                                            error = new Error(`UNSUPPROTED response '${resp.statusCode}': ${resp.statusMessage}`);
+                                            error = new Error(`Unsupported response ${resp.statusCode}: '${resp.statusMessage}'`);
                                         }
                                     }
 
-                                    COMPLETED(null, resp);
+                                    COMPLETED(error, resp);
                                 }
                                 break;
                         }
@@ -243,7 +243,7 @@ function requestInner(url: string | URL.Url, opts: RequestOptions,
                     }
                 });
 
-                let setupAction: () => Promise<void>;
+                let setupAction: () => PromiseLike<void>;
 
                 let requestSetup = opts.setup;
                 if (!deploy_helpers.isNullOrUndefined(requestSetup)) {
