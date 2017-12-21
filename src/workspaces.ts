@@ -2265,11 +2265,6 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             for (const SB of ME._SWITCH_BUTTONS) {
                 const SWITCH_NAME = deploy_targets.getTargetName(SB.target);
                 const OPTION = ME.getSelectedSwitchOption(SB.target);
-                
-                let color = deploy_helpers.normalizeString(SB.settings);
-                if ('' === color) {
-                    color = '#ffffff';
-                }
 
                 const ADDITIONAL_VALUES: deploy_values.Value[] = [
                     // switch
@@ -2283,6 +2278,13 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                                                 : ME.getSwitchOptionName(OPTION);
                     }, 'switchOption'),
                 ];
+
+                let color = deploy_helpers.normalizeString(
+                    ME.replaceWithValues(SB.settings.color, ADDITIONAL_VALUES)
+                );
+                if ('' === color) {
+                    color = '#ffffff';
+                }
 
                 let text = deploy_helpers.toStringSafe(
                     ME.replaceWithValues(SB.settings.text, ADDITIONAL_VALUES)
