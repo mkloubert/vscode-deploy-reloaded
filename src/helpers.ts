@@ -329,7 +329,7 @@ export function checkIfDoesMatchByFileFilter(val: any, filter: deploy_contracts.
     const OPTS: Minimatch.IOptions = {
         dot: true,
         nocase: true,
-        nonull: true,
+        nonull: false,
     };
 
     const IS_EXCLUDED = doesMatch(val, filter.exclude, OPTS);
@@ -841,7 +841,7 @@ export function getMappedPath(mappings: deploy_mappings.FolderMappings, path: st
         opts = {
             dot: true,
             nocase: false,
-            nonull: true,
+            nonull: false,
         };
     }
 
