@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.67",
+ "version": "0.0.68",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -716,6 +716,42 @@
                  "description": "The (display) name of that operation.",
                  "type": "string"
                 },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./beforeDeploy.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -868,6 +904,42 @@
                  "description": "The username for basic auth."
                 }
                }
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./deployed.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
               },
               {
                "type": "object",
@@ -1168,6 +1240,42 @@
                  "description": "The (display) name of that operation.",
                  "type": "string"
                 },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./beforeDeploy.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -1316,6 +1424,42 @@
                  "description": "The username for basic auth."
                 }
                }
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./deployed.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
               },
               {
                "type": "object",
@@ -1608,6 +1752,42 @@
                  "description": "The (display) name of that operation.",
                  "type": "string"
                 },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./beforeDeploy.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -1756,6 +1936,42 @@
                  "description": "The username for basic auth."
                 }
                }
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./deployed.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
               },
               {
                "type": "object",
@@ -2049,6 +2265,42 @@
                  "description": "The (display) name of that operation.",
                  "type": "string"
                 },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./beforeDeploy.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -2197,6 +2449,42 @@
                  "description": "The username for basic auth."
                 }
                }
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./deployed.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
               },
               {
                "type": "object",
@@ -2520,6 +2808,42 @@
                  "description": "The (display) name of that operation.",
                  "type": "string"
                 },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./beforeDeploy.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -2668,6 +2992,42 @@
                  "description": "The username for basic auth."
                 }
                }
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./deployed.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
               },
               {
                "type": "object",
@@ -2985,6 +3345,42 @@
                  "description": "The (display) name of that operation.",
                  "type": "string"
                 },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./beforeDeploy.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -3133,6 +3529,42 @@
                  "description": "The username for basic auth."
                 }
                }
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./deployed.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
               },
               {
                "type": "object",
@@ -3467,6 +3899,42 @@
                  "description": "The (display) name of that operation.",
                  "type": "string"
                 },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./beforeDeploy.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -3615,6 +4083,42 @@
                  "description": "The username for basic auth."
                 }
                }
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./deployed.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
               },
               {
                "type": "object",
@@ -3907,6 +4411,42 @@
                  "description": "The (display) name of that operation.",
                  "type": "string"
                 },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./beforeDeploy.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -4055,6 +4595,42 @@
                  "description": "The username for basic auth."
                 }
                }
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./deployed.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
               },
               {
                "type": "object",
@@ -4393,6 +4969,42 @@
                  "description": "The (display) name of that operation.",
                  "type": "string"
                 },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./beforeDeploy.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -4541,6 +5153,42 @@
                  "description": "The username for basic auth."
                 }
                }
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./deployed.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
               },
               {
                "type": "object",
@@ -4859,6 +5507,42 @@
                  "description": "The (display) name of that operation.",
                  "type": "string"
                 },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./beforeDeploy.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -5007,6 +5691,42 @@
                  "description": "The username for basic auth."
                 }
                }
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./deployed.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
               },
               {
                "type": "object",
@@ -5411,6 +6131,42 @@
                  "description": "The (display) name of that operation.",
                  "type": "string"
                 },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./beforeDeploy.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -5590,6 +6346,42 @@
                  "description": "The username for basic auth."
                 }
                }
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./deployed.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
               },
               {
                "type": "object",
@@ -5878,6 +6670,42 @@
                  "description": "The (display) name of that operation.",
                  "type": "string"
                 },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./beforeDeploy.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -6031,6 +6859,42 @@
                  "description": "The username for basic auth."
                 }
                }
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./deployed.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
               },
               {
                "type": "object",
@@ -6333,6 +7197,42 @@
                  "description": "The (display) name of that operation.",
                  "type": "string"
                 },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./beforeDeploy.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -6486,6 +7386,42 @@
                  "description": "The username for basic auth."
                 }
                }
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./deployed.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
               },
               {
                "type": "object",
@@ -6829,6 +7765,42 @@
                  "description": "The (display) name of that operation.",
                  "type": "string"
                 },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./beforeDeploy.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -6986,6 +7958,42 @@
                  "description": "The username for basic auth."
                 }
                }
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./deployed.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
               },
               {
                "type": "object",
@@ -7277,6 +8285,42 @@
                  "description": "The (display) name of that operation.",
                  "type": "string"
                 },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./beforeDeploy.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -7472,6 +8516,42 @@
                  "description": "The username for basic auth."
                 }
                }
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./deployed.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
               },
               {
                "type": "object",
@@ -7807,6 +8887,42 @@
                  "description": "The (display) name of that operation.",
                  "type": "string"
                 },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./beforeDeploy.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -7955,6 +9071,42 @@
                  "description": "The username for basic auth."
                 }
                }
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./deployed.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
               },
               {
                "type": "object",
@@ -8245,6 +9397,42 @@
                  "description": "The (display) name of that operation.",
                  "type": "string"
                 },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./beforeDeploy.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
                 "target": {
                  "description": "The thing to open.",
                  "type": "string",
@@ -8393,6 +9581,42 @@
                  "description": "The username for basic auth."
                 }
                }
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./deployed.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
               },
               {
                "type": "object",

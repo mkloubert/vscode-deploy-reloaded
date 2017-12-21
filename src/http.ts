@@ -18,6 +18,7 @@
 import * as deploy_helpers from './helpers';
 import * as HTTP from 'http';
 import * as HTTPs from 'https';
+import * as i18 from './i18';
 const MergeDeep = require('merge-deep');
 import * as URL from 'url';
 
@@ -96,8 +97,7 @@ function requestInner(url: string | URL.Url, opts: RequestOptions,
         const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
 
         if (redirections > maxRedirections) {
-            //TODO: translate
-            COMPLETED(new Error(`Maximum number of redirectrions (${redirections}) reached!`));
+            COMPLETED(new Error(i18.t('http.errors.maxRedirections', redirections)));
             return;
         }
 
@@ -204,27 +204,30 @@ function requestInner(url: string | URL.Url, opts: RequestOptions,
 
                             default:
                                 {
-                                    let error: any;
+                                    let errorKey: string | false = false;
 
                                     if (deploy_helpers.toBooleanSafe(FINAL_REQUEST_OPTS.raiseOnClientError)) {
                                         if (resp.statusCode >= 400 && resp.statusCode < 500) {
-                                            //TODO: translate
-                                            error = new Error(`Client error ${resp.statusCode}: '${resp.statusMessage}'`);
+                                            errorKey = 'http.errors.client';
                                         }
                                     }
 
                                     if (deploy_helpers.toBooleanSafe(FINAL_REQUEST_OPTS.raiseOnServerError)) {
                                         if (resp.statusCode >= 500 && resp.statusCode < 600) {
-                                            //TODO: translate
-                                            error = new Error(`Server error ${resp.statusCode}: '${resp.statusMessage}'`);
+                                            errorKey = 'http.errors.server';
                                         }
                                     }
 
                                     if (deploy_helpers.toBooleanSafe(FINAL_REQUEST_OPTS.raiseOnUnsupportedResponse, true)) {
                                         if (resp.statusCode < 200 || resp.statusCode >= 600) {
-                                            //TODO: translate
-                                            error = new Error(`Unsupported response ${resp.statusCode}: '${resp.statusMessage}'`);
+                                            errorKey = 'http.errors.unknown';
                                         }
+                                    }
+
+                                    let error: any;
+                                    if (false !== errorKey) {
+                                        error = new Error(i18.t(errorKey,
+                                                                resp.statusCode, resp.statusMessage));
                                     }
 
                                     COMPLETED(error, resp);
@@ -274,7 +277,8 @@ function requestInner(url: string | URL.Url, opts: RequestOptions,
                 REQUEST.end();
             }
             else {
-                COMPLETED(new Error(`Protocol '${PROTOCOL}' is NOT supported!`));
+                COMPLETED(new Error(i18.t('http.errors.protocolNotSupported',
+                                          PROTOCOL)));
             }
         }
         catch (e) {

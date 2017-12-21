@@ -22,10 +22,12 @@ import * as deploy_mappings from './mappings';
 import * as deploy_packages from './packages';
 import * as deploy_targets_operations_http from './targets/operations/http';
 import * as deploy_targets_operations_open from './targets/operations/open';
+import * as deploy_targets_operations_script from './targets/operations/script';
 import * as deploy_targets_operations_wait from './targets/operations/wait';
 import * as deploy_transformers from './transformers';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
+import * as i18 from './i18';
 import * as Minimatch from 'minimatch';
 import * as Moment from 'moment';
 import * as Path from 'path';
@@ -330,14 +332,18 @@ export async function executeTargetOperations(opts: ExecuteTargetOperationOption
                 executor = deploy_targets_operations_http.execute;
                 break;
 
+            case 'script':
+                executor = deploy_targets_operations_script.execute;
+                break;
+
             case 'wait':
                 executor = deploy_targets_operations_wait.execute;
                 break;
         }
 
         if (!executor) {
-            //TODO: translate
-            throw new Error(`Operation type '${TYPE}' is NOT supported!`);
+            throw new Error(WORKSPACE.t('targets.operations.typeNotSupported',
+                                        TYPE));
         }
 
         try {

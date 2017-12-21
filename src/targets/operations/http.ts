@@ -113,11 +113,6 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
     const TARGET = context.target;
     const WORKSPACE = TARGET.__workspace;
 
-    const SCOPES = [
-        WORKSPACE.settingFolder,
-        Path.join(OS.homedir(), deploy_contracts.HOMEDIR_SUBFOLDER),
-    ];
-
     let u = deploy_helpers.toStringSafe(OPERATION.url);
     if (deploy_helpers.isEmptyString(u)) {
         u = 'http://localhost/';
@@ -132,7 +127,7 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
             break;
 
         default:
-            throw new Error(i18.t('targets.operations.http.protocolNotSupported',
+            throw new Error(i18.t('http.errors.protocolNotSupported',
                                   PROTOCOL));
     }
 

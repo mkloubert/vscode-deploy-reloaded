@@ -44,6 +44,8 @@ export const translation: Translation = {
     http: {
         errors: {
             client: "HTTP Client Fehler{0:trim,leading_space}:{1:trim,surround,leading_space}",
+            protocolNotSupported: "Das Protokoll{0:trim,surround,leading_space} wird nicht unterstützt!",
+            maxRedirections: "Maximale Anzahl von {0:trim} Weiterleitungen erreicht!",
             server: "HTTP Server Fehler{0:trim,leading_space}:{1:trim,surround,leading_space}",
             unknown: "Unbekannter HTTP Fehler{0:trim,leading_space}:{1:trim,surround,leading_space}",
         },
@@ -87,8 +89,13 @@ export const translation: Translation = {
                 bodyScriptNotFound: "Das Skript{0:trim,surround,leading_space} wurde nicht gefunden!",
                 noBodyScriptFunction: "Das Skript{0:trim,surround,leading_space} enthält keine 'getBody' Funktion!",
                 noBodyScriptModule: "Das Skript{0:trim,surround,leading_space} enthält kein Modul!",
-                protocolNotSupported: "Das Protokoll{0:trim,surround,leading_space} wird nicht unterstützt!",
             },
+            script: {
+                noScriptFunction: "Das Skript{0:trim,surround,leading_space} enthält keine 'execute' Funktion!",
+                noScriptModule: "Das Skript{0:trim,surround,leading_space} enthält kein Modul!",
+                scriptNotFound: "Das Skript{0:trim,surround,leading_space} wurde nicht gefunden!",
+            },
+            typeNotSupported: "Eine Operation vom Typ{0:trim,surround,leading_space} wird nicht unterstützt!",
         },
     },
     'vs-deploy': {

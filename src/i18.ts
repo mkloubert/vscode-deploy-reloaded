@@ -51,6 +51,8 @@ export interface Translation {
     http?: {
         errors?: {
             client?: string;
+            protocolNotSupported?: string;
+            maxRedirections?: string;
             server?: string;
             unknown?: string;
         };
@@ -94,8 +96,13 @@ export interface Translation {
                 bodyScriptNotFound?: string;
                 noBodyScriptFunction?: string;
                 noBodyScriptModule?: string;
-                protocolNotSupported?: string;
             };
+            script?: {
+                noScriptFunction?: string;
+                noScriptModule?: string;
+                scriptNotFound?: string;
+            };
+            typeNotSupported?: string;
         };
     };
     'vs-deploy'?: {
