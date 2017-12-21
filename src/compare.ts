@@ -21,6 +21,7 @@ import * as deploy_plugins from './plugins';
 import * as deploy_targets from './targets';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
+import * as i18 from './i18';
 import * as vscode from 'vscode';
 
 
@@ -155,37 +156,32 @@ export async function compareFiles(workspaces: deploy_workspaces.Workspace | dep
                         }
                     }
                     else {
-                        //TODO: translate
                         deploy_helpers.showWarningMessage(
-                            'No targets found!'
+                            i18.t('targets.noneFound')
                         );
                     }
                 }
                 else {
-                    //TODO: translate
                     deploy_helpers.showWarningMessage(
-                        'No matching workspaces found!'
+                        i18.t('targets.noWorkspaceFound')
                     );
                 }
             }
             else {
-                //TODO: translate
                 deploy_helpers.showWarningMessage(
-                    'No active text editor opened!'
+                    i18.t('editors.active.noOpen')
                 );
             }
         }
         else {
-            //TODO: translate
             deploy_helpers.showWarningMessage(
-                'No active text editor opened!'
+                i18.t('editors.active.noOpen')
             );
         }
     }
     catch (e) {
-        //TODO: translate
         deploy_helpers.showWarningMessage(
-            `Could not compare current file: '${deploy_helpers.toStringSafe(e)}'`
+            i18.t('compare.currentFile.failed', e)
         );
     }
 }

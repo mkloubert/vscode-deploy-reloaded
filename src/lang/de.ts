@@ -27,6 +27,16 @@ export const translation: Translation = {
         executionError: "Das Kommando {0:surround} konnte nicht ausgeführt werden:{1:trim,surround,leading_space}",
         scriptNotFound: "Das Skript {0:surround} wurde nicht gefunden!",
     },
+    compare: {
+        currentFile: {
+            failed: "Die aktuelle Datei konnte nicht verglichen werden:{0:trim,surround,leading_space}",
+        },
+    },
+    editors: {
+        active: {
+            noOpen: "Es ist derzeit kein aktiver Texteditor geöffnet!",
+        },
+    },
     ftp: {
         couldNotConnect: "Konnte keine Verbindung aufbauen!",
         couldNotConnectWithJSFTP: "Konnte keine Verbindung mittels 'jsftp' aufbauen!",
@@ -69,7 +79,17 @@ export const translation: Translation = {
         privateKeyNotFound: "Der private Schlüssel{0:trim,surround,leading_space} wurde nicht gefunden!",
     },
     targets: {
-        defaultName: '(Ziel #{0:trim})',
+        defaultName: "(Ziel #{0:trim})",
+        noneFound: "Keine Ziele gefunden!",
+        noWorkspaceFound: "Keinen passenden Arbeitsbereich gefunden!",
+        operations: {
+            http: {
+                bodyScriptNotFound: "Das Skript{0:trim,surround,leading_space} wurde nicht gefunden!",
+                noBodyScriptFunction: "Das Skript{0:trim,surround,leading_space} enthält keine 'getBody' Funktion!",
+                noBodyScriptModule: "Das Skript{0:trim,surround,leading_space} enthält kein Modul!",
+                protocolNotSupported: "Das Protokoll{0:trim,surround,leading_space} wird nicht unterstützt!",
+            },
+        },
     },
     'vs-deploy': {
         continueAndInitialize: 'Fortfahren und initialisieren...',

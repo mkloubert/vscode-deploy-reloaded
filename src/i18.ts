@@ -34,6 +34,16 @@ export interface Translation {
         executionError?: string;
         scriptNotFound?: string;
     };
+    compare?: {
+        currentFile?: {
+            failed?: string;
+        };
+    };
+    editors?: {
+        active?: {
+            noOpen?: string;
+        };
+    };
     ftp?: {
         couldNotConnect?: string;
         couldNotConnectWithJSFTP?: string;
@@ -77,6 +87,16 @@ export interface Translation {
     };
     targets?: {
         defaultName?: string;
+        noneFound?: string;
+        noWorkspaceFound?: string;
+        operations?: {
+            http?: {
+                bodyScriptNotFound?: string;
+                noBodyScriptFunction?: string;
+                noBodyScriptModule?: string;
+                protocolNotSupported?: string;
+            };
+        };
     };
     'vs-deploy'?: {
         continueAndInitialize?: string;

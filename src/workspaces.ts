@@ -417,6 +417,11 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         NEW_SESSION_STATE['upload']['states']['global'] = {};
         NEW_SESSION_STATE['upload']['states']['data_transformers'] = {};
 
+        NEW_SESSION_STATE['target_operations'] = {};
+        NEW_SESSION_STATE['target_operations']['http'] = {};
+        NEW_SESSION_STATE['target_operations']['http']['global'] = {};
+        NEW_SESSION_STATE['target_operations']['http']['body_scripts'] = {};
+
         return NEW_SESSION_STATE;
     }
 

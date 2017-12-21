@@ -27,6 +27,16 @@ export const translation: Translation = {
         executionError: "Could not execute command {0:surround}:{1:trim,surround,leading_space}",
         scriptNotFound: "{0:surround} script not found!",
     },
+    compare: {
+        currentFile: {
+            failed: "Could not compare current file:{0:trim,surround,leading_space}",
+        },
+    },
+    editors: {
+        active: {
+            noOpen: "No active text editor found!",
+        },
+    },
     ftp: {
         couldNotConnect: "Could not start connection!",
         couldNotConnectWithJSFTP: "Could not start connection via 'jsftp'!",
@@ -69,7 +79,17 @@ export const translation: Translation = {
         privateKeyNotFound: "Private key file{0:trim,surround,leading_space} not found!",
     },
     targets: {
-        defaultName: '(Target #{0:trim})',
+        defaultName: "(Target #{0:trim})",
+        noneFound: "No targets found!",
+        noWorkspaceFound: "No matching workspace found!",
+        operations: {
+            http: {
+                bodyScriptNotFound: "Script{0:trim,surround,leading_space} not found!",
+                noBodyScriptFunction: "Script{0:trim,surround,leading_space} does not contain a 'getBody' function!",
+                noBodyScriptModule: "Script{0:trim,surround,leading_space} does not contain a module!",
+                protocolNotSupported: "The protocol{0:trim,surround,leading_space} is not supported!",
+            },
+        },
     },
     'vs-deploy': {
         continueAndInitialize: 'Continue and initialize me...',

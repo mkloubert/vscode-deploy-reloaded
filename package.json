@@ -2,12 +2,13 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.65",
+ "version": "0.0.66",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
  },
  "license": "LGPL-3.0",
+ "preview": true,
  "categories": [
   "Other"
  ],
@@ -615,6 +616,93 @@
               {
                "type": "object",
                "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -663,6 +751,93 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
               {
                "type": "object",
                "properties": {
@@ -831,6 +1006,93 @@
               {
                "type": "object",
                "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -875,6 +1137,93 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
               {
                "type": "object",
                "properties": {
@@ -1035,6 +1384,93 @@
               {
                "type": "object",
                "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -1079,6 +1515,93 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
               {
                "type": "object",
                "properties": {
@@ -1240,6 +1763,93 @@
               {
                "type": "object",
                "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -1284,6 +1894,93 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
               {
                "type": "object",
                "properties": {
@@ -1475,6 +2172,93 @@
               {
                "type": "object",
                "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -1519,6 +2303,93 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
               {
                "type": "object",
                "properties": {
@@ -1704,6 +2575,93 @@
               {
                "type": "object",
                "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -1748,6 +2706,93 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
               {
                "type": "object",
                "properties": {
@@ -1950,6 +2995,93 @@
               {
                "type": "object",
                "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -1994,6 +3126,93 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
               {
                "type": "object",
                "properties": {
@@ -2154,6 +3373,93 @@
               {
                "type": "object",
                "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -2198,6 +3504,93 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
               {
                "type": "object",
                "properties": {
@@ -2404,6 +3797,93 @@
               {
                "type": "object",
                "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -2448,6 +3928,93 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
               {
                "type": "object",
                "properties": {
@@ -2634,6 +4201,93 @@
               {
                "type": "object",
                "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -2678,6 +4332,93 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
               {
                "type": "object",
                "properties": {
@@ -2950,6 +4691,93 @@
               {
                "type": "object",
                "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -3025,6 +4853,93 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
               {
                "type": "object",
                "properties": {
@@ -3181,6 +5096,93 @@
               {
                "type": "object",
                "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -3230,6 +5232,93 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
               {
                "type": "object",
                "properties": {
@@ -3400,6 +5489,93 @@
               {
                "type": "object",
                "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -3449,6 +5625,93 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
               {
                "type": "object",
                "properties": {
@@ -3660,6 +5923,93 @@
               {
                "type": "object",
                "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -3713,6 +6063,93 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
               {
                "type": "object",
                "properties": {
@@ -3872,6 +6309,93 @@
               {
                "type": "object",
                "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -3963,6 +6487,93 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
               {
                "type": "object",
                "properties": {
@@ -4166,6 +6777,93 @@
               {
                "type": "object",
                "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -4210,6 +6908,93 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
               {
                "type": "object",
                "properties": {
@@ -4368,6 +7153,93 @@
               {
                "type": "object",
                "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -4412,6 +7284,93 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
               {
                "type": "object",
                "properties": {
