@@ -24,6 +24,7 @@ import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
+import * as deploy_switch from './switch';
 import * as deploy_targets from './targets';
 import * as deploy_tools from './tools';
 import * as deploy_workflows from './workflows';
@@ -1031,45 +1032,22 @@ async function activateExtension(context: vscode.ExtensionContext) {
             // switches
             vscode.commands.registerCommand('extension.deploy.reloaded.switches', async () => {
                 try {
-                    const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = Enumerable.from( getActiveWorkspacesOrAll() ).selectMany(ws => {
-                        return ws.getSwitchTargets();
-                    }).select(st => {
-                        return {
+                    const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = [
+                        {
                             action: async () => {
-                                await st.__workspace
-                                        .changeSwitchButtonOption(st);
+                                await deploy_switch.changeSwitch(
+                                    getActiveWorkspacesOrAll()
+                                );
                             },
+                            label: '$(settings)  ' + i18.t('plugins.switch.changeSwitch.label'),
+                            description: i18.t('plugins.switch.changeSwitch.description'),
+                        },
+                    ];
 
-                            detail: st.__workspace.rootPath,
-                            label: deploy_targets.getTargetName(st),
-                            description: deploy_helpers.toStringSafe(st.description).trim(),
-                        };
-                    }).toArray();
-
-                    if (QUICK_PICKS.length < 1) {
-                        deploy_helpers.showWarningMessage(
-                            i18.t('plugins.switch.noDefined'),
-                        );
-
-                        return;
-                    }
-
-                    let selectedItem: deploy_contracts.ActionQuickPick;
-                    if (1 === QUICK_PICKS.length) {
-                        selectedItem = QUICK_PICKS[0];
-                    }
-                    else {
-                        selectedItem = await vscode.window.showQuickPick(
-                            QUICK_PICKS,
-                            {
-                                placeHolder: i18.t('plugins.switch.selectSwitch')
-                            },
-                        );
-                    }
-
-                    if (selectedItem) {
+                    const SELECTED_ITEM = await vscode.window.showQuickPick(QUICK_PICKS);
+                    if (SELECTED_ITEM) {
                         await Promise.resolve(
-                            selectedItem.action()
+                            SELECTED_ITEM.action()
                         );
                     }
                 }

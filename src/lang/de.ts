@@ -31,6 +31,13 @@ export const translation: Translation = {
         couldNotConnect: "Konnte keine Verbindung aufbauen!",
         couldNotConnectWithJSFTP: "Konnte keine Verbindung mittels 'jsftp' aufbauen!",
     },
+    http: {
+        errors: {
+            client: "HTTP Client Fehler{0:trim,leading_space}:{1:trim,surround,leading_space}",
+            server: "HTTP Server Fehler{0:trim,leading_space}:{1:trim,surround,leading_space}",
+            unknown: "Unbekannter HTTP Fehler{0:trim,leading_space}:{1:trim,surround,leading_space}",
+        },
+    },
     initializationCanceled: 'Die Initialisierung dieser Erweiterung wurde abgebrochen.',
     no: 'Nein',
     packages: {
@@ -42,6 +49,10 @@ export const translation: Translation = {
                 text: "Schalter{0:trim,surround,leading_space}",
                 tooltip: "Aktuell ausgewählt:{0:trim,surround,leading_space}\n\nHier klicken, um auf eine andere Option umzuschalten...",
             },
+            changeSwitch: {
+                description: "Ändert die aktuelle Einstellung eines Schalters",
+                label: "Schalter ändern ...",
+            },
             defaultOptionName: 'Schalter-Option #{0:trim}',
             noDefined: 'Keine Schalter gefunden!',
             noOptionsDefined: 'Es wurden keine Optionen für den Schalter{0:trim,surround,leading_space} definiert!',
@@ -50,6 +61,12 @@ export const translation: Translation = {
             selectOption: 'Wählen Sie eine Option für den Schalter{0:trim,surround,leading_space}...',
             selectSwitch: "Wählen Sie einen Schalter...",
         },
+    },
+    s3bucket: {
+        credentialTypeNotSupported: "Das Anmeldeverfahren{0:trim,surround,leading_space} wird nicht unterstützt!",
+    },
+    sftp: {
+        privateKeyNotFound: "Der private Schlüssel{0:trim,surround,leading_space} wurde nicht gefunden!",
     },
     targets: {
         defaultName: '(Ziel #{0:trim})',

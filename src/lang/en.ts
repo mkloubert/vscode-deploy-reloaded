@@ -31,6 +31,13 @@ export const translation: Translation = {
         couldNotConnect: "Could not start connection!",
         couldNotConnectWithJSFTP: "Could not start connection via 'jsftp'!",
     },
+    http: {
+        errors: {
+            client: "HTTP client error{0:trim,leading_space}:{1:trim,surround,leading_space}",
+            server: "HTTP server error{0:trim,leading_space}:{1:trim,surround,leading_space}",
+            unknown: "Unknown HTTP error{0:trim,leading_space}:{1:trim,surround,leading_space}",
+        },
+    },
     initializationCanceled: 'The initialization of the extension has been stopped.',
     no: 'No',
     packages: {
@@ -42,6 +49,10 @@ export const translation: Translation = {
                 text: "Switch{0:trim,surround,leading_space}",
                 tooltip: "Current option:{0:trim,surround,leading_space}\n\nClick here to change the current option...",
             },
+            changeSwitch: {
+                description: "Changes the current option of a switch",
+                label: "Change switch ...",
+            },
             defaultOptionName: "Switch option #{0:trim}",
             noDefined: 'No swicthes available!',
             noOptionsDefined: 'No options were defined for the switch{0:trim,surround,leading_space}!',
@@ -50,6 +61,12 @@ export const translation: Translation = {
             selectOption: "Select an option for the switch{0:trim,surround,leading_space}...",
             selectSwitch: "Select a switch...",
         },
+    },
+    s3bucket: {
+        credentialTypeNotSupported: "Credental type{0:trim,surround,leading_space} is not supported!",
+    },
+    sftp: {
+        privateKeyNotFound: "Private key file{0:trim,surround,leading_space} not found!",
     },
     targets: {
         defaultName: '(Target #{0:trim})',

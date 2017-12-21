@@ -22,6 +22,7 @@ import * as deploy_log from '../log';
 import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
 import * as FS from 'fs';
+import * as i18 from '../i18';
 import * as Moment from 'moment';
 import * as OS from 'os';
 import * as Path from 'path';
@@ -119,8 +120,8 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
         }
 
         if (false === privateKeyFile) {
-            //TODO: translate
-            throw new Error(`Private key file '${target.privateKey}' not found!`);
+            throw new Error(i18.t('sftp.privateKeyNotFound',
+                                  target.privateKey));
         }
 
         const DIR = this.replaceWithValues(target, target.dir);

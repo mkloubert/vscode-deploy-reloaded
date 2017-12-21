@@ -18,6 +18,7 @@
 import * as deploy_helpers from './helpers';
 import * as deploy_http from './http';
 import * as HTTP from 'http';
+import * as i18 from './i18';
 import * as Path from 'path';
 import * as URL from 'url';
 
@@ -113,15 +114,14 @@ async function download_http(url: URL.Url): Promise<Buffer> {
         return await deploy_http.readBody(RESPONSE);
     }
 
+    let errorKey = 'http.errors.unknown';
     if (RESPONSE.statusCode >= 400 && RESPONSE.statusCode < 499) {
-        //TODO: translate
-        throw new Error(`HTTP CLIENT error '${RESPONSE.statusCode}': '${RESPONSE.statusMessage}'`);
+        errorKey = 'http.errors.client';
     }
     else if (RESPONSE.statusCode >= 500 && RESPONSE.statusCode < 599) {
-        //TODO: translate
-        throw new Error(`HTTP SERVER error '${RESPONSE.statusCode}': '${RESPONSE.statusMessage}'`);
+        errorKey = 'http.errors.server';
     }
 
-    //TODO: translate
-    throw new Error(`UNHANDLED HTTP response '${RESPONSE.statusCode}': '${RESPONSE.statusMessage}'`);
+    throw new Error(i18.t(errorKey,
+                          RESPONSE.statusCode, RESPONSE.statusMessage));
 }

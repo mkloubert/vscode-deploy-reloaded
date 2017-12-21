@@ -38,6 +38,13 @@ export interface Translation {
         couldNotConnect?: string;
         couldNotConnectWithJSFTP?: string;
     };
+    http?: {
+        errors?: {
+            client?: string;
+            server?: string;
+            unknown?: string;
+        };
+    };
     initializationCanceled?: string;
     no?: string;
     packages?: {
@@ -49,6 +56,10 @@ export interface Translation {
                 text?: string;
                 tooltip?: string;
             };
+            changeSwitch?: {
+                description?: string;
+                label?: string;
+            };
             defaultOptionName?: string;
             noDefined?: string;
             noOptionsDefined?: string;
@@ -57,6 +68,12 @@ export interface Translation {
             selectOption?: string;
             selectSwitch?: string;
         };
+    };
+    s3bucket?: {
+        credentialTypeNotSupported?: string;
+    };
+    sftp?: {
+        privateKeyNotFound?: string;
     };
     targets?: {
         defaultName?: string;

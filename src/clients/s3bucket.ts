@@ -20,6 +20,7 @@ import * as deploy_clients from '../clients';
 import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
 import * as Enumerable from 'node-enumerable';
+import * as i18 from '../i18';
 import * as MimeTypes from 'mime-types';
 import * as Path from 'path';
 import * as Moment from 'moment';
@@ -118,8 +119,8 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
         }
     
         if (!credentialClass) {
-            //TODO: translate
-            throw new Error(`Credetial type '${credentialType}' is not supported!`);
+            throw new Error(i18.t('s3bucket.credentialTypeNotSupported',
+                                  credentialType));
         }
     
         return new AWS.S3({
