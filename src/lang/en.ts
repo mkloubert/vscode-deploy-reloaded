@@ -36,6 +36,21 @@ export const translation: Translation = {
     packages: {
         defaultName: '(Package #{0:trim})',
     },
+    plugins: {
+        switch: {
+            button: {
+                text: "Switch{0:trim,surround,leading_space}",
+                tooltip: "Current option:{0:trim,surround,leading_space}\n\nClick here to change the current option...",
+            },
+            defaultOptionName: "Switch option #{0:trim}",
+            noDefined: 'No swicthes available!',
+            noOptionsDefined: 'No options were defined for the switch{0:trim,surround,leading_space}!',
+            noOptionSelected2: "No option has been selected or defined for switch{0:trim,surround,leading_space}!",
+            noOptionSelected: "NO OPTION SELECTED",
+            selectOption: "Select an option for the switch{0:trim,surround,leading_space}...",
+            selectSwitch: "Select a switch...",
+        },
+    },
     targets: {
         defaultName: '(Target #{0:trim})',
     },

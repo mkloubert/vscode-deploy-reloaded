@@ -1028,6 +1028,62 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 }
             }),
 
+            // switches
+            vscode.commands.registerCommand('extension.deploy.reloaded.switches', async () => {
+                try {
+                    const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = Enumerable.from( getActiveWorkspacesOrAll() ).selectMany(ws => {
+                        return ws.getSwitchTargets();
+                    }).select(st => {
+                        return {
+                            action: async () => {
+                                await st.__workspace
+                                        .changeSwitchButtonOption(st);
+                            },
+
+                            detail: st.__workspace.rootPath,
+                            label: deploy_targets.getTargetName(st),
+                            description: deploy_helpers.toStringSafe(st.description).trim(),
+                        };
+                    }).toArray();
+
+                    if (QUICK_PICKS.length < 1) {
+                        deploy_helpers.showWarningMessage(
+                            i18.t('plugins.switch.noDefined'),
+                        );
+
+                        return;
+                    }
+
+                    let selectedItem: deploy_contracts.ActionQuickPick;
+                    if (1 === QUICK_PICKS.length) {
+                        selectedItem = QUICK_PICKS[0];
+                    }
+                    else {
+                        selectedItem = await vscode.window.showQuickPick(
+                            QUICK_PICKS,
+                            {
+                                placeHolder: i18.t('plugins.switch.selectSwitch')
+                            },
+                        );
+                    }
+
+                    if (selectedItem) {
+                        await Promise.resolve(
+                            selectedItem.action()
+                        );
+                    }
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'extension.deploy.reloaded.switches');
+
+                    //TODO: translate
+                    deploy_helpers.showErrorMessage(
+                        `Switch operation failed (s. debug output 'CTRL + Y')!`
+                    );
+                }
+            }),
+
             // tools
             vscode.commands.registerCommand('extension.deploy.reloaded.showTools', async () => {
                 try {

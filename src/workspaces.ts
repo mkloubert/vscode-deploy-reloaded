@@ -49,10 +49,77 @@ interface PackageWithButton {
     readonly package: deploy_packages.Package;
 }
 
+interface SwitchStateRepoWithCollection {
+    readonly collection: SwitchStateRepositoryCollection;
+    readonly repository: SwitchStateRepository;
+}
+
+type SwitchStateRepository = deploy_contracts.KeyValuePairs<string>;
+
+type SwitchStateRepositoryCollection = deploy_contracts.KeyValuePairs<SwitchStateRepository>;
+
+/**
+ * A 'switch' target.
+ */
+export interface SwitchTarget extends deploy_targets.Target {
+    /**
+     * A button for the switch.
+     */
+    readonly button?: deploy_contracts.Button | boolean | string;
+
+    /**
+     * One or more options for the switch.
+     */
+    readonly options: SwitchTargetOptionValue | SwitchTargetOptionValue[];
+}
+
+/**
+ * An option entry for of a switch target.
+ */
+export interface SwitchTargetOption extends deploy_targets.TargetProvider {
+    /**
+     * [INTERNAL] DO NOT DEFINE OR OVERWRITE THIS PROPERTY BY YOUR OWN!
+     * 
+     * Gets the ID of that option.
+     */
+    readonly __id: any;
+    /**
+     * [INTERNAL] DO NOT DEFINE OR OVERWRITE THIS PROPERTY BY YOUR OWN!
+     * 
+     * The zero-based index.
+     */
+    readonly __index: number;
+
+    /**
+     * The description.
+     */
+    readonly description?: string;
+    /**
+     * Is default or not.
+     */
+    readonly isDefault?: boolean;
+    /**
+     * The (display) name.
+     */
+    readonly name?: string;
+}
+
+/**
+ * A switch option value.
+ */
+export type SwitchTargetOptionValue = SwitchTargetOption | string;
+
 /**
  * Object that stores the states for 'sync when open'.
  */
 export type SyncWhenOpenStates = { [ key: string ]: Moment.Moment };
+
+interface TargetWithButton<TTarget = deploy_targets.Target> {
+    readonly button: vscode.StatusBarItem;
+    readonly command: vscode.Disposable;
+    readonly settings: deploy_contracts.Button;
+    readonly target: TTarget;
+}
 
 /**
  * A workspace context.
@@ -139,6 +206,8 @@ export interface WorkspaceSettings extends deploy_contracts.Configuration, vscod
 
 const FILES_CHANGES: { [path: string]: deploy_contracts.FileChangeType } = {};
 let nextPackageButtonId = Number.MIN_SAFE_INTEGER;
+let nextSwitchButtonId = Number.MIN_SAFE_INTEGER;
+const SWITCH_STATE_REPO_COLLECTION_KEY = 'SwitchStates';
 
 /**
  * A workspace.
@@ -176,10 +245,12 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     private _PACKAGE_BUTTONS: PackageWithButton[] = [];
     private _packages: deploy_packages.Package[];
     private _sessionState: deploy_contracts.KeyValuePairs;
+    private _selectedSwitches: deploy_contracts.KeyValuePairs;
     /**
      * Stores the start time.
      */
     protected _startTime: Moment.Moment;
+    private readonly _SWITCH_BUTTONS: TargetWithButton<SwitchTarget>[] = [];
     /**
      * Stores the states for 'sync when open'.
      */
@@ -201,6 +272,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 public readonly folder: vscode.WorkspaceFolder,
                 public readonly context: WorkspaceContext) {
         super();
+
+        this.state = new WorkspaceMemento(this);
     }
 
     /**
@@ -214,8 +287,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         if (obj) {
             const WORKSPACE = (<any>obj).__workspace || (<any>obj).workspace;
             if (WORKSPACE instanceof Workspace) {
-                return Path.resolve(WORKSPACE.folder.uri.fsPath) ===
-                       Path.resolve(this.folder.uri.fsPath);
+                return WORKSPACE.rootPath === this.rootPath;
             }
         }
 
@@ -230,12 +302,91 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                !this.isReloadingConfig;
     }
 
+    /**
+     * Lets the user change the option of a switch.
+     * 
+     * @param {SwitchTarget} target The target.
+     */
+    public async changeSwitchButtonOption(target: SwitchTarget) {
+        const ME = this;
+        
+        if (!ME.canBeHandledByMe(target)) {
+            return;
+        }
+
+        const MY_ID = deploy_helpers.toStringSafe(ME.id);
+        const TARGET_ID = deploy_helpers.toStringSafe(target.__id);
+        const TARGET_NAME = deploy_targets.getTargetName(target);
+
+        const SWITCH_REPO = ME.getSwitchRepository();
+
+        const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = ME.getAllSwitchOptions(target).map(o => {
+            const OPTION_ID = deploy_helpers.toStringSafe(o.__id);
+            const LABEL = ME.getSwitchOptionName(o);
+            const DESCRIPTION = deploy_helpers.toStringSafe(o.description).trim();
+
+            return {
+                action: async () => {
+                    SWITCH_REPO.repository[TARGET_ID] = OPTION_ID;
+                },
+                description: DESCRIPTION,
+                label: LABEL,
+            };
+        });
+
+        if (QUICK_PICKS.length < 1) {
+            ME.showWarningMessage(
+                ME.t('plugins.switch.noOptionsDefined',
+                     TARGET_NAME)
+            );
+
+            return;
+        }
+
+        let selectedItem: deploy_contracts.ActionQuickPick;
+        if (1 === QUICK_PICKS.length) {
+            selectedItem = QUICK_PICKS[0];
+        }
+        else {
+            selectedItem = await vscode.window.showQuickPick(
+                QUICK_PICKS,
+                {
+                    placeHolder: ME.t('plugins.switch.selectOption',
+                                      TARGET_NAME),
+                }
+            );
+        }
+
+        if (!selectedItem) {
+            return;
+        }
+
+        await Promise.resolve(
+            selectedItem.action()
+        );
+
+        SWITCH_REPO.collection[MY_ID] = SWITCH_REPO.repository;
+        await ME.state.update(SWITCH_STATE_REPO_COLLECTION_KEY,
+                              SWITCH_REPO.collection);
+
+        await ME.updateSwitchButtons();
+    }
+
     private cleanupPackageButtons() {
         while (this._PACKAGE_BUTTONS.length > 0) {
             const PBTN = this._PACKAGE_BUTTONS.shift();
 
             deploy_helpers.tryDispose(PBTN.button);
             deploy_helpers.tryDispose(PBTN.command);
+        }
+    }
+
+    private cleanupSwitchButtons() {
+        while (this._SWITCH_BUTTONS.length > 0) {
+            const SB = this._SWITCH_BUTTONS.shift();
+
+            deploy_helpers.tryDispose(SB.button);
+            deploy_helpers.tryDispose(SB.command);
         }
     }
 
@@ -400,6 +551,32 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
         return await deploy_helpers.glob(patterns,
                                          MergeDeep(DEFAULT_OPTS, opts));
+    }
+
+    private getAllSwitchOptions(target: SwitchTarget): SwitchTargetOption[] {
+        if (!target) {
+            return <any>target;
+        }
+    
+        return deploy_helpers.asArray(target.options).map((o, i) => {
+            o = deploy_helpers.cloneObject(o);
+            if (!deploy_helpers.isObject<SwitchTargetOption>(o)) {
+                o = {
+                    __id: undefined,
+                    __index: undefined,
+    
+                    targets: deploy_helpers.asArray(o)
+                                           .map(tn => deploy_helpers.normalizeString(tn))
+                                           .filter(tn => '' !== tn),
+                };
+            }
+    
+            (<any>o)['__id'] = `${target.__id}\n` + 
+                               `${i}`;
+            (<any>o)['__index'] = i;
+    
+            return o;
+        });
     }
 
     /**
@@ -575,6 +752,80 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         packages = deploy_helpers.filterConditionalItems(packages);
 
         return packages;
+    }
+
+    /**
+     * Returns the selected option of a switch (target),
+     * 
+     * @param {SwitchTarget} target The target.
+     * 
+     * @return {SwitchTargetOption|false} The option or (false) if not found.
+     */
+    public getSelectedSwitchOption(target: SwitchTarget): SwitchTargetOption | false {
+        const ME = this;
+
+        const MY_ID = deploy_helpers.toStringSafe(ME.id);
+
+        if (ME.canBeHandledByMe(target)) {
+            const ALL_OPTIONS = ME.getAllSwitchOptions(target);
+            if (ALL_OPTIONS.length > 0) {
+                const SWITCH_REPO = ME.getSwitchRepository();
+                const TARGET_ID = deploy_helpers.toStringSafe(target.__id);
+
+                const SELECTED_TARGET_OPTION_ID = SWITCH_REPO.repository[TARGET_ID];
+
+                return Enumerable.from(ALL_OPTIONS).orderBy(o => {
+                    if (deploy_helpers.toStringSafe(o.__id) === SELECTED_TARGET_OPTION_ID) {
+                        return Number.MIN_SAFE_INTEGER;
+                    }
+
+                    if (deploy_helpers.toBooleanSafe(o.isDefault)) {
+                        return 0;
+                    }
+
+                    return Number.MAX_SAFE_INTEGER;
+                }).first();
+            }
+        }
+        
+        return false;
+    }
+
+    private getSwitchOptionName(option: SwitchTargetOption): string {
+        if (!option) {
+            return <any>option;
+        }
+    
+        let name = deploy_helpers.toStringSafe(option.name).trim();
+        if ('' === name) {
+            name = this.t('plugins.switch.defaultOptionName',
+                          option.__index + 1);
+        }
+    
+        return name;
+    }
+
+    private getSwitchRepository(): SwitchStateRepoWithCollection {
+        const MY_ID = deploy_helpers.toStringSafe(this.id);
+
+        const REPO_COLL = this.state.get<SwitchStateRepositoryCollection>(SWITCH_STATE_REPO_COLLECTION_KEY) || {};
+        const REPO = REPO_COLL[MY_ID] || {};
+
+        return {
+            collection: REPO_COLL,
+            repository: REPO,
+        };
+    }
+
+    /**
+     * Returns a list of all available 'switch' targets of that workspace.
+     * 
+     * @return {SwitchTarget[]} The targets.
+     */
+    public getSwitchTargets(): SwitchTarget[] {
+        return <any>this.getTargets().filter(t => {
+            return 'switch' === deploy_helpers.normalizeString(t.type);
+        });
     }
 
     /**
@@ -1343,6 +1594,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 }
 
                 await ME.reloadPackageButtons();
+                await ME.reloadSwitches();
             };
         }
         catch (e) {
@@ -1599,6 +1851,92 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         ME._packages = packages;
     }
 
+    private async reloadSwitches() {
+        const ME = this;
+        
+        try {
+            ME.cleanupSwitchButtons();
+
+            const TARGETS = ME.getSwitchTargets();
+
+            const CREATE_AND_ADD_BUTTON = async (b: deploy_contracts.Button, t: SwitchTarget) => {
+                const CMD_ID = `extension.deploy.reloaded.buttons.changeSwitchOption${nextSwitchButtonId++}`;
+
+                let newBtn: vscode.StatusBarItem;
+                let newCmd: vscode.Disposable;
+                let newSwitchBtn: TargetWithButton<SwitchTarget>;
+                try {
+                    newCmd = vscode.commands.registerCommand(CMD_ID, async () => {
+                        try {
+                            await ME.changeSwitchButtonOption(newSwitchBtn.target);
+                        }
+                        catch (e) {
+                            deploy_log.CONSOLE
+                                      .trace(e, 'workspaces.Workspace.reloadSwitches().CREATE_AND_ADD_BUTTON()');
+                        }
+                    });
+
+                    newBtn = await deploy_helpers.createButton(b, (nb) => {
+                        nb.command = CMD_ID;
+                        nb.text = undefined;
+                        nb.tooltip = undefined;
+
+                        nb.show();
+                    });
+
+                    ME._SWITCH_BUTTONS.push(newSwitchBtn = {
+                        button: newBtn,
+                        command: newCmd,
+                        settings: b,
+                        target: t,
+                    });
+                }
+                catch (e) {
+                    deploy_helpers.tryDispose(newBtn);
+                    deploy_helpers.tryDispose(newCmd);
+
+                    throw e;
+                }
+            };
+
+            for (const T of TARGETS) {
+                let btn = T.button;
+                if (deploy_helpers.isNullOrUndefined(btn)) {
+                    btn = true;
+                }
+
+                if (deploy_helpers.isBool(btn)) {
+                    // boolean
+
+                    btn = {
+                        enabled: btn
+                    };
+                }
+                else if (!deploy_helpers.isObject<deploy_contracts.Button>(btn)) {
+                    // button text
+
+                    btn = {
+                        enabled: true,
+                        text: deploy_helpers.toStringSafe(btn)
+                    };
+                }
+
+                if (!deploy_helpers.toBooleanSafe(btn.enabled, true)) {
+                    continue;
+                }
+
+                await CREATE_AND_ADD_BUTTON(btn, T);
+            }
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'workspaces.Workspace.reloadSwitches()');
+        }
+        finally {
+            await ME.updateSwitchButtons();
+        }
+    }
+
     private async reloadTargets(cfg: deploy_contracts.Configuration) {
         const ME = this;
 
@@ -1694,6 +2032,13 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     }
 
     /**
+     * Gets the repository of selected switches.
+     */
+    public get selectedSwitches(): deploy_contracts.KeyValuePairs {
+        return this._selectedSwitches;
+    }
+
+    /**
      * Gets the current session data storage.
      */
     public get sessionState(): deploy_contracts.KeyValuePairs {
@@ -1780,6 +2125,11 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     public get startTime(): Moment.Moment {
         return this._startTime;
     }
+
+    /**
+     * Stores the memento of that workspace.
+     */
+    public readonly state: WorkspaceMemento;
 
     /**
      * Gets the states for 'sync when open'.
@@ -1906,5 +2256,100 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         }
 
         return relativePath;
+    }
+
+    private async updateSwitchButtons() {
+        const ME = this;
+        
+        try {
+            for (const SB of ME._SWITCH_BUTTONS) {
+                const SWITCH_NAME = deploy_targets.getTargetName(SB.target);
+                const OPTION = ME.getSelectedSwitchOption(SB.target);
+                
+                let color = deploy_helpers.normalizeString(SB.settings);
+                if ('' === color) {
+                    color = '#ffffff';
+                }
+
+                const ADDITIONAL_VALUES: deploy_values.Value[] = [
+                    // switch
+                    new deploy_values.FunctionValue(() => {
+                        return SWITCH_NAME;
+                    }, 'switch'),
+                    
+                    // switch option
+                    new deploy_values.FunctionValue(() => {
+                        return false === OPTION ? undefined
+                                                : ME.getSwitchOptionName(OPTION);
+                    }, 'switchOption'),
+                ];
+
+                let text = deploy_helpers.toStringSafe(
+                    ME.replaceWithValues(SB.settings.text, ADDITIONAL_VALUES)
+                ).trim();
+                if ('' === text) {
+                    // default text
+                    text = i18.t('plugins.switch.button.text',
+                                 SWITCH_NAME);
+                }
+
+                let tooltip = deploy_helpers.toStringSafe(
+                    ME.replaceWithValues(SB.settings.tooltip, ADDITIONAL_VALUES)
+                ).trim();
+                if ('' === tooltip) {
+                    // default tooltip
+                    if (false === OPTION) {
+                        tooltip = i18.t('plugins.switch.button.tooltip',
+                                        i18.t('plugins.switch.noOptionSelected'));
+
+                        color = '#ffff00';
+                    }
+                    else {
+                        tooltip = i18.t('plugins.switch.button.tooltip',
+                                        ME.getSwitchOptionName(OPTION));
+                    }
+                }
+
+                SB.button.text = text;
+                SB.button.tooltip = tooltip;
+            }
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'workspaces.Workspace.updateSwitchButtons()');
+        }
+    }
+}
+
+/**
+ * A memento of a workspace.
+ */
+export class WorkspaceMemento implements vscode.Memento {
+    /**
+     * Initializes a new instance of that class.
+     * 
+     * @param {Workspace} workspace The underlying workspace.
+     */
+    constructor(public readonly workspace: Workspace) {
+    }
+
+    /** @inheritdoc */
+    public get<T = any, TDefault = T>(key: any, defaultValue?: TDefault): T | TDefault {
+        return this.workspace.context.extension.workspaceState.get<T | TDefault>(
+            this.normalizeKey(key),
+            defaultValue
+        );
+    }
+
+    private normalizeKey(key: any) {
+        return `vscdr${deploy_helpers.toStringSafe(key)}`;
+    }
+
+    /** @inheritdoc */
+    public async update(key: any, value: any) {
+        await this.workspace.context.extension.workspaceState.update(
+            this.normalizeKey(key),
+            value,
+        );
     }
 }

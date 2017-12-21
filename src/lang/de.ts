@@ -36,6 +36,21 @@ export const translation: Translation = {
     packages: {
         defaultName: '(Paket #{0:trim})',
     },
+    plugins: {
+        switch: {
+            button: {
+                text: "Schalter{0:trim,surround,leading_space}",
+                tooltip: "Aktuell ausgewählt:{0:trim,surround,leading_space}\n\nHier klicken, um auf eine andere Option umzuschalten...",
+            },
+            defaultOptionName: 'Schalter-Option #{0:trim}',
+            noDefined: 'Keine Schalter gefunden!',
+            noOptionsDefined: 'Es wurden keine Optionen für den Schalter{0:trim,surround,leading_space} definiert!',
+            noOptionSelected: "KEINE OPTION AUSGEWÄHLT",
+            noOptionSelected2: "Es ist keine Option für den Schalter{0:trim,surround,leading_space} ausgewählt oder definiert!",
+            selectOption: 'Wählen Sie eine Option für den Schalter{0:trim,surround,leading_space}...',
+            selectSwitch: "Wählen Sie einen Schalter...",
+        },
+    },
     targets: {
         defaultName: '(Ziel #{0:trim})',
     },

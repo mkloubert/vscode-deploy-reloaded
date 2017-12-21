@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.64",
+ "version": "0.0.65",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -47,6 +47,11 @@
    {
     "command": "extension.deploy.reloaded.listDirectory",
     "title": "List directory ...",
+    "category": "Deploy Reloaded"
+   },
+   {
+    "command": "extension.deploy.reloaded.switches",
+    "title": "Switches ...",
     "category": "Deploy Reloaded"
    },
    {
@@ -3854,6 +3859,300 @@
           "required": [
            "channels",
            "token"
+          ]
+         },
+         {
+          "type": "object",
+          "properties": {
+           "beforeDeploy": {
+            "description": "One or more target operation to define.",
+            "type": "array",
+            "items": {
+             "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "target": {
+                 "description": "The thing to open.",
+                 "type": "string",
+                 "pattern": "\\S+"
+                },
+                "type": {
+                 "enum": [
+                  "open",
+                  ""
+                 ],
+                 "type": "string",
+                 "description": "Opens something, like an app or URL on the current machine."
+                },
+                "wait": {
+                 "description": "Wait until operation has been finished or not.",
+                 "type": "boolean",
+                 "default": true
+                }
+               },
+               "required": [
+                "target"
+               ]
+              }
+             ]
+            }
+           },
+           "button": {
+            "description": "Settings for a button for that switch.",
+            "oneOf": [
+             {
+              "type": "boolean",
+              "description": "Display a button for that switch or not.",
+              "default": true
+             },
+             {
+              "type": "string",
+              "description": "The text for the button."
+             },
+             {
+              "type": "object",
+              "description": "The settings for the button.",
+              "properties": {
+               "color": {
+                "type": "string",
+                "description": "The custom (text) color for the button.",
+                "default": "#ffffff"
+               },
+               "enabled": {
+                "type": "boolean",
+                "description": "Enable button or not.",
+                "default": true
+               },
+               "isRight": {
+                "type": "boolean",
+                "description": "Set button on the right side or not.",
+                "default": false
+               },
+               "priority": {
+                "type": "number",
+                "description": "The custom priority."
+               },
+               "text": {
+                "type": "string",
+                "description": "The custom text."
+               },
+               "tooltip": {
+                "type": "string",
+                "description": "The custom tooltip."
+               }
+              }
+             }
+            ]
+           },
+           "deployed": {
+            "description": "One or more target operation to define.",
+            "type": "array",
+            "items": {
+             "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "target": {
+                 "description": "The thing to open.",
+                 "type": "string",
+                 "pattern": "\\S+"
+                },
+                "type": {
+                 "enum": [
+                  "open",
+                  ""
+                 ],
+                 "type": "string",
+                 "description": "Opens something, like an app or URL on the current machine."
+                },
+                "wait": {
+                 "description": "Wait until operation has been finished or not.",
+                 "type": "boolean",
+                 "default": true
+                }
+               },
+               "required": [
+                "target"
+               ]
+              }
+             ]
+            }
+           },
+           "description": {
+            "description": "A description for that target.",
+            "type": "string"
+           },
+           "encryptBy": {
+            "description": "The algorithm for data encryption to use.",
+            "type": "string",
+            "default": "aes-256-ctr"
+           },
+           "encryptWith": {
+            "description": "An optional password for data encryption to use.",
+            "type": "string"
+           },
+           "hideIf": {
+            "description": "Defines a list of one or more package names, which will hide this target from GUI, if one of them is selected.",
+            "type": "array",
+            "items": {
+             "description": "A name of a package.",
+             "type": "string"
+            }
+           },
+           "if": {
+            "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+            "type": "string"
+           },
+           "mappings": {
+            "description": "Defines one or more folder mappings by minimatch patterns.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The mapping to define",
+              "oneOf": [
+               {
+                "description": "The target folder.",
+                "type": "string"
+               },
+               {
+                "description": "Settings for the target folder.",
+                "type": "object",
+                "properties": {
+                 "to": {
+                  "description": "The target folder.",
+                  "type": "string"
+                 }
+                },
+                "required": [
+                 "to"
+                ]
+               }
+              ]
+             }
+            }
+           },
+           "name": {
+            "description": "The (display) name of that target.",
+            "type": "string"
+           },
+           "options": {
+            "description": "One or more options for the switch.",
+            "oneOf": [
+             {
+              "type": "array",
+              "description": "One or more options for the switch.",
+              "items": {
+               "oneOf": [
+                {
+                 "type": "array",
+                 "description": "One or more target names to deploy to.",
+                 "items": {
+                  "description": "The name of another target to deploy to.",
+                  "type": "string"
+                 }
+                },
+                {
+                 "type": "object",
+                 "description": "An option entry.",
+                 "properties": {
+                  "description": {
+                   "type": "string",
+                   "description": "The description."
+                  },
+                  "isDefault": {
+                   "type": "boolean",
+                   "description": "Is default or not.",
+                   "default": false
+                  },
+                  "name": {
+                   "type": "string",
+                   "description": "The (display) name of that option."
+                  },
+                  "targets": {
+                   "description": "One or more targets to deploy to.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "description": "The name of the target to deploy to."
+                   }
+                  }
+                 },
+                 "required": [
+                  "targets"
+                 ]
+                }
+               ]
+              }
+             }
+            ]
+           },
+           "platforms": {
+            "description": "One or more platform names the target is available for.",
+            "type": "array",
+            "items": {
+             "description": "The name of the platform.",
+             "type": "string",
+             "enum": [
+              "darwin",
+              "freebsd",
+              "linux",
+              "sunos",
+              "win32"
+             ]
+            }
+           },
+           "showIf": {
+            "description": "Defines a list of one or more package names, which will show this target in GUI, if one of them is selected.",
+            "type": "array",
+            "items": {
+             "description": "A name of a package.",
+             "type": "string"
+            }
+           },
+           "transformer": {
+            "description": "The path (or URI) to the data transformer script.",
+            "type": "string"
+           },
+           "transformerOptions": {
+            "description": "Options for the data transformer script."
+           },
+           "type": {
+            "enum": [
+             "switch"
+            ],
+            "type": "string",
+            "description": "Switches between targets."
+           }
+          },
+          "required": [
+           "options"
           ]
          },
          {

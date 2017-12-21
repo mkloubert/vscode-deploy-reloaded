@@ -43,6 +43,21 @@ export interface Translation {
     packages?: {
         defaultName?: string;
     };
+    plugins?: {
+        switch?: {
+            button?: {
+                text?: string;
+                tooltip?: string;
+            };
+            defaultOptionName?: string;
+            noDefined?: string;
+            noOptionsDefined?: string;
+            noOptionSelected?: string;
+            noOptionSelected2?: string;
+            selectOption?: string;
+            selectSwitch?: string;
+        };
+    };
     targets?: {
         defaultName?: string;
     };
