@@ -46,6 +46,7 @@ export const translation: Translation = {
             client: "HTTP client error{0:trim,leading_space}:{1:trim,surround,leading_space}",
             protocolNotSupported: "The protocol{0:trim,surround,leading_space} is not supported!",
             maxRedirections: "Maximum number of redirections ({0:trim}) reached!",
+            noRedirectLocation: "No location defined to redirect to!",
             server: "HTTP server error{0:trim,leading_space}:{1:trim,surround,leading_space}",
             unknown: "Unknown HTTP error{0:trim,leading_space}:{1:trim,surround,leading_space}",
         },
@@ -53,9 +54,14 @@ export const translation: Translation = {
     initializationCanceled: 'The initialization of the extension has been stopped.',
     no: 'No',
     packages: {
-        defaultName: '(Package #{0:trim})',
+        defaultName: "(Package #{0:trim})",
+        virtualTarget: "Virtual target for package{0:trim,surround,leading_space}",
     },
     plugins: {
+        list: {
+            defaultEntryName: "(Entry #{0:trim})",
+            selectEntry: "Select the entry with settings to use for deployment...",
+        },
         switch: {
             button: {
                 text: "Switch{0:trim,surround,leading_space}",

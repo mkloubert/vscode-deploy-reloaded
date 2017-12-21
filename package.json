@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.68",
+ "version": "0.0.69",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -616,6 +616,43 @@
               {
                "type": "object",
                "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -818,6 +855,43 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
               {
                "type": "object",
                "properties": {
@@ -1140,6 +1214,43 @@
               {
                "type": "object",
                "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -1338,6 +1449,43 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
               {
                "type": "object",
                "properties": {
@@ -1652,6 +1800,43 @@
               {
                "type": "object",
                "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -1850,6 +2035,43 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
               {
                "type": "object",
                "properties": {
@@ -2165,6 +2387,43 @@
               {
                "type": "object",
                "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -2363,6 +2622,43 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
               {
                "type": "object",
                "properties": {
@@ -2708,6 +3004,43 @@
               {
                "type": "object",
                "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -2906,6 +3239,43 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
               {
                "type": "object",
                "properties": {
@@ -3245,6 +3615,43 @@
               {
                "type": "object",
                "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -3443,6 +3850,43 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
               {
                "type": "object",
                "properties": {
@@ -3799,6 +4243,43 @@
               {
                "type": "object",
                "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -3997,6 +4478,43 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
               {
                "type": "object",
                "properties": {
@@ -4311,6 +4829,43 @@
               {
                "type": "object",
                "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -4509,6 +5064,43 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
               {
                "type": "object",
                "properties": {
@@ -4869,6 +5461,43 @@
               {
                "type": "object",
                "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -5067,6 +5696,43 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
               {
                "type": "object",
                "properties": {
@@ -5407,6 +6073,43 @@
               {
                "type": "object",
                "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -5605,6 +6308,43 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
               {
                "type": "object",
                "properties": {
@@ -6031,6 +6771,43 @@
               {
                "type": "object",
                "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -6260,6 +7037,43 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
               {
                "type": "object",
                "properties": {
@@ -6570,6 +7384,43 @@
               {
                "type": "object",
                "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -6773,6 +7624,43 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
               {
                "type": "object",
                "properties": {
@@ -7097,6 +7985,43 @@
               {
                "type": "object",
                "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -7300,6 +8225,43 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
               {
                "type": "object",
                "properties": {
@@ -7665,6 +8627,43 @@
               {
                "type": "object",
                "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -7872,6 +8871,43 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
               {
                "type": "object",
                "properties": {
@@ -8185,6 +9221,43 @@
               {
                "type": "object",
                "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -8430,6 +9503,43 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
               {
                "type": "object",
                "properties": {
@@ -8787,6 +9897,43 @@
               {
                "type": "object",
                "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -8985,6 +10132,43 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
               {
                "type": "object",
                "properties": {
@@ -9297,6 +10481,43 @@
               {
                "type": "object",
                "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -9495,6 +10716,43 @@
             "type": "array",
             "items": {
              "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
               {
                "type": "object",
                "properties": {

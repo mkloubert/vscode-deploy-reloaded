@@ -44,8 +44,9 @@ export const translation: Translation = {
     http: {
         errors: {
             client: "HTTP Client Fehler{0:trim,leading_space}:{1:trim,surround,leading_space}",
-            protocolNotSupported: "Das Protokoll{0:trim,surround,leading_space} wird nicht unterstützt!",
             maxRedirections: "Maximale Anzahl von {0:trim} Weiterleitungen erreicht!",
+            noRedirectLocation: "Kein Ziel für eine Weiterleitung angegeben!",
+            protocolNotSupported: "Das Protokoll{0:trim,surround,leading_space} wird nicht unterstützt!",
             server: "HTTP Server Fehler{0:trim,leading_space}:{1:trim,surround,leading_space}",
             unknown: "Unbekannter HTTP Fehler{0:trim,leading_space}:{1:trim,surround,leading_space}",
         },
@@ -53,9 +54,14 @@ export const translation: Translation = {
     initializationCanceled: 'Die Initialisierung dieser Erweiterung wurde abgebrochen.',
     no: 'Nein',
     packages: {
-        defaultName: '(Paket #{0:trim})',
+        defaultName: "(Paket #{0:trim})",
+        virtualTarget: "Virtuelles Ziel für Paket{0:trim,surround,leading_space}",
     },
     plugins: {
+        list: {
+            defaultEntryName: "(Eintrag #{0:trim})",
+            selectEntry: "Wählen Sie einen Eintrag mit Einstellungen für das Bereitstellen aus...",
+        },
         switch: {
             button: {
                 text: "Schalter{0:trim,surround,leading_space}",

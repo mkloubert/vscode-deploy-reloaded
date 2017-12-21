@@ -51,8 +51,9 @@ export interface Translation {
     http?: {
         errors?: {
             client?: string;
-            protocolNotSupported?: string;
             maxRedirections?: string;
+            noRedirectLocation?: string;
+            protocolNotSupported?: string;
             server?: string;
             unknown?: string;
         };
@@ -61,8 +62,13 @@ export interface Translation {
     no?: string;
     packages?: {
         defaultName?: string;
+        virtualTarget?: string;
     };
     plugins?: {
+        list?: {
+            defaultEntryName?: string;
+            selectEntry?: string;
+        };
         switch?: {
             button?: {
                 text?: string;

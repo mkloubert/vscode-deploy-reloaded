@@ -20,6 +20,7 @@ import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
 import * as deploy_mappings from './mappings';
 import * as deploy_packages from './packages';
+import * as deploy_targets_operations_command from './targets/operations/command';
 import * as deploy_targets_operations_http from './targets/operations/http';
 import * as deploy_targets_operations_open from './targets/operations/open';
 import * as deploy_targets_operations_script from './targets/operations/script';
@@ -326,6 +327,10 @@ export async function executeTargetOperations(opts: ExecuteTargetOperationOption
             case '':
             case 'open':
                 executor = deploy_targets_operations_open.execute;
+                break;
+
+            case 'command':
+                executor = deploy_targets_operations_command.execute;
                 break;
 
             case 'http':

@@ -294,14 +294,14 @@ export function getTargetsOfPackage(pkg: Package): deploy_targets.Target[] | fal
                        `${UUID.v4()}\n` + 
                        `${Moment.utc().unix()}`;
 
-            //TODO: translate
             const BATCH_TARGET = {
                 __id: ID,
                 __index: -1,
                 __searchValue: deploy_helpers.normalizeString(ID),
                 __workspace: ME,
 
-                name: `Virtual target for package '${getPackageName(pkg)}'`,
+                name: ME.t('packages.virtualTarget',
+                           getPackageName(pkg)),
                 type: 'batch',
                 targets: targets.map(t => t.name),
             };

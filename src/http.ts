@@ -179,8 +179,7 @@ function requestInner(url: string | URL.Url, opts: RequestOptions,
                                     }
                 
                                     if (deploy_helpers.isEmptyString(newLocation)) {
-                                        //TODO: translate
-                                        COMPLETED(new Error(`No location defined to redirect to!`));
+                                        COMPLETED(new Error(i18.t('http.errors.noRedirectLocation')));
                                     }
                                     else {
                                         let nextOpts: HTTP.RequestOptions;

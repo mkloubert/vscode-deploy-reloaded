@@ -88,8 +88,8 @@ class ListPlugin extends deploy_plugins.IterablePluginBase<ListTarget> {
                 ME.replaceWithValues(listTarget, e.name)
             ).trim();
             if ('' === name) {
-                //TODO: translate
-                name = `Entry #${i + 1}`;
+                name = listTarget.__workspace
+                                 .t('plugins.list.defaultEntryName', i + 1);
             }
 
             const DESCRIPTION = deploy_helpers.toStringSafe(
@@ -128,9 +128,9 @@ class ListPlugin extends deploy_plugins.IterablePluginBase<ListTarget> {
             };
         });
 
-        //TODO: translate
         const SELECTED_ITEM = await vscode.window.showQuickPick(QUICK_PICKS, {
-            placeHolder: 'Select the entry with settings to use for deployment...',
+            placeHolder: listTarget.__workspace
+                                   .t('plugins.list.selectEntry'),
         });
 
         if (!SELECTED_ITEM) {
