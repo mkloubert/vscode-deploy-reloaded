@@ -882,7 +882,7 @@ export async function glob(patterns: string | string[], opts?: Glob.IOptions) {
         dot: false,
         nocase: true,
         nodir: true,
-        nonull: true,
+        nonull: false,
         nosort: false,
         sync: false,
     };
