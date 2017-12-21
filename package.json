@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.66",
+ "version": "0.0.67",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -738,6 +738,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -876,6 +907,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -1128,6 +1190,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -1262,6 +1355,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -1506,6 +1630,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -1640,6 +1795,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -1885,6 +2071,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -2019,6 +2236,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -2294,6 +2542,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -2428,6 +2707,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -2697,6 +3007,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -2831,6 +3172,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -3117,6 +3489,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -3251,6 +3654,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -3495,6 +3929,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -3629,6 +4094,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -3919,6 +4415,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -4053,6 +4580,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -4323,6 +4881,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -4457,6 +5046,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -4813,6 +5433,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -4978,6 +5629,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -5218,6 +5900,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -5357,6 +6070,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -5611,6 +6355,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -5750,6 +6525,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -6045,6 +6851,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -6188,6 +7025,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -6431,6 +7299,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -6612,6 +7511,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -6899,6 +7829,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -7033,6 +7994,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -7275,6 +8267,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
@@ -7409,6 +8432,37 @@
                "required": [
                 "target"
                ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
               }
              ]
             }
