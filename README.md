@@ -237,3 +237,4 @@ You can also use the following, predefined, shortcuts:
 | `extension.deploy.reloaded.listDirectory` | `CTRL + ALT + L, D` | Lists a directory on remote. |
 | `extension.deploy.reloaded.pullFile` | `CTRL + ALT + P, F` | Pulls / downloads the current file. |
 | `extension.deploy.reloaded.pullWorkspace` | `CTRL + ALT + P, W` | Pulls / downloads files of a package from remote. |
+| `extension.deploy.reloaded.quickExecution` | `CTRL + SHIFT + Q` | Quick JavaScript code execution. |

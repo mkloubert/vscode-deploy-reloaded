@@ -25,6 +25,7 @@ import * as Enumerable from 'node-enumerable';
 import * as FS from 'fs';
 import * as FSExtra from 'fs-extra';
 import * as Glob from 'glob';
+import * as i18 from './i18';
 const IsBinaryFile = require("isbinaryfile");
 import * as IsStream from 'is-stream';
 const MergeDeep = require('merge-deep');
@@ -374,10 +375,23 @@ export function cloneObjectFlat<T>(val: T,
     }
 
     const CLONED_OBJ: T = <any>{};
+    const ADD_PROPERTY = (prop: string, v: any) => {
+        Object.defineProperty(CLONED_OBJ, prop, {
+            configurable: true,
+            enumerable: true,
+
+            get: () => {
+                return v;
+            },
+            set: (newValue) => {
+                v = newValue;
+            },
+        });
+    };
 
     const THIS_ARGS: any = useNewObjectForFunctions ? CLONED_OBJ : val;
 
-    for (let P in val) {
+    for (const P in val) {
         let valueToSet: any = val[P];
         if (isFunc(valueToSet)) {
             const FUNC = valueToSet;
@@ -387,7 +401,7 @@ export function cloneObjectFlat<T>(val: T,
             };
         }
 
-        CLONED_OBJ[P] = valueToSet;
+        ADD_PROPERTY(P, valueToSet);
     }
 
     return CLONED_OBJ;
@@ -1224,6 +1238,34 @@ export function lstat(path: string | Buffer) {
             COMPLETED(e);
         }
     });
+}
+
+/**
+ * Clones an object and makes it non disposable.
+ * 
+ * @param {TObj} obj The object to clone.
+ * @param {boolean} [throwOnDispose] Throw error when coll 'dispose()' method or not.
+ * 
+ * @return {TObj} The cloned object. 
+ */
+export function makeNonDisposable<TObj extends { dispose: () => any }>(
+    obj: TObj,
+    throwOnDispose = true,
+): TObj {
+    throwOnDispose = toBooleanSafe(throwOnDispose, true);
+
+    const CLONED_OBJ: any = cloneObjectFlat(obj);
+    if (CLONED_OBJ) {
+        if (isFunc(CLONED_OBJ.dispose)) {
+            CLONED_OBJ.dispose = () => {
+                if (throwOnDispose) {
+                    throw new Error(i18.t('disposeNotAllowed'));
+                }
+            };
+        }
+    }
+
+    return CLONED_OBJ;
 }
 
 /**

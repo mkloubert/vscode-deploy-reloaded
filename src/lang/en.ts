@@ -33,6 +33,7 @@ export const translation: Translation = {
             failed: "Could not compare current file:{0:trim,surround,leading_space}",
         },
     },
+    disposeNotAllowed: "Cannot invoke 'dispose()' method!",
     editors: {
         active: {
             noOpen: "No active text editor found!",
@@ -160,6 +161,8 @@ export const translation: Translation = {
         notSupported: "SQL type{0:trim,surround,leading_space} is not supported!",
     },
     targets: {
+        atLeastOneNotFound: "At least one target was not found!",
+        cannotDefineOtherAsSource: "Cannot use target{0:trim,surround,leading_space}!",
         defaultName: "(Target #{0:trim})",
         doesNotExist: "Target{0:trim,surround,leading_space} does not exist!",
         errors: {
@@ -232,6 +235,11 @@ export const translation: Translation = {
         currentlyActive: "'vs-deploy' extension is currently active. It is recommended to DEACTIVATE IT, before you continue and use the new extension!",
     },
     workspaces: {
+        errors: {
+            cannotDetectMappedPathInfoForFile: "Cannot detect mapped path information for file{0:trim,surround,leading_space}!",
+            cannotDetectPathInfoForFile: "Cannot detect path information for file{0:trim,surround,leading_space}!",
+            cannotUseTargetForFile: "Cannot use target{0:trim,surround,leading_space} for file{1:trim,surround,leading_space}!",
+        },
         noneFound: "No workspaces found!",
         selectWorkspace: "Select a workspace ...",
     },

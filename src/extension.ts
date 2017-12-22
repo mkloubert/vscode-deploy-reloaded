@@ -971,6 +971,22 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 }
             }),
 
+            // quick code execution
+            vscode.commands.registerCommand('extension.deploy.reloaded.quickExecution', async () => {
+                try {
+                    await deploy_tools_quick_execution._1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
+                        currentContext,
+                        WORKSPACES.map(ws => ws),
+                        activeWorkspaces.map(aws => aws),
+                    );
+                }
+                catch (e) {
+                    vscode.window.showErrorMessage(
+                        i18.t('tools.quickExecution.errors.failed', e)  
+                    );
+                }
+            }),
+
             // select workspace
             vscode.commands.registerCommand('extension.deploy.reloaded.selectWorkspace', async () => {
                 try {
@@ -1066,16 +1082,10 @@ async function activateExtension(context: vscode.ExtensionContext) {
             // tools
             vscode.commands.registerCommand('extension.deploy.reloaded.showTools', async () => {
                 try {
-                    
-
                     const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = [
                         {
                             action: async () => {
-                                await deploy_tools_quick_execution._1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
-                                    currentContext,
-                                    WORKSPACES.map(ws => ws),
-                                    activeWorkspaces.map(aws => aws),
-                                );
+                                await vscode.commands.executeCommand('extension.deploy.reloaded.quickExecution');
                             },
                             label: '$(code)  ' + i18.t('tools.quickExecution.label'),
                             description: i18.t('tools.quickExecution.description'),

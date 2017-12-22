@@ -696,22 +696,30 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * @param {deploy_targets.Target} target The target.
      */
     public getNameAndPathForFileDeployment(file: string, target: deploy_targets.Target) {
+        const ME = this;
+
         file = deploy_helpers.toStringSafe(file);
 
         if (!target) {
             return;
         }
 
-        if (!this.canBeHandledByMe) {
-            // TODO: translate
-            this.context.outputChannel.append(`Target '${deploy_targets.getTargetName(target)}' cannot be used for file '${file}'!`);
+        if (!ME.canBeHandledByMe) {
+            ME.context.outputChannel.append(
+                ME.t('workspaces.errors.cannotUseTargetForFile',
+                     deploy_targets.getTargetName(target), file)
+            );
+
             return false;
         }
 
-        const NAME_AND_PATH = this.toNameAndPath(file);
+        const NAME_AND_PATH = ME.toNameAndPath(file);
         if (false === NAME_AND_PATH) {
-            // TODO: translate
-            this.context.outputChannel.append(`Cannot detect path information for file '${file}'!`);
+            ME.context.outputChannel.append(
+                ME.t('workspaces.errors.cannotDetectPathInfoForFile',
+                     file)
+            );
+
             return false;
         }
 
@@ -719,10 +727,13 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                                                                    NAME_AND_PATH.path,
                                                                    NAME_AND_PATH.name);
 
-        const MAPPED_NAME_AND_PATH = this.toNameAndPath(MAPPED_PATH);
+        const MAPPED_NAME_AND_PATH = ME.toNameAndPath(MAPPED_PATH);
         if (false === MAPPED_NAME_AND_PATH) {
-            // TODO: translate
-            this.context.outputChannel.append(`Cannot detect mapped path information for file '${file}'!`);
+            ME.context.outputChannel.append(
+                ME.t('workspaces.errors.cannotDetectMappedPathInfoForFile',
+                     file)
+            );
+
             return false;
         }
 

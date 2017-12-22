@@ -40,6 +40,7 @@ export interface Translation {
             failed?: string;
         };
     };
+    disposeNotAllowed?: string;
     editors?: {
         active?: {
             noOpen?: string;
@@ -165,6 +166,8 @@ export interface Translation {
         notSupported?: string;
     };
     targets?: {
+        atLeastOneNotFound?: string;
+        cannotDefineOtherAsSource?: string;
         defaultName?: string;
         doesNotExist?: string;
         errors?: {
@@ -237,6 +240,11 @@ export interface Translation {
         currentlyActive?: string;
     };
     workspaces?: {
+        errors?: {
+            cannotDetectMappedPathInfoForFile?: string;
+            cannotDetectPathInfoForFile?: string;
+            cannotUseTargetForFile?: string;
+        };
         noneFound?: string;
         selectWorkspace?: string;
     };

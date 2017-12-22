@@ -33,6 +33,7 @@ export const translation: Translation = {
             failed: "Die aktuelle Datei konnte nicht verglichen werden:{0:trim,surround,leading_space}",
         },
     },
+    disposeNotAllowed: "'dispose()' Methode kann nicht aufgerufen werden!",
     editors: {
         active: {
             noOpen: "Es ist derzeit kein aktiver Texteditor geöffnet!",
@@ -159,6 +160,8 @@ export const translation: Translation = {
         notSupported: "Der SQL-Typ{0:trim,surround,leading_space} wird nicht unterstützt!",
     },
     targets: {
+        atLeastOneNotFound: "Mindestens ein Ziel konnte nicht gefunden werden!",
+        cannotDefineOtherAsSource: "Das Ziel{0:trim,surround,leading_space} kann nicht verwendet werden!",
         defaultName: "(Ziel #{0:trim})",
         doesNotExist: "Das Ziel{0:trim,surround,leading_space} existiert nicht!",
         errors: {
@@ -230,6 +233,11 @@ export const translation: Translation = {
         currentlyActive: "Die 'vs-deploy' Erweiterung ist derzeit aktiv. Es wird empfohlen diese zu DEAKTIVIEREN, bevor Sie forfahren und die neue Erweiterung nutzen!",
     },
     workspaces: {
+        errors: {
+            cannotDetectMappedPathInfoForFile: "Gemappte Pfad-Informationen konnten für die Datei{0:trim,surround,leading_space} nicht ermittelt werden!",
+            cannotDetectPathInfoForFile: "Pfad-Informationen konnten für die Datei{0:trim,surround,leading_space} nicht ermittelt werden!",
+            cannotUseTargetForFile: "Kann das Ziel{0:trim,surround,leading_space} nicht für die Datei{1:trim,surround,leading_space} verwenden!",
+        },
         noneFound: "Keine Arbeitsbereiche gefunden!",
         selectWorkspace: "Wählen Sie einen Arbeitsbereich ...",
     },

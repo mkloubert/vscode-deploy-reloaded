@@ -19,14 +19,14 @@
 /**
  * Quick execution of JavaScript code.
  * 
- * @param {any} _9cecd2fa49be45138bb5c73f1fa33242_152942589 The extension context.
- * @param {any|any[]} _946ed8fa480a4882bfe021a39aafaea6_823684747 List of all workspaces.
+ * @param {any} extension The extension context.
+ * @param {any|any[]} allWorkspaces List of all workspaces.
  * @param {any|any[]} activeWorkspaces List of all active workspaces.
  */
 export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
-    _9cecd2fa49be45138bb5c73f1fa33242_152942589: any,
-    _946ed8fa480a4882bfe021a39aafaea6_823684747: any | any[],
-    _1cec53bb4eda4fff8c3bb572dd0ce347_1551074281: any | any[],
+    extension: any,
+    allWorkspaces: any | any[],
+    activeWorkspaces: any | any[],
 ) {
     // vscode
     const $vs = require('vscode');
@@ -39,85 +39,86 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
     // logger
     const $l = require('../log').CONSOLE;
 
-    try {
-        // all workspaces
-        const $w: any[] = $h.asArray(_946ed8fa480a4882bfe021a39aafaea6_823684747);
-        // all active workspaces
-        const $aw: any[] = $h.asArray(_1cec53bb4eda4fff8c3bb572dd0ce347_1551074281);
-        
-        // require
-        const $r = (id: any) => {
-            return $h.requireFromExtension(id);
-        };
-        
-        const $unwrap = async (val: any, maxDepth?: number, currentDepth?: number) => {
-            if (isNaN(maxDepth)) {
-                maxDepth = 64;
-            }
-            if (isNaN(currentDepth)) {
-                currentDepth = 0;
-            }
+    // all workspaces
+    const $w: any[] = $h.asArray(allWorkspaces).map(ws => {
+        return $h.makeNonDisposable(ws);
+    });
+    // active workspaces
+    const $aw: any[] = $h.asArray(activeWorkspaces).map(aws => {
+        return $h.makeNonDisposable(aws);
+    });
+    
+    // require
+    const $r = (id: any) => {
+        return $h.requireFromExtension(id);
+    };
+    
+    const $unwrap = async (val: any, maxDepth?: number, currentDepth?: number) => {
+        if (isNaN(maxDepth)) {
+            maxDepth = 64;
+        }
+        if (isNaN(currentDepth)) {
+            currentDepth = 0;
+        }
 
-            if (currentDepth < maxDepth) {
-                if (val) {
-                    if ('function' === typeof val) {
-                        val = $unwrap(
-                            Promise.resolve(
-                                val()
-                            ),
-                            maxDepth, currentDepth + 1
-                        );
-                    }
+        if (currentDepth < maxDepth) {
+            if (val) {
+                if ('function' === typeof val) {
+                    val = $unwrap(
+                        Promise.resolve(
+                            val()
+                        ),
+                        maxDepth, currentDepth + 1
+                    );
                 }
             }
-
-            return val;
-        };
-
-        // toStringSafe()
-        const $s = async (val: any) => {
-            return $h.toStringSafe(
-                await $unwrap(val)
-            );
-        };
-
-        // eval()
-        const $e = async (code: any) => {
-            return await $unwrap(
-                eval(await $s(code))
-            );
-        };
-
-        // code to execute
-        const _def303d6_7db1_4511_8365_e93ed7979b92_1379012881 = await $vs.window.showInputBox(
-            {
-                placeHolder: $i18.t('tools.quickExecution.inputCode'),
-                value: await $s(_9cecd2fa49be45138bb5c73f1fa33242_152942589.workspaceState.get('vscdrLastQuickExecutionCode')),
-            }
-        );
-        if ($h.isEmptyString(_def303d6_7db1_4511_8365_e93ed7979b92_1379012881)) {
-            return;
         }
 
-        // save last executed code
-        _9cecd2fa49be45138bb5c73f1fa33242_152942589.workspaceState.update('vscdrLastQuickExecutionCode',
-                                                                          _def303d6_7db1_4511_8365_e93ed7979b92_1379012881);
+        return val;
+    };
 
-        const RESULT = await Promise.resolve(
-            $e(_def303d6_7db1_4511_8365_e93ed7979b92_1379012881)
+    // toStringSafe()
+    const $s = async (val: any) => {
+        return $h.toStringSafe(
+            await $unwrap(val)
         );
+    };
 
-        if ('undefined' !== typeof RESULT) {
-            $vs.window.showInformationMessage(
-                $h.toStringSafe( RESULT )
-            ).then(() => {}, (err) => {
-                $l.trace(err, 'quickexecution._1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(1)');
-            });
+    // eval()
+    const $e = async (code: any) => {
+        return await $unwrap(
+            eval(await $s(code))
+        );
+    };
+
+    // code to execute
+    const _def303d6_7db1_4511_8365_e93ed7979b92_1379012881 = await $vs.window.showInputBox(
+        {
+            placeHolder: $i18.t('tools.quickExecution.inputCode'),
+            value: await $s(extension.workspaceState.get('vscdrLastQuickExecutionCode')),
         }
+    );
+    if ($h.isEmptyString(_def303d6_7db1_4511_8365_e93ed7979b92_1379012881)) {
+        return;
     }
-    catch (e) {
-        $vs.window.showErrorMessage(
-            $i18.t('tools.quickExecution.errors.failed', e)  
-        );
+
+    // save last executed code
+    extension.workspaceState.update('vscdrLastQuickExecutionCode',
+                                    _def303d6_7db1_4511_8365_e93ed7979b92_1379012881);
+
+    allWorkspaces = undefined;
+    activeWorkspaces = undefined;
+    extension = undefined;
+
+    const RESULT = await Promise.resolve(
+        $e(_def303d6_7db1_4511_8365_e93ed7979b92_1379012881)
+    );
+
+    if ('undefined' !== typeof RESULT) {
+        $vs.window.showInformationMessage(
+            $h.toStringSafe( RESULT )
+        ).then(() => {}, (err) => {
+            $l.trace(err, 'quickexecution._1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(1)');
+        });
     }
 }

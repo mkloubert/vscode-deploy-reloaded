@@ -1145,16 +1145,16 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
             return;
         }
 
+        const WORKSPACE = target.__workspace;
+
         const TARGETS = deploy_targets.getTargetsByName(target.targets, target.__workspace.getTargets());
         if (false === TARGETS) {
-            // TODO: translate
-            throw new Error(`At least one target could not be found!`);
+            throw new Error(WORKSPACE.t('targets.atLeastOneNotFound'));
         }
 
         if (throwIfNonFound) {
             if (TARGETS.length < 1) {
-                // TODO: translate
-                throw new Error(`No TARGET defined!`);
+                throw new Error(WORKSPACE.t('targets.noneFound'));
             }
         }
 
@@ -1167,7 +1167,8 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
             );
 
             if (MY_NAME === OTHER_NAME) {
-                throw new Error(`Cannot define '${OTHER_NAME}' as target source!`);
+                throw new Error(WORKSPACE.t('targets.cannotDefineOtherAsSource',
+                                            OTHER_NAME));
             }
         });
 
