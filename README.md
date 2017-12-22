@@ -225,3 +225,15 @@ Press `F1` and enter one of the following commands:
 | `Deploy Reloaded: Pull ...` | Pull or download files from remote. |
 | `Deploy Reloaded: Switches ...` | Handle [switch targets](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_switch). |
 | `Deploy Reloaded: Tools ...` | A set of helpful tools. |
+
+You can also you the following, predefined, shortcuts:
+
+| Command | Shortcut (`CTRL` is `CMD` on Mac) | Description |
+| ------- | --------------------------------- | ----------- |
+| `extension.deploy.reloaded.deleteFile` | `CTRL + ALT + D, F` | Deletes the current file on remote. |
+| `extension.deploy.reloaded.deletePackage` | `CTRL + ALT + D, W` | Deletes files of a package on remote. |
+| `extension.deploy.reloaded.deployFile` | `CTRL + ALT + F` | Deploys the current file. |
+| `extension.deploy.reloaded.deployWorkspace` | `CTRL + ALT + W` | Deploys files of a package. |
+| `extension.deploy.reloaded.listDirectory` | `CTRL + ALT + L, D` | Lists a directory on remote. |
+| `extension.deploy.reloaded.pullFile` | `CTRL + ALT + P, F` | Pulls / downloads the current file. |
+| `extension.deploy.reloaded.pullWorkspace` | `CTRL + ALT + P, W` | Pulls / downloads files of a package from remote. |

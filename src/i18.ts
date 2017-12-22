@@ -89,6 +89,11 @@ export interface Translation {
             subject?: string;
             text?: string;
         };
+        script?: {
+            noScriptFunction?: string;
+            noScriptModule?: string;
+            scriptNotFound?: string;
+        };
         switch?: {
             button?: {
                 text?: string;
@@ -121,6 +126,7 @@ export interface Translation {
     };
     targets?: {
         defaultName?: string;
+        doesNotExist?: string;
         noneFound?: string;
         noPluginsFound?: string;
         noWorkspaceFound?: string;

@@ -466,9 +466,8 @@ export function getTargetsByName(targetNames: string | string[],
 
     if (NON_EXISTING_TARGETS.length > 0) {
         NON_EXISTING_TARGETS.forEach(tn => {
-            //TODO: translate
             deploy_helpers.showWarningMessage(
-                `The target '${tn}' does NOT EXIST!`
+                i18.t('targets.doesNotExist', tn)
             );
         });
 
@@ -616,12 +615,11 @@ export async function showTargetQuickPick<TTarget extends Target = Target, TResu
     });
 
     if (QUICK_PICK_ITEMS.length < 1) {
-        //TODO: translate
-        await deploy_helpers.showWarningMessage(
-            `No targets found!`
+        deploy_helpers.showWarningMessage(
+            i18.t('targets.noneFound')
         );
 
-        return;
+        return ifNoTargets;
     }
 
     let selectedItem: deploy_contracts.ActionQuickPick;

@@ -177,7 +177,9 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
     }
 
     private async executeScript(args: ScriptArguments): Promise<any> {
-        let script = this.replaceWithValues(
+        const ME = this;
+
+        let script = ME.replaceWithValues(
             args.target,
             args.target.script
         );
@@ -190,8 +192,8 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
         );
 
         if (false === SCRIPT_FILE) {
-            //TODO: translate
-            throw new Error(`Deploy script '${script}' not found!`);
+            throw new Error(ME.t(args.target,
+                                 'plugins.script.scriptNotFound', script));
         }
 
         const SCRIPT_MODULE = await deploy_helpers.loadModule<ScriptModule>(SCRIPT_FILE, args.target.cache);
@@ -203,17 +205,13 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
                 );
             }
             else {
-                //TODO: translate
-                deploy_log.CONSOLE
-                          .warn(`Deploy script '${SCRIPT_FILE}' contains no 'execute()' method!`,
-                                'plugins.script.executeScript(2)');
+                throw new Error(ME.t(args.target,
+                                     'plugins.script.noScriptFunction', SCRIPT_FILE));
             }
         }
         else {
-            //TODO: translate
-            deploy_log.CONSOLE
-                      .warn(`Deploy script '${SCRIPT_FILE}' contains no module!`,
-                            'plugins.script.executeScript(1)');
+            throw new Error(ME.t(args.target,
+                                 'plugins.script.noScriptModule', SCRIPT_FILE));
         }
     }
 

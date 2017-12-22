@@ -84,6 +84,11 @@ export const translation: Translation = {
                   "Gesendet mit der Visual Studio Code Erweiterung 'Deploy Reloaded' (vscode-deploy-reloaded):\n" + 
                   "https://github.com/mkloubert/vscode-deploy-reloaded",
         },
+        script: {
+            noScriptFunction: "Das Skript{0:trim,surround,leading_space} enthält keine 'execute' Funktion!",
+            noScriptModule: "Das Skript{0:trim,surround,leading_space} enthält kein Modul!",
+            scriptNotFound: "Das Skript{0:trim,surround,leading_space} wurde nicht gefunden!",
+        },
         switch: {
             button: {
                 text: "Schalter{0:trim,surround,leading_space}",
@@ -116,6 +121,7 @@ export const translation: Translation = {
     },
     targets: {
         defaultName: "(Ziel #{0:trim})",
+        doesNotExist: "Das Ziel{0:trim,surround,leading_space} existiert nicht!",
         noneFound: "Keine Ziele gefunden!",
         noPluginsFound: "Es wurden keine passenden Plug-Ins gefunden!",
         noWorkspaceFound: "Keinen passenden Arbeitsbereich gefunden!",
