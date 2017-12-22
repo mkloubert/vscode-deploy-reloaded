@@ -190,11 +190,33 @@ export const translation: Translation = {
             askForNewTargetName: "Please define the name of the new target ...",
             askForScriptPath: "What should be the path of the new file?",
             askForUpdatingSettings: "Save script as new target in settings?",
+            description: "Creates a basic script for deploying files",
             errors: {
                 targetAlreadyDefined: "A target called{0:trim,surround,leading_space} has already been defined in the settings!",
                 updateTargetSettingsFailed: "Could not write new script target entry to settings:{0:trim,surround,leading_space}",
             },
+            label: "Create deploy script ...",
             scriptCreated: "The script{0:trim,surround,leading_space} has been created successfully.",
+        },
+        createDeployOperationScript: {
+            askForNewOperationName: "Enter an optional display name for the new operation ...",
+            askForOperationType: {
+                afterDeployment: "After deployment",
+                beforeDeploy: "Before deployment starts",
+                placeHolder: "When should the script be executed?",
+            },
+            askForScriptPath: "What should be the path of the new file?",
+            askForUpdatingSettings: "Save script in settings?",
+            description: "Creates a basic script for a deploy operation",
+            errors: {
+                updateSettingsFailed: "Could not write new script to settings:{0:trim,surround,leading_space}",
+            },
+            label: "Create deploy operation script ...",
+            scriptCreated: "The script{0:trim,surround,leading_space} has been created successfully.",
+            selectTarget: "Select a target ...",
+        },
+        errors: {
+            operationFailed: "Tool operation failed (s. debug output 'CTRL + SHIFT + Y')!",
         },
     },
     'vs-deploy': {

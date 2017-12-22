@@ -195,11 +195,33 @@ export interface Translation {
             askForNewTargetName?: string;
             askForScriptPath?: string;
             askForUpdatingSettings?: string;
+            description?: string;
             errors?: {
                 targetAlreadyDefined?: string;
                 updateTargetSettingsFailed?: string;
             };
+            label?: string;
             scriptCreated?: string;
+        };
+        createDeployOperationScript?: {
+            askForNewOperationName?: string;
+            askForOperationType?: {
+                afterDeployment?: string;
+                beforeDeploy?: string;
+                placeHolder?: string;
+            };
+            askForScriptPath?: string;
+            askForUpdatingSettings?: string;
+            description?: string;
+            errors?: {
+                updateSettingsFailed?: string;
+            };
+            label?: string;
+            scriptCreated?: string;
+            selectTarget?: string;
+        };
+        errors?: {
+            operationFailed?: string;
         };
     };
     'vs-deploy'?: {

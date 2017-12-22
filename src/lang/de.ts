@@ -189,11 +189,32 @@ export const translation: Translation = {
             askForNewTargetName: "Geben Sie bitte den Namen des neuen Ziels ein ...",
             askForScriptPath: "Wo soll das Skript gespeichert werden?",
             askForUpdatingSettings: "Soll das neue Skript als neues Ziel in den Einstellungen gespeichert werden?",
+            description: "Erstellt ein Basis-Skript zum Bereitstellen von Dateien",
             errors: {
                 targetAlreadyDefined: "Ein Ziel mit dem Namen{0:trim,surround,leading_space} ist bereits in den Einstellungen vorhanden!",
                 updateTargetSettingsFailed: "Konnte das Skript nicht in den Einstellungen speichern:{0:trim,surround,leading_space}",
             },
+            label: "Bereitstellungs-Skript erstellen ...",
             scriptCreated: "Das Skript{0:trim,surround,leading_space} wurde erfolgreich erstellt.",
+        },
+        createDeployOperationScript: {
+            askForNewOperationName: "Geben Sie (optional) einen Anzeigenamen für die Operation an ...",
+            askForOperationType: {
+                afterDeployment: "Nach dem Bereitstellen",
+                beforeDeploy: "Vor dem Bereitstellen",
+                placeHolder: "Wann soll das Skript aufgerufen werden?",
+            },
+            askForScriptPath: "Wo soll das Skript gespeichert werden?",
+            askForUpdatingSettings: "Soll das neue Skript in den Einstellungen gespeichert werden?",
+            description: "Erstellt ein Basis-Skript für eine Bereitstellungs-Operation",
+            errors: {
+                updateSettingsFailed: "Konnte das Skript nicht in den Einstellungen speichern:{0:trim,surround,leading_space}",
+            },
+            scriptCreated: "Das Skript{0:trim,surround,leading_space} wurde erfolgreich erstellt.",
+            selectTarget: "Wählen Sie ein Ziel ...",
+        },
+        errors: {
+            operationFailed: "Konnte Funktion nicht ausführen (s. Debugkonsole 'STRG + SHIFT + Y')!",
         },
     },
     'vs-deploy': {

@@ -439,3 +439,305 @@ function pullFiles(args) {
         await vscode.workspace.openTextDocument(scriptFile)
     );
 }
+
+/**
+ * Creates a script for a deploy operation.
+ * 
+ * @param {deploy_workspaces.Workspace|deploy_workspaces.Workspace[]} workspaces One or more workspaces. 
+ */
+export async function createDeployOperationScript(workspaces: deploy_workspaces.Workspace | deploy_workspaces.Workspace[]) {
+    workspaces = deploy_helpers.asArray(workspaces);
+
+    const QUICK_PICKS: deploy_contracts.ActionQuickPick<deploy_workspaces.Workspace>[] = workspaces.map(ws => {
+        return {
+            label: ws.name,
+            description: '',
+            detail: ws.rootPath,
+            state: ws,
+        };
+    });
+
+    if (QUICK_PICKS.length < 1) {
+        deploy_helpers.showWarningMessage(
+            i18.t('workspaces.noneFound')
+        );
+
+        return;
+    }
+
+    let selectedWorkspace: deploy_workspaces.Workspace;
+
+    if (1 === QUICK_PICKS.length) {
+        selectedWorkspace = QUICK_PICKS[0].state;
+    }
+    else {
+        const SELECTED_ITEM = await vscode.window.showQuickPick(QUICK_PICKS, {
+            placeHolder: i18.t('workspaces.selectWorkspace'),
+        });
+
+        if (SELECTED_ITEM) {
+            selectedWorkspace = SELECTED_ITEM.state;
+        }
+    }
+
+    if (!selectedWorkspace) {
+        return;
+    }
+
+    let scriptFile: string;
+    let operationEvent: deploy_targets.TargetOperationEvent;
+    
+    const OPERATION_TYPE_QUICK_PICKS: deploy_contracts.ActionQuickPick[] = [
+        {
+            label: selectedWorkspace.t('tools.createDeployOperationScript.askForOperationType.afterDeployment'),
+            description: '',
+            action: () => {
+                operationEvent = deploy_targets.TargetOperationEvent.AfterDeployed;
+                scriptFile = './afterDeployed.js';
+            }
+        },
+
+        {
+            label: selectedWorkspace.t('tools.createDeployOperationScript.askForOperationType.beforeDeploy'),
+            description: '',
+            action: () => {
+                operationEvent = deploy_targets.TargetOperationEvent.BeforeDeploy;
+                scriptFile = './beforeDeploy.js';
+            }
+        },
+    ];
+
+    const SELECTED_OPERATION_TYPE_QUICK_PICK = await vscode.window.showQuickPick(
+        OPERATION_TYPE_QUICK_PICKS,
+        {
+            placeHolder: selectedWorkspace.t('tools.createDeployOperationScript.askForOperationType.placeHolder'),
+        }
+    );
+    if (!SELECTED_OPERATION_TYPE_QUICK_PICK) {
+        return;
+    }
+
+    SELECTED_OPERATION_TYPE_QUICK_PICK.action();
+
+    let scopeDir = selectedWorkspace.rootPath;
+
+    if (await deploy_helpers.exists(selectedWorkspace.settingFolder)) {
+        if ((await deploy_helpers.lstat(selectedWorkspace.settingFolder)).isDirectory()) {
+            scopeDir = selectedWorkspace.settingFolder;
+        }
+    }
+
+    if (!Path.isAbsolute(scriptFile)) {
+        scriptFile = Path.resolve(
+            Path.join(scopeDir, scriptFile)
+        );
+    }
+
+    // find unique name
+    let doesExist: boolean;
+    let index = 0;
+    do {
+        doesExist = false;
+
+        if (await deploy_helpers.exists(scriptFile)) {
+            if ((await deploy_helpers.lstat(scriptFile)).isFile()) {
+                doesExist = true;
+            }
+        }
+
+        if (doesExist) {
+            ++index;
+
+            const DIR = Path.dirname(scriptFile);
+            const EXT = Path.extname(scriptFile);
+            const BASENAME = Path.basename(scriptFile, EXT);
+
+            scriptFile = Path.resolve(
+                Path.join(DIR,
+                          `${BASENAME}-${index}${EXT}`)
+            );
+        }
+    }
+    while (doesExist);
+
+    scriptFile = await vscode.window.showInputBox({
+        prompt: selectedWorkspace.t('tools.createDeployOperationScript.askForScriptPath'),
+        value: scriptFile,
+    });
+
+    if (deploy_helpers.isEmptyString(scriptFile)) {
+        return;
+    }
+
+    let scriptContent = `// Node.js API provided by Visual Studio Code: https://nodejs.org/en/docs
+const Path = require('path');
+
+// Visual Studio Code API: https://code.visualstudio.com/docs/extensionAPI/vscode-api
+const vscode = require('vscode');
+
+
+// entry point
+exports.execute = function(args) {
+    // args: https://mkloubert.github.io/vscode-deploy-reloaded/interfaces/_targets_operations_script_.scripttargetoperationexecutionarguments.html
+
+    // you also can execute the
+    // function synchronous
+    return new Promise((resolve, reject) => {
+        try {
+            // the root path of the underyling workspace
+            const WORKSPACE_DIR = args.context.target.__workspace.rootPath;
+
+
+            // replace the following TEST CODE
+            for (let file of args.context.files) {
+                vscode.window.showWarningMessage(
+                    'File: ' + Path.join(WORKSPACE_DIR, file)
+                );
+            }
+
+
+            // call this on SUCCESS
+            resolve();
+        }
+        catch (e) {
+            // call this on ERROR
+            reject( e );
+        }
+    });
+}
+`;
+
+    await deploy_helpers.writeFile(scriptFile,
+                                   new Buffer(scriptContent, 'utf8'));
+
+    const WORKSPACE_TARGETS = selectedWorkspace.getTargets();
+    if (WORKSPACE_TARGETS.length > 0) {
+        try {
+            const ASK_IF_WRITE_TO_SETTINGS_ITEMS: deploy_contracts.MessageItemWithValue[] = [
+                {
+                    isCloseAffordance: true,
+                    title: selectedWorkspace.t('no'),
+                    value: 0,
+                },
+
+                {
+                    title: selectedWorkspace.t('yes'),
+                    value: 1,
+                }
+            ];
+
+            const SELECTED_ITEM: deploy_contracts.MessageItemWithValue =
+                await selectedWorkspace.showWarningMessage
+                                    .apply(selectedWorkspace,
+                                            [ <any>selectedWorkspace.t('tools.createDeployOperationScript.askForUpdatingSettings') ].concat(ASK_IF_WRITE_TO_SETTINGS_ITEMS));
+
+            if (SELECTED_ITEM) {
+                if (1 === SELECTED_ITEM.value) {
+                    await deploy_targets.showTargetQuickPick(
+                        WORKSPACE_TARGETS,
+                        selectedWorkspace.t('tools.createDeployOperationScript.selectTarget'),
+                        async (selectedTarget) => {
+                            const CFG = selectedWorkspace.config;
+
+                            const TARGETS_FROM_CFG = deploy_helpers.asArray(
+                                CFG.targets
+                            );
+
+                            const CLONED_CFG = deploy_helpers.cloneObjectWithoutFunctions(CFG);
+                            (<any>CLONED_CFG).targets = deploy_helpers.cloneObject(TARGETS_FROM_CFG);
+
+                            const SETTINGS_FILE = Path.resolve(
+                                selectedWorkspace.configSource.resource.fsPath,
+                            );
+                            const SETTINGS_SECTION = selectedWorkspace.configSource.section;
+
+                            const CLONED_TARGETS_FROM_CFG = deploy_helpers.asArray(
+                                CLONED_CFG.targets
+                            );
+
+                            let targetScriptPath = scriptFile;
+                            if (scriptFile.startsWith(selectedWorkspace.settingFolder)) {
+                                targetScriptPath = './' + deploy_helpers.normalizePath(
+                                    scriptFile.substr(selectedWorkspace.settingFolder.length)
+                                );
+                            }
+
+                            let operationStorage: deploy_targets.TargetOperationValue[] | false = false;
+                            let updater: () => void;
+
+                            const TARGET_ITEM_FROM_CLONED_CFG = CLONED_TARGETS_FROM_CFG[selectedTarget.__index];
+                            if (TARGET_ITEM_FROM_CLONED_CFG) {
+                                switch (operationEvent) {
+                                    case deploy_targets.TargetOperationEvent.AfterDeployed:
+                                        operationStorage = deploy_helpers.asArray(TARGET_ITEM_FROM_CLONED_CFG.deployed);
+                                        updater = () => {
+                                            (<any>TARGET_ITEM_FROM_CLONED_CFG).deployed = <any>operationStorage;
+                                        };
+                                        break;
+
+                                    case deploy_targets.TargetOperationEvent.BeforeDeploy:
+                                        operationStorage = deploy_helpers.asArray(TARGET_ITEM_FROM_CLONED_CFG.beforeDeploy);
+                                        updater = () => {
+                                            (<any>TARGET_ITEM_FROM_CLONED_CFG).beforeDeploy = <any>operationStorage;
+                                        };
+                                        break;
+                                }
+                            }
+
+                            if (false === operationStorage) {
+                                return;
+                            }
+
+                            let newTargetOperationName = await vscode.window.showInputBox({
+                                placeHolder: selectedWorkspace.t('tools.createDeployOperationScript.askForNewOperationName'),
+                            });
+                            newTargetOperationName = deploy_helpers.toStringSafe(newTargetOperationName).trim();
+                            if ('' === newTargetOperationName) {
+                                newTargetOperationName = undefined;
+                            }
+
+                            operationStorage.push(<any>{
+                                name: newTargetOperationName,
+                                script: targetScriptPath,                                
+                                type: 'script'
+                            });
+
+                            updater();
+
+                            let settings: any;
+                            if (await deploy_helpers.exists(SETTINGS_FILE)) {
+                                settings = JSON.parse(
+                                    (await deploy_helpers.readFile(SETTINGS_FILE)).toString('utf8')
+                                );
+                            }
+
+                            if (deploy_helpers.isNullOrUndefined(settings)) {
+                                settings = {};
+                            }
+
+                            settings[SETTINGS_SECTION] = CLONED_CFG;
+
+                            await deploy_helpers.writeFile(
+                                SETTINGS_FILE,
+                                new Buffer( JSON.stringify(settings, null, 4) )
+                            );
+                        }
+                    );
+                }
+            }
+        }
+        catch (e) {
+            selectedWorkspace.showWarningMessage(
+                selectedWorkspace.t('tools.createDeployOperationScript.errors.updateSettingsFailed', e)
+            );
+        }
+    }
+
+    selectedWorkspace.showInformationMessage(
+        selectedWorkspace.t('tools.createDeployOperationScript.scriptCreated', scriptFile)
+    );
+
+    await vscode.window.showTextDocument(
+        await vscode.workspace.openTextDocument(scriptFile)
+    );
+}

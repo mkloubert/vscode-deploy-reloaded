@@ -102,9 +102,8 @@ async function invokeForActiveEditor(placeHolder: string,
         });
 
         if (QUICK_PICK_ITEMS.length < 1) {
-            //TODO: translate
-            await deploy_helpers.showWarningMessage(
-                `No TARGETS found!`
+            deploy_helpers.showWarningMessage(
+                i18.t('targets.noneFound')
             );
 
             return;
@@ -127,9 +126,8 @@ async function invokeForActiveEditor(placeHolder: string,
         }
     }
     else {
-        //TODO: translate
-        await deploy_helpers.showWarningMessage(
-            `No ACTIVE EDITOR found!`
+        deploy_helpers.showWarningMessage(
+            i18.t('editors.active.noOpen')
         );
     }
 }
@@ -1067,7 +1065,6 @@ async function activateExtension(context: vscode.ExtensionContext) {
             // tools
             vscode.commands.registerCommand('extension.deploy.reloaded.showTools', async () => {
                 try {
-                    //TODO: translate
                     const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = [
                         {
                             action: async () => {
@@ -1075,8 +1072,18 @@ async function activateExtension(context: vscode.ExtensionContext) {
                                     getActiveWorkspacesOrAll()
                                 );
                             },
-                            label: '$(plus)  ' + 'Create deploy script ...',
-                            description: 'Creates a basic deploy script',
+                            label: '$(plus)  ' + i18.t('tools.createDeployScript.label'),
+                            description: i18.t('tools.createDeployScript.description'),
+                        },
+
+                        {
+                            action: async () => {
+                                await deploy_tools.createDeployOperationScript(
+                                    getActiveWorkspacesOrAll()
+                                );
+                            },
+                            label: '$(plus)  ' + i18.t('tools.createDeployOperationScript.label'),
+                            description: i18.t('tools.createDeployOperationScript.description'),
                         },
                     ];
 
@@ -1091,9 +1098,8 @@ async function activateExtension(context: vscode.ExtensionContext) {
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.showTools');
 
-                    //TODO: translate
                     deploy_helpers.showErrorMessage(
-                        `Tool operation failed (s. debug output 'CTRL + Y')!`
+                        i18.t('tools.errors.operationFailed')
                     );
                 }
             }),
