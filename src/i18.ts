@@ -59,6 +59,10 @@ export interface Translation {
         };
     };
     initializationCanceled?: string;
+    isNo?: {
+        directory?: string;
+        file?: string;
+    };
     listDirectory?: {
         currentDirectory?: string;
         directoryIsEmpty?: string;
@@ -77,6 +81,13 @@ export interface Translation {
         list?: {
             defaultEntryName?: string;
             selectEntry?: string;
+        };
+        local?: {
+            invalidDirectory?: string;
+        };
+        mail?: {
+            subject?: string;
+            text?: string;
         };
         switch?: {
             button?: {

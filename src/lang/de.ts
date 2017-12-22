@@ -52,6 +52,10 @@ export const translation: Translation = {
         },
     },
     initializationCanceled: 'Die Initialisierung dieser Erweiterung wurde abgebrochen.',
+    isNo: {
+        directory: "{0:trim,surround,ending_space}ist kein Verzeichnis!",
+        file: "{0:trim,surround,ending_space}ist keine Datei!",
+    },
     listDirectory: {
         currentDirectory: "Aktuelles Verzeichnis:{0:trim,surround,leading_space} ({1:trim,surround})",
         directoryIsEmpty: "(Verzeichnis ist leer)",
@@ -70,6 +74,15 @@ export const translation: Translation = {
         list: {
             defaultEntryName: "(Eintrag #{0:trim})",
             selectEntry: "Wählen Sie einen Eintrag mit Einstellungen für das Bereitstellen aus...",
+        },
+        local: {
+            invalidDirectory: "{0:trim,surround,ending_space}ist ein ungültiges Verzeichnis!",
+        },
+        mail: {
+            subject: "Bereitgestellte Dateien",
+            text: "Die Dateien befinden sich im Anhang.\n\n" + 
+                  "Gesendet mit der Visual Studio Code Erweiterung 'Deploy Reloaded' (vscode-deploy-reloaded):\n" + 
+                  "https://github.com/mkloubert/vscode-deploy-reloaded",
         },
         switch: {
             button: {

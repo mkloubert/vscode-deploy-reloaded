@@ -52,6 +52,10 @@ export const translation: Translation = {
         },
     },
     initializationCanceled: 'The initialization of the extension has been stopped.',
+    isNo: {
+        directory: "{0:trim,surround,ending_space}is no directory!",
+        file: "{0:trim,surround,ending_space}is no file!",
+    },
     listDirectory: {
         currentDirectory: "Current directory:{0:trim,surround,leading_space} ({1:trim,surround})",
         directoryIsEmpty: "(directory is empty)",
@@ -70,6 +74,15 @@ export const translation: Translation = {
         list: {
             defaultEntryName: "(Entry #{0:trim})",
             selectEntry: "Select the entry with settings to use for deployment...",
+        },
+        local: {
+            invalidDirectory: "{0:trim,surround,ending_space}is an invalid directory!",
+        },
+        mail: {
+            subject: "Deployed files",
+            text: "Your deployed files (s. attachment).\n\n" + 
+                  "Send by 'Deploy Reloaded' (vscode-deploy-reloaded) Visual Studio Code extension:\n" + 
+                  "https://github.com/mkloubert/vscode-deploy-reloaded",
         },
         switch: {
             button: {

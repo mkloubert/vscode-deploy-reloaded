@@ -58,9 +58,11 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
     }
 
     public async deleteFiles(context: deploy_plugins.DeleteContext<LocalTarget>) {
+        const ME = this;
+
         for (const F of context.files) {
             try {
-                const SETTINGS = await this.getTargetSettings(context, F);
+                const SETTINGS = await ME.getTargetSettings(context, F);
 
                 let targetDir = Path.join(
                     SETTINGS.dir,
@@ -83,9 +85,9 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
                         await deploy_helpers.unlink(TARGET_FILE);
                     }
                     else {
-                        //TODO: translate
                         throw new Error(
-                            `'${TARGET_FILE}' is NO file!`
+                            ME.t(context.target,
+                                 'isNo.file', TARGET_FILE)
                         );
                     }
                 }
@@ -133,13 +135,15 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
 
     private async getTargetSettings(context: deploy_plugins.FilesContext<LocalTarget>,
                                     file: deploy_workspaces.WorkspaceFile): Promise<TargetSettings> {
-        const DIR = this.normalizeDir(context.target, file);
+        const ME = this;
+
+        const DIR = ME.normalizeDir(context.target, file);
 
         if (await deploy_helpers.exists(DIR)) {
             if (!(await deploy_helpers.lstat(DIR)).isDirectory()) {
-                //TODO: translate
                 throw new Error(
-                    `'${context.target.dir}' is NO directory!`
+                    ME.t(context.target,
+                         'isNo.dir', DIR)
                 );
             }
         }
@@ -151,7 +155,10 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
     }
 
     public async listDirectory(context: deploy_plugins.ListDirectoryContext<LocalTarget>) {
-        const DIR = this.normalizeDir(context.target, context);
+        const ME = this;
+
+        const DIR = ME.normalizeDir(context.target, context);
+        const WORKSPACE = context.workspace;
 
         let targetDir = Path.join(
             DIR,
@@ -160,9 +167,9 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
         targetDir = Path.resolve(targetDir);
 
         if (!targetDir.startsWith(DIR)) {
-            //TODO: translate
             throw new Error(
-                `'${context.dir}' is an invalid directory!`
+                ME.t(context.target,
+                     'plugins.local.invalidDirectory', context.dir)
             );
         }
 
@@ -192,9 +199,9 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
         }
 
         const FILES_AND_FOLDERS = await deploy_helpers.readDir(targetDir);
-        await deploy_helpers.forEachAsync(FILES_AND_FOLDERS, async (f) => {
+        for (const F of FILES_AND_FOLDERS) {
             let fullPath = Path.join(
-                targetDir, f
+                targetDir, F
             );
 
             const STATS = await deploy_helpers.lstat(fullPath);
@@ -211,7 +218,7 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
 
             if (STATS.isDirectory()) {
                 const DI: deploy_files.DirectoryInfo = {
-                    name: f,
+                    name: F,
                     path: relativePath,
                     size: SIZE,
                     time: time,
@@ -225,7 +232,7 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
                     download: async () => {
                         return deploy_helpers.readFile(fullPath);
                     },
-                    name: f,
+                    name: F,
                     path: relativePath,
                     size: SIZE,
                     time: time,
@@ -236,7 +243,7 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
             }
             else {
                 const FSI: deploy_files.FileSystemInfo = {
-                    name: f,
+                    name: F,
                     path: relativePath,
                     size: SIZE,
                     time: time,
@@ -244,7 +251,7 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
 
                 RESULT.others.push(FSI);
             }
-        });
+        };
 
         return RESULT;
     }
@@ -267,10 +274,12 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
     }
 
     public async uploadFiles(context: deploy_plugins.UploadContext<LocalTarget>) {
+        const ME = this;
+
         const ALREADY_CHECKED = {};
         for (const F of context.files) {
             try {
-                const SETTINGS = await this.getTargetSettings(context, F);
+                const SETTINGS = await ME.getTargetSettings(context, F);
 
                 let targetDir = Path.join(
                     SETTINGS.dir,
@@ -295,9 +304,9 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
                     }
                     else {
                         if (!(await deploy_helpers.lstat(targetDir)).isDirectory()) {
-                            //TODO: translate
                             throw new Error(
-                                `'${targetDir}' is NO directory!`
+                                ME.t(context.target,
+                                     'isNo.dir', targetDir),
                             );
                         }
                     }

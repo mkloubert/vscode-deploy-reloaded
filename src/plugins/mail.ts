@@ -21,6 +21,7 @@ import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
 import * as Enumerable from 'node-enumerable';
 import * as Mailer from 'nodemailer';
+import { Constants } from 'azure-storage';
 const Zip = require('node-zip');
 
 
@@ -166,16 +167,11 @@ class MailPlugin extends deploy_plugins.PluginBase<MailTarget> {
             compression: 'DEFLATE',
         }), 'binary');
 
-        //TODO: translate
         const MAIL_OPTS: Mailer.SendMailOptions = {
             from: from,
             to: TO,
-            subject: 'Deployed files',
-            text: `Your deployed files (s. attachment).
-
-
-Send by 'Deploy Reloaded' (vscode-deploy-reloaded) Visual Studio Code extension:
-https://github.com/mkloubert/vscode-deploy-reloaded`,
+            subject: ME.t(context.target, 'plugins.mail.subject'),
+            text: ME.t(context.target, 'plugins.mail.text'),
             attachments: [
                 {
                     filename: ZIPFilename,
