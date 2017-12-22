@@ -30,6 +30,7 @@ import * as vscode from 'vscode';
  */
 export interface Translation {
     cancel?: string;
+    canceled?: string;
     commands?: {
         executionError?: string;
         scriptNotFound?: string;
@@ -44,6 +45,7 @@ export interface Translation {
             noOpen?: string;
         };
     };
+    error?: string;
     ftp?: {
         couldNotConnect?: string;
         couldNotConnectWithJSFTP?: string;
@@ -73,6 +75,8 @@ export interface Translation {
         size?: string;
     };
     no?: string;
+    noFiles?: string;
+    ok?: string;
     packages?: {
         buttons?: {
             defaultText?: string;
@@ -136,6 +140,21 @@ export interface Translation {
             invalidDirectory?: string;
         };
     };
+    pull?: {
+        askForCancelOperation?: string;
+        buttons?: {
+            cancel?: {
+                text?: string;
+                tooltip?: string;
+            };
+        };
+        cancelling?: string;
+        errors?: {
+            invalidWorkspace?: string;
+            invalidWorkspaceForPackage?: string;
+        };
+        selectSource?: string;
+    };
     s3bucket?: {
         credentialTypeNotSupported?: string;
     };
@@ -148,6 +167,9 @@ export interface Translation {
     targets?: {
         defaultName?: string;
         doesNotExist?: string;
+        errors?: {
+            couldNotLoadDataTransformer?: string;
+        };
         noneFound?: string;
         noPluginsFound?: string;
         noWorkspaceFound?: string;

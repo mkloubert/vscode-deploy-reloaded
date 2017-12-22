@@ -47,8 +47,8 @@ export async function pullFileFrom(file: string, target: deploy_targets.Target) 
     }
 
     if (!ME.canBeHandledByMe(target)) {
-        //TODO: translate
-        throw new Error(`File '${file}' cannot be pulled to workspace '${ME.folder.uri.fsPath}'!`);
+        throw new Error(ME.t('pull.errors.invalidWorkspace',
+                             file, ME.name));
     }
 
     await pullFilesFrom.apply(
@@ -94,9 +94,8 @@ export async function pullFilesFrom(files: string[],
 
     const PLUGINS = ME.getDownloadPlugins(target);
     if (PLUGINS.length < 1) {
-        //TODO: translate
-        await ME.showWarningMessage(
-            `No matching PLUGINS found!`
+        ME.showWarningMessage(
+            ME.t('targets.noPluginsFound')
         );
 
         return;
@@ -104,8 +103,8 @@ export async function pullFilesFrom(files: string[],
 
     let transformer = await ME.loadDataTransformer(target);
     if (false === transformer) {
-        // TODO: translate
-        throw new Error(`Could not load data transformer for target '${TARGET_NAME}'!`);
+        throw new Error(ME.t('targets.errors.couldNotLoadDataTransformer',
+                             TARGET_NAME));
     }
 
     transformer = deploy_transformers.toDataTransformerSafe(
@@ -135,7 +134,7 @@ export async function pullFilesFrom(files: string[],
                     isCancelling = true;
 
                     cancelBtn.command = undefined;
-                    cancelBtn.text = `Cancelling pull operation...`;  //TODO: translate
+                    cancelBtn.text = ME.t('pull.cancelling');
 
                     const POPUP_BTNS: deploy_contracts.MessageItemWithValue[] = [
                         {
@@ -149,10 +148,9 @@ export async function pullFilesFrom(files: string[],
                         }
                     ];
 
-                    //TODO: translate
                     const PRESSED_BTN = await ME.showWarningMessage.apply(
                         null,
-                        [ <any>`You are about to cancel the pull operation from '${TARGET_NAME}'. Are you sure?` ].concat(
+                        [ <any>ME.t('pull.askForCancelOperation', TARGET_NAME) ].concat(
                             POPUP_BTNS
                         )
                     );
@@ -169,9 +167,9 @@ export async function pullFilesFrom(files: string[],
             });
             
             cancelBtn.command = CANCEL_BTN_COMMAND_ID;
-            //TODO: translate
-            cancelBtn.text = `Pulling files from '${TARGET_NAME}'...`;
-            cancelBtn.tooltip = 'Click here to cancel...';
+            cancelBtn.text = ME.t('pull.buttons.cancel.text',
+                                  TARGET_NAME);
+            cancelBtn.tooltip = ME.t('pull.buttons.cancel.tooltip');
 
             cancelBtn.show();
         }
@@ -222,7 +220,7 @@ export async function pullFilesFrom(files: string[],
                             await WAIT_WHILE_CANCELLING();
 
                             if (CANCELLATION_SOURCE.token.isCancellationRequested) {
-                                ME.context.outputChannel.appendLine(`[Canceled]`);  //TODO: translate
+                                ME.context.outputChannel.appendLine(`[${ME.t('canceled')}]`);
                             }
                         };
                         SF.onDownloadCompleted = async (err?, downloadedFile?) => {
@@ -293,11 +291,11 @@ export async function pullFilesFrom(files: string[],
                                         );
                                     }
 
-                                    ME.context.outputChannel.appendLine(`[OK]`);  //TODO: translate
+                                    ME.context.outputChannel.appendLine(`[${ME.t('ok')}]`);
                                 }
                             }
                             catch (e) {
-                                ME.context.outputChannel.appendLine(`[ERROR: ${e}]`);  //TODO: translate
+                                ME.context.outputChannel.appendLine(`[${ME.t('error', e)}]`);
                             }
                             finally {
                                 if (disposeDownloadedFile) {
@@ -360,15 +358,14 @@ export async function pullPackage(pkg: deploy_packages.Package) {
     }
 
     if (!ME.canBeHandledByMe(pkg)) {
-        //TODO: translate
-        throw new Error(`Package '${deploy_packages.getPackageName(pkg)}' cannot be pulled into workspace '${ME.folder.uri.fsPath}'!`);
+        throw new Error(ME.t('pull.errors.invalidWorkspaceForPackage',
+                             deploy_packages.getPackageName(pkg), ME.name));
     }
 
     const FILES_TO_PULL = await ME.findFilesByFilter(pkg);
     if (FILES_TO_PULL.length < 1) {
-        //TODO: translate
-        await ME.showWarningMessage(
-            `No FILES found!`
+        ME.showWarningMessage(
+            ME.t('noFiles')
         );
 
         return;
@@ -393,9 +390,8 @@ export async function pullPackage(pkg: deploy_packages.Package) {
     }).filter(qp => deploy_targets.isVisibleForPackage(qp.state, pkg));
 
     if (QUICK_PICK_ITEMS.length < 1) {
-        //TODO: translate
         await ME.showWarningMessage(
-            `No TARGETS found!`
+            ME.t('targets.noneFound')
         );
 
         return;
@@ -407,7 +403,7 @@ export async function pullPackage(pkg: deploy_packages.Package) {
     }
     else {
         selectedItem = await vscode.window.showQuickPick(QUICK_PICK_ITEMS, {
-            placeHolder: 'Select the TARGET to pull from...',  //TODO: translate
+            placeHolder: ME.t('pull.selectSource')
         });
     }
 

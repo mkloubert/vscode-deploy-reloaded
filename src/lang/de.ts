@@ -23,6 +23,7 @@ import { Translation } from '../i18';
 // Translated by: Marcel Joachim Kloubert (https://github.com/mkloubert)
 export const translation: Translation = {
     cancel: 'Abbrechen',
+    canceled: 'Abgebrochen',
     commands: {
         executionError: "Das Kommando {0:surround} konnte nicht ausgeführt werden:{1:trim,surround,leading_space}",
         scriptNotFound: "Das Skript {0:surround} wurde nicht gefunden!",
@@ -37,6 +38,7 @@ export const translation: Translation = {
             noOpen: "Es ist derzeit kein aktiver Texteditor geöffnet!",
         },
     },
+    error: "FEHLER:{0:trim,surround,leading_space}",
     ftp: {
         couldNotConnect: "Konnte keine Verbindung aufbauen!",
         couldNotConnectWithJSFTP: "Konnte keine Verbindung mittels 'jsftp' aufbauen!",
@@ -65,7 +67,8 @@ export const translation: Translation = {
         parentDirectory: "(übergeordnetes Verzeichnis)",
         size: "Grösse:{0:trim,leading_space}",
     },
-    no: 'Nein',
+    no: "Nein",
+    noFiles: "Keine Dateien gefunden!",
     packages: {
         buttons: {
             defaultText: "Stelle Paket{0:trim,surround,leading_space} bereit",
@@ -131,6 +134,21 @@ export const translation: Translation = {
             invalidDirectory: "{0:trim,surround,ending_space}ist ein ungültiges Verzeichnis!",
         },
     },
+    pull: {
+        askForCancelOperation: "Sind Sie sicher, dass Sie das Laden der Datei(en) von{0:trim,surround,leading_space} abbrechen wollen?",
+        buttons: {
+            cancel: {
+                text: "Lade Dateien von{0:trim,surround,leading_space} ...",
+                tooltip: "Hier klicken, um abzubrechen ...",
+            },
+        },
+        cancelling: "Breche das Laden ab ...",
+        errors: {
+            invalidWorkspace: "Die Datei{0:trim,surround,leading_space} kann nicht in den Arbeitsbereich{1:trim,surround,leading_space} geladen werden!",
+            invalidWorkspaceForPackage: "Das Paket{0:trim,surround,leading_space} kann nicht in den Arbeitsbereich{1:trim,surround,leading_space} geladen werden!",
+        },
+        selectSource: "Wählen Sie die Quelle von der Sie die Datei(en) laden wollen ...",
+    },
     s3bucket: {
         credentialTypeNotSupported: "Das Anmeldeverfahren{0:trim,surround,leading_space} wird nicht unterstützt!",
     },
@@ -143,6 +161,9 @@ export const translation: Translation = {
     targets: {
         defaultName: "(Ziel #{0:trim})",
         doesNotExist: "Das Ziel{0:trim,surround,leading_space} existiert nicht!",
+        errors: {
+            couldNotLoadDataTransformer: "Konnte das Datenkonvertierung-Skript für{0:trim,surround,leading_space} nicht laden!",
+        },
         noneFound: "Keine Ziele gefunden!",
         noPluginsFound: "Es wurden keine passenden Plug-Ins gefunden!",
         noWorkspaceFound: "Keinen passenden Arbeitsbereich gefunden!",

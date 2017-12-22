@@ -23,6 +23,7 @@ import { Translation } from '../i18';
 // Translated by: Marcel Joachim Kloubert (https://github.com/mkloubert)
 export const translation: Translation = {
     cancel: 'Cancel',
+    canceled: 'Canceled',
     commands: {
         executionError: "Could not execute command {0:surround}:{1:trim,surround,leading_space}",
         scriptNotFound: "{0:surround} script not found!",
@@ -37,6 +38,7 @@ export const translation: Translation = {
             noOpen: "No active text editor found!",
         },
     },
+    error: "ERROR:{0:trim,surround,leading_space}",
     ftp: {
         couldNotConnect: "Could not start connection!",
         couldNotConnectWithJSFTP: "Could not start connection via 'jsftp'!",
@@ -65,7 +67,9 @@ export const translation: Translation = {
         parentDirectory: "(parent)",
         size: "Size:{0:trim,leading_space}",
     },
-    no: 'No',
+    no: "No",
+    noFiles: "No files found!",
+    ok: 'OK',
     packages: {
         buttons: {
             defaultText: "Deploy package{0:trim,surround,leading_space}",
@@ -131,6 +135,21 @@ export const translation: Translation = {
             invalidDirectory: "{0:trim,surround,ending_space}is an invalid directory!",
         },
     },
+    pull: {
+        askForCancelOperation: "You are about to cancel the pull operation from{0:trim,surround,leading_space}. Are you sure?",
+        buttons: {
+            cancel: {
+                text: "Pulling files from{0:trim,surround,leading_space} ...",
+                tooltip: "Click here to cancel ...",
+            },
+        },
+        cancelling: "Cancelling pull operation ...",
+        errors: {
+            invalidWorkspace: "Cannot pull file{0:trim,surround,leading_space} to workspace{1:trim,surround,leading_space}!",
+            invalidWorkspaceForPackage: "Cannot pull package{0:trim,surround,leading_space} to workspace{1:trim,surround,leading_space}!",
+        },
+        selectSource: "Select the source from where to pull from ...",
+    },
     s3bucket: {
         credentialTypeNotSupported: "Credental type{0:trim,surround,leading_space} is not supported!",
     },
@@ -143,6 +162,9 @@ export const translation: Translation = {
     targets: {
         defaultName: "(Target #{0:trim})",
         doesNotExist: "Target{0:trim,surround,leading_space} does not exist!",
+        errors: {
+            couldNotLoadDataTransformer: "Could not load data transformer for{0:trim,surround,leading_space}!",
+        },
         noneFound: "No targets found!",
         noPluginsFound: "No matching plugins found!",
         noWorkspaceFound: "No matching workspace found!",

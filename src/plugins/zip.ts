@@ -29,7 +29,13 @@ const Zip = require('node-zip');
  * A 'zip' target.
  */
 export interface ZipTarget extends deploy_targets.Target {
+    /**
+     * The target directory.
+     */
     readonly dir?: string;
+    /**
+     * Open ZIP after it has been created or not.
+     */
     readonly open?: boolean;
 }
 
