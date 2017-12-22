@@ -1699,8 +1699,9 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         for (const P of ME.getPackages()) {
             let buttonDesc: deploy_packages.PackageButton;
 
-            const DEFAULT_BTN_TEXT = `Deploy package '${ deploy_packages.getPackageName(P) }'`;
-            const DEFAULT_BTN_TOOLTIP = `Click here to start deployment...`;
+            const DEFAULT_BTN_TEXT = ME.t('packages.buttons.defaultText',
+                                          deploy_packages.getPackageName(P));
+            const DEFAULT_BTN_TOOLTIP = ME.t('packages.buttons.defaultTooltip');
             
             if (!deploy_helpers.isNullOrUndefined(P.button)) {
                 if (deploy_helpers.isObject<deploy_packages.PackageButton>(P.button)) {
@@ -1708,7 +1709,6 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 }
                 else {
                     if (deploy_helpers.toBooleanSafe(P.button, true)) {
-                        //TODO: translate
                         buttonDesc = {
                             text: DEFAULT_BTN_TEXT,
                             tooltip: DEFAULT_BTN_TOOLTIP,
@@ -1764,9 +1764,9 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                                 await ME.deployPackage(PACKAGE_TO_DEPLOY);
                             }
                             catch (e) {
-                                //TODO: translate
                                 await ME.showErrorMessage(
-                                    `Could not deploy package '${deploy_packages.getPackageName(PACKAGE_TO_DEPLOY)}': '${deploy_helpers.toStringSafe(e)}'`
+                                    ME.t('packages.deploymentFailed',
+                                         deploy_packages.getPackageName(PACKAGE_TO_DEPLOY))
                                 );
                             }
                         });

@@ -226,7 +226,7 @@ Press `F1` and enter one of the following commands:
 | `Deploy Reloaded: Switches ...` | Handle [switch targets](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_switch). |
 | `Deploy Reloaded: Tools ...` | A set of helpful tools. |
 
-You can also you the following, predefined, shortcuts:
+You can also use the following, predefined, shortcuts:
 
 | Command | Shortcut (`CTRL` is `CMD` on Mac) | Description |
 | ------- | --------------------------------- | ----------- |

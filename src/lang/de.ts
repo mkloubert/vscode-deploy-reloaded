@@ -67,7 +67,12 @@ export const translation: Translation = {
     },
     no: 'Nein',
     packages: {
+        buttons: {
+            defaultText: "Stelle Paket{0:trim,surround,leading_space} bereit",
+            defaultTooltip: "Hier klicken, um das Bereitstellen zu beginnen...",
+        },
         defaultName: "(Paket #{0:trim})",
+        deploymentFailed: "Konnte das Paket{0:trim,surround,leading_space} nicht bereitstellen:{1:trim,surround,leading_space}",
         virtualTarget: "Virtuelles Ziel für Paket{0:trim,surround,leading_space}",
     },
     plugins: {
@@ -83,6 +88,14 @@ export const translation: Translation = {
             text: "Die Dateien befinden sich im Anhang.\n\n" + 
                   "Gesendet mit der Visual Studio Code Erweiterung 'Deploy Reloaded' (vscode-deploy-reloaded):\n" + 
                   "https://github.com/mkloubert/vscode-deploy-reloaded",
+        },
+        prompt: {
+            validation: {
+                noBool: "Geben Sie bitte einen gültigen, booleschen Wert an!",
+                noFloat: "Geben Sie bitte eine gültige Zahl an (englisches Format)!",
+                noInt: "Geben Sie bitte eine gültige Ganzzahl an!",
+                noJSON: "Geben Sie bitte einen gültigen, JavaScript-kompatiblen, JSON-Ausdruck an!",
+            },
         },
         script: {
             noScriptFunction: "Das Skript{0:trim,surround,leading_space} enthält keine 'execute' Funktion!",

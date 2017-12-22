@@ -74,7 +74,12 @@ export interface Translation {
     };
     no?: string;
     packages?: {
+        buttons?: {
+            defaultText?: string;
+            defaultTooltip?: string;
+        };
         defaultName?: string;
+        deploymentFailed?: string;
         virtualTarget?: string;
     };
     plugins?: {
@@ -88,6 +93,14 @@ export interface Translation {
         mail?: {
             subject?: string;
             text?: string;
+        };
+        prompt?: {
+            validation?: {
+                noBool?: string;
+                noFloat?: string;
+                noInt?: string;
+                noJSON?: string;
+            };
         };
         script?: {
             noScriptFunction?: string;

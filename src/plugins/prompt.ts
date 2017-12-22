@@ -122,7 +122,8 @@ class PromptPlugin extends deploy_plugins.IterablePluginBase<PromptTarget> {
                                 break;
 
                             default:
-                                return 'Please enter a valid boolean value!';  //TODO: translate
+                                return ME.t(promptTarget,
+                                            'plugins.prompt.validation.noBool');
                         }
                     };
                     break;
@@ -132,7 +133,8 @@ class PromptPlugin extends deploy_plugins.IterablePluginBase<PromptTarget> {
                     validator = (str) => {
                         if (!deploy_helpers.isEmptyString(str)) {
                             if (isNaN( parseInt(deploy_helpers.toStringSafe(str).trim()) )) {
-                                return 'Please enter a valid integer value!';  //TODO: translate
+                                return ME.t(promptTarget,
+                                            'plugins.prompt.validation.noInt');
                             }
                         }
                     };
@@ -143,7 +145,8 @@ class PromptPlugin extends deploy_plugins.IterablePluginBase<PromptTarget> {
                     validator = (str) => {
                         if (!deploy_helpers.isEmptyString(str)) {
                             if (isNaN( parseFloat(deploy_helpers.toStringSafe(str).trim()) )) {
-                                return 'Please enter a valid float value!';  //TODO: translate
+                                return ME.t(promptTarget,
+                                            'plugins.prompt.validation.noFloat');
                             }
                         }
                     };
@@ -157,7 +160,8 @@ class PromptPlugin extends deploy_plugins.IterablePluginBase<PromptTarget> {
                             JSON.parse(str.trim());
                         }
                         catch (e) {
-                            return 'Please enter a valid JSON string!';  // TODO: translate
+                            return ME.t(promptTarget,
+                                        'plugins.prompt.validation.noJSON');
                         }
                     };
                     break;    
