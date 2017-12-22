@@ -35,6 +35,7 @@ import * as Moment from 'moment';
 import * as Path from 'path';
 import * as Stream from "stream";
 import * as TMP from 'tmp';
+import * as URL from 'url';
 import * as vscode from 'vscode';
 
 
@@ -887,6 +888,30 @@ export function getMappedPath(mappings: deploy_mappings.FolderMappings, path: st
     }
     
     return false;
+}
+
+/**
+ * Returns the value from a "parameter" object.
+ * 
+ * @param {Object} params The object.
+ * @param {string} name The name of the parameter.
+ * @param {TDefault} [defValue] The default value.
+ * 
+ * @return {string|TDefault} The value of the parameter (if found).
+ *                           Otherwise the value of 'defValue'.
+ */
+export function getUriParam<TDefault = string>(params: Object, name: string, defValue?: TDefault): string | TDefault {
+    name = normalizeString(name);
+
+    if (params) {
+        for (const P in params) {
+            if (normalizeString(P) === name) {
+                return toStringSafe(params[P]);
+            }
+        }
+    }
+
+    return defValue;
 }
 
 /**
@@ -2078,6 +2103,31 @@ export function unlink(path: string | Buffer) {
             COMPLETED(e);
         }
     });
+}
+
+/**
+ * Extracts the query parameters of an URI to an object.
+ * 
+ * @param {URL.Url|vscode.Uri} uri The URI.
+ * 
+ * @return {deploy_contracts.KeyValuePairs<string>} The parameters of the URI as object.
+ */
+export function uriParamsToObject(uri: URL.Url | vscode.Uri): deploy_contracts.KeyValuePairs<string> {
+    if (!uri) {
+        return <any>uri;
+    }
+
+    let params: any;
+    if (!isEmptyString(uri.query)) {
+        // s. https://css-tricks.com/snippets/jquery/get-query-params-object/
+        params = uri.query.replace(/(^\?)/,'')
+                          .split("&")
+                          .map(function(n) { return n = n.split("="), this[normalizeString(n[0])] =
+                                                                           toStringSafe(decodeURIComponent(n[1])), this}
+                          .bind({}))[0];
+    }
+
+    return params || {};
 }
 
 /**

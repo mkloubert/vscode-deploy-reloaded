@@ -32,8 +32,14 @@ export const translation: Translation = {
         currentFile: {
             failed: "Die aktuelle Datei konnte nicht verglichen werden:{0:trim,surround,leading_space}",
         },
+        title: "Vergleich{0:trim,surround,leading_space}",
     },
     disposeNotAllowed: "'dispose()' Methode kann nicht aufgerufen werden!",
+    documents: {
+        html: {
+            defaultName: "HTML Dokument #{0:trim}",
+        },
+    },
     editors: {
         active: {
             noOpen: "Es ist derzeit kein aktiver Texteditor geöffnet!",
@@ -148,7 +154,11 @@ export const translation: Translation = {
             invalidWorkspace: "Die Datei{0:trim,surround,leading_space} kann nicht in den Arbeitsbereich{1:trim,surround,leading_space} geladen werden!",
             invalidWorkspaceForPackage: "Das Paket{0:trim,surround,leading_space} kann nicht in den Arbeitsbereich{1:trim,surround,leading_space} geladen werden!",
         },
+        finishedOperation: "Das Laden der Dateien von{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",
+        finishedOperationWithErrors: "[FEHLER] Konnte Dateien nicht von{0:trim,surround,leading_space} laden:{1:trim,surround,leading_space}",
+        pullingFile: "Lade Datei{0:trim,surround,leading_space} von {1:trim,surround,leading_space} ...",
         selectSource: "Wählen Sie die Quelle von der Sie die Datei(en) laden wollen ...",
+        startOperation: "Beginne Ladevorgang von{0:trim,surround,leading_space} ...",
     },
     s3bucket: {
         credentialTypeNotSupported: "Das Anmeldeverfahren{0:trim,surround,leading_space} wird nicht unterstützt!",

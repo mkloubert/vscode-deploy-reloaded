@@ -228,6 +228,32 @@ export enum DeployOperation {
 }
 
 /**
+ * A document.
+ */
+export interface Document {
+    /**
+     * The body / content of the document.
+     */
+    body: Buffer;
+    /**
+     * The encoding.
+     */
+    encoding?: string;
+    /**
+     * The ID.
+     */
+    id?: any;
+    /**
+     * The MIME type.
+     */
+    mime?: string;
+    /**
+     * The title.
+     */
+    title?: string;
+}
+
+/**
  * Something that can work with a password.
  */
 export interface Encryptable {

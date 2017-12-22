@@ -192,9 +192,11 @@ export async function pullFilesFrom(files: string[],
 
                 ME.context.outputChannel.appendLine('');
 
-                // TODO: translate
                 if (files.length > 1) {
-                    ME.context.outputChannel.appendLine(`Start pulling files from '${TARGET_NAME}'...`);
+                    ME.context.outputChannel.appendLine(
+                        ME.t('pull.startOperation',
+                             TARGET_NAME)
+                    );
                 }
 
                 const CTX: deploy_plugins.DownloadContext = {
@@ -214,8 +216,10 @@ export async function pullFilesFrom(files: string[],
                                 source = `'${deploy_helpers.toStringSafe(source)}'`;
                             }
     
-                            // TODO: translate
-                            ME.context.outputChannel.append(`Pulling file '${f}' from ${source}... `);
+                            ME.context.outputChannel.append(
+                                ME.t('pull.pullingFile',
+                                     f, source)
+                            );
 
                             await WAIT_WHILE_CANCELLING();
 
@@ -324,13 +328,17 @@ export async function pullFilesFrom(files: string[],
                 );
 
                 if (files.length > 1) {
-                    // TODO: translate
-                    ME.context.outputChannel.appendLine(`Pulling files from '${TARGET_NAME}' has been finished.`);
+                    ME.context.outputChannel.appendLine(
+                        ME.t('pull.finishedOperation',
+                             TARGET_NAME)
+                    );
                 }
             }
             catch (e) {
-                // TODO: translate
-                ME.context.outputChannel.appendLine(`[ERROR] Pulling from '${TARGET_NAME}' failed: ${e}`);
+                ME.context.outputChannel.appendLine(
+                    ME.t('pull.finishedOperationWithErrors',
+                         TARGET_NAME, e)
+                );
             }
         }
     }

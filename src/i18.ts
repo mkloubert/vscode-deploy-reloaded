@@ -39,8 +39,14 @@ export interface Translation {
         currentFile?: {
             failed?: string;
         };
+        title?: string;
     };
     disposeNotAllowed?: string;
+    documents?: {
+        html?: {
+            defaultName?: string;
+        };
+    };
     editors?: {
         active?: {
             noOpen?: string;
@@ -154,7 +160,11 @@ export interface Translation {
             invalidWorkspace?: string;
             invalidWorkspaceForPackage?: string;
         };
+        finishedOperation?: string;
+        finishedOperationWithErrors?: string;
+        pullingFile?: string;
         selectSource?: string;
+        startOperation?: string;
     };
     s3bucket?: {
         credentialTypeNotSupported?: string;

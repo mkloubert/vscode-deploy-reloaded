@@ -119,8 +119,7 @@ export async function compareFiles(workspaces: deploy_workspaces.Workspace | dep
 
                                         let titleSuffix = deploy_helpers.toStringSafe(t.name).trim();
 
-                                        // TODO: translate
-                                        let windowTitle = `[vscode-deploy-reloaded] Diff '${realtivePath}'`;
+                                        let windowTitle = `[vscode-deploy-reloaded] ${WS.t('compare.title', realtivePath)}`;
                                         if ('' === titleSuffix) {
                                             titleSuffix = deploy_helpers.normalizeString(t.type);
                                         }

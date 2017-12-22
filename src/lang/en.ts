@@ -32,8 +32,14 @@ export const translation: Translation = {
         currentFile: {
             failed: "Could not compare current file:{0:trim,surround,leading_space}",
         },
+        title: "Diff{0:trim,surround,leading_space}",
     },
     disposeNotAllowed: "Cannot invoke 'dispose()' method!",
+    documents: {
+        html: {
+            defaultName: "HTML document #{0:trim}",
+        },
+    },
     editors: {
         active: {
             noOpen: "No active text editor found!",
@@ -149,7 +155,11 @@ export const translation: Translation = {
             invalidWorkspace: "Cannot pull file{0:trim,surround,leading_space} to workspace{1:trim,surround,leading_space}!",
             invalidWorkspaceForPackage: "Cannot pull package{0:trim,surround,leading_space} to workspace{1:trim,surround,leading_space}!",
         },
+        finishedOperation: "Pulling files from{0:trim,surround,leading_space} has been finished.",
+        finishedOperationWithErrors: "[ERROR] Could not pull files from{0:trim,surround,leading_space}:{1:trim,surround,leading_space}",
+        pullingFile: "Pulling file{0:trim,surround,leading_space} from {1:trim,surround,leading_space} ...",
         selectSource: "Select the source from where to pull from ...",
+        startOperation: "Start pulling files from{0:trim,surround,leading_space} ...",
     },
     s3bucket: {
         credentialTypeNotSupported: "Credental type{0:trim,surround,leading_space} is not supported!",
