@@ -160,9 +160,25 @@ export interface Translation {
     time?: {
         dateTimeWithSeconds?: string;
     };
+    tools?: {
+        createDeployScript?: {
+            askForNewTargetName?: string;
+            askForScriptPath?: string;
+            askForUpdatingSettings?: string;
+            errors?: {
+                targetAlreadyDefined?: string;
+                updateTargetSettingsFailed?: string;
+            };
+            scriptCreated?: string;
+        };
+    };
     'vs-deploy'?: {
         continueAndInitialize?: string;
         currentlyActive?: string;
+    };
+    workspaces?: {
+        noneFound?: string;
+        selectWorkspace?: string;
     };
     yes?: string;
 }

@@ -155,9 +155,25 @@ export const translation: Translation = {
     time: {
         dateTimeWithSeconds: "DD.MM.YYYY HH:mm:ss",
     },
+    tools: {
+        createDeployScript: {
+            askForNewTargetName: "Geben Sie bitte den Namen des neuen Ziels ein ...",
+            askForScriptPath: "Wo soll das Skript gespeichert werden?",
+            askForUpdatingSettings: "Soll das neue Skript als neues Ziel in den Einstellungen gespeichert werden?",
+            errors: {
+                targetAlreadyDefined: "Ein Ziel mit dem Namen{0:trim,surround,leading_space} ist bereits in den Einstellungen vorhanden!",
+                updateTargetSettingsFailed: "Konnte das Skript nicht in den Einstellungen speichern:{0:trim,surround,leading_space}",
+            },
+            scriptCreated: "Das Skript{0:trim,surround,leading_space} wurde erfolgreich erstellt.",
+        },
+    },
     'vs-deploy': {
         continueAndInitialize: 'Fortfahren und initialisieren...',
         currentlyActive: "Die 'vs-deploy' Erweiterung ist derzeit aktiv. Es wird empfohlen diese zu DEAKTIVIEREN, bevor Sie forfahren und die neue Erweiterung nutzen!",
+    },
+    workspaces: {
+        noneFound: "Keine Arbeitsbereiche gefunden!",
+        selectWorkspace: "Wählen Sie einen Arbeitsbereich ...",
     },
     yes: 'Ja',
 }

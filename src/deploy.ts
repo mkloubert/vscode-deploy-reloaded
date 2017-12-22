@@ -263,6 +263,10 @@ export async function deployFilesTo(files: string[],
                 ME.context.outputChannel.appendLine('');
                 const BEFORE_DEPLOY_ABORTED = !deploy_helpers.toBooleanSafe(
                     await deploy_targets.executeTargetOperations({
+                        deployOperation: deploy_contracts.DeployOperation.Deploy,
+                        files: FILES_TO_UPLOAD.map(ftu => {
+                            return ftu.path + '/' + ftu.name;
+                        }),
                         onBeforeExecute: async (operation) => {
                             ++operationIndex;
 
@@ -295,6 +299,10 @@ export async function deployFilesTo(files: string[],
                 operationIndex = -1;
                 const AFTER_DEPLOY_ABORTED = !deploy_helpers.toBooleanSafe(
                     await deploy_targets.executeTargetOperations({
+                        deployOperation: deploy_contracts.DeployOperation.Deploy,
+                        files: FILES_TO_UPLOAD.map(ftu => {
+                            return ftu.path + '/' + ftu.name;
+                        }),
                         onBeforeExecute: async (operation) => {
                             ++operationIndex;
 

@@ -20,6 +20,7 @@ import * as deploy_helpers from './helpers';
 import * as deploy_targets from './targets';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
+import * as i18 from './i18';
 import * as Path from 'path';
 import * as vscode from 'vscode';
 
@@ -42,9 +43,8 @@ export async function createDeployScript(workspaces: deploy_workspaces.Workspace
     });
 
     if (QUICK_PICKS.length < 1) {
-        //TODO: translate
         deploy_helpers.showWarningMessage(
-            'No workspaces found!'
+            i18.t('workspaces.noneFound')
         );
 
         return;
@@ -56,9 +56,8 @@ export async function createDeployScript(workspaces: deploy_workspaces.Workspace
         selectedWorkspace = QUICK_PICKS[0].state;
     }
     else {
-        //TODO: translate
         const SELECTED_ITEM = await vscode.window.showQuickPick(QUICK_PICKS, {
-            placeHolder: 'Select a workspace ...',
+            placeHolder: i18.t('workspaces.selectWorkspace'),
         });
 
         if (SELECTED_ITEM) {
@@ -112,9 +111,8 @@ export async function createDeployScript(workspaces: deploy_workspaces.Workspace
     }
     while (doesExist);
 
-    //TODO: translate
     scriptFile = await vscode.window.showInputBox({
-        prompt: 'What should be the path of the new file?',
+        prompt: selectedWorkspace.t('tools.createDeployScript.askForScriptPath'),
         value: scriptFile,
     });
 
@@ -318,25 +316,23 @@ function pullFiles(args) {
                                    new Buffer(scriptContent, 'utf8'));
 
     try {
-        //TODO: translate
         const ASK_IF_WRITE_TO_SETTINGS_ITEMS: deploy_contracts.MessageItemWithValue[] = [
             {
                 isCloseAffordance: true,
-                title: 'No',
+                title: selectedWorkspace.t('no'),
                 value: 0,
             },
 
             {
-                title: 'Yes',
+                title: selectedWorkspace.t('yes'),
                 value: 1,
             }
         ];
 
-        //TODO: translate
         const SELECTED_ITEM: deploy_contracts.MessageItemWithValue =
             await selectedWorkspace.showWarningMessage
                                    .apply(selectedWorkspace,
-                                          [ <any>`Script new target in setting?` ].concat(ASK_IF_WRITE_TO_SETTINGS_ITEMS));
+                                          [ <any>selectedWorkspace.t('tools.createDeployScript.askForUpdatingSettings') ].concat(ASK_IF_WRITE_TO_SETTINGS_ITEMS));
 
         if (SELECTED_ITEM) {
             if (1 === SELECTED_ITEM.value) {
@@ -347,7 +343,7 @@ function pullFiles(args) {
                     targetExists = false;
 
                     newTargetName = await vscode.window.showInputBox({
-                        placeHolder: 'Please define the name of the new target...',
+                        placeHolder: selectedWorkspace.t('tools.createDeployScript.askForNewTargetName'),
                     });
 
                     if (deploy_helpers.isEmptyString(newTargetName)) {
@@ -360,9 +356,8 @@ function pullFiles(args) {
                     });
 
                     if (targetExists) {
-                        //TODO: translate
                         selectedWorkspace.showWarningMessage(
-                            `A target called '${newTargetName}' is already defined in the settings!`
+                            selectedWorkspace.t('tools.createDeployScript.targetAlreadyDefined')
                         );
                     }
                 }
@@ -431,15 +426,13 @@ function pullFiles(args) {
         }
     }
     catch (e) {
-        //TODO: translate
         selectedWorkspace.showWarningMessage(
-            `Could not write new script target entry to settings: ${deploy_helpers.toStringSafe(e)}`,
+            selectedWorkspace.t('tools.createDeployScript.errors.updateTargetSettingsFailed', e)
         );
     }
 
-    //TODO: translate
     selectedWorkspace.showInformationMessage(
-        `Deploy script '${scriptFile}' has been created successfully.`
+        selectedWorkspace.t('tools.createDeployScript.scriptCreated', scriptFile)
     );
 
     await vscode.window.showTextDocument(

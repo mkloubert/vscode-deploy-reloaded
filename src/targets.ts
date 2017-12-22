@@ -42,6 +42,14 @@ import * as vscode from 'vscode';
  */
 export interface ExecuteTargetOperationOptions {
     /**
+     * The current deploy operation.
+     */
+    readonly deployOperation: deploy_contracts.DeployOperation;
+    /**
+     * The underlying files.
+     */
+    readonly files: string[];
+    /**
      * The callback that is invoked BEFORE an operation is going to be executed.
      * 
      * @param {TargetOperation} operation The operation.
@@ -147,9 +155,17 @@ export interface TargetOperationExecutionContext<TOperation extends TargetOperat
      */
     readonly args: any[];
     /**
+     * The underlying deploy operation.
+     */
+    readonly deployOperation: deploy_contracts.DeployOperation;
+    /**
      * The event (type).
      */
     readonly event: TargetOperationEvent;
+    /**
+     * The underlying files.
+     */
+    readonly files: string[];
     /**
      * The underlying operation.
      */
@@ -359,7 +375,9 @@ export async function executeTargetOperations(opts: ExecuteTargetOperationOption
         try {
             const CTX: TargetOperationExecutionContext = {
                 args: executorArgs || [],
+                deployOperation: opts.deployOperation,
                 event: EVENT,
+                files: deploy_helpers.asArray(opts.files),
                 operation: operationToExecute,
                 previousOperation: prevOperation,
                 target: TARGET,
@@ -375,7 +393,7 @@ export async function executeTargetOperations(opts: ExecuteTargetOperationOption
             const ABORT = !deploy_helpers.toBooleanSafe(
                 await Promise.resolve(
                     executor.apply(null,
-                                [ CTX ])
+                                   [ CTX ])
                 ),
                 true
             );

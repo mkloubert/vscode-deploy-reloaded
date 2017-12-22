@@ -54,7 +54,6 @@ export async function deleteFileIn(file: string, target: deploy_targets.Target,
         throw new Error(`File '${file}' cannot be deleted in workspace '${ME.folder.uri.fsPath}'!`);
     }
 
-    //TODO: translate
     const BUTTONS: deploy_contracts.MessageItemWithValue[] = [
         {
             title: ME.t('no'),

@@ -155,9 +155,25 @@ export const translation: Translation = {
     time: {
         dateTimeWithSeconds: "YYYY-MM-DD HH:mm:ss",
     },
+    tools: {
+        createDeployScript: {
+            askForNewTargetName: "Please define the name of the new target ...",
+            askForScriptPath: "What should be the path of the new file?",
+            askForUpdatingSettings: "Save script as new target in settings?",
+            errors: {
+                targetAlreadyDefined: "A target called{0:trim,surround,leading_space} has already been defined in the settings!",
+                updateTargetSettingsFailed: "Could not write new script target entry to settings:{0:trim,surround,leading_space}",
+            },
+            scriptCreated: "The script{0:trim,surround,leading_space} has been created successfully.",
+        },
+    },
     'vs-deploy': {
         continueAndInitialize: 'Continue and initialize me...',
         currentlyActive: "'vs-deploy' extension is currently active. It is recommended to DEACTIVATE IT, before you continue and use the new extension!",
+    },
+    workspaces: {
+        noneFound: "No workspaces found!",
+        selectWorkspace: "Select a workspace ...",
     },
     yes: 'Yes',
 }
