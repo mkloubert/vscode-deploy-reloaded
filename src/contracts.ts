@@ -401,6 +401,12 @@ export interface WithOptionalName {
     readonly name?: string;
 }
 
+
+/**
+ * Stores the default value for an IP (host) address.
+ */
+export const DEFAULT_HOST = '127.0.0.1';
+
 /**
  * The name of the event that is raised after workspace config has been reloaded.
  */

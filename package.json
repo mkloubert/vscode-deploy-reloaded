@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.69",
+ "version": "0.0.71",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -776,6 +776,69 @@
               {
                "type": "object",
                "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -1013,6 +1076,69 @@
                },
                "required": [
                 "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
                ]
               },
               {
@@ -1374,6 +1500,69 @@
               {
                "type": "object",
                "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -1607,6 +1796,69 @@
                },
                "required": [
                 "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
                ]
               },
               {
@@ -1960,6 +2212,69 @@
               {
                "type": "object",
                "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -2193,6 +2508,69 @@
                },
                "required": [
                 "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
                ]
               },
               {
@@ -2547,6 +2925,69 @@
               {
                "type": "object",
                "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -2780,6 +3221,69 @@
                },
                "required": [
                 "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
                ]
               },
               {
@@ -3164,6 +3668,69 @@
               {
                "type": "object",
                "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -3397,6 +3964,69 @@
                },
                "required": [
                 "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
                ]
               },
               {
@@ -3775,6 +4405,69 @@
               {
                "type": "object",
                "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -4008,6 +4701,69 @@
                },
                "required": [
                 "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
                ]
               },
               {
@@ -4403,6 +5159,69 @@
               {
                "type": "object",
                "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -4636,6 +5455,69 @@
                },
                "required": [
                 "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
                ]
               },
               {
@@ -4989,6 +5871,69 @@
               {
                "type": "object",
                "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -5222,6 +6167,69 @@
                },
                "required": [
                 "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
                ]
               },
               {
@@ -5621,6 +6629,69 @@
               {
                "type": "object",
                "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -5854,6 +6925,69 @@
                },
                "required": [
                 "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
                ]
               },
               {
@@ -6233,6 +7367,69 @@
               {
                "type": "object",
                "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -6466,6 +7663,69 @@
                },
                "required": [
                 "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
                ]
               },
               {
@@ -6931,6 +8191,69 @@
               {
                "type": "object",
                "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -7195,6 +8518,69 @@
                },
                "required": [
                 "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
                ]
               },
               {
@@ -7544,6 +8930,69 @@
               {
                "type": "object",
                "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -7782,6 +9231,69 @@
                },
                "required": [
                 "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
                ]
               },
               {
@@ -8145,6 +9657,69 @@
               {
                "type": "object",
                "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -8383,6 +9958,69 @@
                },
                "required": [
                 "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
                ]
               },
               {
@@ -8787,6 +10425,69 @@
               {
                "type": "object",
                "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -9029,6 +10730,69 @@
                },
                "required": [
                 "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
                ]
               },
               {
@@ -9381,6 +11145,69 @@
               {
                "type": "object",
                "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -9661,6 +11488,69 @@
                },
                "required": [
                 "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
                ]
               },
               {
@@ -10057,6 +11947,69 @@
               {
                "type": "object",
                "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -10290,6 +12243,69 @@
                },
                "required": [
                 "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
                ]
               },
               {
@@ -10641,6 +12657,69 @@
               {
                "type": "object",
                "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "if": {
                  "description": "(JavaScript) Code, which indicates, if entry is available or not.",
                  "type": "string"
@@ -10874,6 +12953,69 @@
                },
                "required": [
                 "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
                ]
               },
               {
@@ -11213,6 +13355,8 @@
   "@types/mime-types": "^2.1.0",
   "@types/minimatch": "^3.0.1",
   "@types/mocha": "^2.2.42",
+  "@types/mssql": "^4.0.6",
+  "@types/mysql": "^2.15.2",
   "@types/node": "^7.0.43",
   "@types/nodemailer": "^4.3.1",
   "@types/sanitize-filename": "^1.1.28",
@@ -11251,6 +13395,8 @@
   "mime-types": "^2.1.17",
   "minimatch": "^3.0.4",
   "moment": "^2.19.3",
+  "mssql": "^4.1.0",
+  "mysql": "^2.15.0",
   "node-enumerable": "^3.8.0",
   "node-zip": "^1.1.1",
   "nodemailer": "^4.4.1",

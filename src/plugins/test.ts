@@ -90,9 +90,9 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
     }
 
     public async listDirectory(context: deploy_plugins.ListDirectoryContext<TestTarget>) {
-        const WORKSPACE_DIR = Path.resolve(
-            context.workspace.folder.uri.fsPath
-        );
+        const ME = this;
+
+        const WORKSPACE_DIR = context.workspace.rootPath;
 
         let targetDir = Path.join(
             WORKSPACE_DIR,
@@ -100,10 +100,10 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
         );
         targetDir = Path.resolve(targetDir);
 
-        if (!targetDir.startsWith(WORKSPACE_DIR)) {
-            //TODO: translate
+        if (!context.workspace.isPathOf(targetDir)) {
             throw new Error(
-                `'${context.dir}' is an invalid directory!`
+                ME.t(context.target,
+                     'plugins.test.invalidDirectory', context.dir)
             );
         }
 
@@ -133,9 +133,9 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
         }
 
         const FILES_AND_FOLDERS = await deploy_helpers.readDir(targetDir);
-        await deploy_helpers.forEachAsync(FILES_AND_FOLDERS, async (f) => {
+        for (const F of FILES_AND_FOLDERS) {
             let fullPath = Path.join(
-                targetDir, f
+                targetDir, F
             );
 
             const STATS = await deploy_helpers.lstat(fullPath);
@@ -152,7 +152,7 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
 
             if (STATS.isDirectory()) {
                 const DI: deploy_files.DirectoryInfo = {
-                    name: f,
+                    name: F,
                     path: relativePath,
                     size: SIZE,
                     time: time,
@@ -166,7 +166,7 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
                     download: async () => {
                         return deploy_helpers.readFile(fullPath);
                     },
-                    name: f,
+                    name: F,
                     path: relativePath,
                     size: SIZE,
                     time: time,
@@ -177,7 +177,7 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
             }
             else {
                 const FSI: deploy_files.FileSystemInfo = {
-                    name: f,
+                    name: F,
                     path: relativePath,
                     size: SIZE,
                     time: time,
@@ -185,7 +185,7 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
 
                 RESULT.others.push(FSI);
             }
-        });
+        }
 
         return RESULT;
     }

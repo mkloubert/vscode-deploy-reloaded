@@ -24,6 +24,7 @@ import * as deploy_targets_operations_command from './targets/operations/command
 import * as deploy_targets_operations_http from './targets/operations/http';
 import * as deploy_targets_operations_open from './targets/operations/open';
 import * as deploy_targets_operations_script from './targets/operations/script';
+import * as deploy_targets_operations_sql from './targets/operations/sql';
 import * as deploy_targets_operations_wait from './targets/operations/wait';
 import * as deploy_transformers from './transformers';
 import * as deploy_workspaces from './workspaces';
@@ -339,6 +340,10 @@ export async function executeTargetOperations(opts: ExecuteTargetOperationOption
 
             case 'script':
                 executor = deploy_targets_operations_script.execute;
+                break;
+
+            case 'sql':
+                executor = deploy_targets_operations_sql.execute;
                 break;
 
             case 'wait':

@@ -79,12 +79,18 @@ export const translation: Translation = {
             selectOption: "Select an option for the switch{0:trim,surround,leading_space}...",
             selectSwitch: "Select a switch...",
         },
+        test: {
+            invalidDirectory: "{0:trim,surround,ending_space}is an invalid directory!",
+        },
     },
     s3bucket: {
         credentialTypeNotSupported: "Credental type{0:trim,surround,leading_space} is not supported!",
     },
     sftp: {
         privateKeyNotFound: "Private key file{0:trim,surround,leading_space} not found!",
+    },
+    sql: {
+        notSupported: "SQL type{0:trim,surround,leading_space} is not supported!",
     },
     targets: {
         defaultName: "(Target #{0:trim})",

@@ -26,6 +26,7 @@ import * as deploy_transformers from './transformers';
 import * as deploy_values from './values';
 import * as deploy_workspaces from './workspaces';
 import * as Events from 'events';
+import * as i18 from './i18';
 import * as Stream from 'stream';
 import * as vscode from 'vscode';
 
@@ -693,6 +694,27 @@ export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_
         }
         else {
             return deploy_values.replaceWithValues(additionalValues, val);
+        }
+    }
+
+    /**
+     * Returns a translated string by key and a target.
+     * 
+     * @param {deploy_targets.Target} target The underlying target.
+     * @param {string} key The key.
+     * @param {any} [args] The optional arguments.
+     * 
+     * @return {string} The "translated" string.
+     */
+    public t(target: deploy_targets.Target, key: string, ...args: any[]): string {
+        if (target) {
+            return target.__workspace.t
+                                     .apply(target.__workspace,
+                                            [ <any>key ].concat(args));
+        }
+        else {
+            return i18.t
+                      .apply(null, [ <any>key ].concat(args));
         }
     }
 

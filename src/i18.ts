@@ -86,12 +86,18 @@ export interface Translation {
             selectOption?: string;
             selectSwitch?: string;
         };
+        test?: {
+            invalidDirectory?: string;
+        };
     };
     s3bucket?: {
         credentialTypeNotSupported?: string;
     };
     sftp?: {
         privateKeyNotFound?: string;
+    };
+    sql?: {
+        notSupported?: string;
     };
     targets?: {
         defaultName?: string;

@@ -784,6 +784,13 @@ export function formatArray(formatStr: any, args: any[]): string {
             // format providers
             formatProviders.forEach(fp => {
                 switch (fp) {
+                    case 'ending_space':
+                        resultValue = toStringSafe(resultValue);
+                        if ('' !== resultValue) {
+                            resultValue = resultValue + ' ';
+                        }
+                        break;
+
                     case 'leading_space':
                         resultValue = toStringSafe(resultValue);
                         if ('' !== resultValue) {

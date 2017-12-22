@@ -35,6 +35,8 @@ import * as Moment from 'moment';
 import * as Path from 'path';
 import * as vscode from 'vscode';
 
+import * as deploy_sql from './sql';
+
 
 let activeWorkspaces: deploy_workspaces.Workspace[] = [];
 let currentContext: vscode.ExtensionContext;
@@ -242,17 +244,17 @@ async function onDidFileChange(e: vscode.Uri, type: deploy_contracts.FileChangeT
         return;
     }
 
-    deploy_helpers.forEachAsync(WORKSPACES, async (ws) => {
+    for (const WS of WORKSPACES) {
         try {
-            if (ws.isPathOf(e.fsPath)) {
-                await ws.onDidFileChange(e, type);
+            if (WS.isPathOf(e.fsPath)) {
+                await WS.onDidFileChange(e, type);
             }
         }
         catch (e) {
             deploy_log.CONSOLE
-                      .err(e, 'extension.onDidFileChange()');
+                      .trace(e, 'extension.onDidFileChange()');
         }
-    });
+    }
 }
 
 async function onDidSaveTextDocument(e: vscode.TextDocument) {
@@ -260,17 +262,17 @@ async function onDidSaveTextDocument(e: vscode.TextDocument) {
         return;
     }
 
-    deploy_helpers.forEachAsync(WORKSPACES, async (ws) => {
+    for (const WS of WORKSPACES) {
         try {
-            if (ws.isPathOf(e.fileName)) {
-                await ws.onDidSaveTextDocument(e);
+            if (WS.isPathOf(e.fileName)) {
+                await WS.onDidSaveTextDocument(e);
             }
         }
         catch (e) {
             deploy_log.CONSOLE
-                      .err(e, 'extension.onDidSaveTextDocument()');
+                      .trace(e, 'extension.onDidSaveTextDocument()');
         }
-    });
+    }
 }
 
 async function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?: vscode.WorkspaceFolder[]) {
@@ -299,7 +301,7 @@ async function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?:
     }
 
     if (added) {
-        await deploy_helpers.forEachAsync(added, async (wsf) => {
+        for (const WSF of added) {
             let newWorkspace: deploy_workspaces.Workspace;
             try {
                 const CTX: deploy_workspaces.WorkspaceContext = {
@@ -331,7 +333,7 @@ async function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?:
                 });
 
                 newWorkspace = new deploy_workspaces.Workspace(
-                    nextWorkspaceId--, wsf, CTX
+                    nextWorkspaceId--, WSF, CTX
                 );
                 try {
                     const HAS_BEEN_INITIALIZED = await newWorkspace.initialize();
@@ -341,7 +343,7 @@ async function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?:
                     else {
                         //TODO: translate
                         deploy_helpers.showErrorMessage(
-                            `Workspace '${wsf.uri.fsPath}' has NOT been initialized!`
+                            `Workspace '${WSF.uri.fsPath}' has NOT been initialized!`
                         );
                     }
                 }
@@ -358,7 +360,7 @@ async function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?:
 
                 deploy_helpers.tryDispose(newWorkspace);
             }
-        });
+        }
     }
 
     if (1 === WORKSPACES.length) {

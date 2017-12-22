@@ -79,12 +79,18 @@ export const translation: Translation = {
             selectOption: 'Wählen Sie eine Option für den Schalter{0:trim,surround,leading_space}...',
             selectSwitch: "Wählen Sie einen Schalter...",
         },
+        test: {
+            invalidDirectory: "{0:trim,surround,ending_space}ist ein ungültiges Verzeichnis!",
+        },
     },
     s3bucket: {
         credentialTypeNotSupported: "Das Anmeldeverfahren{0:trim,surround,leading_space} wird nicht unterstützt!",
     },
     sftp: {
         privateKeyNotFound: "Der private Schlüssel{0:trim,surround,leading_space} wurde nicht gefunden!",
+    },
+    sql: {
+        notSupported: "Der SQL-Typ{0:trim,surround,leading_space} wird nicht unterstützt!",
     },
     targets: {
         defaultName: "(Ziel #{0:trim})",
