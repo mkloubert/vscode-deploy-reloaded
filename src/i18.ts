@@ -59,6 +59,15 @@ export interface Translation {
         };
     };
     initializationCanceled?: string;
+    listDirectory?: {
+        currentDirectory?: string;
+        directoryIsEmpty?: string;
+        lastModified?: string;
+        loading?: string;
+        noName?: string;
+        parentDirectory?: string;
+        size?: string;
+    };
     no?: string;
     packages?: {
         defaultName?: string;
@@ -102,6 +111,7 @@ export interface Translation {
     targets?: {
         defaultName?: string;
         noneFound?: string;
+        noPluginsFound?: string;
         noWorkspaceFound?: string;
         operations?: {
             http?: {
@@ -116,6 +126,9 @@ export interface Translation {
             };
             typeNotSupported?: string;
         };
+    };
+    time?: {
+        dateTimeWithSeconds?: string;
     };
     'vs-deploy'?: {
         continueAndInitialize?: string;

@@ -52,6 +52,15 @@ export const translation: Translation = {
         },
     },
     initializationCanceled: 'Die Initialisierung dieser Erweiterung wurde abgebrochen.',
+    listDirectory: {
+        currentDirectory: "Aktuelles Verzeichnis:{0:trim,surround,leading_space} ({1:trim,surround})",
+        directoryIsEmpty: "(Verzeichnis ist leer)",
+        lastModified: "Letzte Änderung:{0:trim,leading_space}",
+        loading: "Lade Verzeichnis{0:trim,surround,leading_space} ({1:trim} / {2:trim})...",
+        noName: "<KEIN NAME>",
+        parentDirectory: "(übergeordnetes Verzeichnis)",
+        size: "Grösse:{0:trim,leading_space}",
+    },
     no: 'Nein',
     packages: {
         defaultName: "(Paket #{0:trim})",
@@ -95,6 +104,7 @@ export const translation: Translation = {
     targets: {
         defaultName: "(Ziel #{0:trim})",
         noneFound: "Keine Ziele gefunden!",
+        noPluginsFound: "Es wurden keine passenden Plug-Ins gefunden!",
         noWorkspaceFound: "Keinen passenden Arbeitsbereich gefunden!",
         operations: {
             http: {
@@ -109,6 +119,9 @@ export const translation: Translation = {
             },
             typeNotSupported: "Eine Operation vom Typ{0:trim,surround,leading_space} wird nicht unterstützt!",
         },
+    },
+    time: {
+        dateTimeWithSeconds: "DD.MM.YYYY HH:mm:ss",
     },
     'vs-deploy': {
         continueAndInitialize: 'Fortfahren und initialisieren...',

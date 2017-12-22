@@ -52,6 +52,15 @@ export const translation: Translation = {
         },
     },
     initializationCanceled: 'The initialization of the extension has been stopped.',
+    listDirectory: {
+        currentDirectory: "Current directory:{0:trim,surround,leading_space} ({1:trim,surround})",
+        directoryIsEmpty: "(directory is empty)",
+        lastModified: "Last modified:{0:trim,leading_space}",
+        loading: "Loading directory{0:trim,surround,leading_space} ({1:trim} / {2:trim})...",
+        noName: "<NO NAME>",
+        parentDirectory: "(parent)",
+        size: "Size:{0:trim,leading_space}",
+    },
     no: 'No',
     packages: {
         defaultName: "(Package #{0:trim})",
@@ -95,6 +104,7 @@ export const translation: Translation = {
     targets: {
         defaultName: "(Target #{0:trim})",
         noneFound: "No targets found!",
+        noPluginsFound: "No matching plugins found!",
         noWorkspaceFound: "No matching workspace found!",
         operations: {
             http: {
@@ -109,6 +119,9 @@ export const translation: Translation = {
             },
             typeNotSupported: "Operation type{0:trim,surround,leading_space} is not supported!",
         },
+    },
+    time: {
+        dateTimeWithSeconds: "YYYY-MM-DD HH:mm:ss",
     },
     'vs-deploy': {
         continueAndInitialize: 'Continue and initialize me...',

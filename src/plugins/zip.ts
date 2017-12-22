@@ -273,7 +273,8 @@ class ZipPlugin extends deploy_plugins.PluginBase<ZipTarget> {
                                                  'YYYYMMDD HHmmss');
                 const DI: deploy_files.DirectoryInfo = {
                     internal_name: FILE_NAME,
-                    name: CREATION_TIME.local().format('YYYY-MM-DD HH:mm:ss'),  
+                    name: deploy_helpers.asLocalTime(CREATION_TIME)
+                                        .format( ME.t(context.target, 'time.dateTimeWithSeconds') ),  
                     path: '',
                     time: CREATION_TIME,
                     type: deploy_files.FileSystemType.Directory,

@@ -77,9 +77,8 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
 
     const PLUGINS = ME.getListPlugins(target);
     if (PLUGINS.length < 1) {
-        //TODO: translate
-        await ME.showWarningMessage(
-            `No matching PLUGINS found!`
+        ME.showWarningMessage(
+            ME.t('targets.noPluginsFound')
         );
 
         return;
@@ -106,8 +105,8 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
 
                 const PI = PLUGINS.shift();
 
-                //TODO translate
-                ctx.message = `Loading directory '${displayDir}' (${index + 1} / ${TOTAL_COUNT})...`;
+                ctx.message = ME.t('listDirectory.loading',
+                                   displayDir, index + 1, TOTAL_COUNT);
 
                 const CTX: deploy_plugins.ListDirectoryContext = {
                     cancellationToken: CANCELLATION_SOURCE.token,
@@ -197,7 +196,7 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
     }).forEach(f => {
         let label = deploy_helpers.toStringSafe(f.name).trim();
         if ('' === label) {
-            label = '<NO NAME>';  //TODO: translate
+            label = ME.t('listDirectory.noName');
         }
 
         const DETAIL_ITEMS: string[] = [];
@@ -243,19 +242,18 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
 
         if (deploy_files.FileSystemType.Directory != f.type) {
             if (!isNaN(f.size)) {
-                //TODO: translate
-
                 DETAIL_ITEMS.push(
-                    `Size: ${FileSize(f.size, {round: 2})}`
+                    ME.t('listDirectory.size',
+                         FileSize(f.size, {round: 2}))
                 );
             }
         }
 
         const LOCAL_TIME = deploy_helpers.asLocalTime(f.time);
         if (LOCAL_TIME && LOCAL_TIME.isValid()) {
-            //TODO: translate
             DETAIL_ITEMS.push(
-                `Last modified: ${LOCAL_TIME.format('YYYY-MM-DD HH:mm:ss')}`
+                ME.t('listDirectory.lastModified',
+                     LOCAL_TIME.format( ME.t('time.dateTimeWithSeconds') ))
             );
         }
 
@@ -276,7 +274,7 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
         QUICK_PICK_ITEMS.unshift({
             label: '..',
             description: '',
-            detail: '(parent)',  //TODO: translate
+            detail: ME.t('listDirectory.parentDirectory'),
 
             action: async () => {
                 LIST_DIRECTORY(
@@ -287,9 +285,8 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
     }
 
     if (QUICK_PICK_ITEMS.length < 1) {
-        //TODO: translate
         QUICK_PICK_ITEMS.push({
-            label: '(the directory is empty)',
+            label: ME.t('listDirectory.directoryIsEmpty'),
             description: '',
         });
     }
@@ -299,9 +296,9 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
         placeHolder = '/' + placeHolder;
     }
 
-    //TODO: translate
     const SELECTED_ITEM = await vscode.window.showQuickPick(QUICK_PICK_ITEMS, {
-        placeHolder: `Current directory: '${placeHolder}' (${TARGET_NAME})`,
+        placeHolder: ME.t('listDirectory.currentDirectory',
+                          placeHolder, TARGET_NAME),
     });
     if (SELECTED_ITEM) {
         if (SELECTED_ITEM.action) {
