@@ -218,6 +218,14 @@ export const translation: Translation = {
         errors: {
             operationFailed: "Tool operation failed (s. debug output 'CTRL + SHIFT + Y')!",
         },
+        quickExecution: {
+            description: "Executes JavaScript code",
+            errors: {
+                failed: "Execution code failed:{0:trim,surround,leading_space}",
+            },
+            inputCode: "Input the code, you would like to execute ...",
+            label: "Quick code execution ..."
+        },
     },
     'vs-deploy': {
         continueAndInitialize: 'Continue and initialize me...',

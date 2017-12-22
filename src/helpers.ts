@@ -1863,6 +1863,14 @@ export function toStringSafe(str: any, defValue: any = ''): string {
     }
 
     try {
+        if (str instanceof Error) {
+            return str.message;
+        }
+    
+        if (isFunc(str['toString'])) {
+            return '' + str.toString();
+        }
+
         try {
             if (Array.isArray(str) || isObject(str)) {
                 return JSON.stringify(str);

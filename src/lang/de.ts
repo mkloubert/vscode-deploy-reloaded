@@ -216,6 +216,14 @@ export const translation: Translation = {
         errors: {
             operationFailed: "Konnte Funktion nicht ausführen (s. Debugkonsole 'STRG + SHIFT + Y')!",
         },
+        quickExecution: {
+            description: "Führt JavaScript-Code aus",
+            errors: {
+                failed: "Das Ausführen des Codes ist fehlgeschlagen:{0:trim,surround,leading_space}",
+            },
+            inputCode: "Code, der ausgeführt werden soll ...",
+            label: "Code ausführen ...",
+        },
     },
     'vs-deploy': {
         continueAndInitialize: 'Fortfahren und initialisieren...',

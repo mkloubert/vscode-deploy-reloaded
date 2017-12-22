@@ -223,6 +223,14 @@ export interface Translation {
         errors?: {
             operationFailed?: string;
         };
+        quickExecution?: {
+            description?: string;
+            errors?: {
+                failed?: string;
+            };
+            inputCode?: string;
+            label?: string;
+        };
     };
     'vs-deploy'?: {
         continueAndInitialize?: string;

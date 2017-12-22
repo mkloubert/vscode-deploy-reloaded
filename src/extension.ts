@@ -27,6 +27,7 @@ import * as deploy_plugins from './plugins';
 import * as deploy_switch from './switch';
 import * as deploy_targets from './targets';
 import * as deploy_tools from './tools';
+import * as deploy_tools_quick_execution from './tools/quickexecution';
 import * as deploy_workflows from './workflows';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
@@ -1065,7 +1066,21 @@ async function activateExtension(context: vscode.ExtensionContext) {
             // tools
             vscode.commands.registerCommand('extension.deploy.reloaded.showTools', async () => {
                 try {
+                    
+
                     const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = [
+                        {
+                            action: async () => {
+                                await deploy_tools_quick_execution._1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
+                                    currentContext,
+                                    WORKSPACES.map(ws => ws),
+                                    activeWorkspaces.map(aws => aws),
+                                );
+                            },
+                            label: '$(code)  ' + i18.t('tools.quickExecution.label'),
+                            description: i18.t('tools.quickExecution.description'),
+                        },
+
                         {
                             action: async () => {
                                 await deploy_tools.createDeployScript(
