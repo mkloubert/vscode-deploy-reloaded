@@ -268,7 +268,6 @@ class ZipPlugin extends deploy_plugins.PluginBase<ZipTarget> {
                 const MATCH = deploy_targets.REGEX_ZIP_FILENAME
                                             .exec(FILE_NAME);
 
-                //TODO: translate
                 const CREATION_TIME = Moment.utc(`${MATCH[4]} ${MATCH[6]}`,
                                                  'YYYYMMDD HHmmss');
                 const DI: deploy_files.DirectoryInfo = {

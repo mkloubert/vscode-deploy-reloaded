@@ -1,6 +1,12 @@
 # vscode-deploy-reloaded
 
+[![Latest Release](https://vsmarketplacebadge.apphb.com/version-short/mkloubert.vscode-deploy-reloaded.svg)](https://marketplace.visualstudio.com/items?itemName=mkloubert.vscode-deploy-reloaded)
+[![Installs](https://vsmarketplacebadge.apphb.com/installs/mkloubert.vscode-deploy-reloaded.svg)](https://marketplace.visualstudio.com/items?itemName=mkloubert.vscode-deploy-reloaded)
+[![Rating](https://vsmarketplacebadge.apphb.com/rating-short/mkloubert.vscode-deploy-reloaded.svg)](https://marketplace.visualstudio.com/items?itemName=mkloubert.vscode-deploy-reloaded#review-details)
+
 Recoded version of [Visual Studio Code](https://code.visualstudio.com) extension [vs-deploy](https://github.com/mkloubert/vs-deploy), which provides commands to deploy files to one or more destinations.
+
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=marcel.kloubert%40gmx.net&item_name=vscode-deploy-reloaded&item_number=vscode-deploy-reloaded&currency_code=EUR)
 
 ## Table of contents
 
