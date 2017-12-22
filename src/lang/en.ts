@@ -122,6 +122,14 @@ export const translation: Translation = {
         test: {
             invalidDirectory: "{0:trim,surround,ending_space}is an invalid directory!",
         },
+        zip: {
+            errors: {
+                fileAlreadyExists: "File{0:trim,surround,leading_space} already exists!",
+                fileNotFound: "File{0:trim,surround,leading_space} not found!",
+                noFilesFound: "No ZIP files found!",
+            },
+            invalidDirectory: "{0:trim,surround,ending_space}is an invalid directory!",
+        },
     },
     s3bucket: {
         credentialTypeNotSupported: "Credental type{0:trim,surround,leading_space} is not supported!",

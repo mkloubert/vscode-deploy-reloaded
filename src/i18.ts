@@ -127,6 +127,14 @@ export interface Translation {
         test?: {
             invalidDirectory?: string;
         };
+        zip?: {
+            errors?: {
+                fileAlreadyExists?: string;
+                fileNotFound?: string;
+                noFilesFound?: string;
+            };
+            invalidDirectory?: string;
+        };
     };
     s3bucket?: {
         credentialTypeNotSupported?: string;

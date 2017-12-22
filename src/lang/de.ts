@@ -122,6 +122,14 @@ export const translation: Translation = {
         test: {
             invalidDirectory: "{0:trim,surround,ending_space}ist ein ungültiges Verzeichnis!",
         },
+        zip: {
+            errors: {
+                fileAlreadyExists: "Die Datei{0:trim,surround,leading_space} existiert bereits!",
+                fileNotFound: "Datei{0:trim,surround,leading_space} wurde nicht gefunden!",
+                noFilesFound: "Keine ZIP-Datei gefunden!",
+            },
+            invalidDirectory: "{0:trim,surround,ending_space}ist ein ungültiges Verzeichnis!",
+        },
     },
     s3bucket: {
         credentialTypeNotSupported: "Das Anmeldeverfahren{0:trim,surround,leading_space} wird nicht unterstützt!",

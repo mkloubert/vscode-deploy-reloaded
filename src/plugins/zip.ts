@@ -47,6 +47,7 @@ class ZipPlugin extends deploy_plugins.PluginBase<ZipTarget> {
 
     public async deleteFiles(context: deploy_plugins.DeleteContext<ZipTarget>) {
         const ME = this;
+        const WORKSPACE = context.target.__workspace;
 
         const LATEST_ZIP = await ME.getLatestZipFile(context.target);
 
@@ -75,8 +76,7 @@ class ZipPlugin extends deploy_plugins.PluginBase<ZipTarget> {
                 }
 
                 if (!found) {
-                    //TODO: translate
-                    throw new Error(`'${file}' not found!`);
+                    throw new Error(WORKSPACE.t('plugins.zip.errors.fileNotFound', file));
                 }
 
                 await F.onDeleteCompleted(null, false);
@@ -103,6 +103,7 @@ class ZipPlugin extends deploy_plugins.PluginBase<ZipTarget> {
 
     public async downloadFiles(context: deploy_plugins.DownloadContext<ZipTarget>) {
         const ME = this;
+        const WORKSPACE = context.target.__workspace;
 
         const LATEST_ZIP = await ME.getLatestZipFile(context.target);
         
@@ -124,8 +125,7 @@ class ZipPlugin extends deploy_plugins.PluginBase<ZipTarget> {
             }
 
             if (deploy_helpers.isSymbol(entry)) {
-                //TODO: translate
-                throw new Error(`'${file}' not found!`);
+                throw new Error(WORKSPACE.t('plugins.zip.errors.fileNotFound', file));
             }
 
             return entry;
@@ -150,6 +150,8 @@ class ZipPlugin extends deploy_plugins.PluginBase<ZipTarget> {
 
     private async getTargetDirectory(target: ZipTarget,
                                      createIfNotExist: boolean) {
+        const WORKSPACE = target.__workspace;
+
         let targetDir = this.replaceWithValues(target, target.dir);
         if (deploy_helpers.isEmptyString(targetDir)) {
             targetDir = './out';
@@ -170,8 +172,7 @@ class ZipPlugin extends deploy_plugins.PluginBase<ZipTarget> {
             }
 
             if (!(await deploy_helpers.lstat(targetDir)).isDirectory()) {
-                //TODO: translate
-                throw new Error(`'${targetDir}' is no directory!`);
+                throw new Error(WORKSPACE.t('isNo.directory', targetDir));
             }
         }
 
@@ -180,6 +181,7 @@ class ZipPlugin extends deploy_plugins.PluginBase<ZipTarget> {
 
     private async getLatestZipFile(target: ZipTarget): Promise<string> {
         const ME = this;
+        const WORKSPACE = target.__workspace;
         
         let zipFile: { name: string, time: Moment.Moment } | symbol
             = Symbol('ZIPFILE_NOT_FOUND');
@@ -205,8 +207,7 @@ class ZipPlugin extends deploy_plugins.PluginBase<ZipTarget> {
         }
 
         if (deploy_helpers.isSymbol(zipFile)) {
-            //TODO: translate
-            throw new Error('No ZIP file found!');
+            throw new Error(WORKSPACE.t('plugins.zip.errors.noFilesFound', zipFile));
         }
 
         return zipFile.name;
@@ -244,6 +245,7 @@ class ZipPlugin extends deploy_plugins.PluginBase<ZipTarget> {
 
     public async listDirectory(context: deploy_plugins.ListDirectoryContext<ZipTarget>) {
         const ME = this;
+        const WORKSPACE = context.workspace;
 
         const RESULT: deploy_plugins.ListDirectoryResult<ZipTarget> = {
             dirs: [],
@@ -291,8 +293,7 @@ class ZipPlugin extends deploy_plugins.PluginBase<ZipTarget> {
             );
 
             if (!ZIP_FILE_PATH.startsWith(TARGET_DIR)) {
-                //TODO: translate
-                throw new Error(`Invalid path '${DIR}'!`);
+                throw new Error(WORKSPACE.t('plugins.zip.invalidDirectory', DIR));
             }
 
             const ZIP_FILE = Zip(await deploy_helpers.readFile(ZIP_FILE_PATH), {
@@ -351,6 +352,8 @@ class ZipPlugin extends deploy_plugins.PluginBase<ZipTarget> {
     }
 
     public async uploadFiles(context: deploy_plugins.UploadContext<ZipTarget>) {
+        const WORKSPACE = context.target.__workspace;
+
         const ZIP_FILE_PATH = Path.join(await this.getTargetDirectory(context.target, true),
                                         deploy_targets.getZipFileName(context.target));
 
@@ -381,8 +384,7 @@ class ZipPlugin extends deploy_plugins.PluginBase<ZipTarget> {
         }), 'binary');
 
         if (await deploy_helpers.exists(ZIP_FILE_PATH)) {
-            //TODO: translate
-            throw new Error(`'${ZIP_FILE_PATH}' does already exist!`);
+            throw new Error(WORKSPACE.t('plugins.zip.errors.fileAlreadyExists', ZIP_FILE_PATH));
         }
 
         await deploy_helpers.writeFile(ZIP_FILE_PATH, ZIPPED_DATA);
