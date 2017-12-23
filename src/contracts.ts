@@ -188,6 +188,10 @@ export interface Configuration extends deploy_values.WithValueItems {
      */
     readonly runGitPullOnStartup?: boolean | number;
     /**
+     * One or more commands that should be run on startup.
+     */
+    readonly startupCommands?: StartupCommandValue | StartupCommandValue[];
+    /**
      * Activates or deactivates "sync when open" feature.
      */
     readonly syncWhenOpen?: boolean;
@@ -387,6 +391,25 @@ export interface ScriptArguments {
      */
     state: any;
 }
+
+/**
+ * A startup command.
+ */
+export interface StartupCommand {
+    /**
+     * Arguments for the execution.
+     */
+    readonly arguments?: any[];
+    /**
+     * The ID of the command.
+     */
+    readonly command: string;
+}
+
+/**
+ * A possible value for a startup command entry.
+ */
+export type StartupCommandValue = string | StartupCommand;
 
 /**
  * An object that can provide translated strings by key.

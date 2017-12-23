@@ -124,10 +124,8 @@ export async function autoDeployFile(file: string,
             }
             catch (e) {
                 ME.showErrorMessage(
-                    deploy_helpers.format(
-                        errorMsgTemplate,
-                        file, TARGET_NAME, e,
-                    )
+                    ME.t(errorMsgTemplate,
+                         file, TARGET_NAME, e)
                 );
             }
         }

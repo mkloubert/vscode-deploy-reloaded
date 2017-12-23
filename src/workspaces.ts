@@ -527,6 +527,50 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                            .apply(this, arguments);
     }
 
+    private async executeStartupCommands() {
+        const ME = this;
+
+        const CFG = ME.config;
+
+        try {
+            for (let cmd of deploy_helpers.asArray(CFG.startupCommands)) {
+                if (!deploy_helpers.isObject<deploy_contracts.StartupCommand>(cmd)) {
+                    cmd = {
+                        command: cmd,
+                    };
+                }
+
+                const CMD_ID = deploy_helpers.toStringSafe(cmd.command);
+                if (deploy_helpers.isEmptyString(CMD_ID)) {
+                    continue;
+                }
+
+                try {
+                    let args: any[];
+                    if (deploy_helpers.isNullOrUndefined(cmd.arguments)) {
+                        args = [];
+                    }
+                    else {
+                        args = deploy_helpers.asArray(cmd.arguments, false);
+                    }
+
+                    await vscode.commands.executeCommand
+                                         .apply(null, [ <any>CMD_ID ].concat(args));
+                }
+                catch (e) {
+                    await ME.showErrorMessage(
+                        ME.t('commands.executionError',
+                             CMD_ID, e)
+                    );
+                }
+            }
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'workspaces.Workspace.executeStartupCommands()');
+        }
+    }
+
     /**
      * Finds files inside that workspace.
      * 
@@ -1614,6 +1658,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
                 await ME.reloadPackageButtons();
                 await ME.reloadSwitches();
+
+                await ME.executeStartupCommands();
             };
         }
         catch (e) {

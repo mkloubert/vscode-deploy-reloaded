@@ -469,11 +469,10 @@ export async function deployPackage(pkg: deploy_packages.Package) {
 export async function deployOnChange(file: string) {
     const ME: deploy_workspaces.Workspace = this;
 
-    //TODO: translate
     const ARGS = [
         file,
         (pkg: deploy_packages.Package) => pkg.deployOnChange,
-        "Deploy ON CHANGE from '{0}' to '{1}' failed: '{2}'",
+        "deploy.onChange.failed",
     ];
 
     return await deploy_packages.autoDeployFile
@@ -488,11 +487,10 @@ export async function deployOnChange(file: string) {
 export async function deployOnSave(file: string) {
     const ME: deploy_workspaces.Workspace = this;
 
-    //TODO: translate
     const ARGS = [
         file,
         (pkg: deploy_packages.Package) => pkg.deployOnSave,
-        "Deploy ON SAVE from '{0}' to '{1}' failed: '{2}'",
+        "deploy.onSave.failed",
     ];
 
     return await deploy_packages.autoDeployFile

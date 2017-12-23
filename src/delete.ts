@@ -352,9 +352,8 @@ export async function deletePackage(pkg: deploy_packages.Package,
 
     const FILES_TO_DELETE = await ME.findFilesByFilter(pkg);
     if (FILES_TO_DELETE.length < 1) {
-        //TODO: translate
-        await ME.showWarningMessage(
-            `No FILES found!`
+        ME.showWarningMessage(
+            ME.t('noFiles')
         );
 
         return;
@@ -410,9 +409,8 @@ export async function deletePackage(pkg: deploy_packages.Package,
     }).filter(qp => deploy_targets.isVisibleForPackage(qp.state, pkg));
 
     if (QUICK_PICK_ITEMS.length < 1) {
-        //TODO: translate
-        await ME.showWarningMessage(
-            `No TARGETS found!`
+        ME.showWarningMessage(
+            ME.t('targets.noneFound')
         );
 
         return;
@@ -424,7 +422,7 @@ export async function deletePackage(pkg: deploy_packages.Package,
     }
     else {
         selectedItem = await vscode.window.showQuickPick(QUICK_PICK_ITEMS, {
-            placeHolder: 'Select the TARGET to delete files in...',  //TODO: translate
+            placeHolder: ME.t('DELETE.selectTarget')
         });
     }
 

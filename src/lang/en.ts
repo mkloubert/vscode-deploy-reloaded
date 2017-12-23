@@ -25,7 +25,7 @@ export const translation: Translation = {
     cancel: 'Cancel',
     canceled: 'Canceled',
     commands: {
-        executionError: "Could not execute command {0:surround}:{1:trim,surround,leading_space}",
+        executionError: "Could not execute command{0:surround,leading_space}:{1:trim,surround,leading_space}",
         scriptNotFound: "{0:surround} script not found!",
     },
     compare: {
@@ -52,7 +52,16 @@ export const translation: Translation = {
         },
         finishedOperation: "Deleting files in{0:trim,surround,leading_space} has been finished.",
         finishedOperationWithErrors: "[ERROR] Could not delete files in{0:trim,surround,leading_space}:{1:trim,surround,leading_space}",
+        selectTarget: "Select the target where to delete ...",
         startOperation: "Start deleting files in{0:trim,surround,leading_space} ...",
+    },
+    deploy: {
+        onChange: {
+            failed: "Deploy on change from{0:trim,surround,leading_space} to{1:trim,surround,leading_space} failed:{2:trim,surround,leading_space}",
+        },
+        onSave: {
+            failed: "Deploy on save from{0:trim,surround,leading_space} to{1:trim,surround,leading_space} failed:{2:trim,surround,leading_space}",
+        },
     },
     disposeNotAllowed: "Cannot invoke 'dispose()' method!",
     documents: {
@@ -94,6 +103,7 @@ export const translation: Translation = {
         parentDirectory: "(parent)",
         size: "Size:{0:trim,leading_space}",
     },
+    maxDepthReached: "Cannot go deeper than{0:trim,leading_space}!",
     no: "No",
     noFiles: "No files found!",
     ok: 'OK',

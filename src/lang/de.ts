@@ -25,7 +25,7 @@ export const translation: Translation = {
     cancel: 'Abbrechen',
     canceled: 'Abgebrochen',
     commands: {
-        executionError: "Das Kommando {0:surround} konnte nicht ausgeführt werden:{1:trim,surround,leading_space}",
+        executionError: "Das Kommando{0:surround,leading_space} konnte nicht ausgeführt werden:{1:trim,surround,leading_space}",
         scriptNotFound: "Das Skript {0:surround} wurde nicht gefunden!",
     },
     compare: {
@@ -51,7 +51,16 @@ export const translation: Translation = {
         },
         finishedOperation: "Das Löschen der Dateien in{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",
         finishedOperationWithErrors: "[FEHLER] Konnte Dateien nicht in{0:trim,surround,leading_space} löschen:{1:trim,surround,leading_space}",
+        selectTarget: "Wählen Sie das Ziel, wo Sie Dateien löschen wollen ...",
         startOperation: "Beginne das Löschen der Dateien in{0:trim,surround,leading_space} ...",
+    },
+    deploy: {
+        onChange: {
+            failed: "Das Bereitstellen nach dem Ändern von{0:trim,surround,leading_space} nach{1:trim,surround,leading_space} ist fehlgeschlagen:{2:trim,surround,leading_space}",
+        },
+        onSave: {
+            failed: "Das Bereitstellen nach dem Speichern von{0:trim,surround,leading_space} nach{1:trim,surround,leading_space} ist fehlgeschlagen:{2:trim,surround,leading_space}",
+        },
     },
     disposeNotAllowed: "'dispose()' Methode kann nicht aufgerufen werden!",
     documents: {
@@ -93,6 +102,7 @@ export const translation: Translation = {
         parentDirectory: "(übergeordnetes Verzeichnis)",
         size: "Grösse:{0:trim,leading_space}",
     },
+    maxDepthReached: "Maximale Tiefe von{0:trim,leading_space} erreicht!",
     no: "Nein",
     noFiles: "Keine Dateien gefunden!",
     packages: {

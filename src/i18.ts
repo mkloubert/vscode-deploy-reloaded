@@ -59,8 +59,17 @@ export interface Translation {
         };
         finishedOperation?: string;
         finishedOperationWithErrors?: string;
+        selectTarget?: string;
         startOperation?: string;
-    }
+    };
+    deploy?: {
+        onChange?: {
+            failed?: string;
+        };
+        onSave?: {
+            failed?: string;
+        };
+    };
     disposeNotAllowed?: string;
     documents?: {
         html?: {
@@ -101,6 +110,7 @@ export interface Translation {
         parentDirectory?: string;
         size?: string;
     };
+    maxDepthReached?: string;
     no?: string;
     noFiles?: string;
     ok?: string;

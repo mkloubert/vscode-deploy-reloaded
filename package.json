@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.75",
+ "version": "0.0.76",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -114,7 +114,7 @@
      "properties": {
       "commands": {
        "description": "Registers one or more commands for the editor.",
-       "type": "objects",
+       "type": "object",
        "patternProperties": {
         "\\S+": {
          "description": "The ID of the command to register.",
@@ -594,6 +594,32 @@
          "minimum": 0
         }
        ]
+      },
+      "startupCommands": {
+       "type": "array",
+       "items": {
+        "oneOf": [
+         {
+          "description": "The ID of the command to execute.",
+          "pattern": "\\S+",
+          "type": "string"
+         },
+         {
+          "description": "Settings for a command to execute.",
+          "type": "object",
+          "properties": {
+           "arguments": {
+            "description": "One or more argument for the execution."
+           },
+           "command": {
+            "description": "The ID of the command to execute.",
+            "pattern": "\\S+",
+            "type": "string"
+           }
+          }
+         }
+        ]
+       }
       },
       "syncWhenOpen": {
        "description": "Activates or deactivates 'sync when open' feature for all packages.",
