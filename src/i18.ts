@@ -78,6 +78,14 @@ export interface Translation {
         startOperation?: string;
     };
     deploy?: {
+        askForCancelOperation?: string;
+        buttons?: {
+            cancel?: {
+                text?: string;
+                tooltip?: string;
+            };
+        };
+        cancelling?: string;
         currentFile?: {
             description?: string;
             label?: string;

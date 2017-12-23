@@ -100,6 +100,11 @@ export async function deployFilesTo(files: string[],
         let isCancelling = false;
         {
             cancelBtn = vscode.window.createStatusBarItem();
+            const RESTORE_CANCEL_BTN_TEXT = () => {
+                cancelBtn.text = ME.t('deploy.buttons.cancel.text',
+                                      TARGET_NAME);
+                cancelBtn.tooltip = ME.t('deploy.buttons.cancel.tooltip');
+            };
 
             const CANCEL_BTN_COMMAND_ID = `extension.deploy.reloaded.buttons.cancelDeployFilesTo${nextCancelBtnCommandId++}`;
             
@@ -108,7 +113,7 @@ export async function deployFilesTo(files: string[],
                     isCancelling = true;
 
                     cancelBtn.command = undefined;
-                    cancelBtn.text = `Cancelling deploy operation...`;  //TODO: translate
+                    cancelBtn.text = ME.t('deploy.cancelling');
 
                     const POPUP_BTNS: deploy_contracts.MessageItemWithValue[] = [
                         {
@@ -122,10 +127,9 @@ export async function deployFilesTo(files: string[],
                         }
                     ];
 
-                    //TODO: translate
                     const PRESSED_BTN = await ME.showWarningMessage.apply(
                         null,
-                        [ <any>`You are about to cancel the deploy operation to '${TARGET_NAME}'. Are you sure?` ].concat(
+                        [ <any>ME.t('deploy.askForCancelOperation', TARGET_NAME) ].concat(
                             POPUP_BTNS
                         )
                     );
@@ -137,14 +141,16 @@ export async function deployFilesTo(files: string[],
                     }
                 }
                 finally {
+                    if (!CANCELLATION_SOURCE.token.isCancellationRequested) {
+                        RESTORE_CANCEL_BTN_TEXT();
+                    }
+
                     isCancelling = false;
                 }
             });
             
             cancelBtn.command = CANCEL_BTN_COMMAND_ID;
-            //TODO: translate
-            cancelBtn.text = `Deploying files to '${TARGET_NAME}'...`;
-            cancelBtn.tooltip = 'Click here to cancel...';
+            RESTORE_CANCEL_BTN_TEXT();
 
             cancelBtn.show();
         }

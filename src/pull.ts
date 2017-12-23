@@ -126,6 +126,11 @@ export async function pullFilesFrom(files: string[],
         let isCancelling = false;
         {
             cancelBtn = vscode.window.createStatusBarItem();
+            const RESTORE_CANCEL_BTN_TEXT = () => {
+                cancelBtn.text = ME.t('pull.buttons.cancel.text',
+                                      TARGET_NAME);
+                cancelBtn.tooltip = ME.t('pull.buttons.cancel.tooltip');
+            };
 
             const CANCEL_BTN_COMMAND_ID = `extension.deploy.reloaded.buttons.cancelPullFilesFrom${nextCancelBtnCommandId++}`;
             
@@ -162,14 +167,16 @@ export async function pullFilesFrom(files: string[],
                     }
                 }
                 finally {
+                    if (!CANCELLATION_SOURCE.token.isCancellationRequested) {
+                        RESTORE_CANCEL_BTN_TEXT();
+                    }
+
                     isCancelling = false;
                 }
             });
             
             cancelBtn.command = CANCEL_BTN_COMMAND_ID;
-            cancelBtn.text = ME.t('pull.buttons.cancel.text',
-                                  TARGET_NAME);
-            cancelBtn.tooltip = ME.t('pull.buttons.cancel.tooltip');
+            RESTORE_CANCEL_BTN_TEXT();
 
             cancelBtn.show();
         }

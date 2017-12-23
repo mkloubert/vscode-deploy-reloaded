@@ -70,6 +70,14 @@ export const translation: Translation = {
         startOperation: "Beginne das Löschen der Dateien in{0:trim,surround,leading_space} ...",
     },
     deploy: {
+        askForCancelOperation: "Sind Sie sicher, dass Sie das Bereitstellen der Datei(en) in{0:trim,surround,leading_space} abbrechen wollen?",
+        buttons: {
+            cancel: {
+                text: "Stelle Dateien in{0:trim,surround,leading_space} breit ...",
+                tooltip: "Hier klicken, um abzubrechen ...",
+            },
+        },
+        cancelling: "Breche das Bereitstellen ab ...",
         currentFile: {
             description: "Stellt die aktuelle Datei bereit",
             label: "Aktuelle Datei ...",

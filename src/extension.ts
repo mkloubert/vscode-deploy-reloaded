@@ -820,7 +820,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
             vscode.commands.registerCommand('extension.deploy.reloaded.pullWorkspace', async () => {
                 try {
                     await invokeForActivePackage(
-                        'Select the PACKAGE to pull...',  //TODO: translate
+                        i18.t('packages.selectPackage'),
                         async (pkg) => {
                             await pkg.__workspace
                                      .pullPackage(pkg);
@@ -831,9 +831,8 @@ async function activateExtension(context: vscode.ExtensionContext) {
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.pullWorkspace');
 
-                    //TODO: translate
                     deploy_helpers.showErrorMessage(
-                        `Pulling WORKSPACE failed (s. debug output 'CTRL + Y')!`
+                        i18.t('pull.errors.operationFailed')
                     );
                 }
             }),

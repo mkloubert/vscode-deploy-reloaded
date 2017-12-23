@@ -71,6 +71,14 @@ export const translation: Translation = {
         startOperation: "Start deleting files in{0:trim,surround,leading_space} ...",
     },
     deploy: {
+        askForCancelOperation: "You are about to cancel the deploy operation to{0:trim,surround,leading_space}. Are you sure?",
+        buttons: {
+            cancel: {
+                text: "Deploying files to{0:trim,surround,leading_space} ...",
+                tooltip: "Click here to cancel ...",
+            },
+        },
+        cancelling: "Cancelling deploy operation ...",
         currentFile: {
             description: "Deploys the current file",
             label: "Current file ...",

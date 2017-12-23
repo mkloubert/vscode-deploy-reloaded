@@ -150,6 +150,11 @@ export async function deleteFilesIn(files: string[],
         let isCancelling = false;
         {
             cancelBtn = vscode.window.createStatusBarItem();
+            const RESTORE_CANCEL_BTN_TEXT = () => {
+                cancelBtn.text = ME.t('DELETE.buttons.cancel.text',
+                                      TARGET_NAME);
+                cancelBtn.tooltip = ME.t('DELETE.buttons.cancel.tooltip');
+            };
 
             const CANCEL_BTN_COMMAND_ID = `extension.deploy.reloaded.buttons.cancelDeleteFilesIn${nextCancelBtnCommandId++}`;
 
@@ -186,14 +191,16 @@ export async function deleteFilesIn(files: string[],
                     }
                 }
                 finally {
+                    if (!CANCELLATION_SOURCE.token.isCancellationRequested) {
+                        RESTORE_CANCEL_BTN_TEXT();
+                    }
+
                     isCancelling = false;
                 }
             });
             
             cancelBtn.command = CANCEL_BTN_COMMAND_ID;
-            cancelBtn.text = ME.t('DELETE.buttons.cancel.text',
-                                  TARGET_NAME);
-            cancelBtn.tooltip = ME.t('DELETE.buttons.cancel.tooltip');
+            RESTORE_CANCEL_BTN_TEXT();
 
             cancelBtn.show();
         }

@@ -91,6 +91,38 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         );
     };
 
+    const $hash = async (algo: string, val: any, asBinary?: boolean) => {
+        algo = $h.normalizeString(
+            await $unwrap(algo)
+        );
+        if ('' === algo) {
+            algo = 'sha256';
+        }
+
+        val = await $unwrap(val);
+        if ($h.isNullOrUndefined(val)) {
+            return val;
+        }
+
+        asBinary = await $unwrap(
+            $h.toBooleanSafe(asBinary)
+        );
+
+        const Crypto = require('crypto');
+        
+        const RESULT = Crypto.createHash(algo).update(
+            await $h.asBuffer(val)
+        );
+
+        return asBinary ? RESULT.digest()
+                        : RESULT.digest('hex');
+    };
+
+    const $sha256 = async (val: any, asBinary?: boolean) => {
+        return await $hash('sha256',
+                           val, asBinary);
+    };
+
     // show help
     const $help = async () => {
         await require('../html').openMarkdownDocument(
@@ -215,7 +247,15 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "### $help\n";
     help += "Shows this help.\n";
     help += "```\n";
-    help += "$help\")\n";
+    help += "$help\n";
+    help += "```\n";
+    help += "\n";
+    // $hash
+    help += "### $hash\n";
+    help += "Hashes data.\n";
+    help += "```\n";
+    help += "$hash('md5', 'abc')\n";
+    help += "$hash('md5', 'abc', true)\n";
     help += "```\n";
     help += "\n";
     // $r
@@ -230,6 +270,14 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "Converts a value / object to a string that is not `(null)` and not `(undefined)`.\n";
     help += "```\n";
     help += "$s(123)\n";
+    help += "```\n";
+    help += "\n";
+    // $sha256
+    help += "### $hash\n";
+    help += "Hashes data with SHA-256.\n";
+    help += "```\n";
+    help += "$sha256('abc')\n";
+    help += "$sha256('abc', true)\n";
     help += "```\n";
     help += "\n";
 
