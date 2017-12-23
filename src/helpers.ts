@@ -212,6 +212,7 @@ async function asBufferInner(val: any, enc?: string,
     }
 
     if (funcDepth > maxDepth) {
+        //TODO: translate
         throw Error(`Could not go deeper than ${maxDepth}!`);
     }
 
