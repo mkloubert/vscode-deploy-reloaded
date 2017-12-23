@@ -3,6 +3,7 @@
 out/test/**
 out/**/*.map
 src/**
+_res/**
 .gitignore
 package-lock.json
 tsconfig.json

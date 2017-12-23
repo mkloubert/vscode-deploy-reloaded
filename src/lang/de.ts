@@ -22,15 +22,21 @@ import { Translation } from '../i18';
 // 
 // Translated by: Marcel Joachim Kloubert (https://github.com/mkloubert)
 export const translation: Translation = {
-    cancel: 'Abbrechen',
-    canceled: 'Abgebrochen',
+    cancel: "Abbrechen",
+    canceled: "Abgebrochen",
+    changelog: "Änderungsprotokoll",
     commands: {
         executionError: "Das Kommando{0:surround,leading_space} konnte nicht ausgeführt werden:{1:trim,surround,leading_space}",
         scriptNotFound: "Das Skript {0:surround} wurde nicht gefunden!",
     },
     compare: {
         currentFile: {
+            description: "Vergleicht die aktuelle Datei mit einer bereitgestellten",
             failed: "Die aktuelle Datei konnte nicht verglichen werden:{0:trim,surround,leading_space}",
+            label: "Aktuelle Datei ...",
+        },
+        errors: {
+            operationFailed: "Konnte Vergleich nicht durchführen (s. Debugkonsole 'STRG + SHIFT + Y')!",
         },
         title: "Vergleich{0:trim,surround,leading_space}",
     },
@@ -55,11 +61,22 @@ export const translation: Translation = {
         startOperation: "Beginne das Löschen der Dateien in{0:trim,surround,leading_space} ...",
     },
     deploy: {
+        currentFile: {
+            description: "Stellt die aktuelle Datei bereit",
+            label: "Aktuelle Datei ...",
+        },
+        errors: {
+            operationFailed: "Konnte das Bereitstellen nicht durchführen (s. Debugkonsole 'STRG + SHIFT + Y')!",
+        },
         onChange: {
             failed: "Das Bereitstellen nach dem Ändern von{0:trim,surround,leading_space} nach{1:trim,surround,leading_space} ist fehlgeschlagen:{2:trim,surround,leading_space}",
         },
         onSave: {
             failed: "Das Bereitstellen nach dem Speichern von{0:trim,surround,leading_space} nach{1:trim,surround,leading_space} ist fehlgeschlagen:{2:trim,surround,leading_space}",
+        },
+        package: {
+            description: "Stellt die Dateien eines Paketes bereit",
+            label: "Paket ...",
         },
     },
     disposeNotAllowed: "'dispose()' Methode kann nicht aufgerufen werden!",

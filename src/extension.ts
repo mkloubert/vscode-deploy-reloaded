@@ -17,6 +17,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+const CompareVersion = require('compare-versions');
 import * as deploy_commands from './commands';
 import * as deploy_compare from './compare';
 import * as deploy_contracts from './contracts';
@@ -657,14 +658,13 @@ async function activateExtension(context: vscode.ExtensionContext) {
             // compare
             vscode.commands.registerCommand('extension.deploy.reloaded.compare', async () => {
                 try {
-                    //TODO: translate
                     const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = [
                         {
                             action: async () => {
                                 await deploy_compare.compareFiles(WORKSPACES);
                             },
-                            label: '$(diff)  ' + 'Current file ...',
-                            description: 'Compare the current file with a remote one',
+                            label: '$(diff)  ' + i18.t('compare.currentFile.label'),
+                            description: i18.t('compare.currentFile.description'),
                         }
                     ];
 
@@ -679,9 +679,8 @@ async function activateExtension(context: vscode.ExtensionContext) {
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.compare');
                     
-                    //TODO: translate
                     deploy_helpers.showErrorMessage(
-                        `Selecting compare operation failed (s. debug output 'CTRL + Y')!`
+                        i18.t('compare.errors.operationFailed')
                     );
                 }
             }),
@@ -689,22 +688,20 @@ async function activateExtension(context: vscode.ExtensionContext) {
             // deploy
             vscode.commands.registerCommand('extension.deploy.reloaded.deploy', async () => {
                 try {
-                    //TODO: translate
                     const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = [
                         {
                             action: async () => {
                                 await vscode.commands.executeCommand('extension.deploy.reloaded.deployFile');
                             },
-                            label: '$(rocket)  ' + 'Current file ...',
-                            description: 'Deploys the current file to a target',
+                            label: '$(rocket)  ' + i18.t('deploy.currentFile.label'),
+                            description: i18.t('deploy.currentFile.description'),
                         },
-
                         {
                             action: async () => {
                                 await vscode.commands.executeCommand('extension.deploy.reloaded.deployWorkspace');
                             },
-                            label: '$(rocket)  ' + 'Package ...',
-                            description: 'Deploys files, as defined in a package, to a target',
+                            label: '$(rocket)  ' + i18.t('deploy.package.label'),
+                            description: i18.t('deploy.package.description'),
                         }
                     ];
 
@@ -719,9 +716,8 @@ async function activateExtension(context: vscode.ExtensionContext) {
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.deploy');
 
-                    //TODO: translate
                     deploy_helpers.showErrorMessage(
-                        `Selecting deploy operation failed (s. debug output 'CTRL + Y')!`
+                        i18.t('deploy.errors.operationFailed')
                     );
                 }
             }),
@@ -952,6 +948,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
                         return t.__workspace.getListPlugins(t).length > 0;
                     }).toArray();
 
+                    //TODO: translate
                     await deploy_targets.showTargetQuickPick(
                         TARGETS,
                         'Select the target where you want to get a directory list from...',
@@ -1005,9 +1002,8 @@ async function activateExtension(context: vscode.ExtensionContext) {
                     });
 
                     if (QUICK_PICKS.length < 1) {
-                        //TODO: translate
                         deploy_helpers.showWarningMessage(
-                            `No WORKSPACE found!`
+                            i18.t('workspaces.noneFound')
                         );
                         
                         return;
@@ -1302,6 +1298,62 @@ async function activateExtension(context: vscode.ExtensionContext) {
     // update 'select workspace' button
     WF.next(async () => {
         await updateActiveWorkspaces();
+    });
+
+    // check for new version
+    WF.next(async () => {
+        if (!packageFile) {
+            return;
+        }
+
+        const CURRENT_VERSION = deploy_helpers.normalizeString(packageFile.version);
+        if ('' === CURRENT_VERSION) {
+            return;
+        }
+
+        const STATE_KEY = 'vscdrLastKnownVersion';
+
+        let update = true;
+        try {
+            const LAST_VERSION = deploy_helpers.normalizeString(
+                context.globalState.get(STATE_KEY, '')
+            );
+            if ('' === LAST_VERSION) {
+                return;
+            }
+
+            if (CompareVersion(CURRENT_VERSION, LAST_VERSION) <= 0) {
+                update = false;
+                return;
+            }
+
+            update = false;
+
+            const CUR_DIR = __dirname;
+            const CHANGELOG_FILE = Path.join(CUR_DIR, '../CHANGELOG.md');
+
+            const MARKDOWN = (await deploy_helpers.readFile(CHANGELOG_FILE)).toString('utf8');
+
+            deploy_html.openMarkdownDocument(MARKDOWN, {
+                documentTitle: '[vscode-deploy-reloaded] ' + i18.t('changelog'),
+            });
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'extension.checkForNewVersion(1)');
+        }
+        finally {
+            if (update) {
+                try {
+                    context.globalState
+                           .update(STATE_KEY, CURRENT_VERSION);
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                            .trace(e, 'extension.checkForNewVersion(2)');
+                }
+            }
+        }
     });
 
     if (!isDeactivating) {

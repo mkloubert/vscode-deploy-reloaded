@@ -22,15 +22,21 @@ import { Translation } from '../i18';
 // 
 // Translated by: Marcel Joachim Kloubert (https://github.com/mkloubert)
 export const translation: Translation = {
-    cancel: 'Cancel',
-    canceled: 'Canceled',
+    cancel: "Cancel",
+    canceled: "Canceled",
+    changelog: "Changelog",
     commands: {
         executionError: "Could not execute command{0:surround,leading_space}:{1:trim,surround,leading_space}",
         scriptNotFound: "{0:surround} script not found!",
     },
     compare: {
         currentFile: {
+            description: "Compares the current file with a remote one",
             failed: "Could not compare current file:{0:trim,surround,leading_space}",
+            label: "Current file ...",
+        },
+        errors: {
+            operationFailed: "Compare operation failed (s. debug output 'CTRL + SHIFT + Y')!",
         },
         title: "Diff{0:trim,surround,leading_space}",
     },
@@ -56,11 +62,22 @@ export const translation: Translation = {
         startOperation: "Start deleting files in{0:trim,surround,leading_space} ...",
     },
     deploy: {
+        currentFile: {
+            description: "Deploys the current file",
+            label: "Current file ...",
+        },
+        errors: {
+            operationFailed: "Deploy operation failed (s. debug output 'CTRL + SHIFT + Y')!",
+        },
         onChange: {
             failed: "Deploy on change from{0:trim,surround,leading_space} to{1:trim,surround,leading_space} failed:{2:trim,surround,leading_space}",
         },
         onSave: {
             failed: "Deploy on save from{0:trim,surround,leading_space} to{1:trim,surround,leading_space} failed:{2:trim,surround,leading_space}",
+        },
+        package: {
+            description: "Deploys the files of a package",
+            label: "Package ...",
         },
     },
     disposeNotAllowed: "Cannot invoke 'dispose()' method!",

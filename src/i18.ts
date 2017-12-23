@@ -31,13 +31,19 @@ import * as vscode from 'vscode';
 export interface Translation {
     cancel?: string;
     canceled?: string;
+    changelog?: string;
     commands?: {
         executionError?: string;
         scriptNotFound?: string;
     };
     compare?: {
         currentFile?: {
+            description?: string;
             failed?: string;
+            label?: string;
+        };
+        errors?: {
+            operationFailed?: string,
         };
         title?: string;
     };
@@ -63,11 +69,22 @@ export interface Translation {
         startOperation?: string;
     };
     deploy?: {
+        currentFile?: {
+            description?: string;
+            label?: string;
+        };
+        errors?: {
+            operationFailed?: string;
+        };
         onChange?: {
             failed?: string;
         };
         onSave?: {
             failed?: string;
+        };
+        package?: {
+            description?: string;
+            label?: string;
         };
     };
     disposeNotAllowed?: string;

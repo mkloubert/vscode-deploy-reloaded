@@ -13418,6 +13418,7 @@
   "@slack/client": "^3.14.2",
   "aws-sdk": "^2.165.0",
   "azure-storage": "^2.6.0",
+  "compare-versions": "^3.1.0",
   "dropbox": "^2.5.12",
   "filesize": "^3.5.11",
   "fs-extra": "^4.0.2",
