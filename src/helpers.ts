@@ -177,10 +177,11 @@ export function applyFuncFor<TFunc extends Function = Function>(
  * @return {T[]} The value as array.
  */
 export function asArray<T>(val: T | T[], removeEmpty = true): T[] {
+    removeEmpty = toBooleanSafe(removeEmpty, true);
+
     return (Array.isArray(val) ? val : [ val ]).filter(i => {
         if (removeEmpty) {
-            return null !== i &&
-                   'undefined' !== typeof i;
+            return !isNullOrUndefined(i);
         }
 
         return true;
