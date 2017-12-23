@@ -125,12 +125,50 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         $e(_def303d6_7db1_4511_8365_e93ed7979b92_1379012881)
     );
 
+    let resultToDisplay = RESULT;
+
+    let displayer: () => any;
     if ('undefined' !== typeof RESULT) {
-        $vs.window.showInformationMessage(
-            $h.toStringSafe( RESULT )
-        ).then(() => {}, (err) => {
-            $l.trace(err, 'quickexecution._1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(1)');
-        });
+        displayer = () => {
+            $vs.window.showInformationMessage(
+                $h.toStringSafe( resultToDisplay )
+            ).then(() => {}, (err) => {
+                $l.trace(err, 'quickexecution._1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(1)');
+            });
+        };
+
+        if (Buffer.isBuffer(resultToDisplay)) {
+            const Hexy = require('hexy');
+            const HtmlEntities = require('html-entities');
+
+            let html = '';
+
+            html += '<html>';
+            html += '<head>';
+            html += '<style type="text/css">';
+            html += 'body { font-size: 1.25em; }';
+            html += '</style>';
+            html += '</head>';
+            html += '<body>';
+            html += '<pre>';
+            html += (new HtmlEntities.AllHtmlEntities()).encode( Hexy.hexy(resultToDisplay) );
+            html += '</pre>';
+            html += '</body>';
+            html += '</html>';
+    
+            displayer = () => {
+                require('../html').openHtmlDocument(
+                    html,
+                    '[vscode-deploy-reloaded] ' + $i18.t('tools.quickExecution.result.title'),
+                );
+            };
+        }
+    }
+
+    if (displayer) {
+        await Promise.resolve(
+            displayer()
+        );
     }
 }
 

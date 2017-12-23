@@ -42,6 +42,14 @@ export interface Translation {
         title?: string;
     };
     DELETE?: {
+        askForCancelOperation?: string;
+        buttons?: {
+            cancel?: {
+                text?: string;
+                tooltip?: string;
+            };
+        };
+        cancelling?: string;
         errors?: {
             invalidWorkspace?: string;
             invalidWorkspaceForPackage?: string;
@@ -255,6 +263,9 @@ export interface Translation {
             },
             inputCode?: string;
             label?: string;
+            result?: {
+                title?: string;
+            },
         };
     };
     'vs-deploy'?: {

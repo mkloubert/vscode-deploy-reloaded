@@ -35,6 +35,14 @@ export const translation: Translation = {
         title: "Vergleich{0:trim,surround,leading_space}",
     },
     DELETE: {
+        askForCancelOperation: "Sind Sie sicher, dass Sie das Löschen der Datei(en) in{0:trim,surround,leading_space} abbrechen wollen?",
+        buttons: {
+            cancel: {
+                text: "Lösche Dateien in{0:trim,surround,leading_space} ...",
+                tooltip: "Hier klicken, um abzubrechen ...",
+            },
+        },
+        cancelling: "Breche das Löschen ab ...",
         errors: {
             invalidWorkspace: "Die Datei{0:trim,surround,leading_space} is nicht Teil des Arbeitsbereiches{1:trim,surround,leading_space}!",
             invalidWorkspaceForPackage: "Das Paket{0:trim,surround,leading_space} ist nicht Teil des Arbeitsbereiches{1:trim,surround,leading_space}!",
@@ -248,6 +256,9 @@ export const translation: Translation = {
             },
             inputCode: "Code, der ausgeführt werden soll (z.B. $help) ...",
             label: "Code ausführen ...",
+            result: {
+                title: "Resultat der Ausführung",
+            },
         },
     },
     'vs-deploy': {

@@ -160,7 +160,7 @@ export async function deleteFilesIn(files: string[],
                     isCancelling = true;
 
                     cancelBtn.command = undefined;
-                    cancelBtn.text = `Cancelling delete operation...`;  //TODO: translate
+                    cancelBtn.text = ME.t('DELETE.cancelling');
 
                     const POPUP_BTNS: deploy_contracts.MessageItemWithValue[] = [
                         {
@@ -174,10 +174,9 @@ export async function deleteFilesIn(files: string[],
                         }
                     ];
 
-                    //TODO: translate
                     const PRESSED_BTN = await ME.showWarningMessage.apply(
                         null,
-                        [ <any>`You are about to cancel the delete operation in '${TARGET_NAME}'. Are you sure?` ].concat(
+                        [ <any>ME.t('DELETE.askForCancelOperation', TARGET_NAME) ].concat(
                             POPUP_BTNS
                         )
                     );
@@ -194,9 +193,9 @@ export async function deleteFilesIn(files: string[],
             });
             
             cancelBtn.command = CANCEL_BTN_COMMAND_ID;
-            //TODO: translate
-            cancelBtn.text = `Deleting files in '${TARGET_NAME}'...`;
-            cancelBtn.tooltip = 'Click here to cancel...';
+            cancelBtn.text = ME.t('DELETE.buttons.cancel.text',
+                                  TARGET_NAME);
+            cancelBtn.tooltip = ME.t('DELETE.buttons.cancel.tooltip');
 
             cancelBtn.show();
         }

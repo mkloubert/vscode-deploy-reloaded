@@ -66,9 +66,8 @@ export async function deployFilesTo(files: string[],
 
     const PLUGINS = ME.getUploadPlugins(target);
     if (PLUGINS.length < 1) {
-        //TODO: translate
-        await ME.showWarningMessage(
-            `No matching PLUGINS found!`
+        ME.showWarningMessage(
+            ME.t('targets.noPluginsFound')
         );
 
         return;
@@ -76,8 +75,8 @@ export async function deployFilesTo(files: string[],
 
     let transformer = await ME.loadDataTransformer(target);
     if (false === transformer) {
-        // TODO: translate
-        throw new Error(`Could not load data transformer for target '${TARGET_NAME}'!`);
+        throw new Error(ME.t('targets.errors.couldNotLoadDataTransformer',
+                             TARGET_NAME));
     }
 
     transformer = deploy_transformers.toDataTransformerSafe(

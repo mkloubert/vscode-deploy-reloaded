@@ -35,6 +35,14 @@ export const translation: Translation = {
         title: "Diff{0:trim,surround,leading_space}",
     },
     DELETE: {
+        askForCancelOperation: "You are about to cancel the delete operation in{0:trim,surround,leading_space}. Are you sure?",
+        buttons: {
+            cancel: {
+                text: "Deleting files in{0:trim,surround,leading_space} ...",
+                tooltip: "Click here to cancel ...",
+            },
+        },
+        cancelling: "Cancelling delete operation ...",
         errors: {
             invalidWorkspace: "File{0:trim,surround,leading_space} is not part of workspace{1:trim,surround,leading_space}!",
             invalidWorkspaceForPackage: "Package{0:trim,surround,leading_space} is not part of workspace{1:trim,surround,leading_space}!",
@@ -249,7 +257,10 @@ export const translation: Translation = {
                 title: "'Quick execution' help",
             },
             inputCode: "Input the code, you would like to execute ($help e.g.) ...",
-            label: "Quick code execution ..."
+            label: "Quick code execution ...",
+            result: {
+                title: "'Quick execution' result",
+            },
         },
     },
     'vs-deploy': {
