@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.73",
+ "version": "0.0.74",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -70,12 +70,14 @@
    {
     "command": "extension.deploy.reloaded.deployFile",
     "key": "ctrl+alt+f",
-    "mac": "cmd+alt+f"
+    "mac": "cmd+alt+f",
+    "when": "editorTextFocus"
    },
    {
     "command": "extension.deploy.reloaded.pullFile",
     "key": "ctrl+alt+p f",
-    "mac": "cmd+alt+p f"
+    "mac": "cmd+alt+p f",
+    "when": "editorTextFocus"
    },
    {
     "command": "extension.deploy.reloaded.pullWorkspace",
@@ -90,7 +92,8 @@
    {
     "command": "extension.deploy.reloaded.deleteFile",
     "key": "ctrl+alt+d f",
-    "mac": "cmd+alt+d f"
+    "mac": "cmd+alt+d f",
+    "when": "editorTextFocus"
    },
    {
     "command": "extension.deploy.reloaded.listDirectory",
