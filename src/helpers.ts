@@ -1811,6 +1811,28 @@ export async function sleep(ms = 1000) {
 }
 
 /**
+ * Sorts items by its label.
+ * 
+ * @param {T|T[]} items The item(s).
+ * @param {Function} [valueResolver] The value resolver whats result is used for comparison.
+ * 
+ * @return {T[]} The sorted items.
+ */
+export function sortByLabel<T extends { label?: any }>(
+    items: T | T[],
+    valueResolver?: (item: T) => any,
+): T[] {
+    if (!valueResolver) {
+        valueResolver = (i) => i.label;
+    }
+
+    return asArray(items).sort((x, y) => {
+        return compareValuesBy(x, y,
+                               i => normalizeString( valueResolver(i) ));
+    });
+}
+
+/**
  * Returns an array like object as new array.
  * 
  * @param {ArrayLike<T>} arr The input object. 

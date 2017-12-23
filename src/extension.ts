@@ -179,6 +179,21 @@ async function invokeForActivePackage(placeHolder: string,
     }
 }
 
+function normalizeActiveWorkspaces(aws: deploy_workspaces.Workspace | deploy_workspaces.Workspace[]) {
+    aws = deploy_helpers.asArray(aws);
+
+    if (aws.length < 1) {
+        if (1 === WORKSPACES.length) {
+            aws = deploy_helpers.asArray(
+                Enumerable.from(WORKSPACES)
+                          .firstOrDefault(x => true, undefined)
+            );
+        }
+    }
+
+    return aws;
+}
+
 async function onDidChangeActiveTextEditor(editor: vscode.TextEditor) {
     if (isDeactivating) {
         return;
@@ -211,16 +226,16 @@ async function onDidChangeActiveTextEditor(editor: vscode.TextEditor) {
             }
             catch (e) {
                 deploy_log.CONSOLE
-                        .err(e, 'extension.onDidChangeActiveTextEditor(2)');
+                          .trace(e, 'extension.onDidChangeActiveTextEditor(2)');
             }
         });
     }
     catch (e) {
         deploy_log.CONSOLE
-                  .err(e, 'extension.onDidChangeActiveTextEditor(1)');
+                  .trace(e, 'extension.onDidChangeActiveTextEditor(1)');
     }
     finally {
-        activeWorkspaces = NEW_ACTIVE_WORKSPACES;
+        activeWorkspaces = normalizeActiveWorkspaces(NEW_ACTIVE_WORKSPACES);
 
         await updateActiveWorkspaces();
     }
@@ -364,12 +379,7 @@ async function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?:
         }
     }
 
-    if (1 === WORKSPACES.length) {
-        activeWorkspaces = deploy_helpers.asArray(
-            Enumerable.from(WORKSPACES)
-                      .firstOrDefault(x => true, undefined)
-        );
-    }
+    activeWorkspaces = normalizeActiveWorkspaces(WORKSPACES);
 
     await updateActiveWorkspaces();
 }
@@ -832,7 +842,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
             vscode.commands.registerCommand('extension.deploy.reloaded.pullFile', async () => {
                 try {
                     await invokeForActiveEditor(
-                        'Select the TARGET to pull from...',  //TODO: translate
+                        i18.t('pull.selectSource'),
                         async (file, target) => {
                             await target.__workspace
                                         .pullFileFrom(file, target);
@@ -842,10 +852,9 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 catch (e) {
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.pullFile');
-                    
-                    //TODO: translate
+
                     deploy_helpers.showErrorMessage(
-                        `Pulling CURRENT FILE failed (s. debug output 'CTRL + Y')!`
+                        i18.t('pull.errors.operationFailed')
                     );
                 }
             }),
@@ -853,22 +862,20 @@ async function activateExtension(context: vscode.ExtensionContext) {
             // delete
             vscode.commands.registerCommand('extension.deploy.reloaded.delete', async () => {
                 try {
-                    //TODO: translate
                     const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = [
                         {
                             action: async () => {
                                 await vscode.commands.executeCommand('extension.deploy.reloaded.deleteFile');
                             },
-                            label: '$(trashcan)  ' + 'Current file ...',
-                            description: 'Deletes the current file in a target',
+                            label: '$(trashcan)  ' + i18.t('DELETE.file.label'),
+                            description: i18.t('DELETE.file.description'),
                         },
-
                         {
                             action: async () => {
                                 await vscode.commands.executeCommand('extension.deploy.reloaded.deletePackage');
                             },
-                            label: '$(trashcan)  ' + 'Package ...',
-                            description: 'Deletes files, as defined in a package, in a target',
+                            label: '$(trashcan)  ' + i18.t('DELETE.package.label'),
+                            description: i18.t('DELETE.package.description'),
                         }
                     ];
 
@@ -883,9 +890,8 @@ async function activateExtension(context: vscode.ExtensionContext) {
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.delete');
 
-                    //TODO: translate
                     deploy_helpers.showErrorMessage(
-                        `Selecting delete operation failed (s. debug output 'CTRL + Y')!`
+                        i18.t('DELETE.errors.operationFailed')
                     );
                 }
             }),
@@ -905,9 +911,8 @@ async function activateExtension(context: vscode.ExtensionContext) {
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.deletePackage');
 
-                    //TODO: translate
                     deploy_helpers.showErrorMessage(
-                        `Deleting PACKAGE failed (s. debug output 'CTRL + Y')!`
+                        i18.t('DELETE.errors.operationFailed')
                     );
                 }
             }),
@@ -927,9 +932,8 @@ async function activateExtension(context: vscode.ExtensionContext) {
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.deleteFile');
                     
-                    //TODO: translate
                     deploy_helpers.showErrorMessage(
-                        `Deleting CURRENT FILE failed (s. debug output 'CTRL + Y')!`
+                        i18.t('DELETE.errors.operationFailed')
                     );
                 }
             }),
@@ -1107,9 +1111,29 @@ async function activateExtension(context: vscode.ExtensionContext) {
                             label: '$(plus)  ' + i18.t('tools.createDeployOperationScript.label'),
                             description: i18.t('tools.createDeployOperationScript.description'),
                         },
+
+                        {
+                            action: async () => {
+                                await deploy_tools.showPackageFiles(
+                                    WORKSPACES
+                                );
+                            },
+                            label: '$(microscope)  ' + i18.t('tools.showPackageFiles.label'),
+                            description: i18.t('tools.showPackageFiles.description'),
+                        },
                     ];
 
-                    const SELECTED_ITEM = await vscode.window.showQuickPick(QUICK_PICKS);
+                    const SELECTED_ITEM = await vscode.window.showQuickPick(
+                        deploy_helpers.sortByLabel(
+                            QUICK_PICKS,
+                            i => {
+                                // skip icons
+                                return i.label.substr(
+                                    i.label.indexOf(' ')
+                                ).trim();
+                            }
+                        )
+                    );
                     if (SELECTED_ITEM) {
                         await Promise.resolve(
                             SELECTED_ITEM.action()

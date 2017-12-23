@@ -51,13 +51,22 @@ export const translation: Translation = {
             },
         },
         cancelling: "Cancelling delete operation ...",
+        currentFile: {
+            description: "Deletes the current file",
+            label: "Current file ...",
+        },
         deletingFile: "Deleting file{0:trim,surround,leading_space} in{1:trim,surround,leading_space} ...",
         errors: {
             invalidWorkspace: "File{0:trim,surround,leading_space} is not part of workspace{1:trim,surround,leading_space}!",
             invalidWorkspaceForPackage: "Package{0:trim,surround,leading_space} is not part of workspace{1:trim,surround,leading_space}!",
+            operationFailed: "Delete operation failed (s. debug output 'CTRL + SHIFT + Y')!",
         },
         finishedOperation: "Deleting files in{0:trim,surround,leading_space} has been finished.",
         finishedOperationWithErrors: "[ERROR] Could not delete files in{0:trim,surround,leading_space}:{1:trim,surround,leading_space}",
+        package: {
+            description: "Deletes the files of a package",
+            label: "Package ...",
+        },
         selectTarget: "Select the target where to delete ...",
         startOperation: "Start deleting files in{0:trim,surround,leading_space} ...",
     },
@@ -92,6 +101,8 @@ export const translation: Translation = {
         },
     },
     error: "ERROR:{0:trim,surround,leading_space}",
+    file: "File",
+    files: "Files",
     ftp: {
         couldNotConnect: "Could not start connection!",
         couldNotConnectWithJSFTP: "Could not start connection via 'jsftp'!",
@@ -131,6 +142,8 @@ export const translation: Translation = {
         },
         defaultName: "(Package #{0:trim})",
         deploymentFailed: "Could not deploy package{0:trim,surround,leading_space}:{1:trim,surround,leading_space}",
+        noneFound: "No packages found!",
+        selectPackage: "Select a package ...",
         virtualTarget: "Virtual target for package{0:trim,surround,leading_space}",
     },
     plugins: {
@@ -201,6 +214,7 @@ export const translation: Translation = {
         errors: {
             invalidWorkspace: "Cannot pull file{0:trim,surround,leading_space} to workspace{1:trim,surround,leading_space}!",
             invalidWorkspaceForPackage: "Cannot pull package{0:trim,surround,leading_space} to workspace{1:trim,surround,leading_space}!",
+            operationFailed: "Pull operation failed (s. debug output 'CTRL + SHIFT + Y')!",
         },
         finishedOperation: "Pulling files from{0:trim,surround,leading_space} has been finished.",
         finishedOperationWithErrors: "[ERROR] Could not pull files from{0:trim,surround,leading_space}:{1:trim,surround,leading_space}",
@@ -292,12 +306,18 @@ export const translation: Translation = {
                 title: "'Quick execution' result",
             },
         },
+        showPackageFiles: {
+            description: "Displays the files of a package",
+            label: "Show package files ...",
+            title: "Files of package{0:trim,surround,leading_space}",
+        },
     },
     'vs-deploy': {
         continueAndInitialize: 'Continue and initialize me...',
         currentlyActive: "'vs-deploy' extension is currently active. It is recommended to DEACTIVATE IT, before you continue and use the new extension!",
     },
     warning: 'WARNING',
+    workspace: "Workspace",
     workspaces: {
         errors: {
             cannotDetectMappedPathInfoForFile: "Cannot detect mapped path information for file{0:trim,surround,leading_space}!",

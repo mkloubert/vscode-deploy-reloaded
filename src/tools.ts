@@ -17,9 +17,12 @@
 
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
+import * as deploy_html from './html';
+import * as deploy_packages from './packages';
 import * as deploy_targets from './targets';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
+import * as HtmlEntities from 'html-entities';
 import * as i18 from './i18';
 import * as Path from 'path';
 import * as vscode from 'vscode';
@@ -740,4 +743,91 @@ exports.execute = function(args) {
     await vscode.window.showTextDocument(
         await vscode.workspace.openTextDocument(scriptFile)
     );
+}
+
+
+export async function showPackageFiles(workspaces: deploy_workspaces.Workspace | deploy_workspaces.Workspace[]) {
+    workspaces = deploy_helpers.asArray(workspaces);
+
+    const QUICK_PICKS: deploy_contracts.ActionQuickPick<deploy_packages.Package>[] = Enumerable.from(workspaces).selectMany((ws) => {
+        return ws.getPackages();
+    }).select(pkg => {
+        return {
+            label: deploy_packages.getPackageName(pkg),
+            description: deploy_helpers.toStringSafe(pkg.description).trim(),
+            detail: pkg.__workspace.rootPath,
+            state: pkg,
+        };
+    }).orderBy(qp => {
+        return deploy_helpers.normalizeString(qp.label);
+    }).toArray();
+
+    if (QUICK_PICKS.length < 1) {
+        deploy_helpers.showWarningMessage(
+            i18.t('packages.noneFound')
+        );
+
+        return;
+    }
+
+    let selectedItem: deploy_contracts.ActionQuickPick<deploy_packages.Package>;
+    if (1 === QUICK_PICKS.length) {
+        selectedItem = QUICK_PICKS[0];
+    }
+    else {
+        selectedItem = await vscode.window.showQuickPick(
+            QUICK_PICKS,
+            {
+                placeHolder: i18.t('packages.selectPackage'),
+            }
+        );
+    }
+
+    if (!selectedItem) {
+        return;
+    }
+
+    const HTML_ENCODER = new HtmlEntities.AllHtmlEntities();
+    const PACKAGE = selectedItem.state;
+    const PACKAGE_NAME = deploy_packages.getPackageName(PACKAGE);
+    const WORKSPACE = PACKAGE.__workspace;
+
+    const FILES = Enumerable.from( await WORKSPACE.findFilesByFilter(PACKAGE) ).select(f => {
+        let realtivePath = WORKSPACE.toRelativePath(f);
+        if (false === realtivePath) {
+            realtivePath = f;
+        }
+
+        return realtivePath;
+    }).distinct()
+      .orderBy(f => {
+        return Path.dirname(f).length;
+    }).thenBy(f => {
+        return deploy_helpers.normalizeString( Path.dirname(f) );
+    }).thenBy(f => {
+        return deploy_helpers.normalizeString( Path.basename(f) );
+    }).toArray();
+
+    let md = "# " + HTML_ENCODER.encode( WORKSPACE.t('workspace') ) + "\n";
+    md += "`" + HTML_ENCODER.encode(WORKSPACE.rootPath) + "`\n";
+
+    md += "## " + WORKSPACE.t('files') + "\n";
+
+    if (FILES.length > 0) {
+        md += "| " + WORKSPACE.t('file') + " |\n";
+        md += "| ---- |\n";
+
+        for (const F of FILES) {
+            md += "| `" + HTML_ENCODER.encode(F) + "` |\n";
+        }
+    }
+    else {
+        md += "\n";
+        md += WORKSPACE.t('noFiles');
+    }
+
+    await deploy_html.openMarkdownDocument(md, {
+        documentTitle: "[vscode-deploy-reloaded] " + WORKSPACE.t('tools.showPackageFiles.title',
+                                                                 PACKAGE_NAME),
+    });
 }

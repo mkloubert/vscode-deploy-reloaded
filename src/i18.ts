@@ -58,13 +58,22 @@ export interface Translation {
             };
         };
         cancelling?: string;
+        currentFile?: {
+            description?: string;
+            label?: string;
+        };
         deletingFile?: string;
         errors?: {
             invalidWorkspace?: string;
             invalidWorkspaceForPackage?: string;
+            operationFailed?: string;
         };
         finishedOperation?: string;
         finishedOperationWithErrors?: string;
+        package?: {
+            description?: string;
+            label?: string;
+        };
         selectTarget?: string;
         startOperation?: string;
     };
@@ -99,6 +108,8 @@ export interface Translation {
         };
     };
     error?: string;
+    file?: string;
+    files?: string;
     ftp?: {
         couldNotConnect?: string;
         couldNotConnectWithJSFTP?: string;
@@ -138,6 +149,8 @@ export interface Translation {
         };
         defaultName?: string;
         deploymentFailed?: string;
+        noneFound?: string;
+        selectPackage?: string;
         virtualTarget?: string;
     };
     plugins?: {
@@ -206,6 +219,7 @@ export interface Translation {
         errors?: {
             invalidWorkspace?: string;
             invalidWorkspaceForPackage?: string;
+            operationFailed?: string;
         };
         finishedOperation?: string;
         finishedOperationWithErrors?: string;
@@ -297,12 +311,18 @@ export interface Translation {
                 title?: string;
             },
         };
+        showPackageFiles?: {
+            description?: string;
+            label?: string;
+            title?: string;
+        };
     };
     'vs-deploy'?: {
         continueAndInitialize?: string;
         currentlyActive?: string;
     };
     warning?: string;
+    workspace?: string;
     workspaces?: {
         errors?: {
             cannotDetectMappedPathInfoForFile?: string;

@@ -17,6 +17,7 @@
 
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
+import * as deploy_res_html from './resources/html';
 import * as Marked from 'marked';
 const MergeDeep = require('merge-deep');
 import * as vscode from 'vscode';
@@ -175,26 +176,28 @@ export async function openMarkdownDocument(md: string, opts?: MarkdownDocumentOp
         tables: true,
     };
 
-    const CSS = opts.css;
+    const CSS = deploy_helpers.toStringSafe(opts.css);
     const DOCUMENT_ID = opts.documentId;
     const DOCUMENT_TITLE = opts.documentTitle;
 
-    let html = '<html>';
+    let html = await deploy_res_html.getStringContent("header.html");
 
-    html += '<head>';
-    html += '<style type="text/css">';
-    html += deploy_helpers.toStringSafe(CSS);
-    html += '</style>';
-    html += '</head>';
-    
-    html += '<body>';
+    if (!deploy_helpers.isEmptyString(CSS)) {
+        html += `
+<style text="text/css">
+
+${CSS}
+
+</style>
+`;
+    }
+
     html += Marked(
         deploy_helpers.toStringSafe(md),
         MergeDeep(DEFAULT_OPTS, opts),
     );
-    html += '</body>';
-
-    html += '</html>';
+    
+    html += await deploy_res_html.getStringContent("footer.html");
 
     delete (<any>opts).css;
     delete (<any>opts).documentId;

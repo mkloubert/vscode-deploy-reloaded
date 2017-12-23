@@ -51,12 +51,21 @@ export const translation: Translation = {
             },
         },
         cancelling: "Breche das Löschen ab ...",
+        currentFile: {
+            description: "Löscht die aktuelle Datei",
+            label: "Aktuelle Datei ...",
+        },
         errors: {
             invalidWorkspace: "Die Datei{0:trim,surround,leading_space} is nicht Teil des Arbeitsbereiches{1:trim,surround,leading_space}!",
             invalidWorkspaceForPackage: "Das Paket{0:trim,surround,leading_space} ist nicht Teil des Arbeitsbereiches{1:trim,surround,leading_space}!",
+            operationFailed: "Konnte das Löschen nicht durchführen (s. Debugkonsole 'STRG + SHIFT + Y')!",
         },
         finishedOperation: "Das Löschen der Dateien in{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",
         finishedOperationWithErrors: "[FEHLER] Konnte Dateien nicht in{0:trim,surround,leading_space} löschen:{1:trim,surround,leading_space}",
+        package: {
+            description: "Löscht die Dateien eines Paketes",
+            label: "Paket ...",
+        },
         selectTarget: "Wählen Sie das Ziel, wo Sie Dateien löschen wollen ...",
         startOperation: "Beginne das Löschen der Dateien in{0:trim,surround,leading_space} ...",
     },
@@ -91,6 +100,8 @@ export const translation: Translation = {
         },
     },
     error: "FEHLER:{0:trim,surround,leading_space}",
+    file: "Datei",
+    files: "Dateien",
     ftp: {
         couldNotConnect: "Konnte keine Verbindung aufbauen!",
         couldNotConnectWithJSFTP: "Konnte keine Verbindung mittels 'jsftp' aufbauen!",
@@ -129,6 +140,8 @@ export const translation: Translation = {
         },
         defaultName: "(Paket #{0:trim})",
         deploymentFailed: "Konnte das Paket{0:trim,surround,leading_space} nicht bereitstellen:{1:trim,surround,leading_space}",
+        noneFound: "Keine Pakete gefunden!",
+        selectPackage: "Wählen Sie ein Paket aus ...",
         virtualTarget: "Virtuelles Ziel für Paket{0:trim,surround,leading_space}",
     },
     plugins: {
@@ -199,6 +212,7 @@ export const translation: Translation = {
         errors: {
             invalidWorkspace: "Die Datei{0:trim,surround,leading_space} kann nicht in den Arbeitsbereich{1:trim,surround,leading_space} geladen werden!",
             invalidWorkspaceForPackage: "Das Paket{0:trim,surround,leading_space} kann nicht in den Arbeitsbereich{1:trim,surround,leading_space} geladen werden!",
+            operationFailed: "Konnte das Laden nicht durchführen (s. Debugkonsole 'STRG + SHIFT + Y')!",
         },
         finishedOperation: "Das Laden der Dateien von{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",
         finishedOperationWithErrors: "[FEHLER] Konnte Dateien nicht von{0:trim,surround,leading_space} laden:{1:trim,surround,leading_space}",
@@ -269,6 +283,7 @@ export const translation: Translation = {
             errors: {
                 updateSettingsFailed: "Konnte das Skript nicht in den Einstellungen speichern:{0:trim,surround,leading_space}",
             },
+            label: "Skript für eine Bereitstellungs-Operation erstellen ...",
             scriptCreated: "Das Skript{0:trim,surround,leading_space} wurde erfolgreich erstellt.",
             selectTarget: "Wählen Sie ein Ziel ...",
         },
@@ -289,12 +304,18 @@ export const translation: Translation = {
                 title: "Resultat der Ausführung",
             },
         },
+        showPackageFiles: {
+            description: "Zeigt die Dateien eines Paketes an",
+            label: "Paket-Dateien anzeigen",
+            title: "Dateien des Paketes{0:trim,surround,leading_space}",
+        },
     },
     'vs-deploy': {
         continueAndInitialize: 'Fortfahren und initialisieren...',
         currentlyActive: "Die 'vs-deploy' Erweiterung ist derzeit aktiv. Es wird empfohlen diese zu DEAKTIVIEREN, bevor Sie forfahren und die neue Erweiterung nutzen!",
     },
     warning: "WARNUNG",
+    workspace: "Arbeitsbereich",
     workspaces: {
         errors: {
             cannotDetectMappedPathInfoForFile: "Gemappte Pfad-Informationen konnten für die Datei{0:trim,surround,leading_space} nicht ermittelt werden!",
