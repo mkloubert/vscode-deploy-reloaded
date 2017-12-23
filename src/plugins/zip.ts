@@ -287,6 +287,16 @@ class ZipPlugin extends deploy_plugins.PluginBase<ZipTarget> {
                     type: deploy_files.FileSystemType.Directory,
                 };
 
+                // other by creation time (DESC)
+                (<any>DI).compareTo = (other: deploy_files.DirectoryInfo) => {
+                    return deploy_helpers.compareValuesBy(
+                        other, DI,
+                        x => {
+                            return x.time.unix();
+                        },
+                    );
+                };
+
                 RESULT.dirs.push(DI);
             }
         }

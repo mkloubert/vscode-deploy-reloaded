@@ -178,12 +178,22 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
             return COMP0;
         }
 
+        // custom comparer?
+        if (x.type == y.type) {
+            if (x.compareTo) {
+                const COMP1 = x.compareTo(y);
+                if (0 != COMP1) {
+                    return COMP1;
+                }
+            }
+        }
+
         // then by name
-        const COMP1 = deploy_helpers.compareValuesBy(x, y, (f) => {
+        const COMP2 = deploy_helpers.compareValuesBy(x, y, (f) => {
             return deploy_helpers.normalizeString(f.name);
         });
-        if (0 !== COMP1) {
-            return COMP1;
+        if (0 !== COMP2) {
+            return COMP2;
         }
 
         // then by timestamp (DESC)

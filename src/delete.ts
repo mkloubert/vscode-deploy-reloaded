@@ -73,10 +73,9 @@ export async function deleteFileIn(file: string, target: deploy_targets.Target,
     let deleteLocalFile = false;
 
     if (deploy_helpers.toBooleanSafe(askForDeleteLocalFile, true)) {
-        //TODO: translate
         const PRESSED_BTN: deploy_contracts.MessageItemWithValue = await vscode.window.showWarningMessage.apply(
             null,
-            [ <any>'Also delete local file?', {} ].concat(BUTTONS),
+            [ <any>ME.t('DELETE.askIfDeleteLocalFile'), {} ].concat(BUTTONS),
         );
 
         if (!PRESSED_BTN || 0 == PRESSED_BTN.value) {
@@ -131,9 +130,8 @@ export async function deleteFilesIn(files: string[],
 
     const PLUGINS = ME.getDeletePlugins(target);
     if (PLUGINS.length < 1) {
-        //TODO: translate
-        await ME.showWarningMessage(
-            `No matching PLUGINS found!`
+        ME.showWarningMessage(
+            ME.t('targets.noPluginsFound')
         );
 
         return;
@@ -240,19 +238,20 @@ export async function deleteFilesIn(files: string[],
                                 destination = `'${deploy_helpers.toStringSafe(destination)}'`;
                             }
     
-                            // TODO: translate
-                            ME.context.outputChannel.append(`Deleting file '${f}' in ${destination}... `);
+                            ME.context.outputChannel.append(
+                                ME.t('DELETE.deletingFile',
+                                     f, destination) + ' '
+                            );
 
                             await WAIT_WHILE_CANCELLING();
 
                             if (CANCELLATION_SOURCE.token.isCancellationRequested) {
-                                ME.context.outputChannel.appendLine(`[Canceled]`);  //TODO: translate
+                                ME.context.outputChannel.appendLine(`[${ME.t('canceled')}]`);
                             }
                         };
                         SF.onDeleteCompleted = async (err?: any, deleteLocal?: boolean) => {
-                            // TODO: translate
                             if (err) {
-                                ME.context.outputChannel.appendLine(`[ERROR: ${err}]`);
+                                ME.context.outputChannel.appendLine(`[${ME.t('error', err)}]`);
                             }
                             else {
                                 try {
@@ -267,10 +266,10 @@ export async function deleteFilesIn(files: string[],
                                         }
                                     }
 
-                                    ME.context.outputChannel.appendLine(`[OK]`);  //TODO: translate
+                                    ME.context.outputChannel.appendLine(`[${ME.t('ok')}]`);
                                 }
                                 catch (e) {
-                                    ME.context.outputChannel.appendLine(`[WARNING: ${e}]`);  //TODO: translate
+                                    ME.context.outputChannel.appendLine(`[${ME.t('warning')}: ${deploy_helpers.toStringSafe(e)}]`);
                                 }
                             }
                         };
@@ -380,10 +379,9 @@ export async function deletePackage(pkg: deploy_packages.Package,
     let deleteLocalFiles = false;
 
     if (deploy_helpers.toBooleanSafe(askForDeleteLocalFiles, true)) {
-        //TODO: translate
         const PRESSED_BTN: deploy_contracts.MessageItemWithValue = await vscode.window.showWarningMessage.apply(
             null,
-            [ <any>'Also delete local files?', {} ].concat(BUTTONS),
+            [ <any>ME.t('DELETE.askIfDeleteLocalFiles'), {} ].concat(BUTTONS),
         );
 
         if (!PRESSED_BTN || 0 == PRESSED_BTN.value) {

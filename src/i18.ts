@@ -43,6 +43,8 @@ export interface Translation {
     };
     DELETE?: {
         askForCancelOperation?: string;
+        askIfDeleteLocalFile?: string;
+        askIfDeleteLocalFiles?: string;
         buttons?: {
             cancel?: {
                 text?: string;
@@ -50,6 +52,7 @@ export interface Translation {
             };
         };
         cancelling?: string;
+        deletingFile?: string;
         errors?: {
             invalidWorkspace?: string;
             invalidWorkspaceForPackage?: string;
@@ -272,6 +275,7 @@ export interface Translation {
         continueAndInitialize?: string;
         currentlyActive?: string;
     };
+    warning?: string;
     workspaces?: {
         errors?: {
             cannotDetectMappedPathInfoForFile?: string;

@@ -36,6 +36,8 @@ export const translation: Translation = {
     },
     DELETE: {
         askForCancelOperation: "Sind Sie sicher, dass Sie das Löschen der Datei(en) in{0:trim,surround,leading_space} abbrechen wollen?",
+        askIfDeleteLocalFile: "Auch die lokale Datei löschen?",
+        askIfDeleteLocalFiles: "Auch die lokale Dateien löschen?",
         buttons: {
             cancel: {
                 text: "Lösche Dateien in{0:trim,surround,leading_space} ...",
@@ -265,6 +267,7 @@ export const translation: Translation = {
         continueAndInitialize: 'Fortfahren und initialisieren...',
         currentlyActive: "Die 'vs-deploy' Erweiterung ist derzeit aktiv. Es wird empfohlen diese zu DEAKTIVIEREN, bevor Sie forfahren und die neue Erweiterung nutzen!",
     },
+    warning: "WARNUNG",
     workspaces: {
         errors: {
             cannotDetectMappedPathInfoForFile: "Gemappte Pfad-Informationen konnten für die Datei{0:trim,surround,leading_space} nicht ermittelt werden!",

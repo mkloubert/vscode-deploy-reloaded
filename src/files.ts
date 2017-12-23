@@ -23,6 +23,8 @@ import * as Moment from 'moment';
  */
 export interface DirectoryInfo extends FileSystemInfo {
     /** @inheritdoc */
+    readonly compareTo?: (other: DirectoryInfo) => number;
+    /** @inheritdoc */
     readonly type: FileSystemType;
 }
 
@@ -30,6 +32,8 @@ export interface DirectoryInfo extends FileSystemInfo {
  * Information about a file.
  */
 export interface FileInfo extends FileSystemInfo {
+    /** @inheritdoc */
+    readonly compareTo?: (other: FileInfo) => number;
     /**
      * Downloads the file.
      * 
@@ -44,6 +48,10 @@ export interface FileInfo extends FileSystemInfo {
  * Information about an item on a file system.
  */
 export interface FileSystemInfo {
+    /**
+     * An optional method to compare that object with another.
+     */
+    readonly compareTo?: (other: FileSystemInfo) => number;
     /**
      * A custom icon to use.
      */

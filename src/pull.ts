@@ -218,7 +218,7 @@ export async function pullFilesFrom(files: string[],
     
                             ME.context.outputChannel.append(
                                 ME.t('pull.pullingFile',
-                                     f, source)
+                                     f, source) + ' '
                             );
 
                             await WAIT_WHILE_CANCELLING();

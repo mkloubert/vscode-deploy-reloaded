@@ -36,6 +36,8 @@ export const translation: Translation = {
     },
     DELETE: {
         askForCancelOperation: "You are about to cancel the delete operation in{0:trim,surround,leading_space}. Are you sure?",
+        askIfDeleteLocalFile: "Also delete local file?",
+        askIfDeleteLocalFiles: "Also delete local files?",
         buttons: {
             cancel: {
                 text: "Deleting files in{0:trim,surround,leading_space} ...",
@@ -43,6 +45,7 @@ export const translation: Translation = {
             },
         },
         cancelling: "Cancelling delete operation ...",
+        deletingFile: "Deleting file{0:trim,surround,leading_space} in{1:trim,surround,leading_space} ...",
         errors: {
             invalidWorkspace: "File{0:trim,surround,leading_space} is not part of workspace{1:trim,surround,leading_space}!",
             invalidWorkspaceForPackage: "Package{0:trim,surround,leading_space} is not part of workspace{1:trim,surround,leading_space}!",
@@ -267,6 +270,7 @@ export const translation: Translation = {
         continueAndInitialize: 'Continue and initialize me...',
         currentlyActive: "'vs-deploy' extension is currently active. It is recommended to DEACTIVATE IT, before you continue and use the new extension!",
     },
+    warning: 'WARNING',
     workspaces: {
         errors: {
             cannotDetectMappedPathInfoForFile: "Cannot detect mapped path information for file{0:trim,surround,leading_space}!",
