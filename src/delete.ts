@@ -50,8 +50,8 @@ export async function deleteFileIn(file: string, target: deploy_targets.Target,
     }
 
     if (!ME.canBeHandledByMe(target)) {
-        //TODO: translate
-        throw new Error(`File '${file}' cannot be deleted in workspace '${ME.folder.uri.fsPath}'!`);
+        throw new Error(ME.t('DELETE.errors.invalidWorkspace',
+                             file, target.__workspace.name));
     }
 
     const BUTTONS: deploy_contracts.MessageItemWithValue[] = [
@@ -217,9 +217,11 @@ export async function deleteFilesIn(files: string[],
             try {
                 ME.context.outputChannel.appendLine('');
 
-                // TODO: translate
                 if (files.length > 1) {
-                    ME.context.outputChannel.appendLine(`Start deleting files in '${TARGET_NAME}'...`);
+                    ME.context.outputChannel.appendLine(
+                        ME.t('DELETE.startOperation',
+                             TARGET_NAME)
+                    );
                 }
 
                 const CTX: deploy_plugins.DeleteContext = {
@@ -294,13 +296,17 @@ export async function deleteFilesIn(files: string[],
                 );
 
                 if (files.length > 1) {
-                    // TODO: translate
-                    ME.context.outputChannel.appendLine(`Deleting files in '${TARGET_NAME}' has been finished.`);
+                    ME.context.outputChannel.appendLine(
+                        ME.t('DELETE.finishedOperation',
+                             TARGET_NAME)
+                    );
                 }
             }
             catch (e) {
-                // TODO: translate
-                ME.context.outputChannel.appendLine(`[ERROR] Deleting files in '${TARGET_NAME}' failed: ${e}`);
+                ME.context.outputChannel.appendLine(
+                    ME.t('DELETE.finishedOperationWithErrors',
+                         TARGET_NAME, e)
+                );
             }
         }
     }
@@ -330,8 +336,8 @@ export async function deletePackage(pkg: deploy_packages.Package,
     }
 
     if (!ME.canBeHandledByMe(pkg)) {
-        //TODO: translate
-        throw new Error(`Package '${deploy_packages.getPackageName(pkg)}' cannot be deleted in workspace '${ME.folder.uri.fsPath}'!`);
+        throw new Error(ME.t('DELETE.errors.invalidWorkspaceForPackage',
+                             deploy_packages.getPackageName(pkg), ME.name));
     }
 
     const FILES = deploy_helpers.asArray(pkg.files).filter(f => {
@@ -356,7 +362,6 @@ export async function deletePackage(pkg: deploy_packages.Package,
         return;
     }
 
-    //TODO: translate
     const BUTTONS: deploy_contracts.MessageItemWithValue[] = [
         {
             title: ME.t('no'),

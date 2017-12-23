@@ -91,6 +91,17 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         );
     };
 
+    // show help
+    const $help = async () => {
+        await require('../html').openMarkdownDocument(
+            _27adf674_b653_4ee0_a33d_4f60be7859d2(),
+            {
+                css: 'a { color: red; }',
+                documentTitle: '[vscode-deploy-reloaded] ' + $i18.t('tools.quickExecution.help.title')
+            }
+        );
+    };
+
     // code to execute
     const _def303d6_7db1_4511_8365_e93ed7979b92_1379012881 = await $vs.window.showInputBox(
         {
@@ -121,4 +132,85 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
             $l.trace(err, 'quickexecution._1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(1)');
         });
     }
+}
+
+// generate help document
+function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
+    let help = '';
+
+    help += "# Quick execution help\n";
+
+
+    help += "## Constants\n";
+    // $aw
+    help += "### $aw\n";
+    help += "An array of active workspace.\n";
+    help += "```\n";
+    help += "$aw.length\n";
+    help += "```\n";
+    help += "\n";
+    // $l
+    help += "### $l\n";
+    help += "A [logger](https://mkloubert.github.io/vscode-deploy-reloaded/interfaces/_log_.logger.html).\n";
+    help += "```\n";
+    help += "$l.warn('Test')\n";
+    help += "```\n";
+    help += "\n";
+    // $w
+    help += "### $w\n";
+    help += "An array of all available workspace.\n";
+    help += "```\n";
+    help += "$w.length\n";
+    help += "```\n";
+    help += "\n";
+
+
+    help += "## Functions\n";
+    // $e
+    help += "### $e\n";
+    help += "Executes code.\n";
+    help += "```\n";
+    help += "$e(\"require('vscode').window.showWarningMessage('Test')\")\n";
+    help += "```\n";
+    help += "\n";
+    // $help
+    help += "### $help\n";
+    help += "Shows this help.\n";
+    help += "```\n";
+    help += "$help\")\n";
+    help += "```\n";
+    help += "\n";
+    // $r
+    help += "### $r\n";
+    help += "Includes a module.\n";
+    help += "```\n";
+    help += "$r('vscode').window.showWarningMessage('Test')\n";
+    help += "```\n";
+    help += "\n";
+    // $s
+    help += "### $s\n";
+    help += "Converts a value / object to a string that is not `(null)` and not `(undefined)`.\n";
+    help += "```\n";
+    help += "$s(123)\n";
+    help += "```\n";
+    help += "\n";
+
+
+    help += "## Modules\n";
+    // $h
+    help += "### $h\n";
+    help += "Extension [helpers](https://mkloubert.github.io/vscode-deploy-reloaded/modules/_helpers_.html).\n";
+    help += "```\n";
+    help += "$h.normalizeString('Abcd Efgh  ')\n";
+    help += "```\n";
+    help += "\n";
+    // $vs
+    help += "### $vs\n";
+    help += "Visual Studio Code [namespace](https://code.visualstudio.com/docs/extensionAPI/vscode-api).\n";
+    help += "```\n";
+    help += "$vs.window.showWarningMessage('Test')\n";
+    help += "```\n";
+    help += "\n";
+
+    return help;
 }

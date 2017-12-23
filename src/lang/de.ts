@@ -34,6 +34,15 @@ export const translation: Translation = {
         },
         title: "Vergleich{0:trim,surround,leading_space}",
     },
+    DELETE: {
+        errors: {
+            invalidWorkspace: "Die Datei{0:trim,surround,leading_space} is nicht Teil des Arbeitsbereiches{1:trim,surround,leading_space}!",
+            invalidWorkspaceForPackage: "Das Paket{0:trim,surround,leading_space} ist nicht Teil des Arbeitsbereiches{1:trim,surround,leading_space}!",
+        },
+        finishedOperation: "Das Löschen der Dateien in{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",
+        finishedOperationWithErrors: "[FEHLER] Konnte Dateien nicht in{0:trim,surround,leading_space} löschen:{1:trim,surround,leading_space}",
+        startOperation: "Beginne das Löschen der Dateien in{0:trim,surround,leading_space} ...",
+    },
     disposeNotAllowed: "'dispose()' Methode kann nicht aufgerufen werden!",
     documents: {
         html: {
@@ -234,7 +243,10 @@ export const translation: Translation = {
             errors: {
                 failed: "Das Ausführen des Codes ist fehlgeschlagen:{0:trim,surround,leading_space}",
             },
-            inputCode: "Code, der ausgeführt werden soll ...",
+            help: {
+                title: "Hilfe zu 'Code ausführen'",
+            },
+            inputCode: "Code, der ausgeführt werden soll (z.B. $help) ...",
             label: "Code ausführen ...",
         },
     },

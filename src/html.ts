@@ -17,7 +17,28 @@
 
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
+import * as Marked from 'marked';
+const MergeDeep = require('merge-deep');
 import * as vscode from 'vscode';
+
+
+/**
+ * Options for openting a Markdown document.
+ */
+export interface MarkdownDocumentOptions extends Marked.MarkedOptions {
+    /**
+     * Custom CSS.
+     */
+    readonly css?: string;
+    /**
+     * Custom document ID.
+     */
+    readonly documentId?: any;
+    /**
+     * Custom document title.
+     */
+    readonly documentTitle?: string;
+}
 
 
 /**
@@ -101,7 +122,8 @@ export class HtmlTextDocumentContentProvider implements vscode.TextDocumentConte
 }
 
 /**
- * Opens a HTML document in a new tab for a document storage.
+ * Opens a HTML document in a new tab.
+ * 
  * @param {string} html The HTML document (source code).
  * @param {string} [title] The custom title for the tab.
  * @param {any} [id] The custom ID for the document in the storage.
@@ -136,6 +158,52 @@ export async function openHtmlDocument(html: string, title?: string, id?: any) {
 
     return await vscode.commands.executeCommand(OPEN_HTML_DOC_COMMAND,
                                                 NEW_DOC, HTML_DOCS);
+}
+
+/**
+ * Opens a Markdown document in a new tab.
+ * 
+ * @param {string} md The Markdown document (source code).
+ * @param {MarkdownDocumentOptions} [opts] Custom options.
+ * 
+ * @returns {Promise<any>} The promise with the result.
+ */
+export async function openMarkdownDocument(md: string, opts?: MarkdownDocumentOptions) {
+    const DEFAULT_OPTS: MarkdownDocumentOptions = {
+        breaks: true,
+        gfm: true,
+        tables: true,
+    };
+
+    const CSS = opts.css;
+    const DOCUMENT_ID = opts.documentId;
+    const DOCUMENT_TITLE = opts.documentTitle;
+
+    let html = '<html>';
+
+    html += '<head>';
+    html += '<style type="text/css">';
+    html += deploy_helpers.toStringSafe(CSS);
+    html += '</style>';
+    html += '</head>';
+    
+    html += '<body>';
+    html += Marked(
+        deploy_helpers.toStringSafe(md),
+        MergeDeep(DEFAULT_OPTS, opts),
+    );
+    html += '</body>';
+
+    html += '</html>';
+
+    delete (<any>opts).css;
+    delete (<any>opts).documentId;
+    delete (<any>opts).documentTitle;
+    
+    return await openHtmlDocument(
+        html,
+        DOCUMENT_TITLE, DOCUMENT_ID    
+    );
 }
 
 /**

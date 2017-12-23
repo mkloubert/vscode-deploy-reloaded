@@ -34,6 +34,15 @@ export const translation: Translation = {
         },
         title: "Diff{0:trim,surround,leading_space}",
     },
+    DELETE: {
+        errors: {
+            invalidWorkspace: "File{0:trim,surround,leading_space} is not part of workspace{1:trim,surround,leading_space}!",
+            invalidWorkspaceForPackage: "Package{0:trim,surround,leading_space} is not part of workspace{1:trim,surround,leading_space}!",
+        },
+        finishedOperation: "Deleting files in{0:trim,surround,leading_space} has been finished.",
+        finishedOperationWithErrors: "[ERROR] Could not delete files in{0:trim,surround,leading_space}:{1:trim,surround,leading_space}",
+        startOperation: "Start deleting files in{0:trim,surround,leading_space} ...",
+    },
     disposeNotAllowed: "Cannot invoke 'dispose()' method!",
     documents: {
         html: {
@@ -236,7 +245,10 @@ export const translation: Translation = {
             errors: {
                 failed: "Execution code failed:{0:trim,surround,leading_space}",
             },
-            inputCode: "Input the code, you would like to execute ...",
+            help: {
+                title: "'Quick execution' help",
+            },
+            inputCode: "Input the code, you would like to execute ($help e.g.) ...",
             label: "Quick code execution ..."
         },
     },

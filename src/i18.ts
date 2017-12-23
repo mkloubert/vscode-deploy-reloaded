@@ -41,6 +41,15 @@ export interface Translation {
         };
         title?: string;
     };
+    DELETE?: {
+        errors?: {
+            invalidWorkspace?: string;
+            invalidWorkspaceForPackage?: string;
+        };
+        finishedOperation?: string;
+        finishedOperationWithErrors?: string;
+        startOperation?: string;
+    }
     disposeNotAllowed?: string;
     documents?: {
         html?: {
@@ -241,6 +250,9 @@ export interface Translation {
             errors?: {
                 failed?: string;
             };
+            help?: {
+                title?: string;
+            },
             inputCode?: string;
             label?: string;
         };
