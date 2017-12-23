@@ -52,7 +52,7 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
         args = [];
     }
     else {
-        args = deploy_helpers.asArray(OPERATION.arguments);
+        args = deploy_helpers.asArray(OPERATION.arguments, false);
     }
 
     await vscode.commands.executeCommand
