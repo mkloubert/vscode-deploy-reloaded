@@ -81,6 +81,7 @@ export const translation: Translation = {
                 tooltip: "Hier klicken, um abzubrechen ...",
             },
         },
+        canceledByOperation: "Das Bereitstellen der Dateien in{0:trim,surround,leading_space} wurde durch eine Operation abgebrochen.",
         cancelling: "Breche das Bereitstellen ab ...",
         currentFile: {
             description: "Stellt die aktuelle Datei bereit",
@@ -265,6 +266,8 @@ export const translation: Translation = {
                 noBodyScriptFunction: "Das Skript{0:trim,surround,leading_space} enthält keine 'getBody' Funktion!",
                 noBodyScriptModule: "Das Skript{0:trim,surround,leading_space} enthält kein Modul!",
             },
+            runningAfter: "Führe Operation{0:trim,surround,leading_space} aus... ",
+            runningBefore: "Führe Operation{0:trim,surround,leading_space} aus... ",
             script: {
                 noScriptFunction: "Das Skript{0:trim,surround,leading_space} enthält keine 'execute' Funktion!",
                 noScriptModule: "Das Skript{0:trim,surround,leading_space} enthält kein Modul!",

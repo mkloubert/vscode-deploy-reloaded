@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.77",
+ "version": "0.0.78",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -2384,7 +2384,8 @@
             "type": "string",
             "enum": [
              "coffee",
-             "coffeescript"
+             "coffeescript",
+             "less"
             ]
            },
            "deployed": {
@@ -14108,6 +14109,7 @@
   "@types/html-entities": "^1.2.16",
   "@types/i18next": "^8.4.2",
   "@types/is-stream": "^1.1.0",
+  "@types/less": "0.0.32",
   "@types/marked": "^0.3.0",
   "@types/mime-types": "^2.1.0",
   "@types/minimatch": "^3.0.1",
@@ -14152,6 +14154,7 @@
   "is-stream": "^1.1.0",
   "isbinaryfile": "^3.0.2",
   "jsftp": "^2.1.2",
+  "less": "^2.7.3",
   "marked": "^0.3.7",
   "merge-deep": "^3.0.0",
   "mime-types": "^2.1.17",

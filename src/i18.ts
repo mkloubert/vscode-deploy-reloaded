@@ -88,6 +88,7 @@ export interface Translation {
                 tooltip?: string;
             };
         };
+        canceledByOperation?: string;
         cancelling?: string;
         currentFile?: {
             description?: string;
@@ -271,6 +272,8 @@ export interface Translation {
                 noBodyScriptFunction?: string;
                 noBodyScriptModule?: string;
             };
+            runningAfter?: string;
+            runningBefore?: string;
             script?: {
                 noScriptFunction?: string;
                 noScriptModule?: string;

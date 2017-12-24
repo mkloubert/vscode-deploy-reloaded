@@ -246,8 +246,10 @@ export async function deployFilesTo(files: string[],
                 });
 
                 const SHOW_CANCELED_BY_OPERATIONS_MESSAGE = () => {
-                    // TODO: translate
-                    ME.context.outputChannel.appendLine(`Deploying files to '${TARGET_NAME}' has been cancelled by target operation.`);
+                    ME.context.outputChannel.appendLine(
+                        ME.t('deploy.canceledByOperation',
+                             TARGET_NAME)
+                    );
                 };
 
                 let operationIndex: number;
@@ -278,16 +280,17 @@ export async function deployFilesTo(files: string[],
                         onBeforeExecute: async (operation) => {
                             ++operationIndex;
 
-                            //TODO: translate
-                            ME.context.outputChannel.append(`Running BEFORE DEPLOY operation '${GET_OPERATION_NAME(operation)}'... `);
+                            ME.context.outputChannel.append(
+                                ME.t('targets.operations.runningBefore',
+                                     GET_OPERATION_NAME(operation))
+                            );
                         },
                         onExecutionCompleted: async (operation, err, doesContinue) => {
-                            //TODO: translate
                             if (err) {
-                                ME.context.outputChannel.appendLine(`[FAILED: '${deploy_helpers.toStringSafe(err)}']`);
+                                ME.context.outputChannel.appendLine(`[${ME.t('error', err)}]`);
                             }
                             else {
-                                ME.context.outputChannel.appendLine('[OK]');
+                                ME.context.outputChannel.appendLine(`[${ME.t('ok')}]`);
                             }
                         },
                         operation: deploy_targets.TargetOperationEvent.BeforeDeploy,
@@ -314,16 +317,17 @@ export async function deployFilesTo(files: string[],
                         onBeforeExecute: async (operation) => {
                             ++operationIndex;
 
-                            //TODO: translate
-                            ME.context.outputChannel.append(`Running AFTER DEPLOYED operation '${GET_OPERATION_NAME(operation)}'... `);
+                            ME.context.outputChannel.append(
+                                ME.t('targets.operations.runningAfter',
+                                     GET_OPERATION_NAME(operation))
+                            );
                         },
                         onExecutionCompleted: async (operation, err, doesContinue) => {
-                            //TODO: translate
                             if (err) {
-                                ME.context.outputChannel.appendLine(`[FAILED: '${deploy_helpers.toStringSafe(err)}']`);
+                                ME.context.outputChannel.appendLine(`[${ME.t('error', err)}]`);
                             }
                             else {
-                                ME.context.outputChannel.appendLine('[OK]');
+                                ME.context.outputChannel.appendLine(`[${ME.t('ok')}]`);
                             }
                         },
                         operation: deploy_targets.TargetOperationEvent.AfterDeployed,

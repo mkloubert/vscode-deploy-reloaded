@@ -80,6 +80,14 @@ class CompilerPlugin extends deploy_plugins.PluginBase<CompilerTarget> {
                     targetExtension: 'js',
                 };
                 break;
+
+            case 'less':
+                context = {
+                    compiler: deploy_compilers.Compiler.Less,
+                    sourceExtension: 'less',
+                    targetExtension: 'css',
+                };
+                break;
         }
 
         if (false === context) {
