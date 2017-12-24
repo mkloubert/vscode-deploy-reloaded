@@ -61,6 +61,8 @@ export interface CompileResultMessage extends deploy_compilers.CompileResultMess
 export async function compile(compileOpts?: CompileOptions) {
     compileOpts = compileOpts || <any>{};
 
+    const WORKSPACE = compileOpts.workspace;
+
     const RESULT: CompileResult = {
         messages: [],
     };
@@ -73,12 +75,16 @@ export async function compile(compileOpts?: CompileOptions) {
         '**/*.css',
     );
 
-    let enc = deploy_helpers.normalizeString(compileOpts.encoding);
+    let enc = deploy_helpers.normalizeString(
+        WORKSPACE.replaceWithValues(compileOpts.encoding)
+    );
     if ('' === enc) {
         enc = 'utf8';
     }
 
-    let outExt = deploy_helpers.toStringSafe(compileOpts.extension).trim();
+    let outExt = deploy_helpers.toStringSafe(
+        WORKSPACE.replaceWithValues(compileOpts.extension)
+    ).trim();
     if ('' === outExt) {
         outExt = 'css';
     }

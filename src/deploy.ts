@@ -379,8 +379,8 @@ export async function deployFileTo(file: string, target: deploy_targets.Target) 
     }
 
     if (!ME.canBeHandledByMe(target)) {
-        //TODO: translate
-        throw new Error(`File '${file}' cannot be deployed from workspace '${ME.folder.uri.fsPath}'!`);
+        throw new Error(ME.t('deploy.errors.invalidWorkspace',
+                             file, ME.name));
     }
 
     file = Path.resolve(file);
@@ -414,15 +414,14 @@ export async function deployPackage(pkg: deploy_packages.Package) {
         }
 
         if (!ME.canBeHandledByMe(pkg)) {
-            //TODO: translate
-            throw new Error(`Package '${deploy_packages.getPackageName(pkg)}' cannot be deployed from workspace '${ME.folder.uri.fsPath}'!`);
+            throw new Error(ME.t('pull.errors.invalidWorkspaceForPackage',
+                                 deploy_packages.getPackageName(pkg), ME.name));
         }
 
         const FILES_TO_DEPLOY = await ME.findFilesByFilter(pkg);
         if (FILES_TO_DEPLOY.length < 1) {
-            //TODO: translate
-            await ME.showWarningMessage(
-                `No FILES found!`
+            ME.showWarningMessage(
+                ME.t('noFiles')
             );
 
             return;
@@ -447,9 +446,8 @@ export async function deployPackage(pkg: deploy_packages.Package) {
         }).filter(qp => deploy_targets.isVisibleForPackage(qp.state, pkg));
 
         if (QUICK_PICK_ITEMS.length < 1) {
-            //TODO: translate
-            await ME.showWarningMessage(
-                `No TARGETS found!`
+            ME.showWarningMessage(
+                ME.t('targets.noneFound')
             );
 
             return;
@@ -461,7 +459,7 @@ export async function deployPackage(pkg: deploy_packages.Package) {
         }
         else {
             selectedItem = await vscode.window.showQuickPick(QUICK_PICK_ITEMS, {
-                placeHolder: 'Select the TARGET to deploy to...',  //TODO: translate
+                placeHolder: ME.t('deploy.selectTarget'),
             });
         }
 

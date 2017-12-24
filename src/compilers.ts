@@ -21,7 +21,7 @@ import * as deploy_compilers_coffeescript from './compilers/coffeescript';
 import * as deploy_compilers_less from './compilers/less';
 // import * as vspt_compilers_pug from './compilers/pug';
 // import * as vspt_compilers_typescript from './compilers/typescript';
-// import * as vspt_compilers_uglifyjs from './compilers/uglifyjs';
+import * as deploy_compilers_uglifyjs from './compilers/uglifyjs';
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
 import * as deploy_workspaces from './workspaces';
@@ -43,25 +43,21 @@ export enum Compiler {
      */
     TypeScript = 1,
     /**
-     * Script based compiler
-     */
-    Script = 2,
-    /**
      * UglifyJS
      */
-    UglifyJS = 3,
+    UglifyJS = 2,
     /**
      * Pug
      */
-    Pug = 4,
+    Pug = 3,
     /**
      * Html Minifier
      */
-    HtmlMinifier = 5,
+    HtmlMinifier = 4,
     /**
      * CoffeeScript
      */
-    CoffeeScript = 6,
+    CoffeeScript = 5,
 }
 
 /**
@@ -205,8 +201,7 @@ export async function compile(compiler: Compiler, opts: CompileOptions): Promise
             break;
 
         case Compiler.UglifyJS:
-            // return await vspt_compilers_uglifyjs.compile(<any>opts);
-            break;
+            return await deploy_compilers_uglifyjs.compile(<any>opts);
     }
 
     throw new Error(i18.t('compilers.notSupported',
@@ -227,7 +222,7 @@ export function getOutputDirectory(opts: CompileOptions): string | false {
 
     const WORKSPACE = opts.workspace;
 
-    let customOutDir: string | false = deploy_helpers.toStringSafe(opts.outDirectory);
+    let customOutDir: string | false = WORKSPACE.replaceWithValues(opts.outDirectory);
     if (!deploy_helpers.isEmptyString(customOutDir)) {
         if (!Path.isAbsolute(customOutDir)) {
             customOutDir = Path.join(

@@ -88,6 +88,15 @@ class CompilerPlugin extends deploy_plugins.PluginBase<CompilerTarget> {
                     targetExtension: 'css',
                 };
                 break;
+
+            case 'uglify-js':
+            case 'uglifyjs':
+                context = {
+                    compiler: deploy_compilers.Compiler.UglifyJS,
+                    sourceExtension: 'js',
+                    targetExtension: 'min.js',
+                };
+                break;
         }
 
         if (false === context) {

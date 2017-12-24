@@ -49,6 +49,11 @@ export interface Translation {
     };
     compilers?: {
         notSupported?: string;
+        uglifyJS?: {
+            errors?: {
+                couldNotDeleteSourceFile?: string;
+            };
+        };
     };
     DELETE?: {
         askForCancelOperation?: string;
@@ -96,6 +101,8 @@ export interface Translation {
         };
         deployingFile?: string;
         errors?: {
+            invalidWorkspace?: string;
+            invalidWorkspaceForPackage?: string;
             operationFailed?: string;
         };
         finishedOperation?: string;
@@ -110,6 +117,7 @@ export interface Translation {
             description?: string;
             label?: string;
         };
+        selectTarget?: string;
         startOperation?: string;
     };
     disposeNotAllowed?: string;

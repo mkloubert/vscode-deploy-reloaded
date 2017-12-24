@@ -42,6 +42,11 @@ export const translation: Translation = {
     },
     compilers: {
         notSupported: "Compiler{0:trim,surround,leading_space} wird nicht unterstützt!",
+        uglifyJS: {
+            errors: {
+                couldNotDeleteSourceFile: "Could not delete source file:{0:trim,surround,leading_space}",
+            },
+        },
     },
     DELETE: {
         askForCancelOperation: "Sind Sie sicher, dass Sie das Löschen der Datei(en) in{0:trim,surround,leading_space} abbrechen wollen?",
@@ -89,6 +94,8 @@ export const translation: Translation = {
         },
         deployingFile: "Stelle Datei{0:trim,surround,leading_space} in{1:trim,surround,leading_space} bereit ...",
         errors: {
+            invalidWorkspace: "Die Datei{0:trim,surround,leading_space} kann nicht über den Arbeitsbereich{1:trim,surround,leading_space} bereitgestellt werden!",
+            invalidWorkspaceForPackage: "Das Paket{0:trim,surround,leading_space} kann nicht über den Arbeitsbereich{1:trim,surround,leading_space} bereitgestellt werden!",
             operationFailed: "Konnte das Bereitstellen nicht durchführen (s. Debugkonsole 'STRG + SHIFT + Y')!",
         },
         finishedOperation: "Das Bereitstellen der Dateien in{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",
@@ -103,6 +110,7 @@ export const translation: Translation = {
             description: "Stellt die Dateien eines Paketes bereit",
             label: "Paket ...",
         },
+        selectTarget: "Wählen Sie das Ziel, in das Sie die Dateien bereitstellen wollen ...",
         startOperation: "Beginne das Bereitstellen der Dateien in{0:trim,surround,leading_space} ...",
     },
     disposeNotAllowed: "'dispose()' Methode kann nicht aufgerufen werden!",

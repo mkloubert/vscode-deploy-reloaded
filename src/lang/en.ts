@@ -42,6 +42,11 @@ export const translation: Translation = {
     },
     compilers: {
         notSupported: "Compiler{0:trim,surround,leading_space} is not supported!",
+        uglifyJS: {
+            errors: {
+                couldNotDeleteSourceFile: "Konnte Quelldatei nicht löschen:{0:trim,surround,leading_space}",
+            },
+        },
     },
     DELETE: {
         askForCancelOperation: "You are about to cancel the delete operation in{0:trim,surround,leading_space}. Are you sure?",
@@ -91,6 +96,8 @@ export const translation: Translation = {
         finishedOperation: "Deploying files to{0:trim,surround,leading_space} has been finished.",
         finishedOperationWithErrors: "[ERROR] Could not deploy files to{0:trim,surround,leading_space}:{1:trim,surround,leading_space}",
         errors: {
+            invalidWorkspace: "Cannot deploy file{0:trim,surround,leading_space} from workspace{1:trim,surround,leading_space}!",
+            invalidWorkspaceForPackage: "Cannot deploy package{0:trim,surround,leading_space} from workspace{1:trim,surround,leading_space}!",
             operationFailed: "Deploy operation failed (s. debug output 'CTRL + SHIFT + Y')!",
         },
         onChange: {
@@ -103,6 +110,7 @@ export const translation: Translation = {
             description: "Deploys the files of a package",
             label: "Package ...",
         },
+        selectTarget: "Select the target to deploy to ...",
         startOperation: "Start deploying files to{0:trim,surround,leading_space} ...",
     },
     disposeNotAllowed: "Cannot invoke 'dispose()' method!",
