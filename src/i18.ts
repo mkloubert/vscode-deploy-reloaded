@@ -47,6 +47,9 @@ export interface Translation {
         };
         title?: string;
     };
+    compilers?: {
+        notSupported?: string;
+    };
     DELETE?: {
         askForCancelOperation?: string;
         askIfDeleteLocalFile?: string;
@@ -90,9 +93,12 @@ export interface Translation {
             description?: string;
             label?: string;
         };
+        deployingFile?: string;
         errors?: {
             operationFailed?: string;
         };
+        finishedOperation?: string;
+        finishedOperationWithErrors?: string;
         onChange?: {
             failed?: string;
         };
@@ -103,6 +109,7 @@ export interface Translation {
             description?: string;
             label?: string;
         };
+        startOperation?: string;
     };
     disposeNotAllowed?: string;
     documents?: {
@@ -162,6 +169,9 @@ export interface Translation {
         virtualTarget?: string;
     };
     plugins?: {
+        compiler?: {
+            invalidDirectory?: string;
+        };
         list?: {
             defaultEntryName?: string;
             selectEntry?: string;

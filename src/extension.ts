@@ -38,8 +38,6 @@ import * as Moment from 'moment';
 import * as Path from 'path';
 import * as vscode from 'vscode';
 
-import * as deploy_sql from './sql';
-
 
 let activeWorkspaces: deploy_workspaces.Workspace[] = [];
 let currentContext: vscode.ExtensionContext;
@@ -641,6 +639,13 @@ async function activateExtension(context: vscode.ExtensionContext) {
         currentContext = context;
     });
 
+    // active workspace provider
+    WF.next(() => {
+        deploy_workspaces.setActiveWorkspaceProvider(() => {
+            return activeWorkspaces;
+        });
+    });
+
     // package file
     WF.next(async () => {
         try {
@@ -866,8 +871,8 @@ async function activateExtension(context: vscode.ExtensionContext) {
                             action: async () => {
                                 await vscode.commands.executeCommand('extension.deploy.reloaded.deleteFile');
                             },
-                            label: '$(trashcan)  ' + i18.t('DELETE.file.label'),
-                            description: i18.t('DELETE.file.description'),
+                            label: '$(trashcan)  ' + i18.t('DELETE.currentFile.label'),
+                            description: i18.t('DELETE.currentFile.description'),
                         },
                         {
                             action: async () => {

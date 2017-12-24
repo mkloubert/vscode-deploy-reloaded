@@ -198,12 +198,20 @@ export interface WorkspaceItemFromSettings {
 }
 
 /**
+ * A function that provides workspaces.
+ * 
+ * @return {Workspace|Workspace[]} The workspace(s).
+ */
+export type WorkspaceProvider = () => Workspace | Workspace[];
+
+/**
  * Workspace settings.
  */
 export interface WorkspaceSettings extends deploy_contracts.Configuration, vscode.WorkspaceConfiguration {
 }
 
 
+let activeWorkspaceProvider: WorkspaceProvider;
 const FILES_CHANGES: { [path: string]: deploy_contracts.FileChangeType } = {};
 let nextPackageButtonId = Number.MIN_SAFE_INTEGER;
 let nextSwitchButtonId = Number.MIN_SAFE_INTEGER;
@@ -2419,4 +2427,25 @@ export class WorkspaceMemento implements vscode.Memento {
             value,
         );
     }
+}
+
+/**
+ * Returns a list of active workspaces.
+ * 
+ * @return {Workspace[]} The list of active workspaces.
+ */
+export function getActiveWorkspaces(): Workspace[] {
+    const PROVIDER = activeWorkspaceProvider;
+    if (PROVIDER) {
+        return deploy_helpers.asArray( PROVIDER() );
+    }
+}
+
+/**
+ * Sets the global function for providing the list of active workspaces.
+ * 
+ * @param {WorkspaceProvider} newProvider The new function.
+ */
+export function setActiveWorkspaceProvider(newProvider: WorkspaceProvider) {
+    activeWorkspaceProvider = newProvider;
 }

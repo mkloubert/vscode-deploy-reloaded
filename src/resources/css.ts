@@ -27,7 +27,7 @@ import * as ZLib from 'zlib';
 
 const REPOSITORY = {
     // START: style.css
-    "style.css": new Buffer("H4sIAAAAAAAACkvKT6lUqOblUgACfS2FlMRihcziEoXUzDyFkFQgQ0ufl6sWAE/cKyYlAAAA", 'base64'),
+    "style.css": new Buffer("H4sIAAAAAAAACn1OSwrCMBDdB3KHbNxZaP0h9TRpMpjBNFOmUSvi3R0wcacDb/O+o1Xo1iZsBFvBTrAXHMxTKyM3EHvgZqCcaexNNy1mpojeYArAmE8fm4tguRd3DoXxOE/RPoSL5C6FHC2fMX3bjtNShAxLbjw4YpuRUm+uSWYjJiiGO/ocZL9tV8K8tNLK1h8dRZJxBv+rLZEUiVCTfaAbcM3/Ga+ZN5WXlOAnAQAA", 'base64'),
     // END: style.css
 
 };

@@ -171,9 +171,11 @@ export async function deployFilesTo(files: string[],
             try {
                 ME.context.outputChannel.appendLine('');
 
-                // TODO: translate
                 if (files.length > 1) {
-                    ME.context.outputChannel.appendLine(`Start deploying files to '${TARGET_NAME}'...`);
+                    ME.context.outputChannel.appendLine(
+                        ME.t('deploy.startOperation',
+                             TARGET_NAME)
+                    );
                 }
 
                 const FILES_TO_UPLOAD: deploy_plugins.LocalFileToUpload[] = [];
@@ -192,19 +194,20 @@ export async function deployFilesTo(files: string[],
                             destination = `'${deploy_helpers.toStringSafe(destination)}'`;
                         }
 
-                        // TODO: translate
-                        ME.context.outputChannel.append(`Deploying file '${F}' to ${destination}... `);
+                        ME.context.outputChannel.append(
+                            ME.t('deploy.deployingFile',
+                                 F, destination)
+                        );
 
                         await WAIT_WHILE_CANCELLING();
 
                         if (CANCELLATION_SOURCE.token.isCancellationRequested) {
-                            ME.context.outputChannel.appendLine(`[Canceled]`);  //TODO: translate
+                            ME.context.outputChannel.appendLine(`[${ME.t('canceled')}]`);
                         }
                     };
                     LF.onUploadCompleted = async (err?: any) => {
-                        // TODO: translate
                         if (err) {
-                            ME.context.outputChannel.appendLine(`[ERROR: ${err}]`);
+                            ME.context.outputChannel.appendLine(`[${ME.t('error', err)}]`);
                         }
                         else {
                             const SYNC_WHEN_OPEN_ID = ME.getSyncWhenOpenKey(target);
@@ -213,7 +216,7 @@ export async function deployFilesTo(files: string[],
                                 delete SYNC_WHEN_STATES[SYNC_WHEN_OPEN_ID];
                             }
 
-                            ME.context.outputChannel.appendLine(`[OK]`);
+                            ME.context.outputChannel.appendLine(`[${ME.t('ok')}]`);
                         }
                     };
 
@@ -333,13 +336,17 @@ export async function deployFilesTo(files: string[],
                 }
 
                 if (files.length > 1) {
-                    // TODO: translate
-                    ME.context.outputChannel.appendLine(`Deploying files to '${TARGET_NAME}' has been finished.`);
+                    ME.context.outputChannel.appendLine(
+                        ME.t('deploy.finishedOperation',
+                             TARGET_NAME)
+                    );
                 }
             }
             catch (e) {
-                // TODO: translate
-                ME.context.outputChannel.appendLine(`[ERROR] Deploying to '${TARGET_NAME}' failed: ${e}`);
+                ME.context.outputChannel.appendLine(
+                    ME.t('deploy.finishedOperationWithErrors',
+                         TARGET_NAME, e)
+                );
             }
         }
     }

@@ -40,6 +40,9 @@ export const translation: Translation = {
         },
         title: "Diff{0:trim,surround,leading_space}",
     },
+    compilers: {
+        notSupported: "Compiler{0:trim,surround,leading_space} is not supported!",
+    },
     DELETE: {
         askForCancelOperation: "You are about to cancel the delete operation in{0:trim,surround,leading_space}. Are you sure?",
         askIfDeleteLocalFile: "Also delete local file?",
@@ -83,6 +86,9 @@ export const translation: Translation = {
             description: "Deploys the current file",
             label: "Current file ...",
         },
+        deployingFile: "Deploying file{0:trim,surround,leading_space} to{1:trim,surround,leading_space} ...",
+        finishedOperation: "Deploying files to{0:trim,surround,leading_space} has been finished.",
+        finishedOperationWithErrors: "[ERROR] Could not deploy files to{0:trim,surround,leading_space}:{1:trim,surround,leading_space}",
         errors: {
             operationFailed: "Deploy operation failed (s. debug output 'CTRL + SHIFT + Y')!",
         },
@@ -96,6 +102,7 @@ export const translation: Translation = {
             description: "Deploys the files of a package",
             label: "Package ...",
         },
+        startOperation: "Start deploying files to{0:trim,surround,leading_space} ...",
     },
     disposeNotAllowed: "Cannot invoke 'dispose()' method!",
     documents: {
@@ -155,6 +162,9 @@ export const translation: Translation = {
         virtualTarget: "Virtual target for package{0:trim,surround,leading_space}",
     },
     plugins: {
+        compiler: {
+            invalidDirectory: "{0:trim,surround,ending_space}is an invalid directory!",
+        },
         list: {
             defaultEntryName: "(Entry #{0:trim})",
             selectEntry: "Select the entry with settings to use for deployment...",

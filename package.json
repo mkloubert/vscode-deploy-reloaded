@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.76",
+ "version": "0.0.77",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -2073,6 +2073,727 @@
           },
           "required": [
            "targets"
+          ]
+         },
+         {
+          "type": "object",
+          "properties": {
+           "beforeDeploy": {
+            "description": "One or more target operation to define.",
+            "type": "array",
+            "items": {
+             "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./beforeDeploy.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "target": {
+                 "description": "The thing to open.",
+                 "type": "string",
+                 "pattern": "\\S+"
+                },
+                "type": {
+                 "enum": [
+                  "open",
+                  ""
+                 ],
+                 "type": "string",
+                 "description": "Opens something, like an app or URL on the current machine."
+                },
+                "wait": {
+                 "description": "Wait until operation has been finished or not.",
+                 "type": "boolean",
+                 "default": true
+                }
+               },
+               "required": [
+                "target"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
+              }
+             ]
+            }
+           },
+           "compiler": {
+            "description": "The compiler to use.",
+            "type": "string",
+            "enum": [
+             "coffee",
+             "coffeescript"
+            ]
+           },
+           "deployed": {
+            "description": "One or more target operation to define.",
+            "type": "array",
+            "items": {
+             "oneOf": [
+              {
+               "type": "object",
+               "properties": {
+                "arguments": {
+                 "type": "array",
+                 "description": "One or more optional argument for the execution."
+                },
+                "command": {
+                 "type": "string",
+                 "description": "The ID of the command to execute.",
+                 "pattern": "\\S+"
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "type": {
+                 "enum": [
+                  "command"
+                 ],
+                 "type": "string",
+                 "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "body": {
+                 "type": "string",
+                 "description": "The body or the path to a script that returns the body to send."
+                },
+                "headers": {
+                 "type": "object",
+                 "description": "The request headers.",
+                 "patternProperties": {
+                  "\\S+": {
+                   "description": "The header to define."
+                  }
+                 }
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "isBodyBase64": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' is Base64 encoded or not.",
+                 "default": false
+                },
+                "isBodyScript": {
+                 "type": "boolean",
+                 "description": "Indicates if 'body' contains the path to a script instead the content to send.",
+                 "default": false
+                },
+                "method": {
+                 "type": "string",
+                 "description": "The HTTP request method.",
+                 "default": "GET"
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceholdersForTheseHeaders": {
+                 "description": "A list of headers that should NOT use placeholders / values.",
+                 "oneOf": [
+                  {
+                   "type": "array",
+                   "description": "A list of headers that should NOT use placeholders / values.",
+                   "items": {
+                    "description": "The name of the header that should NOT use placeholders / values.",
+                    "type": "string"
+                   }
+                  },
+                  {
+                   "description": "Defines if placeholders should be DEactivated for ALL headers or not.",
+                   "type": "boolean",
+                   "default": false
+                  }
+                 ]
+                },
+                "options": {
+                 "description": "The options for the script that returns the body to send."
+                },
+                "password": {
+                 "type": "string",
+                 "description": "The password for basic auth."
+                },
+                "type": {
+                 "enum": [
+                  "http"
+                 ],
+                 "type": "string",
+                 "description": "Does a HTTP request."
+                },
+                "url": {
+                 "type": "string",
+                 "description": "The URL.",
+                 "default": "http://localhost/"
+                },
+                "username": {
+                 "type": "string",
+                 "description": "The username for basic auth."
+                }
+               }
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "Additional options for the script execution."
+                },
+                "script": {
+                 "type": "string",
+                 "description": "The path to the script file.",
+                 "default": "./deployed.js"
+                },
+                "type": {
+                 "enum": [
+                  "script"
+                 ],
+                 "type": "string",
+                 "description": "Runs a script from a file."
+                }
+               },
+               "required": [
+                "script"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "engine": {
+                 "oneOf": [
+                  {
+                   "enum": [
+                    "mysql"
+                   ],
+                   "type": "string",
+                   "description": "MySQL"
+                  },
+                  {
+                   "enum": [
+                    "sql"
+                   ],
+                   "type": "string",
+                   "description": "Microsoft SQL"
+                  }
+                 ]
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "options": {
+                 "description": "The options for the connection."
+                },
+                "queries": {
+                 "description": "One or more query to invoke.",
+                 "oneOf": [
+                  {
+                   "description": "One or more query to invoke.",
+                   "type": "array",
+                   "items": {
+                    "type": "string",
+                    "pattern": "\\S+"
+                   }
+                  }
+                 ]
+                },
+                "type": {
+                 "enum": [
+                  "sql"
+                 ],
+                 "type": "string",
+                 "description": "Executes SQL scripts."
+                }
+               },
+               "required": [
+                "engine",
+                "queries"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "target": {
+                 "description": "The thing to open.",
+                 "type": "string",
+                 "pattern": "\\S+"
+                },
+                "type": {
+                 "enum": [
+                  "open",
+                  ""
+                 ],
+                 "type": "string",
+                 "description": "Opens something, like an app or URL on the current machine."
+                },
+                "wait": {
+                 "description": "Wait until operation has been finished or not.",
+                 "type": "boolean",
+                 "default": true
+                }
+               },
+               "required": [
+                "target"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "time": {
+                 "type": "integer",
+                 "description": "The number of milliseconds to wait before next operation is invoked.",
+                 "minimum": 0,
+                 "default": 1000
+                },
+                "type": {
+                 "enum": [
+                  "wait"
+                 ],
+                 "type": "string",
+                 "description": "Waits a number of milliseconds, before the next operation is executed."
+                }
+               }
+              }
+             ]
+            }
+           },
+           "description": {
+            "description": "A description for that target.",
+            "type": "string"
+           },
+           "dir": {
+            "description": "The custom output directory.",
+            "type": "string",
+            "pattern": "\\S+"
+           },
+           "encryptBy": {
+            "description": "The algorithm for data encryption to use.",
+            "type": "string",
+            "default": "aes-256-ctr"
+           },
+           "encryptWith": {
+            "description": "An optional password for data encryption to use.",
+            "type": "string"
+           },
+           "hideIf": {
+            "description": "Defines a list of one or more package names, which will hide this target from GUI, if one of them is selected.",
+            "type": "array",
+            "items": {
+             "description": "A name of a package.",
+             "type": "string"
+            }
+           },
+           "if": {
+            "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+            "type": "string"
+           },
+           "mappings": {
+            "description": "Defines one or more folder mappings by minimatch patterns.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The mapping to define",
+              "oneOf": [
+               {
+                "description": "The target folder.",
+                "type": "string"
+               },
+               {
+                "description": "Settings for the target folder.",
+                "type": "object",
+                "properties": {
+                 "to": {
+                  "description": "The target folder.",
+                  "type": "string"
+                 }
+                },
+                "required": [
+                 "to"
+                ]
+               }
+              ]
+             }
+            }
+           },
+           "name": {
+            "description": "The (display) name of that target.",
+            "type": "string"
+           },
+           "options": {
+            "description": "Additional options for the compiler.",
+            "type": "object"
+           },
+           "platforms": {
+            "description": "One or more platform names the target is available for.",
+            "type": "array",
+            "items": {
+             "description": "The name of the platform.",
+             "type": "string",
+             "enum": [
+              "darwin",
+              "freebsd",
+              "linux",
+              "sunos",
+              "win32"
+             ]
+            }
+           },
+           "showIf": {
+            "description": "Defines a list of one or more package names, which will show this target in GUI, if one of them is selected.",
+            "type": "array",
+            "items": {
+             "description": "A name of a package.",
+             "type": "string"
+            }
+           },
+           "transformer": {
+            "description": "The path (or URI) to the data transformer script.",
+            "type": "string"
+           },
+           "transformerOptions": {
+            "description": "Options for the data transformer script."
+           },
+           "type": {
+            "enum": [
+             "compiler"
+            ],
+            "type": "string",
+            "description": "Compiles files."
+           }
+          },
+          "required": [
+           "compiler"
           ]
          },
          {
@@ -13418,6 +14139,7 @@
   "@slack/client": "^3.14.2",
   "aws-sdk": "^2.165.0",
   "azure-storage": "^2.6.0",
+  "coffeescript": "^2.1.0",
   "compare-versions": "^3.1.0",
   "dropbox": "^2.5.12",
   "filesize": "^3.5.11",

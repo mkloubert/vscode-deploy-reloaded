@@ -40,6 +40,9 @@ export const translation: Translation = {
         },
         title: "Vergleich{0:trim,surround,leading_space}",
     },
+    compilers: {
+        notSupported: "Compiler{0:trim,surround,leading_space} wird nicht unterstützt!",
+    },
     DELETE: {
         askForCancelOperation: "Sind Sie sicher, dass Sie das Löschen der Datei(en) in{0:trim,surround,leading_space} abbrechen wollen?",
         askIfDeleteLocalFile: "Auch die lokale Datei löschen?",
@@ -55,6 +58,7 @@ export const translation: Translation = {
             description: "Löscht die aktuelle Datei",
             label: "Aktuelle Datei ...",
         },
+        deletingFile: "Lösche Datei{0:trim,surround,leading_space} in{1:trim,surround,leading_space} ...",
         errors: {
             invalidWorkspace: "Die Datei{0:trim,surround,leading_space} is nicht Teil des Arbeitsbereiches{1:trim,surround,leading_space}!",
             invalidWorkspaceForPackage: "Das Paket{0:trim,surround,leading_space} ist nicht Teil des Arbeitsbereiches{1:trim,surround,leading_space}!",
@@ -82,9 +86,12 @@ export const translation: Translation = {
             description: "Stellt die aktuelle Datei bereit",
             label: "Aktuelle Datei ...",
         },
+        deployingFile: "Stelle Datei{0:trim,surround,leading_space} in{1:trim,surround,leading_space} bereit ...",
         errors: {
             operationFailed: "Konnte das Bereitstellen nicht durchführen (s. Debugkonsole 'STRG + SHIFT + Y')!",
         },
+        finishedOperation: "Das Bereitstellen der Dateien in{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",
+        finishedOperationWithErrors: "[FEHLER] Konnte Dateien nicht in{0:trim,surround,leading_space} bereitstellen:{1:trim,surround,leading_space}",
         onChange: {
             failed: "Das Bereitstellen nach dem Ändern von{0:trim,surround,leading_space} nach{1:trim,surround,leading_space} ist fehlgeschlagen:{2:trim,surround,leading_space}",
         },
@@ -95,6 +102,7 @@ export const translation: Translation = {
             description: "Stellt die Dateien eines Paketes bereit",
             label: "Paket ...",
         },
+        startOperation: "Beginne das Bereitstellen der Dateien in{0:trim,surround,leading_space} ...",
     },
     disposeNotAllowed: "'dispose()' Methode kann nicht aufgerufen werden!",
     documents: {
@@ -153,6 +161,9 @@ export const translation: Translation = {
         virtualTarget: "Virtuelles Ziel für Paket{0:trim,surround,leading_space}",
     },
     plugins: {
+        compiler: {
+            invalidDirectory: "{0:trim,surround,ending_space}ist ein ungültiges Verzeichnis!",
+        },
         list: {
             defaultEntryName: "(Eintrag #{0:trim})",
             selectEntry: "Wählen Sie einen Eintrag mit Einstellungen für das Bereitstellen aus...",
