@@ -895,7 +895,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      */
     public getSwitchTargets(): SwitchTarget[] {
         return <any>this.getTargets().filter(t => {
-            return 'switch' === deploy_helpers.normalizeString(t.type);
+            return isSwitchTarget(t);
         });
     }
 
@@ -982,6 +982,40 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         }
 
         return deploy_targets.getTargetsByName(TARGET_NAMES, this.getTargets());
+    }
+
+    /**
+     * Returns the children of a switch target.
+     * 
+     * @param {SwitchTarget} switchTarget The switch target.
+     * 
+     * @return {deploy_targets.Target[]|false} The targets or (false) if failed.
+     */
+    public getTargetsOfSwitch(switchTarget: SwitchTarget): deploy_targets.Target[] | false {
+        const ME = this;
+
+        const OPTION = ME.getSelectedSwitchOption(switchTarget);
+        if (false === OPTION) {
+            ME.showWarningMessage(
+                ME.t('plugins.switch.noOptionSelected2')
+            );
+
+            return false;
+        }
+
+        const TARGETS = deploy_targets.getTargetsByName(
+            OPTION.targets,
+            ME.getTargets(),
+        );
+        if (false === TARGETS) {
+            return false;
+        }
+
+        deploy_targets.throwOnRecurrence(
+            switchTarget, TARGETS
+        );
+
+        return TARGETS;
     }
 
     /**
@@ -1445,6 +1479,86 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      */
     public get name(): string {
         return Path.basename(this.folder.uri.fsPath);
+    }
+
+    /**
+     * Prepares a target for deployment.
+     * 
+     * @param {TTarget} target The target to prepare.
+     * 
+     * @return {TTarget} The prepared target.
+     */
+    public prepareTarget<TTarget extends deploy_targets.Target = deploy_targets.Target>(target: TTarget): TTarget {
+        const ME = this;
+
+        target = deploy_helpers.cloneObjectFlat(target);
+
+        if (target) {
+            if (isSwitchTarget(target)) {
+                const CHILD_TARGETS = ME.getTargetsOfSwitch(<any>target);
+                if (false !== CHILD_TARGETS) {
+                    // collect 'before delete' operations
+                    const BEFORE_DELETE_OF_CHILDREN = Enumerable.from( deploy_helpers.asArray(CHILD_TARGETS) ).selectMany(ct => {
+                        return deploy_helpers.asArray(ct.beforeDelete);
+                    }).toArray();
+                    const MY_BEFORE_DELETE = deploy_helpers.asArray(target.beforeDelete);
+
+                    // collect 'before deploy' operations
+                    const BEFORE_DEPLOY_OF_CHILDREN = Enumerable.from( deploy_helpers.asArray(CHILD_TARGETS) ).selectMany(ct => {
+                        return deploy_helpers.asArray(ct.beforeDeploy);
+                    }).toArray();
+                    const MY_BEFORE_DEPLOY = deploy_helpers.asArray(target.beforeDeploy);
+
+                    // collect 'before pull' operations
+                    const BEFORE_PULL_OF_CHILDREN = Enumerable.from( deploy_helpers.asArray(CHILD_TARGETS) ).selectMany(ct => {
+                        return deploy_helpers.asArray(ct.beforePull);
+                    }).toArray();
+                    const MY_BEFORE_PULL = deploy_helpers.asArray(target.beforePull);
+
+                    // collect 'after deleted' operations
+                    const DELETED_OF_CHILDREN = Enumerable.from( deploy_helpers.asArray(CHILD_TARGETS) ).reverse().selectMany(ct => {
+                        return deploy_helpers.asArray(ct.deleted);
+                    }).toArray();  // in reverse target order
+                    const MY_DELETED = deploy_helpers.asArray(target.deleted);
+
+                    // collect 'after deployed' operations
+                    const DEPLOYED_OF_CHILDREN = Enumerable.from( deploy_helpers.asArray(CHILD_TARGETS) ).reverse().selectMany(ct => {
+                        return deploy_helpers.asArray(ct.deployed);
+                    }).toArray();  // in reverse target order
+                    const MY_DEPLOYED = deploy_helpers.asArray(target.deployed);
+
+                    // collect 'after pulled' operations
+                    const PULLED_OF_CHILDREN = Enumerable.from( deploy_helpers.asArray(CHILD_TARGETS) ).reverse().selectMany(ct => {
+                        return deploy_helpers.asArray(ct.pulled);
+                    }).toArray();  // in reverse target order
+                    const MY_PULLED = deploy_helpers.asArray(target.pulled);
+
+                    // before
+                    (<any>target).beforeDelete = MY_BEFORE_DELETE.concat(
+                        BEFORE_DELETE_OF_CHILDREN
+                    );
+                    (<any>target).beforeDeploy = MY_BEFORE_DEPLOY.concat(
+                        BEFORE_DEPLOY_OF_CHILDREN
+                    );
+                    (<any>target).beforePull = MY_BEFORE_PULL.concat(
+                        BEFORE_PULL_OF_CHILDREN
+                    );
+
+                    // after
+                    (<any>target).deleted = DELETED_OF_CHILDREN.concat(
+                        MY_DELETED
+                    );
+                    (<any>target).deployed = DEPLOYED_OF_CHILDREN.concat(
+                        MY_DEPLOYED
+                    );
+                    (<any>target).pulled = PULLED_OF_CHILDREN.concat(
+                        MY_PULLED
+                    );
+                }
+            }
+        }
+
+        return target;
     }
 
     /**
@@ -2448,4 +2562,21 @@ export function getActiveWorkspaces(): Workspace[] {
  */
 export function setActiveWorkspaceProvider(newProvider: WorkspaceProvider) {
     activeWorkspaceProvider = newProvider;
+}
+
+/**
+ * Checks if a target is a switch or not.
+ * 
+ * @param {deploy_targets.Target} target The target to check.
+ * 
+ * @return {boolean} Is switch or not.
+ */
+export function isSwitchTarget(target: deploy_targets.Target): target is SwitchTarget {
+    if (target) {
+        return [
+            'switch'
+        ].indexOf( deploy_helpers.normalizeString(target.type) ) > -1;
+    }
+
+    return false;
 }

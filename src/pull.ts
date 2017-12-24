@@ -38,6 +38,8 @@ let nextCancelBtnCommandId = Number.MIN_SAFE_INTEGER;
 export async function pullFileFrom(file: string, target: deploy_targets.Target) {
     const ME: deploy_workspaces.Workspace = this;
 
+    target = ME.prepareTarget(target);
+
     if (ME.isInFinalizeState) {
         return;
     }
@@ -67,6 +69,8 @@ export async function pullFileFrom(file: string, target: deploy_targets.Target) 
 export async function pullFilesFrom(files: string[],
                                     target: deploy_targets.Target, targetNr?: number) {
     const ME: deploy_workspaces.Workspace = this;
+
+    target = ME.prepareTarget(target);
 
     if (ME.isInFinalizeState) {
         return;
@@ -206,117 +210,119 @@ export async function pullFilesFrom(files: string[],
                     );
                 }
 
-                const CTX: deploy_plugins.DownloadContext = {
-                    cancellationToken: CANCELLATION_SOURCE.token,
-                    files: files.map(f => {
-                        const NAME_AND_PATH = ME.getNameAndPathForFileDeployment(f, target);
-                        if (false === NAME_AND_PATH) {
-                            return null;
+                const FILES_TO_PULL = files.map(f => {
+                    const NAME_AND_PATH = ME.getNameAndPathForFileDeployment(f, target);
+                    if (false === NAME_AND_PATH) {
+                        return null;
+                    }
+
+                    const SF = new deploy_plugins.SimpleFileToDownload(ME, f, NAME_AND_PATH);
+                    SF.onBeforeDownload = async function(source?) {
+                        if (arguments.length < 1) {
+                            source = `'${deploy_helpers.toDisplayablePath(NAME_AND_PATH.path)}' (${TARGET_NAME})`;
+                        }
+                        else {
+                            source = `'${deploy_helpers.toStringSafe(source)}'`;
                         }
 
-                        const SF = new deploy_plugins.SimpleFileToDownload(ME, f, NAME_AND_PATH);
-                        SF.onBeforeDownload = async function(source?) {
-                            if (arguments.length < 1) {
-                                source = `'${deploy_helpers.toDisplayablePath(NAME_AND_PATH.path)}' (${TARGET_NAME})`;
+                        ME.context.outputChannel.append(
+                            ME.t('pull.pullingFile',
+                                 f, source) + ' '
+                        );
+
+                        await WAIT_WHILE_CANCELLING();
+
+                        if (CANCELLATION_SOURCE.token.isCancellationRequested) {
+                            ME.context.outputChannel.appendLine(`[${ME.t('canceled')}]`);
+                        }
+                    };
+                    SF.onDownloadCompleted = async (err?, downloadedFile?) => {
+                        let disposeDownloadedFile = false;
+                        try {
+                            if (err) {
+                                throw err;
                             }
                             else {
-                                source = `'${deploy_helpers.toStringSafe(source)}'`;
-                            }
-    
-                            ME.context.outputChannel.append(
-                                ME.t('pull.pullingFile',
-                                     f, source) + ' '
-                            );
+                                let dataToWrite: any;
 
-                            await WAIT_WHILE_CANCELLING();
+                                if (downloadedFile) {
+                                    if (Buffer.isBuffer(downloadedFile)) {
+                                        dataToWrite = downloadedFile;
+                                    }
+                                    else if (IsStream(downloadedFile)) {
+                                        dataToWrite = downloadedFile;
+                                    }
+                                    else if (deploy_helpers.isObject<deploy_plugins.DownloadedFile>(downloadedFile)) {
+                                        disposeDownloadedFile = true;
 
-                            if (CANCELLATION_SOURCE.token.isCancellationRequested) {
-                                ME.context.outputChannel.appendLine(`[${ME.t('canceled')}]`);
-                            }
-                        };
-                        SF.onDownloadCompleted = async (err?, downloadedFile?) => {
-                            let disposeDownloadedFile = false;
-                            try {
-                                if (err) {
-                                    throw err;
-                                }
-                                else {
-                                    let dataToWrite: any;
-
-                                    if (downloadedFile) {
-                                        if (Buffer.isBuffer(downloadedFile)) {
-                                            dataToWrite = downloadedFile;
-                                        }
-                                        else if (IsStream(downloadedFile)) {
-                                            dataToWrite = downloadedFile;
-                                        }
-                                        else if (deploy_helpers.isObject<deploy_plugins.DownloadedFile>(downloadedFile)) {
-                                            disposeDownloadedFile = true;
-
-                                            dataToWrite = await Promise.resolve(
-                                                downloadedFile.read()
-                                            );
-                                        }
-                                        else {
-                                            dataToWrite = downloadedFile;
-                                        }
-
-                                        // keep sure we have a buffer here
-                                        dataToWrite = await deploy_helpers.asBuffer(
-                                            dataToWrite
-                                        );
-
-                                        const CONTEXT: deploy_transformers.DataTransformerContext = {
-                                            globals: ME.globals,
-                                            globalState: ME.sessionState['pull']['states']['global'],
-                                            logger: deploy_log.CONSOLE,
-                                            mode: deploy_transformers.DataTransformerMode.Restore,
-                                            options: TRANSFORMER_OPTIONS,
-                                            require: (id) => {
-                                                return deploy_helpers.requireFromExtension(id);
-                                            },
-                                            state: undefined,
-                                        };
-
-                                        // CONTEXT.state
-                                        Object.defineProperty(CONTEXT, 'state', {
-                                            enumerable: true,
-
-                                            get: () => {
-                                                return ME.sessionState['pull']['states']['data_transformers'][STATE_KEY];
-                                            },
-
-                                            set: (newValue) => {
-                                                ME.sessionState['pull']['states']['data_transformers'][STATE_KEY] = newValue;
-                                            }
-                                        });
-
-                                        dataToWrite = await (<deploy_transformers.DataTransformer>transformer)(
-                                            dataToWrite, CONTEXT
+                                        dataToWrite = await Promise.resolve(
+                                            downloadedFile.read()
                                         );
                                     }
-
-                                    if (dataToWrite) {
-                                        await deploy_helpers.writeFile(
-                                            f, dataToWrite
-                                        );
+                                    else {
+                                        dataToWrite = downloadedFile;
                                     }
 
-                                    ME.context.outputChannel.appendLine(`[${ME.t('ok')}]`);
-                                }
-                            }
-                            catch (e) {
-                                ME.context.outputChannel.appendLine(`[${ME.t('error', e)}]`);
-                            }
-                            finally {
-                                if (disposeDownloadedFile) {
-                                    deploy_helpers.tryDispose(<vscode.Disposable>downloadedFile);
-                                }
-                            }
-                        };
+                                    // keep sure we have a buffer here
+                                    dataToWrite = await deploy_helpers.asBuffer(
+                                        dataToWrite
+                                    );
 
-                        return SF;
-                    }).filter(f => null !== f),
+                                    const CONTEXT: deploy_transformers.DataTransformerContext = {
+                                        globals: ME.globals,
+                                        globalState: ME.sessionState['pull']['states']['global'],
+                                        logger: deploy_log.CONSOLE,
+                                        mode: deploy_transformers.DataTransformerMode.Restore,
+                                        options: TRANSFORMER_OPTIONS,
+                                        require: (id) => {
+                                            return deploy_helpers.requireFromExtension(id);
+                                        },
+                                        state: undefined,
+                                    };
+
+                                    // CONTEXT.state
+                                    Object.defineProperty(CONTEXT, 'state', {
+                                        enumerable: true,
+
+                                        get: () => {
+                                            return ME.sessionState['pull']['states']['data_transformers'][STATE_KEY];
+                                        },
+
+                                        set: (newValue) => {
+                                            ME.sessionState['pull']['states']['data_transformers'][STATE_KEY] = newValue;
+                                        }
+                                    });
+
+                                    dataToWrite = await (<deploy_transformers.DataTransformer>transformer)(
+                                        dataToWrite, CONTEXT
+                                    );
+                                }
+
+                                if (dataToWrite) {
+                                    await deploy_helpers.writeFile(
+                                        f, dataToWrite
+                                    );
+                                }
+
+                                ME.context.outputChannel.appendLine(`[${ME.t('ok')}]`);
+                            }
+                        }
+                        catch (e) {
+                            ME.context.outputChannel.appendLine(`[${ME.t('error', e)}]`);
+                        }
+                        finally {
+                            if (disposeDownloadedFile) {
+                                deploy_helpers.tryDispose(<vscode.Disposable>downloadedFile);
+                            }
+                        }
+                    };
+
+                    return SF;
+                }).filter(f => null !== f);
+
+                const CTX: deploy_plugins.DownloadContext = {
+                    cancellationToken: CANCELLATION_SOURCE.token,
+                    files: FILES_TO_PULL,
                     isCancelling: undefined,
                     target: target,
                 };
@@ -330,9 +336,97 @@ export async function pullFilesFrom(files: string[],
                     }
                 });
 
+                const SHOW_CANCELED_BY_OPERATIONS_MESSAGE = () => {
+                    ME.context.outputChannel.appendLine(
+                        ME.t('pull.canceledByOperation',
+                             TARGET_NAME)
+                    );
+                };
+
+                let operationIndex: number;
+
+                const GET_OPERATION_NAME = (operation: deploy_targets.TargetOperation) => {
+                    let operationName = deploy_helpers.toStringSafe(operation.name).trim();
+                    if ('' === operationName) {
+                        operationName = deploy_helpers.normalizeString(operation.type);
+                        if ('' === operationName) {
+                            operationName = deploy_targets.DEFAULT_OPERATION_TYPE;
+                        }
+
+                        operationName += ' #' + (operationIndex + 1);
+                    }
+
+                    return operationName;
+                };
+
+                // beforePull
+                operationIndex = -1;
+                ME.context.outputChannel.appendLine('');
+                const BEFORE_PULL_ABORTED = !deploy_helpers.toBooleanSafe(
+                    await deploy_targets.executeTargetOperations({
+                        files: FILES_TO_PULL.map(ftu => {
+                            return ftu.path + '/' + ftu.name;
+                        }),
+                        onBeforeExecute: async (operation) => {
+                            ++operationIndex;
+
+                            ME.context.outputChannel.append(
+                                ME.t('targets.operations.runningBeforePull',
+                                     GET_OPERATION_NAME(operation))
+                            );
+                        },
+                        onExecutionCompleted: async (operation, err, doesContinue) => {
+                            if (err) {
+                                ME.context.outputChannel.appendLine(`[${ME.t('error', err)}]`);
+                            }
+                            else {
+                                ME.context.outputChannel.appendLine(`[${ME.t('ok')}]`);
+                            }
+                        },
+                        operation: deploy_targets.TargetOperationEvent.BeforePull,
+                        target: target,
+                    })
+                , true);
+                if (BEFORE_PULL_ABORTED) {
+                    SHOW_CANCELED_BY_OPERATIONS_MESSAGE();
+                    continue;
+                }
+
                 await Promise.resolve(
                     PI.downloadFiles(CTX)
                 );
+
+                // pulled
+                operationIndex = -1;
+                const AFTER_PULLED_ABORTED = !deploy_helpers.toBooleanSafe(
+                    await deploy_targets.executeTargetOperations({
+                        files: FILES_TO_PULL.map(ftu => {
+                            return ftu.path + '/' + ftu.name;
+                        }),
+                        onBeforeExecute: async (operation) => {
+                            ++operationIndex;
+
+                            ME.context.outputChannel.append(
+                                ME.t('targets.operations.runningAfterPulled',
+                                     GET_OPERATION_NAME(operation))
+                            );
+                        },
+                        onExecutionCompleted: async (operation, err, doesContinue) => {
+                            if (err) {
+                                ME.context.outputChannel.appendLine(`[${ME.t('error', err)}]`);
+                            }
+                            else {
+                                ME.context.outputChannel.appendLine(`[${ME.t('ok')}]`);
+                            }
+                        },
+                        operation: deploy_targets.TargetOperationEvent.AfterPulled,
+                        target: target,
+                    })
+                , true);
+                if (AFTER_PULLED_ABORTED) {
+                    SHOW_CANCELED_BY_OPERATIONS_MESSAGE();
+                    continue;
+                }
 
                 if (files.length > 1) {
                     ME.context.outputChannel.appendLine(

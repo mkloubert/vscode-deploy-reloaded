@@ -312,6 +312,11 @@ export interface PluginModule {
 }
 
 /**
+ * A result for preparing a base target.
+ */
+export type PrepareBaseTargetResult<TTarget = deploy_targets.Target> = TTarget | false;
+
+/**
  * A result for preparing targets.
  */
 export type PrepareTargetsResult = deploy_targets.Target | deploy_targets.Target[] | false;
@@ -1046,9 +1051,13 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
 
     /** @inheritdoc */
     public async deleteFiles(context: DeleteContext<TTarget>) {
-        await this.invokeForEachTarget(
-            context.target,
-            await this.getTargets(context.target, deploy_contracts.DeployOperation.Delete),
+        const ME = this;
+
+        await ME.invokeForEachTarget(
+            <any>await Promise.resolve(
+                ME.prepareBaseTarget(context.target)
+            ),
+            await ME.getTargets(context.target, deploy_contracts.DeployOperation.Delete),
             deploy_contracts.DeployOperation.Delete,
             () => context.isCancelling,
             async (target, plugin) => {
@@ -1089,7 +1098,9 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
         const ME = this;
         
         await ME.invokeForEachTarget(
-            context.target,
+            <any>await Promise.resolve(
+                ME.prepareBaseTarget(context.target)
+            ),
             await ME.getFirstTarget(context.target, deploy_contracts.DeployOperation.Pull),
             deploy_contracts.DeployOperation.Pull,
             () => context.isCancelling,
@@ -1137,8 +1148,16 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
         )[0];
     }
 
-    
-    private async getTargets(target: TTarget, operation: deploy_contracts.DeployOperation, throwIfNonFound = false)
+    /**
+     * Extracts the list of available targets based on a parent target.
+     * 
+     * @param {TTarget} target The parent target.
+     * @param {deploy_contracts.DeployOperation} operation The underlying operation.
+     * @param {throwIfNonFound} [throwIfNonFound] Throw error if non was found or not.
+     * 
+     * @return {deploy_targets.Target[]|false}
+     */
+    protected async getTargets(target: TTarget, operation: deploy_contracts.DeployOperation, throwIfNonFound = false)
         : Promise<deploy_targets.Target[] | false>
     {
         if (!target) {
@@ -1158,19 +1177,9 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
             }
         }
 
-        const MY_NAME = deploy_helpers.normalizeString(
-            target.name
+        deploy_targets.throwOnRecurrence(
+            target, TARGETS
         );
-        TARGETS.forEach(t => {
-            const OTHER_NAME = deploy_helpers.normalizeString(
-                t.name
-            );
-
-            if (MY_NAME === OTHER_NAME) {
-                throw new Error(WORKSPACE.t('targets.cannotDefineOtherAsSource',
-                                            OTHER_NAME));
-            }
-        });
 
         const PREPARED_TARGETS = await Promise.resolve(
             this.prepareTargetsMany(target, TARGETS, operation)
@@ -1181,6 +1190,19 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
         }
 
         return deploy_helpers.asArray(<any>PREPARED_TARGETS);
+    }
+
+    /**
+     * Prepares a base target.
+     * 
+     * @param {TTarget} baseTarget The base target.
+     * 
+     * @return {PrepareBaseTargetResult<TTarget>|PromiseLike<PrepareBaseTargetResult<TTarget>>} The result of the prepared target.
+     */
+    protected prepareBaseTarget(baseTarget: TTarget)
+        : PrepareBaseTargetResult<TTarget> | PromiseLike<PrepareBaseTargetResult<TTarget>>
+    {
+        return baseTarget;
     }
 
     /**
@@ -1212,13 +1234,17 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
     }
 
     private async invokeForEachTarget(
-        myTarget: TTarget,
+        myTarget: TTarget | false,
         targets: deploy_targets.Target | deploy_targets.Target[] | false,
         operation: deploy_contracts.DeployOperation,
         isCancelling: () => boolean,
         action: (target: deploy_targets.Target, plugin: Plugin) => any
     ) {
         const ME = this;
+
+        if (!myTarget) {
+            return;
+        }
 
         if (false === targets) {
             return;
@@ -1281,7 +1307,9 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
         let firstResult: ListDirectoryResult;
 
         await ME.invokeForEachTarget(
-            context.target,
+            <any>await Promise.resolve(
+                ME.prepareBaseTarget(context.target)
+            ),
             await ME.getFirstTarget(context.target, deploy_contracts.DeployOperation.ListDirectory),
             deploy_contracts.DeployOperation.ListDirectory,
             () => context.isCancelling,
@@ -1321,9 +1349,9 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
         let result: ListDirectoryResult<TTarget>;
         if (firstResult) {
             result = {
-                dirs: firstResult.dirs || [],
-                files: firstResult.files || [],
-                others: firstResult.others || [],
+                dirs: deploy_helpers.asArray(firstResult.dirs),
+                files: deploy_helpers.asArray(firstResult.files),
+                others: deploy_helpers.asArray(firstResult.others),
                 target: context.target,
             };
         }
@@ -1336,7 +1364,9 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
         const ME = this;
 
         await ME.invokeForEachTarget(
-            context.target,
+            <any>await Promise.resolve(
+                ME.prepareBaseTarget(context.target)
+            ),
             await ME.getTargets(context.target, deploy_contracts.DeployOperation.Deploy),
             deploy_contracts.DeployOperation.Deploy,
             () => context.isCancelling,

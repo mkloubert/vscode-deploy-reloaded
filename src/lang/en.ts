@@ -58,6 +58,7 @@ export const translation: Translation = {
                 tooltip: "Click here to cancel ...",
             },
         },
+        canceledByOperation: "Deleting files in{0:trim,surround,leading_space} has been cancelled by target operation.",
         cancelling: "Cancelling delete operation ...",
         currentFile: {
             description: "Deletes the current file",
@@ -237,6 +238,7 @@ export const translation: Translation = {
                 tooltip: "Click here to cancel ...",
             },
         },
+        canceledByOperation: "Pulling files from{0:trim,surround,leading_space} has been cancelled by target operation.",
         cancelling: "Cancelling pull operation ...",
         errors: {
             invalidWorkspace: "Cannot pull file{0:trim,surround,leading_space} to workspace{1:trim,surround,leading_space}!",
@@ -275,8 +277,12 @@ export const translation: Translation = {
                 noBodyScriptFunction: "Script{0:trim,surround,leading_space} does not contain a 'getBody' function!",
                 noBodyScriptModule: "Script{0:trim,surround,leading_space} does not contain a module!",
             },
-            runningAfter: "Running 'after deployed' operation{0:trim,surround,leading_space}... ",
-            runningBefore: "Running 'before deploy' operation{0:trim,surround,leading_space}... ",
+            runningAfterDeleted: "Running 'after deleted' operation{0:trim,surround,leading_space}... ",
+            runningAfterDeployed: "Running 'after deployed' operation{0:trim,surround,leading_space}... ",
+            runningAfterPulled: "Running 'after pulled' operation{0:trim,surround,leading_space}... ",
+            runningBeforeDelete: "Running 'before delete' operation{0:trim,surround,leading_space}... ",
+            runningBeforeDeploy: "Running 'before deploy' operation{0:trim,surround,leading_space}... ",
+            runningBeforePull: "Running 'before pull' operation{0:trim,surround,leading_space}... ",
             script: {
                 noScriptFunction: "Script{0:trim,surround,leading_space} does not contain an 'execute' function!",
                 noScriptModule: "Script{0:trim,surround,leading_space} does not contain a module!",

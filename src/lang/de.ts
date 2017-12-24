@@ -58,6 +58,7 @@ export const translation: Translation = {
                 tooltip: "Hier klicken, um abzubrechen ...",
             },
         },
+        canceledByOperation: "Das Löschen der Dateien in{0:trim,surround,leading_space} wurde durch eine Operation abgebrochen.",
         cancelling: "Breche das Löschen ab ...",
         currentFile: {
             description: "Löscht die aktuelle Datei",
@@ -236,6 +237,7 @@ export const translation: Translation = {
                 tooltip: "Hier klicken, um abzubrechen ...",
             },
         },
+        canceledByOperation: "Das Laden der Dateien von{0:trim,surround,leading_space} wurde durch eine Operation abgebrochen.",
         cancelling: "Breche das Laden ab ...",
         errors: {
             invalidWorkspace: "Die Datei{0:trim,surround,leading_space} kann nicht in den Arbeitsbereich{1:trim,surround,leading_space} geladen werden!",
@@ -274,8 +276,12 @@ export const translation: Translation = {
                 noBodyScriptFunction: "Das Skript{0:trim,surround,leading_space} enthält keine 'getBody' Funktion!",
                 noBodyScriptModule: "Das Skript{0:trim,surround,leading_space} enthält kein Modul!",
             },
-            runningAfter: "Führe Operation{0:trim,surround,leading_space} aus... ",
-            runningBefore: "Führe Operation{0:trim,surround,leading_space} aus... ",
+            runningAfterDeleted: "Führe Operation{0:trim,surround,leading_space} nach dem Löschen aus... ",
+            runningAfterDeployed: "Führe Operation{0:trim,surround,leading_space} nach dem Bereitstellen aus... ",
+            runningAfterPulled: "Führe Operation{0:trim,surround,leading_space} nach dem Laden aus... ",
+            runningBeforeDelete: "Führe Operation{0:trim,surround,leading_space} vor dem Löschen aus... ",
+            runningBeforeDeploy: "Führe Operation{0:trim,surround,leading_space} vor dem Bereitstellen aus... ",
+            runningBeforePull: "Führe Operation{0:trim,surround,leading_space} vor dem Laden aus... ",
             script: {
                 noScriptFunction: "Das Skript{0:trim,surround,leading_space} enthält keine 'execute' Funktion!",
                 noScriptModule: "Das Skript{0:trim,surround,leading_space} enthält kein Modul!",

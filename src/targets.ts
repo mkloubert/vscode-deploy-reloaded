@@ -42,10 +42,6 @@ import * as vscode from 'vscode';
  */
 export interface ExecuteTargetOperationOptions {
     /**
-     * The current deploy operation.
-     */
-    readonly deployOperation: deploy_contracts.DeployOperation;
-    /**
      * The underlying files.
      */
     readonly files: string[];
@@ -85,9 +81,24 @@ export interface Target extends deploy_transformers.CanTransformData,
 {
     /**
      * One or more target operations that should be invoked
+     * BEFORE a deletion in that target starts.
+     */
+    readonly beforeDelete?: TargetOperationValue | TargetOperationValue[];
+    /**
+     * One or more target operations that should be invoked
      * BEFORE a deployment to that target starts.
      */
     readonly beforeDeploy?: TargetOperationValue | TargetOperationValue[];
+    /**
+     * One or more target operations that should be invoked
+     * BEFORE a pullment from that target starts.
+     */
+    readonly beforePull?: TargetOperationValue | TargetOperationValue[];
+    /**
+     * One or more target operations that should be invoked
+     * AFTER a deletion in that target has been done.
+     */
+    readonly deleted?: TargetOperationValue | TargetOperationValue[];
     /**
      * One or more target operations that should be invoked
      * AFTER a deployment to that target has been done.
@@ -106,6 +117,11 @@ export interface Target extends deploy_transformers.CanTransformData,
      * Defines folder mappings.
      */
     readonly mappings?: deploy_mappings.FolderMappings;
+    /**
+     * One or more target operations that should be invoked
+     * AFTER a pullment from that target has been done.
+     */
+    readonly pulled?: TargetOperationValue | TargetOperationValue[];
     /**
      * A list of one or more package names that indicates
      * if that target is only shown in GUI if one of the package(s) has been selected.
@@ -144,6 +160,22 @@ export enum TargetOperationEvent {
      * After deployed
      */
     AfterDeployed = 1,
+    /**
+     * Before pull
+     */
+    BeforePull = 2,
+    /**
+     * After pulled
+     */
+    AfterPulled = 3,
+    /**
+     * Before delete
+     */
+    BeforeDelete = 4,
+    /**
+     * After deleted
+     */
+    AfterDeleted = 5,
 }
 
 /**
@@ -292,13 +324,36 @@ export async function executeTargetOperations(opts: ExecuteTargetOperationOption
     const EVENT = opts.operation;
 
     let operationsFromTarget: TargetOperationValue | TargetOperationValue[];
+    let deployOperation: deploy_contracts.DeployOperation;
     switch (EVENT) {
+        case TargetOperationEvent.AfterDeleted:
+            operationsFromTarget = TARGET.deleted;
+            deployOperation = deploy_contracts.DeployOperation.Delete;
+            break;
+
         case TargetOperationEvent.AfterDeployed:
             operationsFromTarget = TARGET.deployed;
+            deployOperation = deploy_contracts.DeployOperation.Deploy;
+            break;
+
+        case TargetOperationEvent.AfterPulled:
+            operationsFromTarget = TARGET.pulled;
+            deployOperation = deploy_contracts.DeployOperation.Pull;
+            break;
+
+        case TargetOperationEvent.BeforeDelete:
+            operationsFromTarget = TARGET.beforeDelete;
+            deployOperation = deploy_contracts.DeployOperation.Delete;
             break;
 
         case TargetOperationEvent.BeforeDeploy:
             operationsFromTarget = TARGET.beforeDeploy;
+            deployOperation = deploy_contracts.DeployOperation.Deploy;
+            break;
+
+        case TargetOperationEvent.BeforePull:
+            operationsFromTarget = TARGET.beforePull;
+            deployOperation = deploy_contracts.DeployOperation.Pull;
             break;
     }
 
@@ -375,7 +430,7 @@ export async function executeTargetOperations(opts: ExecuteTargetOperationOption
         try {
             const CTX: TargetOperationExecutionContext = {
                 args: executorArgs || [],
-                deployOperation: opts.deployOperation,
+                deployOperation: deployOperation,
                 event: EVENT,
                 files: deploy_helpers.asArray(opts.files),
                 operation: operationToExecute,
@@ -655,5 +710,34 @@ export async function showTargetQuickPick<TTarget extends Target = Target, TResu
         return await Promise.resolve(
             selectedItem.action(),
         );
+    }
+}
+
+/**
+ * Throws an error if a parent target is defined in a child list of targets.
+ * 
+ * @param {Target} parentTarget The target to check.
+ * @param {Target|Target[]} childTargets One or more children.
+ * 
+ * @throws Found parent target in child list.
+ */
+export function throwOnRecurrence(parentTarget: Target, childTargets: Target | Target[]) {
+    childTargets = deploy_helpers.asArray(childTargets);
+    
+    if (!parentTarget) {
+        return;
+    }
+
+    const WORKSPACE = parentTarget.__workspace;
+
+    for (const CT of childTargets) {
+        if (WORKSPACE.id !== CT.__workspace.id) {
+            continue;
+        }
+
+        if (parentTarget.__id === CT.__id) {
+            throw new Error(WORKSPACE.t('targets.cannotDefineOtherAsSource',
+                                        getTargetName(CT)));
+        }
     }
 }

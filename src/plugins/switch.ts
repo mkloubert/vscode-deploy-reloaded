@@ -15,29 +15,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as deploy_contracts from '../contracts';
+import * as deploy_helpers from '../helpers';
 import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
 import * as deploy_workspaces from '../workspaces';
 
 
 class SwitchPlugin extends deploy_plugins.IterablePluginBase<deploy_workspaces.SwitchTarget> {
-    protected async prepareTargetsMany(switchTarget: deploy_workspaces.SwitchTarget): Promise<deploy_targets.Target[] | false> {
-        const ME = this;
+    protected async getTargets(switchTarget: deploy_workspaces.SwitchTarget, operation: deploy_contracts.DeployOperation, throwIfNonFound = false)
+        : Promise<deploy_targets.Target[] | false>
+    {
         const WORKSPACE = switchTarget.__workspace;
 
-        const OPTION = WORKSPACE.getSelectedSwitchOption(switchTarget);
-        if (false === OPTION) {
-            WORKSPACE.showWarningMessage(
-                WORKSPACE.t('plugins.switch.noOptionSelected2')
-            );
-
-            return false;
-        }
-
-        const TARGETS = deploy_targets.getTargetsByName(
-            OPTION.targets,
-            WORKSPACE.getTargets(),
-        );
+        const TARGETS = WORKSPACE.getTargetsOfSwitch(switchTarget);
         if (false === TARGETS) {
             return false;
         }

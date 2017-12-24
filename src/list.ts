@@ -67,6 +67,8 @@ function createSelectFileAction(file: deploy_files.FileInfo) {
 export async function listDirectory(target: deploy_targets.Target, dir?: string) {
     const ME: deploy_workspaces.Workspace = this;
 
+    target = ME.prepareTarget(target);
+
     if (ME.isInFinalizeState) {
         return;
     }

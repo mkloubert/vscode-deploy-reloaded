@@ -41,6 +41,8 @@ export async function deleteFileIn(file: string, target: deploy_targets.Target,
                                    askForDeleteLocalFile = true) {
     const ME: deploy_workspaces.Workspace = this;
 
+    target = ME.prepareTarget(target);
+
     if (ME.isInFinalizeState) {
         return;
     }
@@ -102,6 +104,8 @@ export async function deleteFilesIn(files: string[],
                                     target: deploy_targets.Target, targetNr?: number,
                                     deleteLocalFiles?: boolean) {
     const ME: deploy_workspaces.Workspace = this;
+
+    target = ME.prepareTarget(target);
 
     if (ME.isInFinalizeState) {
         return;
@@ -228,61 +232,63 @@ export async function deleteFilesIn(files: string[],
                     );
                 }
 
-                const CTX: deploy_plugins.DeleteContext = {
-                    cancellationToken: CANCELLATION_SOURCE.token,
-                    files: files.map(f => {
-                        const NAME_AND_PATH = ME.getNameAndPathForFileDeployment(f, target);
-                        if (false === NAME_AND_PATH) {
-                            return null;
+                const FILES_TO_DELETE = files.map(f => {
+                    const NAME_AND_PATH = ME.getNameAndPathForFileDeployment(f, target);
+                    if (false === NAME_AND_PATH) {
+                        return null;
+                    }
+
+                    const SF = new deploy_plugins.SimpleFileToDelete(ME, f, NAME_AND_PATH);
+                    SF.onBeforeDelete = async function (destination?: string) {
+                        if (arguments.length < 1) {
+                            destination = `'${deploy_helpers.toDisplayablePath(NAME_AND_PATH.path)}' (${TARGET_NAME})`;
+                        }
+                        else {
+                            destination = `'${deploy_helpers.toStringSafe(destination)}'`;
                         }
 
-                        const SF = new deploy_plugins.SimpleFileToDelete(ME, f, NAME_AND_PATH);
-                        SF.onBeforeDelete = async function (destination?: string) {
-                            if (arguments.length < 1) {
-                                destination = `'${deploy_helpers.toDisplayablePath(NAME_AND_PATH.path)}' (${TARGET_NAME})`;
-                            }
-                            else {
-                                destination = `'${deploy_helpers.toStringSafe(destination)}'`;
-                            }
-    
-                            ME.context.outputChannel.append(
-                                ME.t('DELETE.deletingFile',
-                                     f, destination) + ' '
-                            );
+                        ME.context.outputChannel.append(
+                            ME.t('DELETE.deletingFile',
+                                 f, destination) + ' '
+                        );
 
-                            await WAIT_WHILE_CANCELLING();
+                        await WAIT_WHILE_CANCELLING();
 
-                            if (CANCELLATION_SOURCE.token.isCancellationRequested) {
-                                ME.context.outputChannel.appendLine(`[${ME.t('canceled')}]`);
-                            }
-                        };
-                        SF.onDeleteCompleted = async (err?: any, deleteLocal?: boolean) => {
-                            if (err) {
-                                ME.context.outputChannel.appendLine(`[${ME.t('error', err)}]`);
-                            }
-                            else {
-                                try {
-                                    let doDeleteLocalFiles = deploy_helpers.toBooleanSafe(deleteLocalFiles);
-                                    if (doDeleteLocalFiles) {
-                                        doDeleteLocalFiles = deploy_helpers.toBooleanSafe(deleteLocal, true);
-                                    }
-
-                                    if (doDeleteLocalFiles) {
-                                        if (await deploy_helpers.exists(SF.file)) {
-                                            await deploy_helpers.unlink(SF.file);
-                                        }
-                                    }
-
-                                    ME.context.outputChannel.appendLine(`[${ME.t('ok')}]`);
+                        if (CANCELLATION_SOURCE.token.isCancellationRequested) {
+                            ME.context.outputChannel.appendLine(`[${ME.t('canceled')}]`);
+                        }
+                    };
+                    SF.onDeleteCompleted = async (err?: any, deleteLocal?: boolean) => {
+                        if (err) {
+                            ME.context.outputChannel.appendLine(`[${ME.t('error', err)}]`);
+                        }
+                        else {
+                            try {
+                                let doDeleteLocalFiles = deploy_helpers.toBooleanSafe(deleteLocalFiles);
+                                if (doDeleteLocalFiles) {
+                                    doDeleteLocalFiles = deploy_helpers.toBooleanSafe(deleteLocal, true);
                                 }
-                                catch (e) {
-                                    ME.context.outputChannel.appendLine(`[${ME.t('warning')}: ${deploy_helpers.toStringSafe(e)}]`);
-                                }
-                            }
-                        };
 
-                        return SF;
-                    }).filter(f => null !== f),
+                                if (doDeleteLocalFiles) {
+                                    if (await deploy_helpers.exists(SF.file)) {
+                                        await deploy_helpers.unlink(SF.file);
+                                    }
+                                }
+
+                                ME.context.outputChannel.appendLine(`[${ME.t('ok')}]`);
+                            }
+                            catch (e) {
+                                ME.context.outputChannel.appendLine(`[${ME.t('warning')}: ${deploy_helpers.toStringSafe(e)}]`);
+                            }
+                        }
+                    };
+
+                    return SF;
+                }).filter(f => null !== f);
+
+                const CTX: deploy_plugins.DeleteContext = {
+                    cancellationToken: CANCELLATION_SOURCE.token,
+                    files: FILES_TO_DELETE,
                     isCancelling: undefined,
                     target: target,
                 };
@@ -296,9 +302,97 @@ export async function deleteFilesIn(files: string[],
                     }
                 });
 
+                const SHOW_CANCELED_BY_OPERATIONS_MESSAGE = () => {
+                    ME.context.outputChannel.appendLine(
+                        ME.t('DELETE.canceledByOperation',
+                             TARGET_NAME)
+                    );
+                };
+
+                let operationIndex: number;
+
+                const GET_OPERATION_NAME = (operation: deploy_targets.TargetOperation) => {
+                    let operationName = deploy_helpers.toStringSafe(operation.name).trim();
+                    if ('' === operationName) {
+                        operationName = deploy_helpers.normalizeString(operation.type);
+                        if ('' === operationName) {
+                            operationName = deploy_targets.DEFAULT_OPERATION_TYPE;
+                        }
+
+                        operationName += ' #' + (operationIndex + 1);
+                    }
+
+                    return operationName;
+                };
+
+                // beforeDelete
+                operationIndex = -1;
+                ME.context.outputChannel.appendLine('');
+                const BEFORE_DELETE_ABORTED = !deploy_helpers.toBooleanSafe(
+                    await deploy_targets.executeTargetOperations({
+                        files: FILES_TO_DELETE.map(ftu => {
+                            return ftu.path + '/' + ftu.name;
+                        }),
+                        onBeforeExecute: async (operation) => {
+                            ++operationIndex;
+
+                            ME.context.outputChannel.append(
+                                ME.t('targets.operations.runningBeforeDelete',
+                                     GET_OPERATION_NAME(operation))
+                            );
+                        },
+                        onExecutionCompleted: async (operation, err, doesContinue) => {
+                            if (err) {
+                                ME.context.outputChannel.appendLine(`[${ME.t('error', err)}]`);
+                            }
+                            else {
+                                ME.context.outputChannel.appendLine(`[${ME.t('ok')}]`);
+                            }
+                        },
+                        operation: deploy_targets.TargetOperationEvent.BeforeDelete,
+                        target: target,
+                    })
+                , true);
+                if (BEFORE_DELETE_ABORTED) {
+                    SHOW_CANCELED_BY_OPERATIONS_MESSAGE();
+                    continue;
+                }
+
                 await Promise.resolve(
                     PI.deleteFiles(CTX)
                 );
+
+                // deleted
+                operationIndex = -1;
+                const AFTER_DELETED_ABORTED = !deploy_helpers.toBooleanSafe(
+                    await deploy_targets.executeTargetOperations({
+                        files: FILES_TO_DELETE.map(ftu => {
+                            return ftu.path + '/' + ftu.name;
+                        }),
+                        onBeforeExecute: async (operation) => {
+                            ++operationIndex;
+
+                            ME.context.outputChannel.append(
+                                ME.t('targets.operations.runningAfterDeleted',
+                                     GET_OPERATION_NAME(operation))
+                            );
+                        },
+                        onExecutionCompleted: async (operation, err, doesContinue) => {
+                            if (err) {
+                                ME.context.outputChannel.appendLine(`[${ME.t('error', err)}]`);
+                            }
+                            else {
+                                ME.context.outputChannel.appendLine(`[${ME.t('ok')}]`);
+                            }
+                        },
+                        operation: deploy_targets.TargetOperationEvent.AfterDeleted,
+                        target: target,
+                    })
+                , true);
+                if (AFTER_DELETED_ABORTED) {
+                    SHOW_CANCELED_BY_OPERATIONS_MESSAGE();
+                    continue;
+                }
 
                 if (files.length > 1) {
                     ME.context.outputChannel.appendLine(

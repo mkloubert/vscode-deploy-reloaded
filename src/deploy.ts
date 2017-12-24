@@ -39,6 +39,8 @@ export async function deployFilesTo(files: string[],
                                     target: deploy_targets.Target, targetNr?: number) {
     const ME: deploy_workspaces.Workspace = this;
 
+    target = ME.prepareTarget(target);
+
     if (ME.isInFinalizeState) {
         return;
     }
@@ -273,7 +275,6 @@ export async function deployFilesTo(files: string[],
                 ME.context.outputChannel.appendLine('');
                 const BEFORE_DEPLOY_ABORTED = !deploy_helpers.toBooleanSafe(
                     await deploy_targets.executeTargetOperations({
-                        deployOperation: deploy_contracts.DeployOperation.Deploy,
                         files: FILES_TO_UPLOAD.map(ftu => {
                             return ftu.path + '/' + ftu.name;
                         }),
@@ -281,7 +282,7 @@ export async function deployFilesTo(files: string[],
                             ++operationIndex;
 
                             ME.context.outputChannel.append(
-                                ME.t('targets.operations.runningBefore',
+                                ME.t('targets.operations.runningBeforeDeploy',
                                      GET_OPERATION_NAME(operation))
                             );
                         },
@@ -310,7 +311,6 @@ export async function deployFilesTo(files: string[],
                 operationIndex = -1;
                 const AFTER_DEPLOY_ABORTED = !deploy_helpers.toBooleanSafe(
                     await deploy_targets.executeTargetOperations({
-                        deployOperation: deploy_contracts.DeployOperation.Deploy,
                         files: FILES_TO_UPLOAD.map(ftu => {
                             return ftu.path + '/' + ftu.name;
                         }),
@@ -318,7 +318,7 @@ export async function deployFilesTo(files: string[],
                             ++operationIndex;
 
                             ME.context.outputChannel.append(
-                                ME.t('targets.operations.runningAfter',
+                                ME.t('targets.operations.runningAfterDeployed',
                                      GET_OPERATION_NAME(operation))
                             );
                         },
@@ -369,6 +369,8 @@ export async function deployFilesTo(files: string[],
  */
 export async function deployFileTo(file: string, target: deploy_targets.Target) {
     const ME: deploy_workspaces.Workspace = this;
+
+    target = ME.prepareTarget(target);    
 
     if (ME.isInFinalizeState) {
         return;
@@ -436,7 +438,7 @@ export async function deployPackage(pkg: deploy_packages.Package) {
             return {
                 action: async () => {
                     await deployFilesTo.apply(ME,
-                                            [ FILES_TO_DEPLOY, t, i + 1 ]);
+                                              [ FILES_TO_DEPLOY, t, i + 1 ]);
                 },
                 description: deploy_helpers.toStringSafe( t.description ).trim(),
                 detail: t.__workspace.folder.uri.fsPath,
