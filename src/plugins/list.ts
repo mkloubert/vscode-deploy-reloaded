@@ -59,13 +59,9 @@ export type ListTargetSettings = { [key: string]: any } | string;
 class ListPlugin extends deploy_plugins.IterablePluginBase<ListTarget> {
     protected async prepareTargetsMany(listTarget: ListTarget, targets: deploy_targets.Target | deploy_targets.Target[]): Promise<deploy_targets.Target[] | false> {
         const ME = this;
+        const WORKSPACE = listTarget.__workspace;
 
         const CLONED_TARGETS: deploy_targets.Target[] = [];
-
-        const SCOPES = [
-            listTarget.__workspace.settingFolder,
-            Path.join(OS.homedir(), deploy_contracts.HOMEDIR_SUBFOLDER),
-        ];
 
         let entries: string | ListTargetEntry | ListTargetEntry[];
         if (!deploy_helpers.isObject<ListTargetEntry>(entries) && !Array.isArray(entries)) {
@@ -78,7 +74,7 @@ class ListPlugin extends deploy_plugins.IterablePluginBase<ListTarget> {
             entries =
                 <ListTargetEntry | ListTargetEntry[]>JSON.parse(
                     (await deploy_download.download(
-                        DOWNLOAD_SOURCE, SCOPES
+                        DOWNLOAD_SOURCE, WORKSPACE.getSettingScopes()
                     )).toString('utf8')
                 );
         }
@@ -109,7 +105,7 @@ class ListPlugin extends deploy_plugins.IterablePluginBase<ListTarget> {
                         settingsToApply =
                             <ListTargetSettings>JSON.parse(
                                 (await deploy_download.download(
-                                    DOWNLOAD_SOURCE, SCOPES
+                                    DOWNLOAD_SOURCE, WORKSPACE.getSettingScopes()
                                 )).toString('utf8')
                             );
                     }

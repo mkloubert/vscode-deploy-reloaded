@@ -153,27 +153,27 @@ async function invokeForActivePackage(placeHolder: string,
     });
 
     if (QUICK_PICK_ITEMS.length < 1) {
-        //TODO: translate
-        await deploy_helpers.showWarningMessage(
-            `No PACKAGES found!`
+        deploy_helpers.showWarningMessage(
+            i18.t('packages.noneFound')
         );
+
+        return;
+    }
+
+    let selectedItem: deploy_contracts.ActionQuickPick;
+    if (1 === QUICK_PICK_ITEMS.length) {
+        selectedItem = QUICK_PICK_ITEMS[0];
     }
     else {
-        let selectedItem: deploy_contracts.ActionQuickPick;
-        if (1 === QUICK_PICK_ITEMS.length) {
-            selectedItem = QUICK_PICK_ITEMS[0];
-        }
-        else {
-            selectedItem = await vscode.window.showQuickPick(QUICK_PICK_ITEMS, {
-                placeHolder: placeHolder,
-            });
-        }
+        selectedItem = await vscode.window.showQuickPick(QUICK_PICK_ITEMS, {
+            placeHolder: placeHolder,
+        });
+    }
 
-        if (selectedItem) {
-            await Promise.resolve(
-                selectedItem.action()
-            );
-        }
+    if (selectedItem) {
+        await Promise.resolve(
+            selectedItem.action()
+        );
     }
 }
 
@@ -355,9 +355,9 @@ async function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?:
                         WORKSPACES.push(newWorkspace);
                     }
                     else {
-                        //TODO: translate
                         deploy_helpers.showErrorMessage(
-                            `Workspace '${WSF.uri.fsPath}' has NOT been initialized!`
+                            i18.t('workspaces.errors.notInitialized',
+                                  WSF.uri.fsPath)
                         );
                     }
                 }
@@ -452,16 +452,16 @@ async function reloadPlugins() {
                                                 PLUGINS.push(PI);
                                             }
                                             else {
-                                                //TODO: translate
                                                 deploy_helpers.showErrorMessage(
-                                                    `Plugin '${PI.__file}' has NOT been initialized!`
+                                                    i18.t('plugins.errors.notInitialized',
+                                                          PI.__file)
                                                 );
                                             }
                                         }
                                         catch (e) {
-                                            //TODO: translate
                                             deploy_helpers.showErrorMessage(
-                                                `Error while initializing plugin '${JS}' (s. debug output 'CTRL + Y')!`
+                                                i18.t('plugins.errors.initializationFailed',
+                                                      JS)
                                             );
 
                                             deploy_log.CONSOLE
@@ -471,23 +471,23 @@ async function reloadPlugins() {
                                 }
                             }
                             else {
-                                //TODO: translate
                                 deploy_helpers.showWarningMessage(
-                                    `Plugin module '${JS}' contains NO factory function!`
+                                    i18.t('plugins.errors.noFactoryFunction',
+                                          JS)
                                 );
                             }
                         }
                         else {
-                            //TODO: translate
                             deploy_helpers.showWarningMessage(
-                                `Plugin '${JS}' contains NO module!`
+                                i18.t('plugins.errors.noModule',
+                                      JS)
                             );
                         }
                     }
                     catch (e) {
-                        //TODO: translate
                         deploy_helpers.showErrorMessage(
-                            `Error while loading '${JS}' (s. debug output 'CTRL + Y')!`
+                            i18.t('plugins.errors.loadingFailed',
+                                  JS)
                         );
 
                         deploy_log.CONSOLE
@@ -496,23 +496,23 @@ async function reloadPlugins() {
                 }
             }
             else {
-                //TODO: translate
-                deploy_helpers.showWarningMessage(
-                    `NO plugins found in '${PLUGIN_DIR}'!`
+                deploy_helpers.showErrorMessage(
+                    i18.t('plugins.errors.noneFoundIn',
+                          PLUGIN_DIR)
                 );
             }
         }
         else {
-            //TODO: translate
             deploy_helpers.showErrorMessage(
-                `Plugin folder '${PLUGIN_DIR}' is NO directory!`
+                i18.t('isNo.dir',
+                      PLUGIN_DIR)
             );
         }
     }
     else {
-        //TODO: translate
         deploy_helpers.showErrorMessage(
-            `Plugin folder '${PLUGIN_DIR}' does NOT exist!`
+            i18.t('notFound.dir',
+                  PLUGIN_DIR)
         );
     }
 }

@@ -89,6 +89,14 @@ class CompilerPlugin extends deploy_plugins.PluginBase<CompilerTarget> {
                 };
                 break;
 
+            case 'pug':
+                context = {
+                    compiler: deploy_compilers.Compiler.Pug,
+                    sourceExtension: 'pug',
+                    targetExtension: 'html',
+                };
+                break;
+
             case 'uglify-js':
             case 'uglifyjs':
                 context = {

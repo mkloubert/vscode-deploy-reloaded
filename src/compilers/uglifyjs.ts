@@ -59,13 +59,11 @@ export interface CompileResultMessage extends deploy_compilers.CompileResultMess
 /**
  * Minifies JavaScript files by UglifyJS.
  * 
- * @param {CompileOptions} [compileOpts] The custom options for the compilation.
+ * @param {CompileOptions} compileOpts The options for the compilation.
  * 
  * @return {Promise<CompileResult>} The promise with the result.
  */
-export async function compile(compileOpts?: CompileOptions) {
-    compileOpts = compileOpts || <any>{};
-
+export async function compile(compileOpts: CompileOptions) {
     const WORKSPACE = compileOpts.workspace;
 
     const RESULT: CompileResult = {

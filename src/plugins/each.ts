@@ -47,6 +47,7 @@ export interface EachTarget extends deploy_targets.Target, deploy_targets.Target
 class EachPlugin extends deploy_plugins.IterablePluginBase<EachTarget> {
     protected async prepareTarget(eachTarget: EachTarget, target: deploy_targets.Target): Promise<deploy_targets.Target[]> {
         const ME = this;
+        const WORKSPACE = eachTarget.__workspace;
 
         const CLONED_TARGETS: deploy_targets.Target[] = [];
 
@@ -59,13 +60,9 @@ class EachPlugin extends deploy_plugins.IterablePluginBase<EachTarget> {
                 from
             );
 
-            const SCOPES = [
-                eachTarget.__workspace.settingFolder,
-                Path.join(OS.homedir(), deploy_contracts.HOMEDIR_SUBFOLDER),
-            ];
-
             from = JSON.parse(
-                (await deploy_download.download(DOWNLOAD_SOURCE, SCOPES)).toString('utf8')
+                (await deploy_download.download(DOWNLOAD_SOURCE,
+                                                WORKSPACE.getSettingScopes())).toString('utf8')
             );
         }
 

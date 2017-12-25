@@ -159,6 +159,9 @@ export const translation: Translation = {
     maxDepthReached: "Cannot go deeper than{0:trim,leading_space}!",
     no: "No",
     noFiles: "No files found!",
+    notFound: {
+        dir: "Directory{0:trim,surround,leading_space} not found!",
+    },
     ok: 'OK',
     packages: {
         buttons: {
@@ -174,6 +177,14 @@ export const translation: Translation = {
     plugins: {
         compiler: {
             invalidDirectory: "{0:trim,surround,ending_space}is an invalid directory!",
+        },
+        errors: {
+            initializationFailed: "Initialization of plugin{0:trim,surround,leading_space} failed (s. debug output 'CTRL + SHIFT + Y')!",
+            loadingFailed: "Error while loading{0:trim,surround,leading_space} (s. debug output 'CTRL + SHIFT + Y')!",
+            noFactoryFunction: "Plugin module{0:trim,surround,leading_space} contains no factory function!",
+            noModule: "Plugin{0:trim,surround,leading_space} contains no module!",
+            noneFoundIn: "No plugins found in{0:trim,surround,leading_space}!",
+            notInitialized: "Plugin{0:trim,surround,leading_space} has not been initialized!",
         },
         list: {
             defaultEntryName: "(Entry #{0:trim})",
@@ -358,6 +369,7 @@ export const translation: Translation = {
             cannotDetectMappedPathInfoForFile: "Cannot detect mapped path information for file{0:trim,surround,leading_space}!",
             cannotDetectPathInfoForFile: "Cannot detect path information for file{0:trim,surround,leading_space}!",
             cannotUseTargetForFile: "Cannot use target{0:trim,surround,leading_space} for file{1:trim,surround,leading_space}!",
+            notInitialized: "Workspace{0:trim,surround,leading_space} has not been initialized!",
         },
         noneFound: "No workspaces found!",
         selectWorkspace: "Select a workspace ...",

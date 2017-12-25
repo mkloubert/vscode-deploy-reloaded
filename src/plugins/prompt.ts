@@ -72,13 +72,9 @@ type ValueValidatorResult = string | undefined | null;
 class PromptPlugin extends deploy_plugins.IterablePluginBase<PromptTarget> {
     protected async prepareTargetsMany(promptTarget: PromptTarget, targets: deploy_targets.Target | deploy_targets.Target[]): Promise<deploy_targets.Target[] | false> {
         const ME = this;
+        const WORKSPACE = promptTarget.__workspace;
 
         const CLONED_TARGETS: deploy_targets.Target[] = [];
-
-        const SCOPES = [
-            promptTarget.__workspace.settingFolder,
-            Path.join(OS.homedir(), deploy_contracts.HOMEDIR_SUBFOLDER),
-        ];
 
         let prompts = promptTarget.prompts;
         if (!deploy_helpers.isObject<PromptEntry>(prompts) && !Array.isArray(prompts)) {
@@ -91,7 +87,7 @@ class PromptPlugin extends deploy_plugins.IterablePluginBase<PromptTarget> {
             prompts =
                 <PromptEntry | PromptEntry[]>JSON.parse(
                     (await deploy_download.download(
-                        DOWNLOAD_SOURCE, SCOPES
+                        DOWNLOAD_SOURCE, WORKSPACE.getSettingScopes()
                     )).toString('utf8')
                 );
         }
@@ -220,7 +216,7 @@ class PromptPlugin extends deploy_plugins.IterablePluginBase<PromptTarget> {
 
                         return JSON.parse(
                             (await deploy_download.download(
-                                i, SCOPES
+                                i, WORKSPACE.getSettingScopes()
                             )).toString('utf8')
                               .trim()
                         );

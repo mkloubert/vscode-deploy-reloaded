@@ -159,6 +159,9 @@ export const translation: Translation = {
     maxDepthReached: "Maximale Tiefe von{0:trim,leading_space} erreicht!",
     no: "Nein",
     noFiles: "Keine Dateien gefunden!",
+    notFound: {
+        dir: "Das Verzeichnis{0:trim,surround,leading_space} wurde nicht gefunden!",
+    },
     packages: {
         buttons: {
             defaultText: "Stelle Paket{0:trim,surround,leading_space} bereit",
@@ -173,6 +176,14 @@ export const translation: Translation = {
     plugins: {
         compiler: {
             invalidDirectory: "{0:trim,surround,ending_space}ist ein ungültiges Verzeichnis!",
+        },
+        errors: {
+            initializationFailed: "Die Initialisierung des Plugins{0:trim,surround,leading_space} ist fehlgeschlagen (s. Debugkonsole 'STRG + SHIFT + Y')!",
+            loadingFailed: "Fehler beim Laden von{0:trim,surround,leading_space} (s. Debugkonsole 'STRG + SHIFT + Y')!",
+            noFactoryFunction: "Das Plugin-Modul{0:trim,surround,leading_space} beinhaltet keine Factory-Funktion!",
+            noModule: "Das Plugin{0:trim,surround,leading_space} enthält kein Modul!",
+            noneFoundIn: "Es wurden keine Plugins in{0:trim,surround,leading_space} gefunden!",
+            notInitialized: "Das Plugin{0:trim,surround,leading_space} wurde nicht initialisiert!",
         },
         list: {
             defaultEntryName: "(Eintrag #{0:trim})",
@@ -357,6 +368,7 @@ export const translation: Translation = {
             cannotDetectMappedPathInfoForFile: "Gemappte Pfad-Informationen konnten für die Datei{0:trim,surround,leading_space} nicht ermittelt werden!",
             cannotDetectPathInfoForFile: "Pfad-Informationen konnten für die Datei{0:trim,surround,leading_space} nicht ermittelt werden!",
             cannotUseTargetForFile: "Kann das Ziel{0:trim,surround,leading_space} nicht für die Datei{1:trim,surround,leading_space} verwenden!",
+            notInitialized: "Der Arbeitsbereich{0:trim,surround,leading_space} wurde nicht initialisiert!",
         },
         noneFound: "Keine Arbeitsbereiche gefunden!",
         selectWorkspace: "Wählen Sie einen Arbeitsbereich ...",

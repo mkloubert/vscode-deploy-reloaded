@@ -691,21 +691,25 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * @return {string|boolean} The existing, full normalized path or (false) if path does not exist.
      */
     public async getExistingSettingPath(path: string): Promise<string | false> {
+        const ME = this;
+
         path = deploy_helpers.toStringSafe(path);
         
         if (!Path.isAbsolute(path)) {
-            const FROM_SETTINGS = Path.resolve(
-                Path.join(Path.dirname(this.configSource.resource.fsPath), path)
-            );
-            if (await deploy_helpers.exists(FROM_SETTINGS)) {
-                return FROM_SETTINGS;
-            }
+            const SCOPES = ME.getSettingScopes();
 
             const FROM_HOMEDIR = Path.resolve(
-                Path.join(OS.homedir(), deploy_contracts.HOMEDIR_SUBFOLDER, path)
+                Path.join(SCOPES[0], path)  // SCOPES[0] => home directory
             );
             if (await deploy_helpers.exists(FROM_HOMEDIR)) {
                 return FROM_HOMEDIR;
+            }
+
+            const FROM_SETTINGS = Path.resolve(
+                Path.join(SCOPES[1], path)  // SCOPES[1] => settings folder
+            );
+            if (await deploy_helpers.exists(FROM_SETTINGS)) {
+                return FROM_SETTINGS;
             }
 
             return false;
@@ -860,6 +864,20 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         }
         
         return false;
+    }
+
+    /**
+     * Returns the scope directories for settings.
+     * 
+     * @return {string[]} The list of scope directories.
+     */
+    public getSettingScopes(): string[] {
+        return [
+            Path.resolve(
+                Path.join(OS.homedir(), deploy_contracts.HOMEDIR_SUBFOLDER)
+            ),
+            this.settingFolder,
+        ];
     }
 
     private getSwitchOptionName(option: SwitchTargetOption): string {
@@ -1617,10 +1635,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         }
         ME._isReloadingConfig = true;
 
-        const SCOPES = [
-            ME.settingFolder,
-            Path.join(OS.homedir(), deploy_contracts.HOMEDIR_SUBFOLDER),
-        ];
+        const SCOPES = ME.getSettingScopes();
 
         let finalizer: () => any;
         try {
@@ -1646,9 +1661,20 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                     let importFile: string;
 
                     if (deploy_helpers.isObject<deploy_contracts.Import>(IE)) {
-                        const CI = deploy_helpers.filterConditionalItems(IE);
-                        if (1 === CI.length) {
-                            importFile = deploy_helpers.toStringSafe(CI[0].from);
+                        let doesMatch = true;
+                        
+                        const PI = deploy_helpers.filterPlatformItems(IE);
+                        if (PI.length < 1) {
+                            doesMatch = false;
+
+                            const CI = deploy_helpers.filterConditionalItems(IE);
+                            if (CI.length > 0) {
+                                doesMatch = true;
+                            }
+                        }
+
+                        if (doesMatch) {
+                            importFile = deploy_helpers.toStringSafe(IE.from);
                         }
                     }
                     else {

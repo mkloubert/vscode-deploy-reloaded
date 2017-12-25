@@ -306,7 +306,7 @@ export interface FileFilter {
 /**
  * An import entry.
  */
-export interface Import extends ConditionalItem {
+export interface Import extends ConditionalItem, PlatformItem {
     /**
      * Gets the source.
      */

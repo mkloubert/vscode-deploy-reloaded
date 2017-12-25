@@ -50,13 +50,9 @@ export type TargetMappings = { [name: string]: any };
 class MapPlugin extends deploy_plugins.IterablePluginBase<MapTarget> {
     protected async prepareTarget(mapTarget: MapTarget, target: deploy_targets.Target): Promise<deploy_targets.Target[]> {
         const ME = this;
+        const WORKSPACE = mapTarget.__workspace;
 
         const CLONED_TARGETS: deploy_targets.Target[] = [];
-
-        const SCOPES = [
-            mapTarget.__workspace.settingFolder,
-            Path.join(OS.homedir(), deploy_contracts.HOMEDIR_SUBFOLDER),
-        ];
 
         const MAPPINGS: TargetMappings[] = [];
         await deploy_helpers.forEachAsync(deploy_helpers.asArray(mapTarget.from), async (item) => {
@@ -72,7 +68,7 @@ class MapPlugin extends deploy_plugins.IterablePluginBase<MapTarget> {
                     JSON.parse(
                         (await deploy_download.download(
                             DOWNLOAD_SOURCE,
-                            SCOPES
+                            WORKSPACE.getSettingScopes()
                         )).toString('utf8')
                     )
                 );

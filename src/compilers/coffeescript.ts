@@ -53,13 +53,11 @@ export interface CompileResultMessage extends deploy_compilers.CompileResultMess
 /**
  * Compiles CoffeeScript files.
  * 
- * @param {CompileOptions} [compileOpts] The custom options for the compilation.
+ * @param {CompileOptions} compileOpts The options for the compilation.
  * 
  * @return {Promise<CompileResult>} The promise with the result.
  */
-export async function compile(compileOpts?: CompileOptions) {
-    compileOpts = compileOpts || <any>{};
-
+export async function compile(compileOpts: CompileOptions) {
     const WORKSPACE = compileOpts.workspace;
 
     const RESULT: CompileResult = {
@@ -70,7 +68,7 @@ export async function compile(compileOpts?: CompileOptions) {
 
     const FILES_TO_COMPILE = await deploy_compilers.collectFiles(
         compileOpts,
-        '**/*.coffee',
+        '**/*.coffee'
     );
 
     let enc = deploy_helpers.normalizeString(

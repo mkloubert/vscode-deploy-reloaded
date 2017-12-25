@@ -166,6 +166,9 @@ export interface Translation {
     maxDepthReached?: string;
     no?: string;
     noFiles?: string;
+    notFound?: {
+        dir?: string;
+    };
     ok?: string;
     packages?: {
         buttons?: {
@@ -181,6 +184,14 @@ export interface Translation {
     plugins?: {
         compiler?: {
             invalidDirectory?: string;
+        };
+        errors?: {
+            initializationFailed?: string;
+            loadingFailed?: string;
+            noFactoryFunction?: string;
+            noModule?: string;
+            noneFoundIn?: string;
+            notInitialized?: string;
         };
         list?: {
             defaultEntryName?: string;
@@ -363,6 +374,7 @@ export interface Translation {
             cannotDetectMappedPathInfoForFile?: string;
             cannotDetectPathInfoForFile?: string;
             cannotUseTargetForFile?: string;
+            notInitialized?: string;
         };
         noneFound?: string;
         selectWorkspace?: string;
