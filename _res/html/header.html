@@ -1,10 +1,32 @@
+<!DOCTYPE html>
 <html>
     <head>
+        <meta charset="UTF-8">
+
         <style type="text/css">
 
 /* VSCODE-DEPLOY-RELOADED src="css/style.css" */
 
         </style>
+
+        <script type="text/javascript">
+
+function vscdr_b64DecodeUnicode(str) {
+    return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+    }).join(''))
+}
+
+        </script>
+
+        <!-- jQuery -->
+        <script type="text/javascript">
+
+eval(
+    vscdr_b64DecodeUnicode(/* VSCODE-DEPLOY-RELOADED src="javascript/jquery-2.2.4.min.js" format="base64,json" */)
+);
+    
+        </script>
     </head>
 
     <body>

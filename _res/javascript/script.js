@@ -1,4 +1,4 @@
 
-function test_function() {
+$(function() {
     
-}
+});
