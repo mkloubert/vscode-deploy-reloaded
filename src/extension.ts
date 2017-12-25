@@ -740,7 +740,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
             vscode.commands.registerCommand('extension.deploy.reloaded.deployWorkspace', async () => {
                 try {
                     await invokeForActivePackage(
-                        'Select the PACKAGE to deploy...',  //TODO: translate
+                        i18.t('packages.selectPackage'),
                         async (pkg) => {
                             await pkg.__workspace
                                      .deployPackage(pkg);
@@ -761,7 +761,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
             vscode.commands.registerCommand('extension.deploy.reloaded.deployFile', async () => {
                 try {
                     await invokeForActiveEditor(
-                        'Select the TARGET to deploy to...',  //TODO: translate
+                        i18.t('targets.selectTarget'),
                         async (file, target) => {
                             await target.__workspace
                                         .deployFileTo(file, target);
@@ -781,22 +781,21 @@ async function activateExtension(context: vscode.ExtensionContext) {
             // pull
             vscode.commands.registerCommand('extension.deploy.reloaded.pull', async () => {
                 try {
-                    //TODO: translate
                     const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = [
                         {
                             action: async () => {
                                 await vscode.commands.executeCommand('extension.deploy.reloaded.pullFile');
                             },
-                            label: '$(cloud-download)  ' + 'Current file ...',
-                            description: 'Pulls the current file from a target',
+                            label: '$(cloud-download)  ' + i18.t('pull.currentFile.label'),
+                            description: i18.t('pull.currentFile.description'),
                         },
 
                         {
                             action: async () => {
                                 await vscode.commands.executeCommand('extension.deploy.reloaded.pullWorkspace');
                             },
-                            label: '$(cloud-download)  ' + 'Package ...',
-                            description: 'Pulls files, as defined in a package, from a target',
+                            label: '$(cloud-download)  ' + i18.t('pull.package.label'),
+                            description: i18.t('pull.package.description'),
                         }
                     ];
 
@@ -900,7 +899,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
             vscode.commands.registerCommand('extension.deploy.reloaded.deletePackage', async () => {
                 try {
                     await invokeForActivePackage(
-                        'Select the PACKAGE to delete its files...',  //TODO: translate
+                        i18.t('packages.selectPackage'),
                         async (pkg) => {
                             await pkg.__workspace
                                      .deletePackage(pkg);
@@ -921,7 +920,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
             vscode.commands.registerCommand('extension.deploy.reloaded.deleteFile', async () => {
                 try {
                     await invokeForActiveEditor(
-                        'Select the TARGET to delete the file in...',  //TODO: translate
+                        i18.t('targets.selectTarget'),
                         async (file, target) => {
                             await target.__workspace
                                         .deleteFileIn(file, target);
@@ -952,10 +951,9 @@ async function activateExtension(context: vscode.ExtensionContext) {
                         return t.__workspace.getListPlugins(t).length > 0;
                     }).toArray();
 
-                    //TODO: translate
                     await deploy_targets.showTargetQuickPick(
                         TARGETS,
-                        'Select the target where you want to get a directory list from...',
+                        i18.t('listDirectory.selectSource'),
                         async (target) => {
                             await target.__workspace
                                         .listDirectory(target);
@@ -1017,11 +1015,10 @@ async function activateExtension(context: vscode.ExtensionContext) {
                         selectedItem = QUICK_PICKS[0];
                     }
                     else {
-                        //TODO: translate
                         selectedItem = await vscode.window.showQuickPick(
                             QUICK_PICKS,
                             {
-                                placeHolder: 'Select the active workspace...',
+                                placeHolder: i18.t('workspaces.active.selectWorkspace'),
                             }
                         );
                     }
@@ -1036,9 +1033,8 @@ async function activateExtension(context: vscode.ExtensionContext) {
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.selectWorkspace');
 
-                    //TODO: translate
                     deploy_helpers.showErrorMessage(
-                        `Selecting workspace failed (s. debug output 'CTRL + Y')!`
+                        i18.t('workspaces.active.errors.selectWorkspaceFailed'),
                     );
                 }
                 finally {
@@ -1072,9 +1068,8 @@ async function activateExtension(context: vscode.ExtensionContext) {
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.switches');
 
-                    //TODO: translate
                     deploy_helpers.showErrorMessage(
-                        `Switch operation failed (s. debug output 'CTRL + Y')!`
+                        i18.t('switches.errors.operationFailed')
                     );
                 }
             }),

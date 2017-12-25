@@ -155,6 +155,7 @@ export const translation: Translation = {
         loading: "Loading directory{0:trim,surround,leading_space} ({1:trim} / {2:trim})...",
         noName: "<NO NAME>",
         parentDirectory: "(parent)",
+        selectSource: "Select the source from where to start listening ...",
         size: "Size:{0:trim,leading_space}",
     },
     maxDepthReached: "Cannot go deeper than{0:trim,leading_space}!",
@@ -252,6 +253,10 @@ export const translation: Translation = {
         },
         canceledByOperation: "Pulling files from{0:trim,surround,leading_space} has been cancelled by target operation.",
         cancelling: "Cancelling pull operation ...",
+        currentFile: {
+            description: "Pull the current file",
+            label: "Current file ...",
+        },
         errors: {
             invalidWorkspace: "Cannot pull file{0:trim,surround,leading_space} to workspace{1:trim,surround,leading_space}!",
             invalidWorkspaceForPackage: "Cannot pull package{0:trim,surround,leading_space} to workspace{1:trim,surround,leading_space}!",
@@ -260,6 +265,10 @@ export const translation: Translation = {
         finishedOperation: "Pulling files from{0:trim,surround,leading_space} has been finished.",
         finishedOperationWithErrors: "[ERROR] Could not pull files from{0:trim,surround,leading_space}:{1:trim,surround,leading_space}",
         pullingFile: "Pulling file{0:trim,surround,leading_space} from {1:trim,surround,leading_space} ...",
+        package: {
+            description: "Pulls the files of a package",
+            label: "Package ...",
+        },
         selectSource: "Select the source from where to pull from ...",
         startOperation: "Start pulling files from{0:trim,surround,leading_space} ...",
     },
@@ -271,6 +280,11 @@ export const translation: Translation = {
     },
     sql: {
         notSupported: "SQL type{0:trim,surround,leading_space} is not supported!",
+    },
+    switches: {
+        errors: {
+            operationFailed: "Switch operation failed (s. debug output 'CTRL + SHIFT + Y')!",
+        },
     },
     targets: {
         atLeastOneNotFound: "At least one target was not found!",
@@ -302,6 +316,7 @@ export const translation: Translation = {
             },
             typeNotSupported: "Operation type{0:trim,surround,leading_space} is not supported!",
         },
+        selectTarget: "Select a target ...",
     },
     time: {
         dateTimeWithSeconds: "YYYY-MM-DD HH:mm:ss",
@@ -366,6 +381,12 @@ export const translation: Translation = {
     warning: 'WARNING',
     workspace: "Workspace",
     workspaces: {
+        active: {
+            errors: {
+                selectWorkspaceFailed: "Selecting active workspace failed (s. debug output 'CTRL + SHIFT + Y')!",
+            },
+            selectWorkspace: "Select the active workspace ...",
+        },
         errors: {
             cannotDetectMappedPathInfoForFile: "Cannot detect mapped path information for file{0:trim,surround,leading_space}!",
             cannotDetectPathInfoForFile: "Cannot detect path information for file{0:trim,surround,leading_space}!",

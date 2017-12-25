@@ -155,6 +155,7 @@ export const translation: Translation = {
         loading: "Lade Verzeichnis{0:trim,surround,leading_space} ({1:trim} / {2:trim})...",
         noName: "<KEIN NAME>",
         parentDirectory: "(übergeordnetes Verzeichnis)",
+        selectSource: "Wählen Sie eine Quelle ...",
         size: "Grösse:{0:trim,leading_space}",
     },
     maxDepthReached: "Maximale Tiefe von{0:trim,leading_space} erreicht!",
@@ -251,6 +252,10 @@ export const translation: Translation = {
         },
         canceledByOperation: "Das Laden der Dateien von{0:trim,surround,leading_space} wurde durch eine Operation abgebrochen.",
         cancelling: "Breche das Laden ab ...",
+        currentFile: {
+            description: "Lädt die aktuelle Datei",
+            label: "Aktuelle Datei ...",
+        },
         errors: {
             invalidWorkspace: "Die Datei{0:trim,surround,leading_space} kann nicht in den Arbeitsbereich{1:trim,surround,leading_space} geladen werden!",
             invalidWorkspaceForPackage: "Das Paket{0:trim,surround,leading_space} kann nicht in den Arbeitsbereich{1:trim,surround,leading_space} geladen werden!",
@@ -258,6 +263,10 @@ export const translation: Translation = {
         },
         finishedOperation: "Das Laden der Dateien von{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",
         finishedOperationWithErrors: "[FEHLER] Konnte Dateien nicht von{0:trim,surround,leading_space} laden:{1:trim,surround,leading_space}",
+        package: {
+            description: "Lädt die Dateien eines Paketes",
+            label: "Paket ...",
+        },
         pullingFile: "Lade Datei{0:trim,surround,leading_space} von {1:trim,surround,leading_space} ...",
         selectSource: "Wählen Sie die Quelle von der Sie die Datei(en) laden wollen ...",
         startOperation: "Beginne Ladevorgang von{0:trim,surround,leading_space} ...",
@@ -270,6 +279,11 @@ export const translation: Translation = {
     },
     sql: {
         notSupported: "Der SQL-Typ{0:trim,surround,leading_space} wird nicht unterstützt!",
+    },
+    switches: {
+        errors: {
+            operationFailed: "Schalter-Operation ist fehlgeschlagen (s. Debugkonsole 'STRG + SHIFT + Y')!",
+        },
     },
     targets: {
         atLeastOneNotFound: "Mindestens ein Ziel konnte nicht gefunden werden!",
@@ -301,6 +315,7 @@ export const translation: Translation = {
             },
             typeNotSupported: "Eine Operation vom Typ{0:trim,surround,leading_space} wird nicht unterstützt!",
         },
+        selectTarget: "Wählen Sie ein Ziel aus ...",
     },
     time: {
         dateTimeWithSeconds: "DD.MM.YYYY HH:mm:ss",
@@ -365,6 +380,12 @@ export const translation: Translation = {
     warning: "WARNUNG",
     workspace: "Arbeitsbereich",
     workspaces: {
+        active: {
+            errors: {
+                selectWorkspaceFailed: "Das Selektieren des aktiven Arbeitsbereiches ist fehlgeschlagen (s. Debugkonsole 'STRG + SHIFT + Y')!",
+            },
+            selectWorkspace: "Wählen Sie den aktiven Arbeitsbereich aus ...",
+        },
         errors: {
             cannotDetectMappedPathInfoForFile: "Gemappte Pfad-Informationen konnten für die Datei{0:trim,surround,leading_space} nicht ermittelt werden!",
             cannotDetectPathInfoForFile: "Pfad-Informationen konnten für die Datei{0:trim,surround,leading_space} nicht ermittelt werden!",

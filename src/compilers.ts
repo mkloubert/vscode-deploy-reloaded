@@ -20,7 +20,6 @@ import * as deploy_compilers_coffeescript from './compilers/coffeescript';
 import * as deploy_compilers_htmlminifier from './compilers/htmlminifier';
 import * as deploy_compilers_less from './compilers/less';
 import * as deploy_compilers_pug from './compilers/pug';
-// import * as vspt_compilers_typescript from './compilers/typescript';
 import * as deploy_compilers_uglifyjs from './compilers/uglifyjs';
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
@@ -39,25 +38,21 @@ export enum Compiler {
      */
     Less = 0,
     /**
-     * TypeScript
-     */
-    TypeScript = 1,
-    /**
      * UglifyJS
      */
-    UglifyJS = 2,
+    UglifyJS = 1,
     /**
      * Pug
      */
-    Pug = 3,
+    Pug = 2,
     /**
      * Html Minifier
      */
-    HtmlMinifier = 4,
+    HtmlMinifier = 3,
     /**
      * CoffeeScript
      */
-    CoffeeScript = 5,
+    CoffeeScript = 4,
 }
 
 /**
@@ -193,10 +188,6 @@ export async function compile(compiler: Compiler, opts: CompileOptions): Promise
 
         case Compiler.Pug:
             return await deploy_compilers_pug.compile(<any>opts);
-
-        case Compiler.TypeScript:
-            // return await vspt_compilers_typescript.compile(<any>opts);
-            break;
 
         case Compiler.UglifyJS:
             return await deploy_compilers_uglifyjs.compile(<any>opts);

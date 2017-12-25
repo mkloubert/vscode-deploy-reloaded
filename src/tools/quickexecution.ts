@@ -118,6 +118,16 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
                         : RESULT.digest('hex');
     };
 
+    const $md5 = async (val: any, asBinary?: boolean) => {
+        return await $hash('md5',
+                           val, asBinary);
+    };
+
+    const $sha1 = async (val: any, asBinary?: boolean) => {
+        return await $hash('sha1',
+                           val, asBinary);
+    };
+
     const $sha256 = async (val: any, asBinary?: boolean) => {
         return await $hash('sha256',
                            val, asBinary);
@@ -258,6 +268,14 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "$hash('md5', 'abc', true)\n";
     help += "```\n";
     help += "\n";
+    // $md5
+    help += "### $md5\n";
+    help += "Hashes data with MD5.\n";
+    help += "```\n";
+    help += "$md5('abc')\n";
+    help += "$md5('abc', true)\n";
+    help += "```\n";
+    help += "\n";
     // $r
     help += "### $r\n";
     help += "Includes a module.\n";
@@ -272,8 +290,16 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "$s(123)\n";
     help += "```\n";
     help += "\n";
+    // $sha1
+    help += "### $sha1\n";
+    help += "Hashes data with SHA-1.\n";
+    help += "```\n";
+    help += "$sha1('abc')\n";
+    help += "$sha1('abc', true)\n";
+    help += "```\n";
+    help += "\n";
     // $sha256
-    help += "### $hash\n";
+    help += "### $sha256\n";
     help += "Hashes data with SHA-256.\n";
     help += "```\n";
     help += "$sha256('abc')\n";

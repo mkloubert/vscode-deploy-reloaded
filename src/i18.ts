@@ -162,6 +162,7 @@ export interface Translation {
         loading?: string;
         noName?: string;
         parentDirectory?: string;
+        selectSource?: string;
         size?: string;
     };
     maxDepthReached?: string;
@@ -257,6 +258,10 @@ export interface Translation {
         };
         canceledByOperation?: string;
         cancelling?: string;
+        currentFile?: {
+            description?: string;
+            label?: string;
+        };
         errors?: {
             invalidWorkspace?: string;
             invalidWorkspaceForPackage?: string;
@@ -264,6 +269,10 @@ export interface Translation {
         };
         finishedOperation?: string;
         finishedOperationWithErrors?: string;
+        package?: {
+            description?: string;
+            label?: string;
+        };
         pullingFile?: string;
         selectSource?: string;
         startOperation?: string;
@@ -276,6 +285,11 @@ export interface Translation {
     };
     sql?: {
         notSupported?: string;
+    };
+    switches?: {
+        errors?: {
+            operationFailed?: string;
+        };
     };
     targets?: {
         atLeastOneNotFound?: string;
@@ -307,6 +321,7 @@ export interface Translation {
             };
             typeNotSupported?: string;
         };
+        selectTarget?: string;
     };
     time?: {
         dateTimeWithSeconds?: string;
@@ -371,6 +386,12 @@ export interface Translation {
     warning?: string;
     workspace?: string;
     workspaces?: {
+        active?: {
+            errors?: {
+                selectWorkspaceFailed?: string;
+            };
+            selectWorkspace?: string;
+        };
         errors?: {
             cannotDetectMappedPathInfoForFile?: string;
             cannotDetectPathInfoForFile?: string;
