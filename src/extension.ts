@@ -541,13 +541,12 @@ async function updateWorkspaceButton() {
         const ACTIVE_WORKSPACES = deploy_helpers.asArray(activeWorkspaces)
                                                 .map(ws => ws);
 
-        // TODO: translate
         let command: string;
         let color = '#ffffff';
         let text = 'Deploy Reloaded: ';
         if (ACTIVE_WORKSPACES.length < 1) {
             color = '#ffff00';
-            text += '(no workspace selected)';
+            text += `(${i18.t('workspaces.noSelected')})`;
         }
         else {
             text += Enumerable.from( ACTIVE_WORKSPACES ).select(ws => {
@@ -752,9 +751,8 @@ async function activateExtension(context: vscode.ExtensionContext) {
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.deployWorkspace');
                     
-                    //TODO: translate
                     deploy_helpers.showErrorMessage(
-                        `Deploying WORKSPACE failed (s. debug output 'CTRL + Y')!`
+                        i18.t('deploy.errors.operationFailed')
                     );
                 }
             }),
@@ -774,9 +772,8 @@ async function activateExtension(context: vscode.ExtensionContext) {
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.deployFile');
                     
-                    //TODO: translate
                     deploy_helpers.showErrorMessage(
-                        `Deploying CURRENT FILE failed (s. debug output 'CTRL + Y')!`
+                        i18.t('deploy.errors.operationFailed')
                     );
                 }
             }),
@@ -814,9 +811,8 @@ async function activateExtension(context: vscode.ExtensionContext) {
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.pull');
 
-                    //TODO: translate
                     deploy_helpers.showErrorMessage(
-                        `Selecting pull operation failed (s. debug output 'CTRL + Y')!`
+                        i18.t('pull.errors.operationFailed')
                     );
                 }
             }),
@@ -970,9 +966,8 @@ async function activateExtension(context: vscode.ExtensionContext) {
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.listDirectory');
 
-                    //TODO: translate
                     deploy_helpers.showErrorMessage(
-                        `Listening directory failed (s. debug output 'CTRL + Y')!`
+                        i18.t('listDirectory.errors.operationFailed')
                     );
                 }
             }),

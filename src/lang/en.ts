@@ -41,12 +41,10 @@ export const translation: Translation = {
         title: "Diff{0:trim,surround,leading_space}",
     },
     compilers: {
-        notSupported: "Compiler{0:trim,surround,leading_space} is not supported!",
-        uglifyJS: {
-            errors: {
-                couldNotDeleteSourceFile: "Konnte Quelldatei nicht löschen:{0:trim,surround,leading_space}",
-            },
+        errors: {
+            couldNotDeleteSourceFile: "Could not delete source file:{0:trim,surround,leading_space}",
         },
+        notSupported: "Compiler{0:trim,surround,leading_space} is not supported!",
     },
     DELETE: {
         askForCancelOperation: "You are about to cancel the delete operation in{0:trim,surround,leading_space}. Are you sure?",
@@ -150,6 +148,9 @@ export const translation: Translation = {
     listDirectory: {
         currentDirectory: "Current directory:{0:trim,surround,leading_space} ({1:trim,surround})",
         directoryIsEmpty: "(directory is empty)",
+        errors: {
+            operationFailed: "List directory operation failed (s. Debugkonsole 'STRG + SHIFT + Y')!",
+        },
         lastModified: "Last modified:{0:trim,leading_space}",
         loading: "Loading directory{0:trim,surround,leading_space} ({1:trim} / {2:trim})...",
         noName: "<NO NAME>",
@@ -372,6 +373,7 @@ export const translation: Translation = {
             notInitialized: "Workspace{0:trim,surround,leading_space} has not been initialized!",
         },
         noneFound: "No workspaces found!",
+        noSelected: "no workspace selected",
         selectWorkspace: "Select a workspace ...",
     },
     yes: 'Yes',

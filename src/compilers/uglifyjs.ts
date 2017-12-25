@@ -158,7 +158,7 @@ export async function compile(compileOpts: CompileOptions) {
                             category: deploy_compilers.CompileResultMessageCategory.Warning,
                             compiler: deploy_compilers.Compiler.UglifyJS,
                             file: FTC,
-                            message: WORKSPACE.t('compilers.uglifyJS.errors.couldNotDeleteSourceFile',
+                            message: WORKSPACE.t('compilers.errors.couldNotDeleteSourceFile',
                                                  e),
                         });
                     }

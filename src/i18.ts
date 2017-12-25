@@ -48,12 +48,10 @@ export interface Translation {
         title?: string;
     };
     compilers?: {
-        notSupported?: string;
-        uglifyJS?: {
-            errors?: {
-                couldNotDeleteSourceFile?: string;
-            };
+        errors?: {
+            couldNotDeleteSourceFile?: string;
         };
+        notSupported?: string;
     };
     DELETE?: {
         askForCancelOperation?: string;
@@ -157,6 +155,9 @@ export interface Translation {
     listDirectory?: {
         currentDirectory?: string;
         directoryIsEmpty?: string;
+        errors?: {
+            operationFailed?: string;
+        };
         lastModified?: string;
         loading?: string;
         noName?: string;
@@ -377,6 +378,7 @@ export interface Translation {
             notInitialized?: string;
         };
         noneFound?: string;
+        noSelected?: string;
         selectWorkspace?: string;
     };
     yes?: string;

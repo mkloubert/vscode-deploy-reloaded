@@ -17,7 +17,7 @@
 
 import * as Path from 'path';
 import * as deploy_compilers_coffeescript from './compilers/coffeescript';
-// import * as vspt_compilers_htmlminifier from './compilers/htmlminifier';
+import * as deploy_compilers_htmlminifier from './compilers/htmlminifier';
 import * as deploy_compilers_less from './compilers/less';
 import * as deploy_compilers_pug from './compilers/pug';
 // import * as vspt_compilers_typescript from './compilers/typescript';
@@ -186,8 +186,7 @@ export async function compile(compiler: Compiler, opts: CompileOptions): Promise
             return await deploy_compilers_coffeescript.compile(<any>opts);
 
         case Compiler.HtmlMinifier:
-            // return await vspt_compilers_htmlminifier.compile(<any>opts);
-            break;
+            return await deploy_compilers_htmlminifier.compile(<any>opts);
 
         case Compiler.Less:
             return await deploy_compilers_less.compile(<any>opts);

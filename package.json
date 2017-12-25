@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.80",
+ "version": "0.0.81",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -5397,6 +5397,10 @@
              "coffeescript",
              "less",
              "pug",
+             "html-min",
+             "html-minifier",
+             "htmlmin",
+             "htmlminifier",
              "uglify-js",
              "uglifyjs"
             ]
@@ -35782,6 +35786,7 @@
   "@types/ftp": "^0.3.29",
   "@types/glob": "^5.0.33",
   "@types/html-entities": "^1.2.16",
+  "@types/html-minifier": "^1.1.30",
   "@types/i18next": "^8.4.2",
   "@types/is-stream": "^1.1.0",
   "@types/less": "0.0.32",
@@ -35826,6 +35831,7 @@
   "glob": "^7.1.2",
   "hexy": "^0.2.10",
   "html-entities": "^1.2.1",
+  "html-minifier": "^3.5.8",
   "i18next": "^10.2.1",
   "is-stream": "^1.1.0",
   "isbinaryfile": "^3.0.2",

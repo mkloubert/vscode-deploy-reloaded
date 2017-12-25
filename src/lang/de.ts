@@ -41,12 +41,10 @@ export const translation: Translation = {
         title: "Vergleich{0:trim,surround,leading_space}",
     },
     compilers: {
-        notSupported: "Compiler{0:trim,surround,leading_space} wird nicht unterstützt!",
-        uglifyJS: {
-            errors: {
-                couldNotDeleteSourceFile: "Could not delete source file:{0:trim,surround,leading_space}",
-            },
+        errors: {
+            couldNotDeleteSourceFile: "Konnte Quelldatei nicht löschen:{0:trim,surround,leading_space}",
         },
+        notSupported: "Compiler{0:trim,surround,leading_space} wird nicht unterstützt!",
     },
     DELETE: {
         askForCancelOperation: "Sind Sie sicher, dass Sie das Löschen der Datei(en) in{0:trim,surround,leading_space} abbrechen wollen?",
@@ -150,6 +148,9 @@ export const translation: Translation = {
     listDirectory: {
         currentDirectory: "Aktuelles Verzeichnis:{0:trim,surround,leading_space} ({1:trim,surround})",
         directoryIsEmpty: "(Verzeichnis ist leer)",
+        errors: {
+            operationFailed: "Konnte das Auflisten eines Verzeichnisses nicht durchführen (s. Debugkonsole 'STRG + SHIFT + Y')!",
+        },
         lastModified: "Letzte Änderung:{0:trim,leading_space}",
         loading: "Lade Verzeichnis{0:trim,surround,leading_space} ({1:trim} / {2:trim})...",
         noName: "<KEIN NAME>",
@@ -371,6 +372,7 @@ export const translation: Translation = {
             notInitialized: "Der Arbeitsbereich{0:trim,surround,leading_space} wurde nicht initialisiert!",
         },
         noneFound: "Keine Arbeitsbereiche gefunden!",
+        noSelected: "kein Arbeitsbereich ausgewählt",
         selectWorkspace: "Wählen Sie einen Arbeitsbereich ...",
     },
     yes: 'Ja',

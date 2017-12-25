@@ -81,6 +81,17 @@ class CompilerPlugin extends deploy_plugins.PluginBase<CompilerTarget> {
                 };
                 break;
 
+            case 'html-min':
+            case 'html-minifier':
+            case 'htmlmin':
+            case 'htmlminifier':
+                context = {
+                    compiler: deploy_compilers.Compiler.HtmlMinifier,
+                    sourceExtension: 'html',
+                    targetExtension: 'min.html',
+                };
+                break;
+
             case 'less':
                 context = {
                     compiler: deploy_compilers.Compiler.Less,
