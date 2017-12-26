@@ -16,3 +16,7 @@ a {
 a:hover {
     text-decoration: underline;   
 }
+
+table {
+    border-width: 1px;
+}

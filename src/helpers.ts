@@ -16,6 +16,7 @@
  */
 
 import * as ChildProcess from 'child_process';
+import * as Crypto from 'crypto';
 import * as deploy_code from './code';
 import * as deploy_contracts from './contracts';
 import * as deploy_log from './log';
@@ -1523,6 +1524,32 @@ export function open(target: string, opts?: OpenOptions): Promise<ChildProcess.C
         catch (e) {
             COMPLETED(e);
         }
+    });
+}
+
+/**
+ * Promise version of 'crypto.randomBytes()' function.
+ * 
+ * @param {number} size The size of the result.
+ * 
+ * @return {Promise<Buffer>} The buffer with the random bytes. 
+ */
+export function randomBytes(size: number) {
+    size = parseInt(
+        toStringSafe(size).trim()
+    );
+
+    return new Promise<Buffer>((resolve, reject) => {
+        const COMPLETED = createCompletedAction(resolve, reject);
+        
+        Crypto.randomBytes(size, (err, buf) => {
+            if (err) {
+                COMPLETED(err);
+            }
+            else {
+                COMPLETED(null, buf);
+            }
+        });
     });
 }
 

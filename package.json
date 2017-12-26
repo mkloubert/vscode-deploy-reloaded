@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.83",
+ "version": "0.0.84",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -104,6 +104,21 @@
     "command": "extension.deploy.reloaded.quickExecution",
     "key": "ctrl+shift+q",
     "mac": "cmd+shift+q"
+   },
+   {
+    "command": "extension.deploy.reloaded.sendFile",
+    "key": "ctrl+alt+s s",
+    "mac": "cmd+alt+s s"
+   },
+   {
+    "command": "extension.deploy.reloaded.receiveFile",
+    "key": "ctrl+alt+s r",
+    "mac": "cmd+alt+s r"
+   },
+   {
+    "command": "extension.deploy.reloaded.receiveFile.closeServer",
+    "key": "ctrl+alt+s c",
+    "mac": "cmd+alt+s c"
    }
   ],
   "configuration": {
@@ -136,7 +151,7 @@
                "type": "string",
                "default": "#ffffff"
               },
-              "enable": {
+              "enabled": {
                "description": "Enable button or not.",
                "type": "boolean",
                "default": true
@@ -318,7 +333,7 @@
               "description": "The custom ID for the command.",
               "type": "string"
              },
-             "enable": {
+             "enabled": {
               "description": "Enable button or not.",
               "type": "boolean",
               "default": true

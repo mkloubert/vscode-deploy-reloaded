@@ -173,6 +173,7 @@ export async function openMarkdownDocument(md: string, opts?: MarkdownDocumentOp
     const DEFAULT_OPTS: MarkdownDocumentOptions = {
         breaks: true,
         gfm: true,
+        langPrefix: '',
         tables: true,
     };
 

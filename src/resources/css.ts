@@ -26,8 +26,12 @@ import * as ZLib from 'zlib';
 
 
 const REPOSITORY = {
+    // START: hl.railscasts.css
+    "hl.railscasts.css": new Buffer("H4sIAAAAAAAACq1UwW7bMAy9+ysEDAXaok7tJHZt97rLrjtsx4GSaEeLLGUS3SQY9u+Ts9qRi6KnISfSj++RT2Qe75PkKyjtBXjyqVZ7ZJ7OGtmtuGPflLctPbAvRqzY7WfoFRr2facI75Lk/jFJVjv907PfCWNS+YOGc8O4tmL/HDL2BV2r7TE9NQwGsmPuAFIq0zUsWxXYjxkOYt85OxjZsE/rzfgb08Jq60IGS8yleE7+vGqlwvY9Gnp4DX8NlvDSwFTBRb0tqpGjtYbSyzANUwRaxTx7PB+tkxOPR42CrEsJugWdWJfrTRYVenJhgqnODD1HN0UOOzwdpugFnAKucYoJ+2AR4fxhIQRFkMpjoYF7WkCKvG6LuJfQ7NwI9Es+rHhbQgw+H5YICdt6U18Qk+S551ZPlHzQGukaKU0/lFnEylyEpxwQzV5oZfYLuVLWgmPU0AEc9H7ZUiazto0wI6Piw5s3FhKqso5gPRIsEDWvilrG0yu6voQPb62sWVS0rSjLuGJc1Rl1XdN0Ksi323W+fm9Zo2tQJviA6XwURyVp17A8y24iKRm27yOpMsv+i8685UKD928Me8o27XtYJRfAitcV8AgYtnoHXv2j+/DmwulY011xR1TdjsJfhtWx8fPmEJ4oeCOsg9GdhgVP0I2Djui/3qezQLsEAAA=", 'base64'),
+    // END: hl.railscasts.css
+
     // START: style.css
-    "style.css": new Buffer("H4sIAAAAAAAACn1OSwrCMBDdB3KHbNxZaP0h9TRpMpjBNFOmUSvi3R0wcacDb/O+o1Xo1iZsBFvBTrAXHMxTKyM3EHvgZqCcaexNNy1mpojeYArAmE8fm4tguRd3DoXxOE/RPoSL5C6FHC2fMX3bjtNShAxLbjw4YpuRUm+uSWYjJiiGO/ocZL9tV8K8tNLK1h8dRZJxBv+rLZEUiVCTfaAbcM3/Ga+ZN5WXlOAnAQAA", 'base64'),
+    "style.css": new Buffer("H4sIAAAAAAAACn1Q2woCIRB9F/wHX3proe1G2Ne4OqTkOos71Ub07w2lBUEJ5+XMucwohW/nyi8ZK8aasWFs1U0Kxa/D7CA3HRJhr1U7TGrEGJwKyUMOtH/JbASTNavJF8aFcYjmylxEeyxkb/IhpHfabpjKgGCixoHFbChg0uqUuDaGBEVwCY489y8WM2buUkhh6o4WI3J5BvcrLSEH8aA6tccz5Or/U/7xkOkifP1KXep5Bqse88c+ik0BAAA=", 'base64'),
     // END: style.css
 
 };
@@ -36,7 +40,7 @@ const REPOSITORY = {
 /**
  * A possible value for a repository key.
  */
-export type RepositoryKey = "style.css";
+export type RepositoryKey = "hl.railscasts.css" | "style.css";
 
 
 /**

@@ -109,6 +109,24 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         );
     };
 
+    // toFullPath()
+    const $fp = async (p: string) => {
+        const Path = require('path');
+
+        p = $h.toStringSafe(
+            await $unwrap(p)
+        );
+
+        if (!Path.isAbsolute(p)) {
+            p = Path.join(
+                $aw[0].rootPath,
+                p,
+            );
+        }
+
+        return Path.resolve(p);
+    };
+
     const $hash = async (algo: string, val: any, asBinary?: boolean) => {
         algo = $h.normalizeString(
             await $unwrap(algo)
@@ -141,22 +159,30 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
                            val, asBinary);
     };
 
-    const $rf = async (file: string) => {
-        const Path = require('path');
+    const $pwd = async (size = 20, chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789') => {
+        size = await $unwrap(size);
 
-        file = $h.toStringSafe(
-            await $unwrap(file)
+        chars = $h.toStringSafe(
+            await $unwrap(chars)
         );
 
-        if (!Path.isAbsolute(file)) {
-            file = Path.join(
-                $aw[0].rootPath,
-                file,
-            );
-        }
-        file = Path.resolve(file);
+        let result = '';
 
-        return await $h.readFile(file);
+        const BYTES: Buffer = await $h.randomBytes(size * 4);
+        for (let i = 0; i < (BYTES.length / 4); i++) {
+            const B = BYTES.readUInt32LE(i);
+
+            result += chars[ B % chars.length ];
+        }
+
+        return result;
+    };
+
+    // readFile()
+    const $rf = async (file: string) => {
+        return await $h.readFile(
+            await $fp(file)
+        );
     };
 
     const $sha1 = async (val: any, asBinary?: boolean) => {
@@ -169,26 +195,15 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
                            val, asBinary);
     };
 
+    // writeFile()
     const $wf = async (file: string, data: any, enc?: string) => {
-        const Path = require('path');
-
-        file = $h.toStringSafe(
-            await $unwrap(file)
-        );
         data = await $h.asBuffer(
             await $unwrap(data), enc
         );
 
-        if (!Path.isAbsolute(file)) {
-            file = Path.join(
-                $aw[0].rootPath,
-                file,
-            );
-        }
-        file = Path.resolve(file);
-
         await $h.writeFile(
-            file, data
+            await $fp(file),
+            data
         );
     };
 
@@ -283,22 +298,22 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "## Constants\n";
     // $aw
     help += "### $aw\n";
-    help += "An array of active workspace.\n";
-    help += "```\n";
-    help += "$aw.length\n";
+    help += "An array of active workspaces.\n";
+    help += "```javascript\n";
+    help += "$aw.rootPath\n";
     help += "```\n";
     help += "\n";
     // $l
     help += "### $l\n";
     help += "A [logger](https://mkloubert.github.io/vscode-deploy-reloaded/interfaces/_log_.logger.html).\n";
-    help += "```\n";
+    help += "```javascript\n";
     help += "$l.warn('Test')\n";
     help += "```\n";
     help += "\n";
     // $w
     help += "### $w\n";
     help += "An array of all available workspace.\n";
-    help += "```\n";
+    help += "```javascript\n";
     help += "$w.length\n";
     help += "```\n";
     help += "\n";
@@ -308,21 +323,29 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     // $e
     help += "### $e\n";
     help += "Executes code.\n";
-    help += "```\n";
+    help += "```javascript\n";
     help += "$e(\"require('vscode').window.showWarningMessage('Test')\")\n";
+    help += "```\n";
+    help += "\n";
+    // $fp
+    help += "### $fp\n";
+    help += "Keeps sure to return a full path.\n";
+    help += "```javascript\n";
+    help += "$fp('./myFile.txt')\n";
+    help += "$fp('E:/test/myFile.txt')\n";
     help += "```\n";
     help += "\n";
     // $help
     help += "### $help\n";
     help += "Shows this help.\n";
-    help += "```\n";
+    help += "```javascript\n";
     help += "$help\n";
     help += "```\n";
     help += "\n";
     // $hash
     help += "### $hash\n";
     help += "Hashes data.\n";
-    help += "```\n";
+    help += "```javascript\n";
     help += "$hash('md5', 'abc')\n";
     help += "$hash('md5', 'abc', true)\n";
     help += "```\n";
@@ -330,36 +353,45 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     // $md5
     help += "### $md5\n";
     help += "Hashes data with MD5.\n";
-    help += "```\n";
+    help += "```javascript\n";
     help += "$md5('abc')\n";
     help += "$md5('abc', true)\n";
+    help += "```\n";
+    help += "\n";
+    // $pwd
+    help += "### $pwd\n";
+    help += "Generates a password.\n";
+    help += "```javascript\n";
+    help += "$pwd()\n";
+    help += "$pwd(10)\n";
+    help += "$pwd(15, 'Ab_d67,')\n";
     help += "```\n";
     help += "\n";
     // $r
     help += "### $r\n";
     help += "Includes a module.\n";
-    help += "```\n";
+    help += "```javascript\n";
     help += "$r('vscode').window.showWarningMessage('Test')\n";
     help += "```\n";
     help += "\n";
     // $rf
     help += "### $rf\n";
     help += "Reads the content of a file.\n";
-    help += "```\n";
+    help += "```javascript\n";
     help += "$rf('./myFile.txt')\n";
     help += "```\n";
     help += "\n";
     // $s
     help += "### $s\n";
     help += "Converts a value / object to a string that is not `(null)` and not `(undefined)`.\n";
-    help += "```\n";
+    help += "```javascript\n";
     help += "$s(123)\n";
     help += "```\n";
     help += "\n";
     // $sha1
     help += "### $sha1\n";
     help += "Hashes data with SHA-1.\n";
-    help += "```\n";
+    help += "```javascript\n";
     help += "$sha1('abc')\n";
     help += "$sha1('abc', true)\n";
     help += "```\n";
@@ -367,7 +399,7 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     // $sha256
     help += "### $sha256\n";
     help += "Hashes data with SHA-256.\n";
-    help += "```\n";
+    help += "```javascript\n";
     help += "$sha256('abc')\n";
     help += "$sha256('abc', true)\n";
     help += "```\n";
@@ -375,7 +407,7 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     // $wf
     help += "### $wf\n";
     help += "Writes data to a file.\n";
-    help += "```\n";
+    help += "```javascript\n";
     help += "$wf('./myFile1.txt', 'Test')\n";
     help += "$wf('./myFile2.txt', 'Täst', 'utf8')\n";
     help += "$wf('./myFile3.txt', new Buffer('Test'))\n";
@@ -387,14 +419,14 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     // $h
     help += "### $h\n";
     help += "Extension [helpers](https://mkloubert.github.io/vscode-deploy-reloaded/modules/_helpers_.html).\n";
-    help += "```\n";
+    help += "```javascript\n";
     help += "$h.normalizeString('Abcd Efgh  ')\n";
     help += "```\n";
     help += "\n";
     // $vs
     help += "### $vs\n";
     help += "Visual Studio Code [namespace](https://code.visualstudio.com/docs/extensionAPI/vscode-api).\n";
-    help += "```\n";
+    help += "```javascript\n";
     help += "$vs.window.showWarningMessage('Test')\n";
     help += "```\n";
     help += "\n";
