@@ -65,7 +65,7 @@ export async function compile(compileOpts: CompileOptions) {
         messages: [],
     };
     
-    const OPTS = compileOpts.options || {};
+    const OPTS: Less.Options = compileOpts.options || {};
 
     const FILES_TO_COMPILE = await deploy_compilers.collectFiles(
         compileOpts,

@@ -62,7 +62,7 @@ export interface CompileResultMessage extends deploy_compilers.CompileResultMess
  * @return {Promise<CompileResult>} The promise with the result.
  */
 export async function compile(compileOpts: CompileOptions) {
-    const OPTS = compileOpts.options || <any>{};
+    const OPTS: HtmlMinifier.Options = compileOpts.options || <any>{};
 
     const WORKSPACE = compileOpts.workspace;
 

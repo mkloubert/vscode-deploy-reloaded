@@ -22,16 +22,24 @@ The extension supports the following destinations:
 | [Slack](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_slack) |
 | [ZIP files](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_zip) |
 
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=marcel.kloubert%40gmx.net&item_name=Marcel%20Joachim%20Kloubert&item_number=vscode-deploy-reloaded&currency_code=EUR)
-
 ## Table of contents
 
-1. [Install](#install-)
-2. [How to use](#how-to-use-)
+1. [Preview](#preview-)
+2. [Install](#install-)
+3. [How to use](#how-to-use-)
    * [Settings](#settings-)
      * [Packages](#packages-)
      * [Targets](#targets-)
    * [How to execute](#how-to-execute-)
+4. [Support and contribute](#support-and-contribute-)
+
+## Preview [[&uarr;](#table-of-contents)]
+
+Keep in mind, that this is preview extension, which is in a good beta state.
+
+The goal is to create a refactored version of [vs-deploy](https://github.com/mkloubert/vs-deploy), with a clean API and lots of more helpful [tools](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/tools) and features, like [multi workspace spport](https://code.visualstudio.com/docs/editor/multi-root-workspaces).
+
+If you are already using [vs-deploy](https://github.com/mkloubert/vs-deploy), it is recommended to deactivate the old extension, before you use `vscode-deploy-reloaded`.
 
 ## Install [[&uarr;](#table-of-contents)]
 
@@ -242,3 +250,27 @@ You can also use the following, predefined, shortcuts:
 | `extension.deploy.reloaded.receiveFile` | `CTRL + ALT + S, R` | Waits for a file from a remote editor. |
 | `extension.deploy.reloaded.receiveFile.closeServer` | `CTRL + ALT + S, C` | Cancels the receiving of a file from a remote editor. |
 | `extension.deploy.reloaded.sendFile` | `CTRL + ALT + S, S` | Sends the current file to a remote editor. |
+
+## Support and contribute [[&uarr;](#table-of-contents)]
+
+If you like the extension, you can support the project by sending a donation
+
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=marcel.kloubert%40gmx.net&item_name=Marcel%20Joachim%20Kloubert&item_number=vscode-deploy-reloaded&currency_code=EUR)
+
+to [me](https://github.com/mkloubert).
+
+To contribute, you can [open an issue](https://github.com/mkloubert/vscode-deploy-reloaded/issues) and/or fork this repository.
+
+To work with the code:
+
+* clone [this repository](https://github.com/mkloubert/vscode-deploy-reloaded)
+* create and change to a new branch, like `git checkout -b my_new_feature`
+* run `npm install` from your project folder
+* open that project folder from Visual Studio Code
+* edit and debug there
+* commit your changes to your new branch and sync it with your forked GitHub repo
+* make a [pull request](https://github.com/mkloubert/vscode-deploy-reloaded/pulls)
+
+If you like to create a translation, for example, you can take a look at [this directory](https://github.com/mkloubert/vscode-deploy-reloaded/tree/master/src/lang).
+
+The API documentation can be found [here](https://mkloubert.github.io/vscode-deploy-reloaded/).

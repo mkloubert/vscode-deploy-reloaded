@@ -22,7 +22,6 @@ import * as Path from 'path';
 const UglifyJS = require('uglify-js');
 
 
-
 /**
  * UglifyJS compile options.
  */

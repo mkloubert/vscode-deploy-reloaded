@@ -324,6 +324,7 @@ class CompilerPlugin extends deploy_plugins.PluginBase<CompilerTarget> {
 
         const DEFAULT_OPTS: deploy_compilers.CompileOptions = {
             files: FILES_TO_COMPILERS,
+            options: deploy_helpers.cloneObject(COMPILER.target.options),
             outDirectory: COMPILER.outputDirectory,
             workspace: COMPILER.workspace,
         };
@@ -332,6 +333,19 @@ class CompilerPlugin extends deploy_plugins.PluginBase<CompilerTarget> {
             COMPILER.compiler,
             MergeDeep(DEFAULT_OPTS, COMPILER.target.options)
         );
+
+        //TODO: show result messages
+        if (RESULT) {
+            for (const MSG of deploy_helpers.asArray(RESULT.messages)) {
+                switch (MSG.category) {
+                    case deploy_compilers.CompileResultMessageCategory.Error:
+                        throw new Error(MSG.message);
+
+                    case deploy_compilers.CompileResultMessageCategory.Warning:
+                        break;
+                }
+            }
+        }
     }
 }
 
