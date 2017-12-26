@@ -39,7 +39,7 @@ Keep in mind, that this is a preview extension, which is in a good beta state.
 
 The goal is to create a refactored version of [vs-deploy](https://github.com/mkloubert/vs-deploy), with a clean API and lots of more helpful tools and features, like [multi workspace support](https://code.visualstudio.com/docs/editor/multi-root-workspaces).
 
-If you are already using [vs-deploy](https://github.com/mkloubert/vs-deploy), it is recommended to deactivate the old extension, before you use `vscode-deploy-reloaded`.
+If you are already using [vs-deploy](https://github.com/mkloubert/vs-deploy), it is recommended to [disable the old extension](https://code.visualstudio.com/docs/editor/extension-gallery#_disable-an-extension), before you use `vscode-deploy-reloaded`.
 
 ## Install [[&uarr;](#table-of-contents)]
 
