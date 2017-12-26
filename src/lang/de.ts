@@ -288,6 +288,13 @@ export const translation: Translation = {
             operationFailed: "Schalter-Operation ist fehlgeschlagen (s. Debugkonsole 'STRG + SHIFT + Y')!",
         },
     },
+    sync: {
+        whenOpen: {
+            errors: {
+                allFailed: "Alle Synchronisierungs-Operationen sind feldgeschlagen!",
+            },
+        },
+    },
     targets: {
         atLeastOneNotFound: "Mindestens ein Ziel konnte nicht gefunden werden!",
         cannotDefineOtherAsSource: "Das Ziel{0:trim,surround,leading_space} kann nicht verwendet werden!",
@@ -368,6 +375,31 @@ export const translation: Translation = {
             label: "Code ausführen ...",
             result: {
                 title: "Resultat der Ausführung",
+            },
+        },
+        sendOrReceiveFile: {
+            description: "Sendet oder empfängt eine Dateien an/von einen/einem entfernten Editor",
+            label: "Datei senden / empfangen",
+            receive: {
+                button: {
+                    text: "Warte auf Datei (Port{0:trim,leading_space}) ...",
+                    tooltip: "Hier klicken, um abzubrechen ...",
+                },
+                description: "Empfängt eine Datei von einem entfernten Editor",
+                enterPort: "Geben Sie den TCP-Port an (Standard:{0:trim,leading_space}) ...",
+                errors: {
+                    couldNotReceiveFile: "Konnte Datei nicht empfangen:{0:trim,surround,leading_space}",
+                    startHostFailed: "Konnte den Dienst zum Empfangen einer Datei nicht starten:{0:trim,surround,leading_space}",
+                },
+                label: "Datei empfangen ...",
+            },
+            send: {
+                description: "Sendet eine Datei an einen entfernten Editor",
+                enterRemoteAddress: "Geben Sie die Zieladresse an ...",
+                errors: {
+                    couldNotSendFile: "Das Senden der Datei ist fehlgeschlagen:{0:trim,surround,leading_space}",
+                },
+                label: "Datei senden ...",
             },
         },
         showPackageFiles: {

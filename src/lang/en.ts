@@ -289,6 +289,13 @@ export const translation: Translation = {
             operationFailed: "Switch operation failed (s. debug output 'CTRL + SHIFT + Y')!",
         },
     },
+    sync: {
+        whenOpen: {
+            errors: {
+                allFailed: "All sync operations failed!",
+            },
+        },
+    },
     targets: {
         atLeastOneNotFound: "At least one target was not found!",
         cannotDefineOtherAsSource: "Cannot use target{0:trim,surround,leading_space}!",
@@ -369,6 +376,31 @@ export const translation: Translation = {
             label: "Quick code execution ...",
             result: {
                 title: "'Quick execution' result",
+            },
+        },
+        sendOrReceiveFile: {
+            description: "Sends or receives a file to/from a remote editor",
+            label: "Send / receive file",
+            receive: {
+                button: {
+                    text: "Waiting for file (port{0:trim,leading_space}) ...",
+                    tooltip: "Click here to cancel ...",
+                },
+                description: "Receives a file from a remote editor",
+                enterPort: "Enter the TCP port (default:{0:trim,leading_space}) ...",
+                errors: {
+                    couldNotReceiveFile: "Could not receive file:{0:trim,surround,leading_space}",
+                    startHostFailed: "Could not start host for receiving a file:{0:trim,surround,leading_space}",
+                },
+                label: "Receive file ...",
+            },
+            send: {
+                description: "Sends a file to a remote editor",
+                enterRemoteAddress: "Enter the destination address ...",
+                errors: {
+                    couldNotSendFile: "Sending file failed:{0:trim,surround,leading_space}",
+                },
+                label: "Send file ...",
             },
         },
         showPackageFiles: {

@@ -30,6 +30,7 @@ import * as deploy_switch from './switch';
 import * as deploy_targets from './targets';
 import * as deploy_tools from './tools';
 import * as deploy_tools_quick_execution from './tools/quickexecution';
+import * as deploy_tools_send_file from './tools/sendfile';
 import * as deploy_workflows from './workflows';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
@@ -1115,6 +1116,14 @@ async function activateExtension(context: vscode.ExtensionContext) {
                             label: '$(microscope)  ' + i18.t('tools.showPackageFiles.label'),
                             description: i18.t('tools.showPackageFiles.description'),
                         },
+
+                        {
+                            action: async () => {
+                                await deploy_tools_send_file.sendOrReceiveFile(currentContext);
+                            },
+                            label: '$(broadcast)  ' + i18.t('tools.sendOrReceiveFile.label'),
+                            description: i18.t('tools.sendOrReceiveFile.description'),
+                        }
                     ];
 
                     const SELECTED_ITEM = await vscode.window.showQuickPick(
@@ -1142,6 +1151,41 @@ async function activateExtension(context: vscode.ExtensionContext) {
                         i18.t('tools.errors.operationFailed')
                     );
                 }
+            }),
+
+            // receive file
+            vscode.commands.registerCommand('extension.deploy.reloaded.receiveFile', async () => {
+                try {
+                    await deploy_tools_send_file.receiveFile(currentContext);
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'extension.deploy.reloaded.receiveFile');
+
+                    deploy_helpers.showErrorMessage(
+                        i18.t('tools.errors.operationFailed')
+                    );
+                }
+            }),
+
+            // send file
+            vscode.commands.registerCommand('extension.deploy.reloaded.sendFile', async () => {
+                try {
+                    await deploy_tools_send_file.sendFile(currentContext);
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'extension.deploy.reloaded.sendFile');
+
+                    deploy_helpers.showErrorMessage(
+                        i18.t('tools.errors.operationFailed')
+                    );
+                }
+            }),
+
+            // close server instance that waits for a file
+            vscode.commands.registerCommand(deploy_tools_send_file.CLOSE_SERVER_COMMAND, () => {
+                deploy_tools_send_file.closeServer();
             }),
         );
     });

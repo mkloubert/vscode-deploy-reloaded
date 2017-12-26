@@ -547,8 +547,6 @@ export async function removeOnChange(file: string) {
     }
 
     try {
-        const KNOWN_TARGETS = ME.getTargets();
-
         const TARGETS = await deploy_helpers.applyFuncFor(
             deploy_packages.findTargetsForFileOfPackage, ME
         )(file,
@@ -575,7 +573,7 @@ export async function removeOnChange(file: string) {
             const TARGET_NAME = deploy_targets.getTargetName(T);
 
             try {
-                await ME.deleteFileIn(file, T);
+                await ME.deleteFileIn(file, T, false);
             }
             catch (e) {
                 ME.showErrorMessage(

@@ -239,3 +239,6 @@ You can also use the following, predefined, shortcuts:
 | `extension.deploy.reloaded.pullFile` | `CTRL + ALT + P, F` | Pulls / downloads the current file. |
 | `extension.deploy.reloaded.pullWorkspace` | `CTRL + ALT + P, W` | Pulls / downloads files of a package from remote. |
 | `extension.deploy.reloaded.quickExecution` | `CTRL + SHIFT + Q` | Quick JavaScript code execution. |
+| `extension.deploy.reloaded.receiveFile` | `CTRL + ALT + S, R` | Waits for a file from a remote editor. |
+| `extension.deploy.reloaded.receiveFile.closeServer` | `CTRL + ALT + S, C` | Cancels the receiving of a file from a remote editor. |
+| `extension.deploy.reloaded.sendFile` | `CTRL + ALT + S, S` | Sends the current file to a remote editor. |

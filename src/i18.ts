@@ -294,6 +294,13 @@ export interface Translation {
             operationFailed?: string;
         };
     };
+    sync?: {
+        whenOpen?: {
+            errors?: {
+                allFailed?: string;
+            };
+        };
+    };
     targets?: {
         atLeastOneNotFound?: string;
         cannotDefineOtherAsSource?: string;
@@ -375,6 +382,31 @@ export interface Translation {
             result?: {
                 title?: string;
             },
+        };
+        sendOrReceiveFile?: {
+            description?: string;
+            label?: string;
+            receive?: {
+                button?: {
+                    text?: string;
+                    tooltip?: string;
+                };
+                description?: string;
+                enterPort?: string;
+                errors?: {
+                    couldNotReceiveFile?: string;
+                    startHostFailed?: string;
+                };
+                label?: string;
+            };
+            send?: {
+                description?: string;
+                enterRemoteAddress?: string;
+                errors?: {
+                    couldNotSendFile?: string;
+                };
+                label?: string;
+            };
         };
         showPackageFiles?: {
             description?: string;

@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.82",
+ "version": "0.0.83",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -35866,6 +35866,7 @@
   "mssql": "^4.1.0",
   "mysql": "^2.15.0",
   "node-enumerable": "^3.8.0",
+  "node-simple-socket": "^2.8.1",
   "node-zip": "^1.1.1",
   "nodemailer": "^4.4.1",
   "parse-listing": "^1.1.3",

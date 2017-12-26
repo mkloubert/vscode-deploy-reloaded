@@ -75,73 +75,13 @@ export async function syncDocumentWhenOpen(doc: vscode.TextDocument) {
         return;
     }
 
-    const KNOWN_TARGETS = ME.getTargets();
-    const TARGETS: deploy_targets.Target[] = [];
+    const TARGETS = await deploy_helpers.applyFuncFor(
+        deploy_packages.findTargetsForFileOfPackage, ME
+    )(FILE,
+      (pkg) => pkg.syncWhenOpen);
 
-    for (const PKG of ME.getPackages()) {
-        const SYNC_WHEN_OPEN = PKG.syncWhenOpen;
-        if (deploy_helpers.isNullOrUndefined(PKG.syncWhenOpen)) {
-            continue;
-        }
-
-        let filter: deploy_contracts.FileFilter;
-        let targetNames: string | string[] | false = false;
-        let useMinimatch = false;
-
-        if (deploy_helpers.isObject<deploy_packages.SyncWhenOpenSetting>(SYNC_WHEN_OPEN)) {
-            filter = SYNC_WHEN_OPEN;
-            targetNames = PKG.targets;
-            useMinimatch = true;
-        }
-        else if (deploy_helpers.isBool(SYNC_WHEN_OPEN)) {
-            if (true === SYNC_WHEN_OPEN) {
-                filter = PKG;
-                targetNames = PKG.targets;
-            }
-        }
-        else {
-            filter = PKG;
-            targetNames = SYNC_WHEN_OPEN;
-        }
-
-        if (false === targetNames) {
-            continue;
-        }
-
-        let fileList: string[];
-        if (useMinimatch) {
-            // filter all files of that package
-            // by 'minimatch'
-            fileList = (await ME.findFilesByFilter(PKG)).filter(f => {
-                let relPath = ME.toRelativePath(f);
-                if (false !== relPath) {
-                    return deploy_helpers.checkIfDoesMatchByFileFilter('/' + relPath,
-                                                                       deploy_helpers.toMinimatchFileFilter(filter));
-                }
-
-                return false;
-            });
-        }
-        else {
-            fileList = await ME.findFilesByFilter(filter);
-        }
-
-        const MATCHING_TARGETS = deploy_targets.getTargetsByName(
-            targetNames,
-            KNOWN_TARGETS
-        );
-        if (false === MATCHING_TARGETS) {
-            return;
-        }
-
-        const DOES_MATCH = Enumerable.from( fileList ).select(f => {
-            return Path.resolve(f);
-        }).contains(FILE);
-
-        if (DOES_MATCH) {
-            TARGETS.push
-                   .apply(TARGETS, MATCHING_TARGETS);
-        }
+    if (false === TARGETS) {
+        return;
     }
 
     if (TARGETS.length < 1) {
@@ -150,117 +90,114 @@ export async function syncDocumentWhenOpen(doc: vscode.TextDocument) {
 
     let targetWithNewestFile: TargetAndLastModifiedTime;
 
-    await deploy_helpers.forEachAsync(Enumerable.from(TARGETS)
-                                                .distinct(true),
-            async (t) => {
-                const SHOW_ERROR = (err: any) => {
-                    ME.showErrorMessage(
-                        err
-                    );
-                };
+    for (const T of Enumerable.from(TARGETS).distinct(true)) {
+        const SHOW_ERROR = (err: any) => {
+            ME.showErrorMessage(
+                err
+            );
+        };
 
+        try {
+            const KEY = <string>ME.getSyncWhenOpenKey(T);
+
+            const PLUGINS = ME.getListPlugins(T);
+            while (PLUGINS.length > 0) {
+                const PI = PLUGINS.shift();
+
+                const CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
                 try {
-                    const KEY = <string>ME.getSyncWhenOpenKey(t);
+                    const CTX: deploy_plugins.ListDirectoryContext = {
+                        cancellationToken: CANCELLATION_SOURCE.token,
+                        dir: DIR,
+                        isCancelling: undefined,
+                        target: T,
+                        workspace: ME,
+                    };
 
-                    const PLUGINS = ME.getListPlugins(t);
-                    while (PLUGINS.length > 0) {
-                        const PI = PLUGINS.shift();
+                    // CTX.isCancelling
+                    Object.defineProperty(CTX, 'isCancelling', {
+                        enumerable: true,
 
-                        const CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
+                        get: () => {
+                            return CTX.cancellationToken.isCancellationRequested;
+                        }
+                    });
+
+                    const LIST = await PI.listDirectory(CTX);
+                    if (!LIST) {
+                        continue;
+                    }
+
+                    const MATCHING_FILES = Enumerable.from(LIST.files).where(f => {
+                        return deploy_helpers.isObject(f) &&
+                                FILENAME === deploy_helpers.toStringSafe(f.name);
+                    }).toArray();
+
+                    let allFailed: boolean | null = null;
+                    for (const F of MATCHING_FILES) {
+                        if (null === allFailed) {
+                            allFailed = true;
+                        }
+
                         try {
-                            const CTX: deploy_plugins.ListDirectoryContext = {
-                                cancellationToken: CANCELLATION_SOURCE.token,
-                                dir: DIR,
-                                isCancelling: undefined,
-                                target: t,
-                                workspace: ME,
-                            };
+                            const LAST_CHECK = STATES[KEY];
+                            const LOCAL_UTC = deploy_helpers.asUTC(STATS.mtime);
+                            const REMOTE_UTC = deploy_helpers.asUTC(F.time);
 
-                            // CTX.isCancelling
-                            Object.defineProperty(CTX, 'isCancelling', {
-                                enumerable: true,
+                            let remoteIsNewer = false;
 
-                                get: () => {
-                                    return CTX.cancellationToken.isCancellationRequested;
-                                }
-                            });
-
-                            const LIST = await PI.listDirectory(CTX);
-                            if (!LIST) {
-                                continue;
+                            let check = false;
+                            if (LAST_CHECK) {
+                                check = LAST_CHECK.isBefore(LAST_CFG_UPDATE);
+                            }
+                            else {
+                                check = true;
                             }
 
-                            const MATCHING_FILES = Enumerable.from(LIST.files).where(f => {
-                                return deploy_helpers.isObject(f) &&
-                                       FILENAME === deploy_helpers.toStringSafe(f.name);
-                            }).toArray();
-
-                            let allFailed: boolean | null = null;
-                            for (const F of MATCHING_FILES) {
-                                if (null === allFailed) {
-                                    allFailed = true;
-                                }
-
-                                try {
-                                    const LAST_CHECK = STATES[KEY];
-                                    const LOCAL_UTC = deploy_helpers.asUTC(STATS.mtime);
-                                    const REMOTE_UTC = deploy_helpers.asUTC(F.time);
-
-                                    let remoteIsNewer = false;
-
-                                    let check = false;
-                                    if (LAST_CHECK) {
-                                        check = LAST_CHECK.isBefore(LAST_CFG_UPDATE);
-                                    }
-                                    else {
-                                        check = true;
-                                    }
-
-                                    if (check) {
-                                        if (REMOTE_UTC && REMOTE_UTC.isValid()) {
-                                            remoteIsNewer = REMOTE_UTC.isAfter(LOCAL_UTC);
-                                        }
-                                    }
-
-                                    if (remoteIsNewer) {
-                                        let addNewer = true;
-                                        if (targetWithNewestFile) {
-                                            addNewer = REMOTE_UTC.isSameOrAfter(targetWithNewestFile.time);
-                                        }
-
-                                        if (addNewer) {
-                                            targetWithNewestFile = {
-                                                target: t,
-                                                time: REMOTE_UTC,
-                                            };
-                                        }
-                                    }
-                                    
-                                    allFailed = false;
-                                }
-                                catch (e) {
-                                    deploy_log.CONSOLE
-                                              .log(e, 'sync.syncDocumentWhenOpen()');
+                            if (check) {
+                                if (REMOTE_UTC && REMOTE_UTC.isValid()) {
+                                    remoteIsNewer = REMOTE_UTC.isAfter(LOCAL_UTC);
                                 }
                             }
 
-                            if (true === allFailed) {
-                                //TODO: better error message
-                                throw new Error(`All sync operations failed!`);
+                            if (remoteIsNewer) {
+                                let addNewer = true;
+                                if (targetWithNewestFile) {
+                                    addNewer = REMOTE_UTC.isAfter(targetWithNewestFile.time);
+                                }
+
+                                if (addNewer) {
+                                    targetWithNewestFile = {
+                                        target: T,
+                                        time: REMOTE_UTC,
+                                    };
+                                }
                             }
+                            
+                            allFailed = false;
                         }
                         catch (e) {
-                            SHOW_ERROR(e);
+                            deploy_log.CONSOLE
+                                        .log(e, 'sync.syncDocumentWhenOpen()');
                         }
-                        finally {
-                            deploy_helpers.tryDispose(CANCELLATION_SOURCE);
-                        }
+                    }
+
+                    if (true === allFailed) {
+                        throw new Error(ME.t('sync.whenOpen.errors.allFailed'));
                     }
                 }
                 catch (e) {
                     SHOW_ERROR(e);
                 }
-            });
+                finally {
+                    deploy_helpers.tryDispose(CANCELLATION_SOURCE);
+                }
+            }
+        }
+        catch (e) {
+            SHOW_ERROR(e);
+        }
+    }
 
     if (targetWithNewestFile) {
         const TARGET = targetWithNewestFile.target;
