@@ -489,7 +489,7 @@ export async function deployOnChange(file: string) {
     const ARGS = [
         file,
         (pkg: deploy_packages.Package) => pkg.deployOnChange,
-        "deploy.onChange.failed",
+        'deploy.onChange.failed',
     ];
 
     return await deploy_packages.autoDeployFile
@@ -507,7 +507,7 @@ export async function deployOnSave(file: string) {
     const ARGS = [
         file,
         (pkg: deploy_packages.Package) => pkg.deployOnSave,
-        "deploy.onSave.failed",
+        'deploy.onSave.failed',
     ];
 
     return await deploy_packages.autoDeployFile

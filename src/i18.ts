@@ -77,6 +77,9 @@ export interface Translation {
         };
         finishedOperation?: string;
         finishedOperationWithErrors?: string;
+        onChange?: {
+            failed?: string;
+        };
         package?: {
             description?: string;
             label?: string;

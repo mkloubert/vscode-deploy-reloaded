@@ -579,13 +579,14 @@ export async function removeOnChange(file: string) {
             }
             catch (e) {
                 ME.showErrorMessage(
-                    `Auto removing file '${file}' in '${TARGET_NAME}' failed: ${e}`
+                    ME.t('DELETE.onChange.failed',
+                         file, TARGET_NAME, e)
                 );
             }
         }
     }
     catch (e) {
         deploy_log.CONSOLE
-                    .trace(e, 'delete.removeOnChange()');
+                  .trace(e, 'delete.removeOnChange()');
     }
 }

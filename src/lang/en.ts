@@ -70,6 +70,9 @@ export const translation: Translation = {
         },
         finishedOperation: "Deleting files in{0:trim,surround,leading_space} has been finished.",
         finishedOperationWithErrors: "[ERROR] Could not delete files in{0:trim,surround,leading_space}:{1:trim,surround,leading_space}",
+        onChange: {
+            failed: "Remove on change for{0:trim,surround,leading_space} in{1:trim,surround,leading_space} failed:{2:trim,surround,leading_space}",
+        },
         package: {
             description: "Deletes the files of a package",
             label: "Package ...",
