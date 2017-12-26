@@ -219,10 +219,10 @@ export async function pullFilesFrom(files: string[],
                     const SF = new deploy_plugins.SimpleFileToDownload(ME, f, NAME_AND_PATH);
                     SF.onBeforeDownload = async function(source?) {
                         if (arguments.length < 1) {
-                            source = `'${deploy_helpers.toDisplayablePath(NAME_AND_PATH.path)}' (${TARGET_NAME})`;
+                            source = `${deploy_helpers.toDisplayablePath(NAME_AND_PATH.path)} (${TARGET_NAME})`;
                         }
                         else {
-                            source = `'${deploy_helpers.toStringSafe(source)}'`;
+                            source = `${deploy_helpers.toStringSafe(source)}`;
                         }
 
                         ME.context.outputChannel.append(

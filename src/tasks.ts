@@ -21,7 +21,6 @@ import * as deploy_workspaces from './workspaces';
 import * as vscode from 'vscode';
 
 
-let buildTaskAlreadyRun = false;
 let buildTaskTimer: NodeJS.Timer;
 let gitPullAlreadyRun = false;
 let gitPullTimer: NodeJS.Timer;
@@ -30,11 +29,6 @@ let gitPullTimer: NodeJS.Timer;
  * Runs build task on startup.
  */
 export async function runBuildTaskOnStartup() {
-    if (buildTaskAlreadyRun) {
-        return;
-    }
-    buildTaskAlreadyRun = true;
-
     const ME: deploy_workspaces.Workspace = this;
     const CFG = ME.config;
 
@@ -95,7 +89,6 @@ export async function runGitPullOnStartup(cfg?: deploy_workspaces.WorkspaceSetti
     if (gitPullAlreadyRun) {
         return;
     }
-    gitPullAlreadyRun = true;
 
     const ME: deploy_workspaces.Workspace = this;
     const CFG = cfg || ME.config;
@@ -139,6 +132,8 @@ export async function runGitPullOnStartup(cfg?: deploy_workspaces.WorkspaceSetti
     if (!doRun) {
         return;
     }
+
+    gitPullAlreadyRun = true;
 
     if (isNaN(timeToWait)) {
         RUN_PULL();
