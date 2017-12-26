@@ -78,7 +78,9 @@ export interface Translation {
         finishedOperation?: string;
         finishedOperationWithErrors?: string;
         onChange?: {
+            activated?: string;
             failed?: string;
+            waitingBeforeActivate?: string;
         };
         package?: {
             description?: string;
@@ -110,7 +112,9 @@ export interface Translation {
         finishedOperation?: string;
         finishedOperationWithErrors?: string;
         onChange?: {
+            activated?: string;
             failed?: string;
+            waitingBeforeActivate?: string;
         };
         onSave?: {
             failed?: string;

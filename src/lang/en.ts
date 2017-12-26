@@ -71,7 +71,9 @@ export const translation: Translation = {
         finishedOperation: "Deleting files in{0:trim,surround,leading_space} has been finished.",
         finishedOperationWithErrors: "[ERROR] Could not delete files in{0:trim,surround,leading_space}:{1:trim,surround,leading_space}",
         onChange: {
+            activated: "Remove on change has been activated for workspace{0:trim,surround,leading_space}.",
             failed: "Remove on change for{0:trim,surround,leading_space} in{1:trim,surround,leading_space} failed:{2:trim,surround,leading_space}",
+            waitingBeforeActivate: "Remove on change is deactivated for about{0:trim,leading_space} seconds for workspace{1:trim,surround,leading_space}.",
         },
         package: {
             description: "Deletes the files of a package",
@@ -103,7 +105,9 @@ export const translation: Translation = {
             operationFailed: "Deploy operation failed (s. debug output 'CTRL + SHIFT + Y')!",
         },
         onChange: {
+            activated: "Deploy on change has been activated for workspace{0:trim,surround,leading_space}.",
             failed: "Deploy on change from{0:trim,surround,leading_space} to{1:trim,surround,leading_space} failed:{2:trim,surround,leading_space}",
+            waitingBeforeActivate: "Deploy on change is deactivated for about{0:trim,leading_space} seconds for workspace{1:trim,surround,leading_space}.",
         },
         onSave: {
             failed: "Deploy on save from{0:trim,surround,leading_space} to{1:trim,surround,leading_space} failed:{2:trim,surround,leading_space}",

@@ -41,11 +41,29 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
 
     // all workspaces
     const $w: any[] = $h.asArray(allWorkspaces).map(ws => {
-        return $h.makeNonDisposable(ws);
+        const CLONED_WS = $h.makeNonDisposable(ws);
+
+        // CLONED_WS.rootPath
+        Object.defineProperty(CLONED_WS, 'rootPath', {
+            enumerable: true,
+
+            get: () => ws.rootPath,
+        });
+
+        return CLONED_WS;
     });
     // active workspaces
     const $aw: any[] = $h.asArray(activeWorkspaces).map(aws => {
-        return $h.makeNonDisposable(aws);
+        const CLONED_AWS = $h.makeNonDisposable(aws);
+
+        // CLONED_WS.rootPath
+        Object.defineProperty(CLONED_AWS, 'rootPath', {
+            enumerable: true,
+            
+            get: () => aws.rootPath,
+        });
+
+        return CLONED_AWS;
     });
     
     // require
@@ -123,6 +141,24 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
                            val, asBinary);
     };
 
+    const $rf = async (file: string) => {
+        const Path = require('path');
+
+        file = $h.toStringSafe(
+            await $unwrap(file)
+        );
+
+        if (!Path.isAbsolute(file)) {
+            file = Path.join(
+                $aw[0].rootPath,
+                file,
+            );
+        }
+        file = Path.resolve(file);
+
+        return await $h.readFile(file);
+    };
+
     const $sha1 = async (val: any, asBinary?: boolean) => {
         return await $hash('sha1',
                            val, asBinary);
@@ -131,6 +167,29 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
     const $sha256 = async (val: any, asBinary?: boolean) => {
         return await $hash('sha256',
                            val, asBinary);
+    };
+
+    const $wf = async (file: string, data: any, enc?: string) => {
+        const Path = require('path');
+
+        file = $h.toStringSafe(
+            await $unwrap(file)
+        );
+        data = await $h.asBuffer(
+            await $unwrap(data), enc
+        );
+
+        if (!Path.isAbsolute(file)) {
+            file = Path.join(
+                $aw[0].rootPath,
+                file,
+            );
+        }
+        file = Path.resolve(file);
+
+        await $h.writeFile(
+            file, data
+        );
     };
 
     // show help
@@ -283,6 +342,13 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "$r('vscode').window.showWarningMessage('Test')\n";
     help += "```\n";
     help += "\n";
+    // $rf
+    help += "### $rf\n";
+    help += "Reads the content of a file.\n";
+    help += "```\n";
+    help += "$rf('./myFile.txt')\n";
+    help += "```\n";
+    help += "\n";
     // $s
     help += "### $s\n";
     help += "Converts a value / object to a string that is not `(null)` and not `(undefined)`.\n";
@@ -304,6 +370,15 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "```\n";
     help += "$sha256('abc')\n";
     help += "$sha256('abc', true)\n";
+    help += "```\n";
+    help += "\n";
+    // $wf
+    help += "### $wf\n";
+    help += "Writes data to a file.\n";
+    help += "```\n";
+    help += "$wf('./myFile1.txt', 'Test')\n";
+    help += "$wf('./myFile2.txt', 'Täst', 'utf8')\n";
+    help += "$wf('./myFile3.txt', new Buffer('Test'))\n";
     help += "```\n";
     help += "\n";
 

@@ -71,7 +71,9 @@ export const translation: Translation = {
         finishedOperation: "Das Löschen der Dateien in{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",
         finishedOperationWithErrors: "[FEHLER] Konnte Dateien nicht in{0:trim,surround,leading_space} löschen:{1:trim,surround,leading_space}",
         onChange: {
+            activated: "Automatisches Löschen wurde für den Arbeitsbereich{0:trim,surround,leading_space} aktiviert.",
             failed: "Das automatische Löschen von{0:trim,surround,leading_space} in{1:trim,surround,leading_space} ist fehlgeschlagen:{2:trim,surround,leading_space}",
+            waitingBeforeActivate: "Automatisches Löschen wird für ca.{0:trim,leading_space} Sekunden für den Arbeitsbereich{1:trim,surround,leading_space} deaktiviert.",
         },
         package: {
             description: "Löscht die Dateien eines Paketes",
@@ -103,7 +105,9 @@ export const translation: Translation = {
         finishedOperation: "Das Bereitstellen der Dateien in{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",
         finishedOperationWithErrors: "[FEHLER] Konnte Dateien nicht in{0:trim,surround,leading_space} bereitstellen:{1:trim,surround,leading_space}",
         onChange: {
+            activated: "Das Bereitstellen nach dem Ändern wurde für den Arbeitsbereich{0:trim,surround,leading_space} aktiviert.",
             failed: "Das Bereitstellen nach dem Ändern von{0:trim,surround,leading_space} nach{1:trim,surround,leading_space} ist fehlgeschlagen:{2:trim,surround,leading_space}",
+            waitingBeforeActivate: "Das Bereitstellen nach dem Ändern wird für ca.{0:trim,leading_space} Sekunden für den Arbeitsbereich{1:trim,surround,leading_space} deaktiviert.",
         },
         onSave: {
             failed: "Das Bereitstellen nach dem Speichern von{0:trim,surround,leading_space} nach{1:trim,surround,leading_space} ist fehlgeschlagen:{2:trim,surround,leading_space}",

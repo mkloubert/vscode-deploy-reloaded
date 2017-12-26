@@ -639,6 +639,11 @@ async function activateExtension(context: vscode.ExtensionContext) {
         currentContext = context;
     });
 
+    // output channel
+    WF.next(() => {
+        outputChannel = vscode.window.createOutputChannel('Deploy (Reloaded)');
+    });
+
     // active workspace provider
     WF.next(() => {
         deploy_workspaces.setActiveWorkspaceProvider(() => {
@@ -662,9 +667,20 @@ async function activateExtension(context: vscode.ExtensionContext) {
         }
     });
 
-    // output channel
+    // extension information
     WF.next(() => {
-        outputChannel = vscode.window.createOutputChannel('Deploy (Reloaded)');
+        const NOW = Moment();
+
+        if (packageFile) {
+            outputChannel.appendLine(`${packageFile.displayName} (${packageFile.name}) - v${packageFile.version}`);
+        }
+
+        outputChannel.appendLine(`Copyright (c) 2017-${NOW.format('YYYY')}  Marcel Joachim Kloubert <marcel.kloubert@gmx.net>`);
+        outputChannel.appendLine('');
+        outputChannel.appendLine(`GitHub : https://github.com/mkloubert/vscode-deploy-reloaded`);
+        outputChannel.appendLine(`Twitter: https://twitter.com/mjkloubert`);
+        outputChannel.appendLine(`Donate : [PayPal] https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RB3WUETWG4QU2`);
+        outputChannel.appendLine(`         [Flattr] https://flattr.com/submit/auto?fid=o62pkd&url=https%3A%2F%2Fgithub.com%2Fmkloubert%2Fvs-deploy`);
     });
 
     // commands
@@ -1238,6 +1254,13 @@ async function activateExtension(context: vscode.ExtensionContext) {
     // reload plugins
     WF.next(async () => {
         await reloadPlugins();
+
+        outputChannel.appendLine('');
+
+        outputChannel.appendLine(`Loaded ${PLUGINS.length} plugins:`);
+        PLUGINS.forEach((pi) => {
+            outputChannel.appendLine(`- ${pi.__type}`);
+        });
     });
 
     // global VSCode events
@@ -1331,30 +1354,6 @@ async function activateExtension(context: vscode.ExtensionContext) {
         catch (e) {
             deploy_helpers.tryDispose(newBtn);
         }
-    });
-
-    WF.next(() => {
-        const NOW = Moment();
-
-        if (packageFile) {
-            outputChannel.appendLine(`${packageFile.displayName} (${packageFile.name}) - v${packageFile.version}`);
-        }
-
-        outputChannel.appendLine(`Copyright (c) 2017-${NOW.format('YYYY')}  Marcel Joachim Kloubert <marcel.kloubert@gmx.net>`);
-        outputChannel.appendLine('');
-        outputChannel.appendLine(`GitHub : https://github.com/mkloubert/vscode-deploy-reloaded`);
-        outputChannel.appendLine(`Twitter: https://twitter.com/mjkloubert`);
-        outputChannel.appendLine(`Donate : [PayPal] https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RB3WUETWG4QU2`);
-        outputChannel.appendLine(`         [Flattr] https://flattr.com/submit/auto?fid=o62pkd&url=https%3A%2F%2Fgithub.com%2Fmkloubert%2Fvs-deploy`);
-
-        outputChannel.appendLine('');
-
-        outputChannel.appendLine(`Loaded ${PLUGINS.length} plugins:`);
-        PLUGINS.forEach((pi) => {
-            outputChannel.appendLine(`- ${pi.__type}`);
-        });
-
-        outputChannel.show();
     });
 
     // update 'select workspace' button

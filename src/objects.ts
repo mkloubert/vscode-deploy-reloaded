@@ -31,17 +31,17 @@ export abstract class DisposableBase extends Events.EventEmitter implements vsco
     private _isDisposed = false;
     private _isDisposing = false;
     /**
-     * Stores timers.
+     * Stores timeouts.
      */
-    protected readonly _TIMERS: NodeJS.Timer[] = [];
+    protected readonly _TIMEOUTS: NodeJS.Timer[] = [];
 
     /**
-     * Cleansup all timers.
+     * Cleansup all timeouts.
      */
-    protected cleanupTimers() {
-        while (this._TIMERS.length > 0) {
+    protected cleanupTimeouts() {
+        while (this._TIMEOUTS.length > 0) {
             deploy_helpers.tryClearTimeout(
-                this._TIMERS.shift()
+                this._TIMEOUTS.shift()
             );
         }
     }
@@ -55,7 +55,8 @@ export abstract class DisposableBase extends Events.EventEmitter implements vsco
         this._isDisposing = true;
         
         try {
-            this.cleanupTimers();
+            this.cleanupTimeouts();
+
             this.removeAllListeners();
 
             while (this._DISPOSABLES.length > 0) {

@@ -1639,7 +1639,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
         let finalizer: () => any;
         try {
-            ME.cleanupTimers();
+            ME.cleanupTimeouts();
             deploy_helpers.applyFuncFor(deploy_commands.cleanupCommands, ME)();
 
             ME._isDeployOnChangeFreezed = false;
@@ -1736,6 +1736,13 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                           .trace(e, 'workspaces.reloadConfiguration(2)');
             }
 
+            if (deploy_helpers.toBooleanSafe(loadedCfg.clearOutputOnStartup)) {
+                ME.context.outputChannel.clear();
+            }
+            if (deploy_helpers.toBooleanSafe(loadedCfg.openOutputOnStartup, true)) {
+                ME.context.outputChannel.show();
+            }
+
             finalizer = async () => {
                 ME._syncWhenOpenStates = {};
 
@@ -1759,9 +1766,23 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                         // for a while
 
                         ME._isDeployOnChangeFreezed = true;
-                        ME._TIMERS.push(
+
+                        ME.context.outputChannel.appendLine('');
+                        ME.context.outputChannel.appendLine(
+                            ME.t('deploy.onChange.waitingBeforeActivate',
+                                 Math.round(TIME_TO_WAIT_BEFORE_ACTIVATE_DEPLOY_ON_CHANGE / 1000.0),
+                                 ME.rootPath)
+                        );
+
+                        ME._TIMEOUTS.push(
                             setTimeout(() => {
                                 ME._isDeployOnChangeFreezed = false;
+
+                                ME.context.outputChannel.appendLine('');
+                                ME.context.outputChannel.appendLine(
+                                    ME.t('deploy.onChange.activated',
+                                         ME.rootPath)
+                                );
                             }, TIME_TO_WAIT_BEFORE_ACTIVATE_DEPLOY_ON_CHANGE)
                         );
                     }
@@ -1783,9 +1804,23 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                         // for a while
 
                         ME._isRemoveOnChangeFreezed = true;
-                        ME._TIMERS.push(
+
+                        ME.context.outputChannel.appendLine('');
+                        ME.context.outputChannel.appendLine(
+                            ME.t('DELETE.onChange.waitingBeforeActivate',
+                                 Math.round(TIME_TO_WAIT_BEFORE_ACTIVATE_REMOVE_ON_CHANGE / 1000.0),
+                                 ME.rootPath)
+                        );
+
+                        ME._TIMEOUTS.push(
                             setTimeout(() => {
                                 ME._isRemoveOnChangeFreezed = false;
+
+                                ME.context.outputChannel.appendLine('');
+                                ME.context.outputChannel.appendLine(
+                                    ME.t('DELETE.onChange.activated',
+                                         ME.rootPath)
+                                );
                             }, TIME_TO_WAIT_BEFORE_ACTIVATE_REMOVE_ON_CHANGE)
                         );
                     }
@@ -1795,13 +1830,6 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                               .trace(e, 'workspaces.reloadConfiguration(6)');
 
                     ME._isRemoveOnChangeFreezed = false;
-                }
-
-                if (deploy_helpers.toBooleanSafe(loadedCfg.clearOutputOnStartup)) {
-                    ME.context.outputChannel.clear();
-                }
-                if (deploy_helpers.toBooleanSafe(loadedCfg.openOutputOnStartup, true)) {
-                    ME.context.outputChannel.show();
                 }
 
                 await ME.reloadPackageButtons();
