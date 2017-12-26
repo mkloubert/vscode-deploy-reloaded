@@ -97,6 +97,22 @@ export type PackageDeploySettings = boolean | string | string[] | PackageDeployF
 export type PackageDeploySettingsResolver = (pkg: Package) => PackageDeploySettings;
 
 /**
+ * A package file list resolver.
+ * 
+ * @param {deploy_contracts.FileFilter} The filter.
+ * @param {string} The scope file.
+ * 
+ * @return {PackageFileListResolverResult|PromiseLike<PackageFileListResolverResult>} The result.
+ */
+export type PackageFileListResolver = (filter: deploy_contracts.FileFilter, file: string) => PackageFileListResolverResult |
+                                                                                             PromiseLike<PackageFileListResolverResult>;
+
+/**
+ * Possible results of a package file list resolver.
+ */
+export type PackageFileListResolverResult = string | string[];
+
+/**
  * Stores settings for 'sync when open' feature.
  */
 export interface SyncWhenOpenSetting extends deploy_contracts.FileFilter {
@@ -149,12 +165,14 @@ export async function autoDeployFile(file: string,
  * 
  * @param {string} file The path to the file.
  * @param {PackageDeploySettingsResolver} settingsResolver The resolver for the settings.
+ * @param {PackageFileListResolver} [fileListResolver] A custom file list resolver.
  * 
  * @return {Promise<deploy_targets.Target[]>|false} The List of targets or (false) if at least one target name could not be resolved.
  */
 export async function findTargetsForFileOfPackage(
     file: string,
-    settingsResolver: PackageDeploySettingsResolver
+    settingsResolver: PackageDeploySettingsResolver,
+    fileListResolver?: PackageFileListResolver,
 ): Promise<deploy_targets.Target[] | false> {
     const ME: deploy_workspaces.Workspace = this;
     
@@ -221,20 +239,35 @@ export async function findTargetsForFileOfPackage(
             return false;
         }
 
-        let fileList = await ME.findFilesByFilter(pkg);
-        if (filter !== pkg) {
-            fileList = fileList.filter(f => {
-                let relPath = ME.toRelativePath(f);
-                if (false !== relPath) {
-                    return deploy_helpers.checkIfDoesMatchByFileFilter('/' + relPath,
-                                                                       deploy_helpers.toMinimatchFileFilter(filter));
+        let flr = fileListResolver;
+        if (!flr) {
+            // use default
+
+            flr = async () => {
+                let fileList = await ME.findFilesByFilter(pkg);
+                if (filter !== pkg) {
+                    fileList = fileList.filter(f => {
+                        const REL_PATH = ME.toRelativePath(f);
+                        if (false !== REL_PATH) {
+                            return deploy_helpers.checkIfDoesMatchByFileFilter('/' + REL_PATH,
+                                                                               deploy_helpers.toMinimatchFileFilter(filter));
+                        }
+
+                        return false;
+                    });
                 }
 
-                return false;
-            });
+                return fileList;
+            };
         }
 
-        if (fileList.indexOf(file) > -1) {
+        const FILE_LIST = deploy_helpers.asArray(
+            await Promise.resolve(
+                flr(filter, file)
+            )
+        );
+
+        if (FILE_LIST.indexOf(file) > -1) {
             TARGETS.push
                    .apply(TARGETS, MATCHING_TARGETS);
         }

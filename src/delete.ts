@@ -552,7 +552,20 @@ export async function removeOnChange(file: string) {
         const TARGETS = await deploy_helpers.applyFuncFor(
             deploy_packages.findTargetsForFileOfPackage, ME
         )(file,
-         (pkg) => pkg.removeOnChange);
+         (pkg) => pkg.removeOnChange,
+         (filter, file) => {
+             const FILE_LIST: string[] = [];
+             const REL_PATH = ME.toRelativePath(file);
+             if (false !== REL_PATH) {
+                 const DOES_MATCH = deploy_helpers.checkIfDoesMatchByFileFilter('/' + REL_PATH,
+                                                                                deploy_helpers.toMinimatchFileFilter(filter));
+                 if (DOES_MATCH) {
+                     FILE_LIST.push(file);
+                 }
+             }
+
+             return FILE_LIST;
+         });
 
         if (false === TARGETS) {
             return;
