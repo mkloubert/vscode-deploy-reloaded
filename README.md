@@ -259,7 +259,7 @@ If you like the extension, you can support the project by sending a donation
 
 to [me](https://github.com/mkloubert).
 
-To contribute, you can [open an issue](https://github.com/mkloubert/vscode-deploy-reloaded/issues/new) and/or fork this repository.
+To contribute, you can [open an issue](https://github.com/mkloubert/vscode-deploy-reloaded/issues) and/or fork this repository.
 
 To work with the code:
 
