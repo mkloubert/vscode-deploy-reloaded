@@ -35,7 +35,7 @@ The extension supports the following destinations:
 
 ## Preview [[&uarr;](#table-of-contents)]
 
-Keep in mind, that this is preview extension, which is in a good beta state.
+Keep in mind, that this is a preview extension, which is in a good beta state.
 
 The goal is to create a refactored version of [vs-deploy](https://github.com/mkloubert/vs-deploy), with a clean API and lots of more helpful [tools](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/tools) and features, like [multi workspace spport](https://code.visualstudio.com/docs/editor/multi-root-workspaces).
 
