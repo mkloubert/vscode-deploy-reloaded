@@ -125,6 +125,10 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
             logger: deploy_log.CONSOLE,
             operation: operation,
             options: deploy_helpers.cloneObject(context.target.options),
+            replaceWithValues: function (val) {
+                return this.workspace
+                           .replaceWithValues(val);
+            },
             require: (id) => {
                 return deploy_helpers.requireFromExtension(id);
             },

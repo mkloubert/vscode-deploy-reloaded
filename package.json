@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.0.81",
+ "version": "0.0.82",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -355,7 +355,7 @@
            {
             "type": "array",
             "items": {
-             "description": "The names of one or more custom targets to deploy to.",
+             "description": "The names of one or more custom targets.",
              "type": "string"
             }
            },
@@ -363,23 +363,30 @@
             "type": "object",
             "properties": {
              "exclude": {
-              "description": "One or more (glob) patterns, that describe what files should be EXCLUDED.",
+              "description": "One or more (minimatch) sub patterns, that describe what files should be EXCLUDED.",
               "type": "array",
               "items": {
-               "description": "A (glob) pattern",
+               "description": "A (minimatch) pattern",
                "type": "string"
               }
              },
              "files": {
-              "description": "One or more (glob) patterns, that describe what files should be EXCLUDED.",
+              "description": "One or more (minimatch) sub patterns, that describe what files should be INCLUDED.",
               "type": "array",
               "items": {
-               "description": "A (glob) pattern",
+               "description": "A (minimatch) pattern",
                "type": "string"
               },
               "default": [
                "**"
               ]
+             },
+             "targets": {
+              "type": "array",
+              "items": {
+               "description": "One or more names of custom targets.",
+               "type": "string"
+              }
              }
             }
            }
@@ -396,7 +403,7 @@
            {
             "type": "array",
             "items": {
-             "description": "The names of one or more custom targets to deploy to.",
+             "description": "The names of one or more custom targets.",
              "type": "string"
             }
            },
@@ -404,23 +411,30 @@
             "type": "object",
             "properties": {
              "exclude": {
-              "description": "One or more (glob) patterns, that describe what files should be EXCLUDED.",
+              "description": "One or more (minimatch) sub patterns, that describe what files should be EXCLUDED.",
               "type": "array",
               "items": {
-               "description": "A (glob) pattern",
+               "description": "A (minimatch) pattern",
                "type": "string"
               }
              },
              "files": {
-              "description": "One or more (glob) patterns, that describe what files should be EXCLUDED.",
+              "description": "One or more (minimatch) sub patterns, that describe what files should be INCLUDED.",
               "type": "array",
               "items": {
-               "description": "A (glob) pattern",
+               "description": "A (minimatch) pattern",
                "type": "string"
               },
               "default": [
                "**"
               ]
+             },
+             "targets": {
+              "type": "array",
+              "items": {
+               "description": "One or more names of custom targets.",
+               "type": "string"
+              }
              }
             }
            }
@@ -478,7 +492,7 @@
            {
             "type": "array",
             "items": {
-             "description": "The names of one or more custom targets to deploy to.",
+             "description": "The names of one or more custom targets.",
              "type": "string"
             }
            },
@@ -486,23 +500,30 @@
             "type": "object",
             "properties": {
              "exclude": {
-              "description": "One or more (glob) patterns, that describe what files should be EXCLUDED.",
+              "description": "One or more (minimatch) sub patterns, that describe what files should be EXCLUDED.",
               "type": "array",
               "items": {
-               "description": "A (glob) pattern",
+               "description": "A (minimatch) pattern",
                "type": "string"
               }
              },
              "files": {
-              "description": "One or more (glob) patterns, that describe what files should be EXCLUDED.",
+              "description": "One or more (minimatch) sub patterns, that describe what files should be INCLUDED.",
               "type": "array",
               "items": {
-               "description": "A (glob) pattern",
+               "description": "A (minimatch) pattern",
                "type": "string"
               },
               "default": [
                "**"
               ]
+             },
+             "targets": {
+              "type": "array",
+              "items": {
+               "description": "One or more names of custom targets.",
+               "type": "string"
+              }
              }
             }
            }

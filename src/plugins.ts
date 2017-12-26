@@ -538,6 +538,10 @@ export abstract class FileToUploadBase implements FileToUpload {
                 logger: deploy_log.CONSOLE,
                 mode: deploy_transformers.DataTransformerMode.Transform,
                 options: ME.transformerOptions,
+                replaceWithValues: (val) => {
+                    return ME.workspace
+                             .replaceWithValues(val);
+                },
                 require: (id) => {
                     return deploy_helpers.requireFromExtension(id);
                 },

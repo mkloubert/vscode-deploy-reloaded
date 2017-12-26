@@ -127,7 +127,7 @@ export class MSSQLConnection extends deploy_objects.DisposableBase implements de
                         switch (typeof a) {
                             case 'boolean':
                                 type = MSSQL.Bit;
-                                value = deploy_helpers.toBooleanSafe(a) ? 1 : 0;
+                                value = a ? 1 : 0;
                                 break;
         
                             case 'number':

@@ -206,6 +206,9 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
                         globalState: WORKSPACE.sessionState['target_operations']['http']['global'],
                         logger: deploy_log.CONSOLE,
                         options: deploy_helpers.cloneObject(OPERATION.options),
+                        replaceWithValues: (val) => {
+                            return WORKSPACE.replaceWithValues(val);
+                        },
                         require: (id) => {
                             return deploy_helpers.requireFromExtension(id);
                         },

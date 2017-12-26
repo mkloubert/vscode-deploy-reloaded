@@ -76,9 +76,16 @@ export interface PackageButton extends deploy_contracts.ButtonWithCustomCommand 
 }
 
 /**
+ * A file filter for package deploy settings.
+ */
+export interface PackageDeployFileFilter extends deploy_contracts.FileFilter,
+                                                 deploy_targets.TargetProvider {
+}
+
+/**
  * Types of a package deploy setting value.
  */
-export type PackageDeploySettings = boolean | string | string[] | deploy_contracts.FileFilter;
+export type PackageDeploySettings = boolean | string | string[] | PackageDeployFileFilter;
 
 /**
  * A function that resolves deploy settings for a package.
@@ -109,9 +116,10 @@ export async function autoDeployFile(file: string,
     const ME: deploy_workspaces.Workspace = this;
 
     try {
-        const TARGETS = await findTargetsForFileOfPackage(file,
-                                                          settingsResolver);
-
+        const TARGETS = await deploy_helpers.applyFuncFor(
+            findTargetsForFileOfPackage, ME
+        )(file,
+          settingsResolver);
         if (false === TARGETS) {
             return;
         }
@@ -174,17 +182,20 @@ export async function findTargetsForFileOfPackage(
 
         let filter: deploy_contracts.FileFilter;
         let targetNames: string | string[] | false = false;
-        let useMinimatch = false;
 
-        if (deploy_helpers.isObject<deploy_contracts.FileFilter>(settings)) {
+        if (deploy_helpers.isObject<PackageDeployFileFilter>(settings)) {
             filter = settings;
-            targetNames = pkg.targets;
+
+            targetNames = deploy_helpers.asArray(settings.targets);
+            if (targetNames.length < 1) {
+                // nothing defined => take from package
+                targetNames = deploy_helpers.asArray(pkg.targets);
+            }
         }
         else if (deploy_helpers.isBool(settings)) {
             if (true === settings) {
                 filter = pkg;
                 targetNames = pkg.targets;
-                useMinimatch = true;
             }
         }
         else {
@@ -210,11 +221,9 @@ export async function findTargetsForFileOfPackage(
             return false;
         }
 
-        let fileList: string[];
-        if (useMinimatch) {
-            // filter all files of that package
-            // by 'minimatch'
-            fileList = (await ME.findFilesByFilter(pkg)).filter(f => {
+        let fileList = await ME.findFilesByFilter(pkg);
+        if (filter !== pkg) {
+            fileList = fileList.filter(f => {
                 let relPath = ME.toRelativePath(f);
                 if (false !== relPath) {
                     return deploy_helpers.checkIfDoesMatchByFileFilter('/' + relPath,
@@ -224,15 +233,8 @@ export async function findTargetsForFileOfPackage(
                 return false;
             });
         }
-        else {
-            fileList = await ME.findFilesByFilter(filter);
-        }
 
-        const DOES_MATCH = Enumerable.from( fileList ).select(f => {
-            return Path.resolve(f);
-        }).contains(file);
-
-        if (DOES_MATCH) {
+        if (fileList.indexOf(file) > -1) {
             TARGETS.push
                    .apply(TARGETS, MATCHING_TARGETS);
         }

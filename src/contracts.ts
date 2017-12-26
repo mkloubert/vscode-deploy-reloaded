@@ -383,6 +383,14 @@ export interface ScriptArguments {
      */
     readonly logger: deploy_log.Logger;
     /**
+     * Handles a value as string and replaces placeholders.
+     * 
+     * @param {any} val The value to parse.
+     * 
+     * @return {string} The parsed value.
+     */
+    readonly replaceWithValues: (val: any) => string;
+    /**
      * Imports a module from the extension context.
      */
     readonly require: (id: any) => any;

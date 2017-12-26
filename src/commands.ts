@@ -190,6 +190,9 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
                         globalState: GLOBAL_STATE,
                         logger: deploy_log.CONSOLE,
                         options: deploy_helpers.cloneObject(sc.options),
+                        replaceWithValues: (val) => {
+                            return ME.replaceWithValues(val);
+                        },
                         require: (moduleId) => {
                             return deploy_helpers.requireFromExtension(moduleId);
                         },

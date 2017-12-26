@@ -274,6 +274,9 @@ export async function pullFilesFrom(files: string[],
                                         logger: deploy_log.CONSOLE,
                                         mode: deploy_transformers.DataTransformerMode.Restore,
                                         options: TRANSFORMER_OPTIONS,
+                                        replaceWithValues: (val) => {
+                                            return ME.replaceWithValues(val);
+                                        },
                                         require: (id) => {
                                             return deploy_helpers.requireFromExtension(id);
                                         },

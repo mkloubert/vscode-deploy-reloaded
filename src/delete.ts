@@ -549,8 +549,10 @@ export async function removeOnChange(file: string) {
     try {
         const KNOWN_TARGETS = ME.getTargets();
 
-        const TARGETS = await deploy_packages.findTargetsForFileOfPackage(file,
-                                                                          (pkg) => pkg.removeOnChange);
+        const TARGETS = await deploy_helpers.applyFuncFor(
+            deploy_packages.findTargetsForFileOfPackage, ME
+        )(file,
+         (pkg) => pkg.removeOnChange);
 
         if (false === TARGETS) {
             return;

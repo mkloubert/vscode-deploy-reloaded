@@ -1906,7 +1906,7 @@ export function toMinimatchFileFilter<TFilter extends deploy_contracts.FileFilte
 (
     filter: TFilter
 ) {
-    filter = cloneObject(filter);
+    filter = cloneObjectFlat(filter);
     if (filter) {
         const NORMALIZE_PATTERNS = (patterns: string | string[]) => {
             return asArray(patterns).map(p => {
