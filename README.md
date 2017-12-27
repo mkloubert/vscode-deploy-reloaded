@@ -27,8 +27,10 @@ The extension supports the following destinations:
 1. [Demos](#demos-)
    * [Deploying to SFTP](#deploying-to-sftp-)
    * [Sync when open](#sync-when-open-)
+   * [Auto remove on remote](#auto-remove-on-remote-)
    * [Compare files](#compare-files-)
    * [Download files](#download-files-)
+   * [Compare files](#compare-files-)
 2. [Preview](#preview-)
 3. [Install](#install-)
 4. [How to use](#how-to-use-)
@@ -48,13 +50,17 @@ The extension supports the following destinations:
 
 ![Demo Sync when open](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo2.gif)
 
-### Compare files [[&uarr;](#demos-)]
+### Auto remove on remote [[&uarr;](#demos-)]
 
-![Demo Compare files](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo3.gif)
+![Demo Auto remove on remote](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo5.gif)
 
 ### Download files [[&uarr;](#demos-)]
 
 ![Demo Download files](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo4.gif)
+
+### Compare files [[&uarr;](#demos-)]
+
+![Demo Compare files](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo3.gif)
 
 ## Preview [[&uarr;](#table-of-contents)]
 
