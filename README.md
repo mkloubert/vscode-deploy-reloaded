@@ -28,6 +28,7 @@ The extension supports the following destinations:
    * [Deploying to SFTP](#deploying-to-sftp-)
    * [Sync when open](#sync-when-open-)
    * [Compare files](#compare-files-)
+   * [Download files](#download-files-)
 2. [Preview](#preview-)
 3. [Install](#install-)
 4. [How to use](#how-to-use-)
@@ -50,6 +51,10 @@ The extension supports the following destinations:
 ### Compare files [[&uarr;](#demos-)]
 
 ![Demo Compare files](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo3.gif)
+
+### Download files [[&uarr;](#demos-)]
+
+![Demo Download files](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo4.gif)
 
 ## Preview [[&uarr;](#table-of-contents)]
 
