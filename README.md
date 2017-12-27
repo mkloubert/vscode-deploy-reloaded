@@ -26,6 +26,7 @@ The extension supports the following destinations:
 
 1. [Demos](#demos-)
    * [Deploying to SFTP](#deploying-to-sftp-)
+   * [Sync when open](#sync-when-open-)
 2. [Preview](#preview-)
 3. [Install](#install-)
 4. [How to use](#how-to-use-)
@@ -40,6 +41,10 @@ The extension supports the following destinations:
 ### Deploying to SFTP [[&uarr;](#demos-)]
 
 ![Demo Deploying to SFTP](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo1.gif)
+
+### Sync when open [[&uarr;](#demos-)]
+
+![Demo Sync when open](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo2.gif)
 
 ## Preview [[&uarr;](#table-of-contents)]
 
