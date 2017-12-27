@@ -653,63 +653,47 @@ export function normalizeTargetType(target: Target): string {
 }
 
 /**
- * Shows a quick for targets.
+ * Shows a quick pick for a list of targets.
  * 
- * @param {TTarget|TTarget[]} targets One or more target.
- * @param {string} placeHolder The placeholder.
- * @param {Function} action The action to invoke.
- * @param {TNoTargets} [ifNoTargets] The custom value to return if no target was found.
+ * @param {Target|Target[]} targets One or more targets.
+ * @param {vscode.QuickPickOptions} [opts] Custom options for the quick picks.
  * 
- * @return {TResult|TNoTargets|void} The result of the action (if available) or 'ifNoTargets' if no target has been found.
+ * @return {Promise<Target|false>} The promise that contains the selected target (if selected)
+ *                                 or (false) if no target is available.
  */
-export async function showTargetQuickPick<TTarget extends Target = Target, TResult = any, TNoTargets = false>(
-    targets: TTarget | TTarget[],
-    placeHolder: string,
-    action: (target: TTarget) => TResult,
-    ifNoTargets: TNoTargets = <any>false,
-): Promise<TResult | TNoTargets | void>
-{
-    targets = deploy_helpers.asArray(targets)
-                            .filter(t => deploy_helpers.isObject(t));
-    
-    const QUICK_PICK_ITEMS: deploy_contracts.ActionQuickPick[] = targets.map(t => {
+export async function showTargetQuickPick(targets: Target | Target[],
+                                          opts?: vscode.QuickPickOptions): Promise<Target | false> {
+    const QUICK_PICKS: deploy_contracts.ActionQuickPick<Target>[] = deploy_helpers.asArray(targets).map(t => {
+        const WORKSPACE = t.__workspace;
+
         return {
-            action: async () => {
-                if (action) {
-                    await Promise.resolve(
-                        action(t)
-                    )
-                }
-            },
-            description: deploy_helpers.toStringSafe( t.description ).trim(),
-            detail: `${t.__workspace.name} (${t.__workspace.rootPath})`,
             label: getTargetName(t),
+            description: deploy_helpers.toStringSafe(t.description),
+            detail: WORKSPACE.rootPath,
+            state: t,
         };
     });
 
-    if (QUICK_PICK_ITEMS.length < 1) {
+    if (QUICK_PICKS.length < 1) {
         deploy_helpers.showWarningMessage(
             i18.t('targets.noneFound')
         );
-
-        return ifNoTargets;
+        
+        return false;
     }
 
-    let selectedItem: deploy_contracts.ActionQuickPick;
-
-    if (1 === QUICK_PICK_ITEMS.length) {
-        selectedItem = QUICK_PICK_ITEMS[0];
+    let selectedItem: deploy_contracts.ActionQuickPick<Target>;
+    if (1 === QUICK_PICKS.length) {
+        selectedItem = QUICK_PICKS[0];
     }
     else {
-        selectedItem = await vscode.window.showQuickPick(QUICK_PICK_ITEMS, {
-            placeHolder: deploy_helpers.toStringSafe(placeHolder),
-        });
+        selectedItem = await vscode.window.showQuickPick(
+            QUICK_PICKS, opts
+        );
     }
 
     if (selectedItem) {
-        return await Promise.resolve(
-            selectedItem.action(),
-        );
+        return selectedItem.state;
     }
 }
 

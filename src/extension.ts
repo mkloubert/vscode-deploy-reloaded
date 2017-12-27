@@ -72,6 +72,40 @@ function getActiveWorkspacesOrAll() {
     return listOfWorkspaces.map(ws => ws);
 }
 
+function getAllWorkspacesSorted() {
+    return Enumerable.from( WORKSPACES ).orderBy(ws => {
+        return ws.isActive ? 0 : 1;
+    }).thenBy(ws => {
+        return deploy_helpers.normalizeString(ws.name);
+    }).thenBy(ws => {
+        return deploy_helpers.normalizeString(ws.rootPath);
+    }).toArray();
+}
+
+function getAllPackagesSorted() {
+    return Enumerable.from( getAllWorkspacesSorted() ).selectMany(ws => {
+        return Enumerable.from( ws.getPackages() ).orderBy(pkg => {
+            return deploy_helpers.normalizeString(
+                deploy_packages.getPackageName(pkg)
+            );
+        }).thenBy(pkg => {
+            return pkg.__index;
+        });
+    }).toArray();
+}
+
+function getAllTargetsSorted() {
+    return Enumerable.from( getAllWorkspacesSorted() ).selectMany(ws => {
+        return Enumerable.from( ws.getTargets() ).orderBy(t => {
+            return deploy_helpers.normalizeString(
+                deploy_targets.getTargetName(t)
+            );
+        }).thenBy(t => {
+            return t.__index;
+        });
+    }).toArray();
+}
+
 async function invokeForActiveEditor(placeHolder: string,
                                      action: (file: string, target: deploy_targets.Target) => any) {
     const ACTIVE_EDITOR = vscode.window.activeTextEditor;
@@ -130,50 +164,6 @@ async function invokeForActiveEditor(placeHolder: string,
     else {
         deploy_helpers.showWarningMessage(
             i18.t('editors.active.noOpen')
-        );
-    }
-}
-
-async function invokeForActivePackage(placeHolder: string,
-                                      action: (pkg: deploy_packages.Package) => any) {
-    const PACKAGES = getActivePackages();
-    
-    const QUICK_PICK_ITEMS: deploy_contracts.ActionQuickPick[] = PACKAGES.map((p, i) => {
-        return {
-            action: async () => {
-                if (action) {
-                    await Promise.resolve(
-                        action(p)
-                    );
-                }
-            },
-            description: deploy_helpers.toStringSafe( p.description ).trim(),
-            detail: p.__workspace.folder.uri.fsPath,
-            label: deploy_packages.getPackageName(p),
-        };
-    });
-
-    if (QUICK_PICK_ITEMS.length < 1) {
-        deploy_helpers.showWarningMessage(
-            i18.t('packages.noneFound')
-        );
-
-        return;
-    }
-
-    let selectedItem: deploy_contracts.ActionQuickPick;
-    if (1 === QUICK_PICK_ITEMS.length) {
-        selectedItem = QUICK_PICK_ITEMS[0];
-    }
-    else {
-        selectedItem = await vscode.window.showQuickPick(QUICK_PICK_ITEMS, {
-            placeHolder: placeHolder,
-        });
-    }
-
-    if (selectedItem) {
-        await Promise.resolve(
-            selectedItem.action()
         );
     }
 }
@@ -299,6 +289,7 @@ async function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?:
         for (let i = 0; i < WORKSPACES.length; ) {
             const WS = WORKSPACES[i];
             let removeWorkspace = false;
+            let hasBeenRemoved = false;
 
             for (let rws of removed) {
                 if (Path.resolve(rws.uri.fsPath) === Path.resolve(WS.folder.uri.fsPath)) {
@@ -310,7 +301,12 @@ async function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?:
             if (removeWorkspace) {
                 if (deploy_helpers.tryDispose(WS)) {
                     WORKSPACES.splice(i, 1);
+                    hasBeenRemoved = true;
                 }
+            }
+
+            if (!hasBeenRemoved) {
+                ++i;
             }
         }
     }
@@ -679,7 +675,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
         outputChannel.appendLine('');
         outputChannel.appendLine(`GitHub : https://github.com/mkloubert/vscode-deploy-reloaded`);
         outputChannel.appendLine(`Twitter: https://twitter.com/mjkloubert`);
-        outputChannel.appendLine(`Donate : [PayPal] https://paypal.me/MarcelKloubert`);
+        outputChannel.appendLine(`Donate : https://paypal.me/MarcelKloubert`);
     });
 
     // commands
@@ -755,13 +751,17 @@ async function activateExtension(context: vscode.ExtensionContext) {
             // deploy workspace
             vscode.commands.registerCommand('extension.deploy.reloaded.deployWorkspace', async () => {
                 try {
-                    await invokeForActivePackage(
-                        i18.t('packages.selectPackage'),
-                        async (pkg) => {
-                            await pkg.__workspace
-                                     .deployPackage(pkg);
+                    const PKG = await deploy_packages.showPackageQuickPick(
+                        getAllPackagesSorted(),
+                        {
+                            placeHolder: i18.t('packages.selectPackage'),
                         }
                     );
+
+                    if (PKG) {
+                        await PKG.__workspace
+                                 .deployPackage(PKG);
+                    }
                 }
                 catch (e) {
                     deploy_log.CONSOLE
@@ -835,13 +835,17 @@ async function activateExtension(context: vscode.ExtensionContext) {
             // pull workspace
             vscode.commands.registerCommand('extension.deploy.reloaded.pullWorkspace', async () => {
                 try {
-                    await invokeForActivePackage(
-                        i18.t('packages.selectPackage'),
-                        async (pkg) => {
-                            await pkg.__workspace
-                                     .pullPackage(pkg);
+                    const PKG = await deploy_packages.showPackageQuickPick(
+                        getAllPackagesSorted(),
+                        {
+                            placeHolder: i18.t('packages.selectPackage'),
                         }
                     );
+
+                    if (PKG) {
+                        await PKG.__workspace
+                                 .pullPackage(PKG);
+                    }
                 }
                 catch (e) {
                     deploy_log.CONSOLE
@@ -914,13 +918,17 @@ async function activateExtension(context: vscode.ExtensionContext) {
             // delete package
             vscode.commands.registerCommand('extension.deploy.reloaded.deletePackage', async () => {
                 try {
-                    await invokeForActivePackage(
-                        i18.t('packages.selectPackage'),
-                        async (pkg) => {
-                            await pkg.__workspace
-                                     .deletePackage(pkg);
+                    const PKG = await deploy_packages.showPackageQuickPick(
+                        getAllPackagesSorted(),
+                        {
+                            placeHolder: i18.t('packages.selectPackage'),
                         }
                     );
+
+                    if (PKG) {
+                        await PKG.__workspace
+                                 .deletePackage(PKG);
+                    }
                 }
                 catch (e) {
                     deploy_log.CONSOLE
@@ -956,25 +964,17 @@ async function activateExtension(context: vscode.ExtensionContext) {
             // list directory
             vscode.commands.registerCommand('extension.deploy.reloaded.listDirectory', async () => {
                 try {
-                    let workspacesWithTargets = activeWorkspaces;
-                    if (workspacesWithTargets.length < 1) {
-                        workspacesWithTargets = WORKSPACES;
-                    }
-
-                    const TARGETS = Enumerable.from(workspacesWithTargets).selectMany(ws => {
-                        return ws.getTargets();
-                    }).where(t => {
-                        return t.__workspace.getListPlugins(t).length > 0;
-                    }).toArray();
-
-                    await deploy_targets.showTargetQuickPick(
-                        TARGETS,
-                        i18.t('listDirectory.selectSource'),
-                        async (target) => {
-                            await target.__workspace
-                                        .listDirectory(target);
+                    const TARGET = await deploy_targets.showTargetQuickPick(
+                        getAllTargetsSorted(),
+                        {
+                            placeHolder: i18.t('listDirectory.selectSource'),
                         }
                     );
+
+                    if (TARGET) {
+                        await TARGET.__workspace
+                                    .listDirectory(TARGET);
+                    }
                 }
                 catch (e) {
                     deploy_log.CONSOLE
@@ -991,7 +991,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 try {
                     await deploy_tools_quick_execution._1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
                         currentContext,
-                        WORKSPACES.map(ws => ws),
+                        getAllWorkspacesSorted(),
                         activeWorkspaces.map(aws => aws),
                     );
                 }

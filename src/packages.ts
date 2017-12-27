@@ -21,6 +21,7 @@ import * as deploy_log from './log';
 import * as deploy_targets from './targets';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
+import * as i18 from './i18';
 import * as Moment from 'moment';
 import * as Path from 'path';
 import * as UUID from 'uuid';
@@ -344,4 +345,49 @@ export function getTargetsOfPackage(pkg: Package): deploy_targets.Target[] | fal
     }
 
     return targets;
+}
+
+/**
+ * Shows a quick pick for a list of packages.
+ * 
+ * @param {Package|Package[]} packages One or more packages.
+ * @param {vscode.QuickPickOptions} [opts] Custom options for the quick picks.
+ * 
+ * @return {Promise<Package|false>} The promise that contains the selected package (if selected)
+ *                                  or (false) if no package is available.
+ */
+export async function showPackageQuickPick(packages: Package | Package[],
+                                           opts?: vscode.QuickPickOptions): Promise<Package | false> {
+    const QUICK_PICKS: deploy_contracts.ActionQuickPick<Package>[] = deploy_helpers.asArray(packages).map(pkg => {
+        const WORKSPACE = pkg.__workspace;
+
+        return {
+            label: getPackageName(pkg),
+            description: deploy_helpers.toStringSafe(pkg.description),
+            detail: WORKSPACE.rootPath,
+            state: pkg,
+        };
+    });
+
+    if (QUICK_PICKS.length < 1) {
+        deploy_helpers.showWarningMessage(
+            i18.t('packages.noneFound')
+        );
+        
+        return false;
+    }
+
+    let selectedItem: deploy_contracts.ActionQuickPick<Package>;
+    if (1 === QUICK_PICKS.length) {
+        selectedItem = QUICK_PICKS[0];
+    }
+    else {
+        selectedItem = await vscode.window.showQuickPick(
+            QUICK_PICKS, opts
+        );
+    }
+
+    if (selectedItem) {
+        return selectedItem.state;
+    }
 }

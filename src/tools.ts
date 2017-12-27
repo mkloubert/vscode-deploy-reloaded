@@ -636,96 +636,99 @@ exports.execute = function(args) {
 
             if (SELECTED_ITEM) {
                 if (1 === SELECTED_ITEM.value) {
-                    await deploy_targets.showTargetQuickPick(
+                    const selectedTarget = await deploy_targets.showTargetQuickPick(
                         WORKSPACE_TARGETS,
-                        selectedWorkspace.t('tools.createDeployOperationScript.selectTarget'),
-                        async (selectedTarget) => {
-                            const CFG = selectedWorkspace.config;
-
-                            const TARGETS_FROM_CFG = deploy_helpers.asArray(
-                                CFG.targets
-                            );
-
-                            const CLONED_CFG = deploy_helpers.cloneObjectWithoutFunctions(CFG);
-                            (<any>CLONED_CFG).targets = deploy_helpers.cloneObject(TARGETS_FROM_CFG);
-
-                            const SETTINGS_FILE = Path.resolve(
-                                selectedWorkspace.configSource.resource.fsPath,
-                            );
-                            const SETTINGS_SECTION = selectedWorkspace.configSource.section;
-
-                            const CLONED_TARGETS_FROM_CFG = deploy_helpers.asArray(
-                                CLONED_CFG.targets
-                            );
-
-                            let targetScriptPath = scriptFile;
-                            if (scriptFile.startsWith(selectedWorkspace.settingFolder)) {
-                                targetScriptPath = './' + deploy_helpers.normalizePath(
-                                    scriptFile.substr(selectedWorkspace.settingFolder.length)
-                                );
-                            }
-
-                            let operationStorage: deploy_targets.TargetOperationValue[] | false = false;
-                            let updater: () => void;
-
-                            const TARGET_ITEM_FROM_CLONED_CFG = CLONED_TARGETS_FROM_CFG[selectedTarget.__index];
-                            if (TARGET_ITEM_FROM_CLONED_CFG) {
-                                switch (operationEvent) {
-                                    case deploy_targets.TargetOperationEvent.AfterDeployed:
-                                        operationStorage = deploy_helpers.asArray(TARGET_ITEM_FROM_CLONED_CFG.deployed);
-                                        updater = () => {
-                                            (<any>TARGET_ITEM_FROM_CLONED_CFG).deployed = <any>operationStorage;
-                                        };
-                                        break;
-
-                                    case deploy_targets.TargetOperationEvent.BeforeDeploy:
-                                        operationStorage = deploy_helpers.asArray(TARGET_ITEM_FROM_CLONED_CFG.beforeDeploy);
-                                        updater = () => {
-                                            (<any>TARGET_ITEM_FROM_CLONED_CFG).beforeDeploy = <any>operationStorage;
-                                        };
-                                        break;
-                                }
-                            }
-
-                            if (false === operationStorage) {
-                                return;
-                            }
-
-                            let newTargetOperationName = await vscode.window.showInputBox({
-                                placeHolder: selectedWorkspace.t('tools.createDeployOperationScript.askForNewOperationName'),
-                            });
-                            newTargetOperationName = deploy_helpers.toStringSafe(newTargetOperationName).trim();
-                            if ('' === newTargetOperationName) {
-                                newTargetOperationName = undefined;
-                            }
-
-                            operationStorage.push(<any>{
-                                name: newTargetOperationName,
-                                script: targetScriptPath,                                
-                                type: 'script'
-                            });
-
-                            updater();
-
-                            let settings: any;
-                            if (await deploy_helpers.exists(SETTINGS_FILE)) {
-                                settings = JSON.parse(
-                                    (await deploy_helpers.readFile(SETTINGS_FILE)).toString('utf8')
-                                );
-                            }
-
-                            if (deploy_helpers.isNullOrUndefined(settings)) {
-                                settings = {};
-                            }
-
-                            settings[SETTINGS_SECTION] = CLONED_CFG;
-
-                            await deploy_helpers.writeFile(
-                                SETTINGS_FILE,
-                                new Buffer( JSON.stringify(settings, null, 4) )
-                            );
+                        {
+                            placeHolder: selectedWorkspace.t('tools.createDeployOperationScript.selectTarget')
                         }
                     );
+
+                    if (selectedTarget) {
+                        const CFG = selectedWorkspace.config;
+
+                        const TARGETS_FROM_CFG = deploy_helpers.asArray(
+                            CFG.targets
+                        );
+
+                        const CLONED_CFG = deploy_helpers.cloneObjectWithoutFunctions(CFG);
+                        (<any>CLONED_CFG).targets = deploy_helpers.cloneObject(TARGETS_FROM_CFG);
+
+                        const SETTINGS_FILE = Path.resolve(
+                            selectedWorkspace.configSource.resource.fsPath,
+                        );
+                        const SETTINGS_SECTION = selectedWorkspace.configSource.section;
+
+                        const CLONED_TARGETS_FROM_CFG = deploy_helpers.asArray(
+                            CLONED_CFG.targets
+                        );
+
+                        let targetScriptPath = scriptFile;
+                        if (scriptFile.startsWith(selectedWorkspace.settingFolder)) {
+                            targetScriptPath = './' + deploy_helpers.normalizePath(
+                                scriptFile.substr(selectedWorkspace.settingFolder.length)
+                            );
+                        }
+
+                        let operationStorage: deploy_targets.TargetOperationValue[] | false = false;
+                        let updater: () => void;
+
+                        const TARGET_ITEM_FROM_CLONED_CFG = CLONED_TARGETS_FROM_CFG[selectedTarget.__index];
+                        if (TARGET_ITEM_FROM_CLONED_CFG) {
+                            switch (operationEvent) {
+                                case deploy_targets.TargetOperationEvent.AfterDeployed:
+                                    operationStorage = deploy_helpers.asArray(TARGET_ITEM_FROM_CLONED_CFG.deployed);
+                                    updater = () => {
+                                        (<any>TARGET_ITEM_FROM_CLONED_CFG).deployed = <any>operationStorage;
+                                    };
+                                    break;
+
+                                case deploy_targets.TargetOperationEvent.BeforeDeploy:
+                                    operationStorage = deploy_helpers.asArray(TARGET_ITEM_FROM_CLONED_CFG.beforeDeploy);
+                                    updater = () => {
+                                        (<any>TARGET_ITEM_FROM_CLONED_CFG).beforeDeploy = <any>operationStorage;
+                                    };
+                                    break;
+                            }
+                        }
+
+                        if (false === operationStorage) {
+                            return;
+                        }
+
+                        let newTargetOperationName = await vscode.window.showInputBox({
+                            placeHolder: selectedWorkspace.t('tools.createDeployOperationScript.askForNewOperationName'),
+                        });
+                        newTargetOperationName = deploy_helpers.toStringSafe(newTargetOperationName).trim();
+                        if ('' === newTargetOperationName) {
+                            newTargetOperationName = undefined;
+                        }
+
+                        operationStorage.push(<any>{
+                            name: newTargetOperationName,
+                            script: targetScriptPath,                                
+                            type: 'script'
+                        });
+
+                        updater();
+
+                        let settings: any;
+                        if (await deploy_helpers.exists(SETTINGS_FILE)) {
+                            settings = JSON.parse(
+                                (await deploy_helpers.readFile(SETTINGS_FILE)).toString('utf8')
+                            );
+                        }
+
+                        if (deploy_helpers.isNullOrUndefined(settings)) {
+                            settings = {};
+                        }
+
+                        settings[SETTINGS_SECTION] = CLONED_CFG;
+
+                        await deploy_helpers.writeFile(
+                            SETTINGS_FILE,
+                            new Buffer( JSON.stringify(settings, null, 4) )
+                        );
+                    }
                 }
             }
         }

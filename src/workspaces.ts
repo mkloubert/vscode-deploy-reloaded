@@ -1215,6 +1215,14 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     }
 
     /**
+     * Gets if the workspace is active or not.
+     */
+    public get isActive() {
+        return getActiveWorkspaces().map(aws => aws.id)
+                                    .indexOf( this.id ) > -1;
+    }
+
+    /**
      * Gets if 'deploy on change' is currently freezed or not.
      */
     public get isDeployOnChangeFreezed() {
