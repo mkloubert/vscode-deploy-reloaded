@@ -31,6 +31,7 @@ The extension supports the following destinations:
    * [Compare files](#compare-files-)
    * [Download files](#download-files-)
    * [Compare files](#compare-files-)
+   * [List remote files](#list-remote-files-)
 2. [Preview](#preview-)
 3. [Install](#install-)
 4. [How to use](#how-to-use-)
@@ -61,6 +62,10 @@ The extension supports the following destinations:
 ### Compare files [[&uarr;](#demos-)]
 
 ![Demo Compare files](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo3.gif)
+
+### List remote files [[&uarr;](#demos-)]
+
+![Demo List remote files](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo6.gif)
 
 ## Preview [[&uarr;](#table-of-contents)]
 
