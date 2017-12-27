@@ -1388,8 +1388,6 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 return;
             }
 
-            update = false;
-
             const CUR_DIR = __dirname;
             const CHANGELOG_FILE = Path.join(CUR_DIR, '../CHANGELOG.md');
 
