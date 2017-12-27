@@ -24,14 +24,22 @@ The extension supports the following destinations:
 
 ## Table of contents
 
-1. [Preview](#preview-)
-2. [Install](#install-)
-3. [How to use](#how-to-use-)
+1. [Demos](#demos-)
+   * [Deploying to SFTP](#deploying-to-sftp-)
+2. [Preview](#preview-)
+3. [Install](#install-)
+4. [How to use](#how-to-use-)
    * [Settings](#settings-)
      * [Packages](#packages-)
      * [Targets](#targets-)
    * [How to execute](#how-to-execute-)
-4. [Support and contribute](#support-and-contribute-)
+5. [Support and contribute](#support-and-contribute-)
+
+## Demos [[&uarr;](#table-of-contents)]
+
+### Deploying to SFTP [[&uarr;](#demos-)]
+
+![Demo Deploying to SFTP](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo1.gif)
 
 ## Preview [[&uarr;](#table-of-contents)]
 
@@ -255,7 +263,7 @@ You can also use the following, predefined, shortcuts:
 
 If you like the extension, you can support the project by sending a donation
 
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=marcel.kloubert%40gmx.net&item_name=Marcel%20Joachim%20Kloubert&item_number=vscode-deploy-reloaded&currency_code=EUR)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/MarcelKloubert)
 
 to [me](https://github.com/mkloubert).
 
@@ -266,8 +274,8 @@ To work with the code:
 * clone [this repository](https://github.com/mkloubert/vscode-deploy-reloaded)
 * create and change to a new branch, like `git checkout -b my_new_feature`
 * run `npm install` from your project folder
-* open that project folder from Visual Studio Code
-* edit and debug there
+* open that project folder in Visual Studio Code
+* now you can edit and debug there
 * commit your changes to your new branch and sync it with your forked GitHub repo
 * make a [pull request](https://github.com/mkloubert/vscode-deploy-reloaded/pulls)
 

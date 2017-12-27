@@ -35,6 +35,6 @@
 - Visual Studio Code version: {Please write here}
 - Extension version: {Please write here}
 
-### Some more info
+### Additional comments
 
-{Please write here, if possible}
+{Please write here, if there is something more to tell}

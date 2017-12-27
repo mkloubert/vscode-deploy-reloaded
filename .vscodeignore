@@ -1,6 +1,7 @@
 .github/**
 .vscode/**
 .vscode-test/**
+img/**
 out/test/**
 out/**/*.map
 src/**
