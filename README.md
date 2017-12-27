@@ -32,6 +32,8 @@ The extension supports the following destinations:
    * [Download files](#download-files-)
    * [Compare files](#compare-files-)
    * [List remote files](#list-remote-files-)
+   * [Tools](#tools-)
+     * [Quick code execution](#quick-code-execution-)
 2. [Preview](#preview-)
 3. [Install](#install-)
 4. [How to use](#how-to-use-)
@@ -66,6 +68,12 @@ The extension supports the following destinations:
 ### List remote files [[&uarr;](#demos-)]
 
 ![Demo List remote files](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo6.gif)
+
+### Tools [[&uarr;](#demos-)]
+
+#### Quick code execution [[&uarr;](#tools-)]
+
+![Demo Quick code execution](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo7.gif)
 
 ## Preview [[&uarr;](#table-of-contents)]
 

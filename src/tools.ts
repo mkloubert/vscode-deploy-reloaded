@@ -748,50 +748,24 @@ exports.execute = function(args) {
     );
 }
 
+/**
+ * Shows the list of files of a package.
+ * 
+ * @param {deploy_packages.Package|deploy_packages.Package[]} packages The available packages. 
+ */
+export async function showPackageFiles(packages: deploy_packages.Package | deploy_packages.Package[]) {
+    const PACKAGE = await deploy_packages.showPackageQuickPick(
+        packages,
+        {
+            placeHolder: i18.t('packages.selectPackage'),
+        }
+    );
 
-export async function showPackageFiles(workspaces: deploy_workspaces.Workspace | deploy_workspaces.Workspace[]) {
-    workspaces = deploy_helpers.asArray(workspaces);
-
-    const QUICK_PICKS: deploy_contracts.ActionQuickPick<deploy_packages.Package>[] = Enumerable.from(workspaces).selectMany((ws) => {
-        return ws.getPackages();
-    }).select(pkg => {
-        return {
-            label: deploy_packages.getPackageName(pkg),
-            description: deploy_helpers.toStringSafe(pkg.description).trim(),
-            detail: pkg.__workspace.rootPath,
-            state: pkg,
-        };
-    }).orderBy(qp => {
-        return deploy_helpers.normalizeString(qp.label);
-    }).toArray();
-
-    if (QUICK_PICKS.length < 1) {
-        deploy_helpers.showWarningMessage(
-            i18.t('packages.noneFound')
-        );
-
-        return;
-    }
-
-    let selectedItem: deploy_contracts.ActionQuickPick<deploy_packages.Package>;
-    if (1 === QUICK_PICKS.length) {
-        selectedItem = QUICK_PICKS[0];
-    }
-    else {
-        selectedItem = await vscode.window.showQuickPick(
-            QUICK_PICKS,
-            {
-                placeHolder: i18.t('packages.selectPackage'),
-            }
-        );
-    }
-
-    if (!selectedItem) {
+    if (!PACKAGE) {
         return;
     }
 
     const HTML_ENCODER = new HtmlEntities.AllHtmlEntities();
-    const PACKAGE = selectedItem.state;
     const PACKAGE_NAME = deploy_packages.getPackageName(PACKAGE);
     const WORKSPACE = PACKAGE.__workspace;
 
@@ -817,12 +791,119 @@ export async function showPackageFiles(workspaces: deploy_workspaces.Workspace |
     md += "## " + WORKSPACE.t('files') + "\n";
 
     if (FILES.length > 0) {
-        md += "| " + WORKSPACE.t('file') + " |\n";
+        md += "| " + WORKSPACE.t('file') + " | D-O-S<sup>1</sup> | D-O-C<sup>2</sup> | S-W-O<sup>3</sup> | R-O-C<sup>4</sup> \n";
         md += "| ---- |\n";
 
         for (const F of FILES) {
-            md += "| `" + HTML_ENCODER.encode(F) + "` |\n";
+            const FULL_PATH = Path.join(
+                WORKSPACE.rootPath, F
+            );
+
+            let deployOnSave = '';
+            {
+                let deployOnSaveTargets = await deploy_helpers.applyFuncFor(
+                    deploy_packages.findTargetsForFileOfPackage,
+                    WORKSPACE
+                )(FULL_PATH,
+                  () => PACKAGE.deployOnSave);
+                
+                if (false !== deployOnSaveTargets) {
+                    if (deployOnSaveTargets.length > 0) {
+                        deployOnSave = Enumerable.from( deployOnSaveTargets ).select(t => {
+                            return deploy_targets.getTargetName(t);
+                        }).orderBy(tn => {
+                            return deploy_helpers.normalizeString(tn);
+                        }).select(tn => {
+                            return '`' + HTML_ENCODER.encode(tn) + '`';
+                        }).joinToString(', ');
+                    }
+                }
+            }
+
+            let deployOnChange = '';
+            {
+                let deployOnChangeTargets = await deploy_helpers.applyFuncFor(
+                    deploy_packages.findTargetsForFileOfPackage,
+                    WORKSPACE
+                )(FULL_PATH,
+                  () => PACKAGE.deployOnChange);
+                
+                if (false !== deployOnChangeTargets) {
+                    if (deployOnChangeTargets.length > 0) {
+                        deployOnChange = Enumerable.from( deployOnChangeTargets ).select(t => {
+                            return deploy_targets.getTargetName(t);
+                        }).orderBy(tn => {
+                            return deploy_helpers.normalizeString(tn);
+                        }).select(tn => {
+                            return '`' + HTML_ENCODER.encode(tn) + '`';
+                        }).joinToString(', ');
+                    }
+                }
+            }
+
+            let syncWhenOpen = '';
+            {
+                let syncWhenOpenTargets = await deploy_helpers.applyFuncFor(
+                    deploy_packages.findTargetsForFileOfPackage,
+                    WORKSPACE
+                )(FULL_PATH,
+                  () => PACKAGE.syncWhenOpen);
+                
+                if (false !== syncWhenOpenTargets) {
+                    if (syncWhenOpenTargets.length > 0) {
+                        syncWhenOpen = Enumerable.from( syncWhenOpenTargets ).select(t => {
+                            return deploy_targets.getTargetName(t);
+                        }).orderBy(tn => {
+                            return deploy_helpers.normalizeString(tn);
+                        }).select(tn => {
+                            return '`' + HTML_ENCODER.encode(tn) + '`';
+                        }).joinToString(', ');
+                    }
+                }
+            }
+
+            let removeOnChange = '';
+            {
+                let removeOnChangeTargets = await deploy_helpers.applyFuncFor(
+                    deploy_packages.findTargetsForFileOfPackage,
+                    WORKSPACE
+                )(FULL_PATH,
+                  () => PACKAGE.removeOnChange,
+                  (filter, file) => {
+                      const FILE_LIST: string[] = [];
+                      const REL_PATH = WORKSPACE.toRelativePath(file);
+                      if (false !== REL_PATH) {
+                          const DOES_MATCH = deploy_helpers.checkIfDoesMatchByFileFilter('/' + REL_PATH,
+                                                                                         deploy_helpers.toMinimatchFileFilter(filter));
+                          if (DOES_MATCH) {
+                              FILE_LIST.push(file);
+                          }
+                      }
+       
+                      return FILE_LIST;
+                  });
+                
+                if (false !== removeOnChangeTargets) {
+                    if (removeOnChangeTargets.length > 0) {
+                        removeOnChange = Enumerable.from( removeOnChangeTargets ).select(t => {
+                            return deploy_targets.getTargetName(t);
+                        }).orderBy(tn => {
+                            return deploy_helpers.normalizeString(tn);
+                        }).select(tn => {
+                            return '`' + HTML_ENCODER.encode(tn) + '`';
+                        }).joinToString(', ');
+                    }
+                }
+            }
+
+            md += "| `" + HTML_ENCODER.encode(F) + "` | " + deployOnSave + " | " + deployOnChange + " | " + syncWhenOpen + " | " + removeOnChange + " |\n";
         }
+
+        md += "<br /><br />";
+        md += "<sup>1</sup>&nbsp;&nbsp;" + HTML_ENCODER.encode(WORKSPACE.t('deploy.onSave.text')) + "\n";
+        md += "<sup>2</sup>&nbsp;&nbsp;" + HTML_ENCODER.encode(WORKSPACE.t('deploy.onChange.text')) + "\n";
+        md += "<sup>3</sup>&nbsp;&nbsp;" + HTML_ENCODER.encode(WORKSPACE.t('sync.whenOpen.text')) + "\n";
+        md += "<sup>4</sup>&nbsp;&nbsp;" + HTML_ENCODER.encode(WORKSPACE.t('DELETE.onChange.text')) + "\n";
     }
     else {
         md += "\n";

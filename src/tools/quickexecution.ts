@@ -35,6 +35,8 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
     const $i18 = require('../i18');
 
     // helpers
+    const $dl = require('../download');
+    // helpers
     const $h = require('../helpers');
     // logger
     const $l = require('../log').CONSOLE;
@@ -43,6 +45,12 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
     const $w: any[] = $h.asArray(allWorkspaces).map(ws => {
         const CLONED_WS = $h.makeNonDisposable(ws);
 
+        // CLONED_WS.name
+        Object.defineProperty(CLONED_WS, 'name', {
+            enumerable: true,
+
+            get: () => ws.name,
+        });
         // CLONED_WS.rootPath
         Object.defineProperty(CLONED_WS, 'rootPath', {
             enumerable: true,
@@ -56,7 +64,13 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
     const $aw: any[] = $h.asArray(activeWorkspaces).map(aws => {
         const CLONED_AWS = $h.makeNonDisposable(aws);
 
-        // CLONED_WS.rootPath
+        // CLONED_AWS.name
+        Object.defineProperty(CLONED_AWS, 'name', {
+            enumerable: true,
+            
+            get: () => aws.name,
+        });
+        // CLONED_AWS.rootPath
         Object.defineProperty(CLONED_AWS, 'rootPath', {
             enumerable: true,
             
@@ -95,6 +109,17 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         return val;
     };
 
+    // resolve()
+    const $res = async (val: any, func: (v: any) => any) => {
+        val = await $unwrap(val);
+        
+        if (func) {
+            return Promise.resolve(
+                func(val)
+            );
+        }
+    };
+
     // toStringSafe()
     const $s = async (val: any) => {
         return $h.toStringSafe(
@@ -125,6 +150,43 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         }
 
         return Path.resolve(p);
+    };
+
+    const $guid = async (ver?: string, ...args: any[]) => {
+        const UUID = require('uuid');
+
+        ver = $h.normalizeString(
+            await $unwrap(ver)
+        );
+        args = $h.asArray(
+            await $unwrap(args),
+            false,
+        );
+
+        let func: (...a: any[]) => string;
+        switch (ver) {
+            case '1':
+            case 'v1':
+                func = UUID.v1;
+                break;
+
+            case '':
+            case '4':
+            case 'v4':
+                func = UUID.v4;
+                break;
+
+            case '5':
+            case 'v5':
+                func = UUID.v5;
+                break;
+        }
+
+        if (!func) {
+            throw new Error(`UUID version '${ver}' not supported!`);
+        }
+
+        return func.apply(null, args);
     };
 
     const $hash = async (algo: string, val: any, asBinary?: boolean) => {
@@ -178,6 +240,32 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         return result;
     };
 
+    const $rand = async function (minOrMax?: number, max?: number) {
+        const RandomFloat = require('random-float');
+
+        minOrMax = parseFloat($h.toStringSafe(
+            await $unwrap(minOrMax)
+        ).trim());
+
+        max = parseFloat($h.toStringSafe(
+            await $unwrap(max)
+        ).trim());
+        
+        const ARGS = [];
+        if (!isNaN(max)) {
+            ARGS.push(minOrMax, max);
+        }
+        else if (!isNaN(minOrMax)) {
+            ARGS.push(minOrMax);
+        }
+
+        if (ARGS.length < 1) {
+            ARGS.push(0, Number.MAX_SAFE_INTEGER);
+        }
+
+        return RandomFloat.apply(null, ARGS);
+    };
+
     // readFile()
     const $rf = async (file: string) => {
         return await $h.readFile(
@@ -193,6 +281,10 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
     const $sha256 = async (val: any, asBinary?: boolean) => {
         return await $hash('sha256',
                            val, asBinary);
+    };
+
+    const $uuid = async function (ver?: string, ...args: any[]) {
+        return await $guid.apply(null, arguments);
     };
 
     // writeFile()
@@ -300,7 +392,8 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "### $aw\n";
     help += "An array of active workspaces.\n";
     help += "```javascript\n";
-    help += "$aw.rootPath\n";
+    help += "$aw[0].name\n";
+    help += "$aw[0].rootPath\n";
     help += "```\n";
     help += "\n";
     // $l
@@ -314,7 +407,8 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "### $w\n";
     help += "An array of all available workspace.\n";
     help += "```javascript\n";
-    help += "$w.length\n";
+    help += "$w[0].name\n";
+    help += "$w[0].rootPath\n";
     help += "```\n";
     help += "\n";
 
@@ -333,6 +427,14 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "```javascript\n";
     help += "$fp('./myFile.txt')\n";
     help += "$fp('E:/test/myFile.txt')\n";
+    help += "```\n";
+    help += "\n";
+    // $guid
+    help += "### $s\n";
+    help += "Generates a GUID.\n";
+    help += "```javascript\n";
+    help += "$guid\n";
+    help += "$guid('v4')\n";
     help += "```\n";
     help += "\n";
     // $help
@@ -374,6 +476,22 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "$r('vscode').window.showWarningMessage('Test')\n";
     help += "```\n";
     help += "\n";
+    // $rand
+    help += "### $rand\n";
+    help += "Generates a random float number.\n";
+    help += "```javascript\n";
+    help += "$rand\n";
+    help += "$rand(59.1979)\n";
+    help += "$res( $rand(5979, 23979), (n) => Math.floor(n) )\n";
+    help += "```\n";
+    help += "\n";
+    // $res
+    help += "### $res\n";
+    help += "Resolves a wrapped value.\n";
+    help += "```javascript\n";
+    help += "$res( $dl.download('https://example.com', (data) => data.toString('utf8')) )\n";
+    help += "```\n";
+    help += "\n";
     // $rf
     help += "### $rf\n";
     help += "Reads the content of a file.\n";
@@ -404,6 +522,14 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "$sha256('abc', true)\n";
     help += "```\n";
     help += "\n";
+    // $uuid
+    help += "### $uuid\n";
+    help += "Generates a GUID.\n";
+    help += "```javascript\n";
+    help += "$uuid\n";
+    help += "$uuid('v5')\n";
+    help += "```\n";
+    help += "\n";
     // $wf
     help += "### $wf\n";
     help += "Writes data to a file.\n";
@@ -416,6 +542,13 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
 
 
     help += "## Modules\n";
+    // $dl
+    help += "### $dl\n";
+    help += "Download [helpers](https://mkloubert.github.io/vscode-deploy-reloaded/modules/_download_.html).\n";
+    help += "```javascript\n";
+    help += "$dl.download('http://localhost/')\n";
+    help += "```\n";
+    help += "\n";
     // $h
     help += "### $h\n";
     help += "Extension [helpers](https://mkloubert.github.io/vscode-deploy-reloaded/modules/_helpers_.html).\n";

@@ -1,10 +1,8 @@
 
 h1, h2, h3, h4, h5, h6 {
-    border-bottom: 1px solid inherit;
     clear: both;
     display: block;
-    margin-bottom: 8px;
-    text-decoration: underline;
+    margin-bottom: 12px;
     width: 100%;
 }
 
@@ -18,5 +16,12 @@ a:hover {
 }
 
 table {
-    border-width: 1px;
+    border: 1px #777 solid;
+    border-spacing: 0;
+    border-collapse: separate;
+}
+
+table td, table th {
+    border: 1px #777 solid;
+    padding: 6px 10px;
 }

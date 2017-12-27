@@ -80,6 +80,7 @@ export interface Translation {
         onChange?: {
             activated?: string;
             failed?: string;
+            text?: string;
             waitingBeforeActivate?: string;
         };
         package?: {
@@ -114,10 +115,12 @@ export interface Translation {
         onChange?: {
             activated?: string;
             failed?: string;
+            text?: string;
             waitingBeforeActivate?: string;
         };
         onSave?: {
             failed?: string;
+            text?: string;
         };
         package?: {
             description?: string;
@@ -303,6 +306,7 @@ export interface Translation {
             errors?: {
                 allFailed?: string;
             };
+            text?: string;
         };
     };
     targets?: {

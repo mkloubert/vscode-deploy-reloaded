@@ -1125,7 +1125,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
                         {
                             action: async () => {
                                 await deploy_tools.showPackageFiles(
-                                    WORKSPACES
+                                    getAllPackagesSorted()
                                 );
                             },
                             label: '$(microscope)  ' + i18.t('tools.showPackageFiles.label'),
@@ -1148,7 +1148,8 @@ async function activateExtension(context: vscode.ExtensionContext) {
                                 // skip icons
                                 return i.label.substr(
                                     i.label.indexOf(' ')
-                                ).trim();
+                                ).toLowerCase()
+                                 .trim();
                             }
                         )
                     );

@@ -73,6 +73,7 @@ export const translation: Translation = {
         onChange: {
             activated: "Remove on change has been activated for workspace{0:trim,surround,leading_space}.",
             failed: "Remove on change for{0:trim,surround,leading_space} in{1:trim,surround,leading_space} failed:{2:trim,surround,leading_space}",
+            text: "Remove on change",
             waitingBeforeActivate: "Remove on change is deactivated for about{0:trim,leading_space} seconds for workspace{1:trim,surround,leading_space}.",
         },
         package: {
@@ -107,10 +108,12 @@ export const translation: Translation = {
         onChange: {
             activated: "Deploy on change has been activated for workspace{0:trim,surround,leading_space}.",
             failed: "Deploy on change from{0:trim,surround,leading_space} to{1:trim,surround,leading_space} failed:{2:trim,surround,leading_space}",
+            text: "Deploy on change",
             waitingBeforeActivate: "Deploy on change is deactivated for about{0:trim,leading_space} seconds for workspace{1:trim,surround,leading_space}.",
         },
         onSave: {
             failed: "Deploy on save from{0:trim,surround,leading_space} to{1:trim,surround,leading_space} failed:{2:trim,surround,leading_space}",
+            text: "Deploy on save",
         },
         package: {
             description: "Deploys the files of a package",
@@ -298,6 +301,7 @@ export const translation: Translation = {
             errors: {
                 allFailed: "All sync operations failed!",
             },
+            text: "Sync when open",
         },
     },
     targets: {

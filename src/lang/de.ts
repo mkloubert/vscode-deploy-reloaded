@@ -73,6 +73,7 @@ export const translation: Translation = {
         onChange: {
             activated: "Automatisches Löschen wurde für den Arbeitsbereich{0:trim,surround,leading_space} aktiviert.",
             failed: "Das automatische Löschen von{0:trim,surround,leading_space} in{1:trim,surround,leading_space} ist fehlgeschlagen:{2:trim,surround,leading_space}",
+            text: "Automatisches Löschen",
             waitingBeforeActivate: "Automatisches Löschen wird für ca.{0:trim,leading_space} Sekunden für den Arbeitsbereich{1:trim,surround,leading_space} deaktiviert.",
         },
         package: {
@@ -107,10 +108,12 @@ export const translation: Translation = {
         onChange: {
             activated: "Das Bereitstellen nach dem Ändern wurde für den Arbeitsbereich{0:trim,surround,leading_space} aktiviert.",
             failed: "Das Bereitstellen nach dem Ändern von{0:trim,surround,leading_space} nach{1:trim,surround,leading_space} ist fehlgeschlagen:{2:trim,surround,leading_space}",
+            text: "Bereitstellen beim Ändern",
             waitingBeforeActivate: "Das Bereitstellen nach dem Ändern wird für ca.{0:trim,leading_space} Sekunden für den Arbeitsbereich{1:trim,surround,leading_space} deaktiviert.",
         },
         onSave: {
             failed: "Das Bereitstellen nach dem Speichern von{0:trim,surround,leading_space} nach{1:trim,surround,leading_space} ist fehlgeschlagen:{2:trim,surround,leading_space}",
+            text: "Bereitstellen nach dem Speichern",
         },
         package: {
             description: "Stellt die Dateien eines Paketes bereit",
@@ -297,6 +300,7 @@ export const translation: Translation = {
             errors: {
                 allFailed: "Alle Synchronisierungs-Operationen sind feldgeschlagen!",
             },
+            text: "Synchronisieren beim Öffnen",
         },
     },
     targets: {

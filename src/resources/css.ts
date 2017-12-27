@@ -31,7 +31,7 @@ const REPOSITORY = {
     // END: hl.railscasts.css
 
     // START: style.css
-    "style.css": new Buffer("H4sIAAAAAAAACn1Q2woCIRB9F/wHX3proe1G2Ne4OqTkOos71Ub07w2lBUEJ5+XMucwohW/nyi8ZK8aasWFs1U0Kxa/D7CA3HRJhr1U7TGrEGJwKyUMOtH/JbASTNavJF8aFcYjmylxEeyxkb/IhpHfabpjKgGCixoHFbChg0uqUuDaGBEVwCY489y8WM2buUkhh6o4WI3J5BvcrLSEH8aA6tccz5Or/U/7xkOkifP1KXep5Bqse88c+ik0BAAA=", 'base64'),
+    "style.css": new Buffer("H4sIAAAAAAAACo1Q3crCMAy9H+wdAuKdg82/Qfc02RpssTal7fc5Ed/doJswvLFwoJyfnJCyMM0GzFawE+wFB8ER7mUB8gZHGBX0nE33ZrRNweFNOMfDeSIvGE/WV2LLfFHQbMM4KVersxGmrtfCPMqiLPAznB3L8Eh6Mmcac6Vp4IjZslfg2VMnwpxUhv8pzvkv+5/XFJ1dZDL2juZEz1Ecsk4YYdW2LSR2dm5/i1UKOFh/UlAvednWYUikIFFAqaRuUZH1Bqaf+akvoNavoqOoTf06mcx7AlJvfWSTAQAA", 'base64'),
     // END: style.css
 
 };

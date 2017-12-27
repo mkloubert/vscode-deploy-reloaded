@@ -1,5 +1,10 @@
 # Change Log (vscode-deploy-reloaded)
 
+## 0.3.0 (December 27th, 2017; tools)
+
+* bugfixes
+* extended tools
+
 ## 0.2.0 (December 27th, 2017; improvements and bugfixes)
 
 * bugfixes
