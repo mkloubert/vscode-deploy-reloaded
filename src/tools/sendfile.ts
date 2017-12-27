@@ -21,6 +21,7 @@ import * as deploy_log from '../log';
 import * as i18 from '../i18';
 import * as Path from 'path';
 import * as Net from 'net';
+import * as SanitizeFilename from 'sanitize-filename';
 import * as SimpleSocket from 'node-simple-socket';
 import * as vscode from 'vscode';
 
@@ -146,11 +147,15 @@ export async function receiveFile(context: vscode.ExtensionContext) {
             try {
                 remoteConnection.readJSON<FileToSend>().then((file) => {
                     try {
+                        let fileName = deploy_helpers.toStringSafe(file.name);
+
                         let prefix: string;
                         let postfix: string;
-                        if (!deploy_helpers.isEmptyString(file.name)) {
-                            postfix = Path.extname(file.name);
-                            prefix = Path.basename(file.name, postfix) + '-';
+                        if (!deploy_helpers.isEmptyString(fileName)) {
+                            fileName = SanitizeFilename(fileName);
+
+                            postfix = Path.extname(fileName);
+                            prefix = Path.basename(fileName, postfix) + '-';
                         }
 
                         deploy_helpers.invokeForTempFile(async (tmpFile) => {

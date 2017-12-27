@@ -141,6 +141,10 @@ export interface Translation {
         };
     };
     error?: string;
+    extension?: {
+        initialized?: string;
+        initializing?: string;
+    };
     file?: string;
     files?: string;
     ftp?: {
@@ -176,6 +180,12 @@ export interface Translation {
         size?: string;
     };
     maxDepthReached?: string;
+    network?: {
+        hostname?: string;
+        interfaces?: {
+            list?: string;
+        };
+    };
     no?: string;
     noFiles?: string;
     notFound?: {
@@ -194,6 +204,7 @@ export interface Translation {
         virtualTarget?: string;
     };
     plugins?: {
+        __loaded?: string;
         compiler?: {
             invalidDirectory?: string;
         };
@@ -390,6 +401,9 @@ export interface Translation {
             result?: {
                 title?: string;
             },
+            uuid?: {
+                notSupported?: string;
+            };
         };
         sendOrReceiveFile?: {
             description?: string;
@@ -441,8 +455,10 @@ export interface Translation {
             cannotUseTargetForFile?: string;
             notInitialized?: string;
         };
+        initializing?: string;
         noneFound?: string;
         noSelected?: string;
+        removing?: string;
         selectWorkspace?: string;
     };
     yes?: string;

@@ -15,8 +15,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as Crypto from 'crypto';
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
+import * as deploy_gui from './gui';
 import * as deploy_log from './log';
 import * as deploy_mappings from './mappings';
 import * as deploy_packages from './packages';
@@ -255,6 +257,9 @@ export interface TargetProvider {
      */
     readonly targets?: string | string[];
 }
+
+
+const KEY_TARGET_USAGE = 'vscdrLastExecutedTargetActions';
 
 /**
  * The default type or a target operation.
@@ -653,24 +658,44 @@ export function normalizeTargetType(target: Target): string {
 }
 
 /**
+ * Resets the target usage statistics.
+ * 
+ * @param {vscode.ExtensionContext} context The extension context.
+ */
+export function resetTargetUsage(context: vscode.ExtensionContext) {
+    context.workspaceState.update(KEY_TARGET_USAGE, undefined).then(() => {
+    }, (err) => {
+        deploy_log.CONSOLE
+                  .trace(err, 'targets.resetTargetUsage()');
+    });
+}
+
+/**
  * Shows a quick pick for a list of targets.
  * 
+ * @param {vscode.ExtensionContext} context The extension context.
  * @param {Target|Target[]} targets One or more targets.
  * @param {vscode.QuickPickOptions} [opts] Custom options for the quick picks.
  * 
  * @return {Promise<Target|false>} The promise that contains the selected target (if selected)
  *                                 or (false) if no target is available.
  */
-export async function showTargetQuickPick(targets: Target | Target[],
+export async function showTargetQuickPick(context: vscode.ExtensionContext,
+                                          targets: Target | Target[],
                                           opts?: vscode.QuickPickOptions): Promise<Target | false> {
-    const QUICK_PICKS: deploy_contracts.ActionQuickPick<Target>[] = deploy_helpers.asArray(targets).map(t => {
+    const QUICK_PICKS: deploy_contracts.ActionQuickPick<string>[] = deploy_helpers.asArray(targets).map(t => {
         const WORKSPACE = t.__workspace;
 
         return {
-            label: getTargetName(t),
+            action: () => {
+                return t;
+            },
+            label: '$(telescope)  ' + getTargetName(t),
             description: deploy_helpers.toStringSafe(t.description),
             detail: WORKSPACE.rootPath,
-            state: t,
+            state: Crypto.createHash('sha256')
+                         .update( new Buffer(deploy_helpers.toStringSafe(t.__id), 'utf8') )
+                         .digest('hex'),
         };
     });
 
@@ -682,18 +707,27 @@ export async function showTargetQuickPick(targets: Target | Target[],
         return false;
     }
 
-    let selectedItem: deploy_contracts.ActionQuickPick<Target>;
+    let selectedItem: deploy_contracts.ActionQuickPick<string>;
     if (1 === QUICK_PICKS.length) {
         selectedItem = QUICK_PICKS[0];
     }
     else {
         selectedItem = await vscode.window.showQuickPick(
-            QUICK_PICKS, opts
+            deploy_gui.sortQuickPicksByUsage(QUICK_PICKS,
+                                             context.workspaceState,
+                                             KEY_TARGET_USAGE,
+                                             (i) => {
+                                                 // remove icon
+                                                 return i.label
+                                                         .substr(i.label.indexOf(' '))
+                                                         .trim();
+                                             }),
+            opts,
         );
     }
 
     if (selectedItem) {
-        return selectedItem.state;
+        return selectedItem.action();
     }
 }
 

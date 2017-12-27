@@ -110,14 +110,23 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
     };
 
     // resolve()
-    const $res = async (val: any, func: (v: any) => any) => {
+    const $res = async (val: any, ...funcs: ((v: any) => any)[]) => {
         val = await $unwrap(val);
-        
-        if (func) {
-            return Promise.resolve(
-                func(val)
-            );
+
+        let lastResult: any = val;
+
+        for (const F of $h.asArray(funcs)) {
+            let result: any;
+            if (F) {
+                result = await Promise.resolve(
+                    F(lastResult)
+                );
+            }
+
+            lastResult = await $unwrap(result);
         }
+        
+        return lastResult;
     };
 
     // toStringSafe()
@@ -152,16 +161,49 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         return Path.resolve(p);
     };
 
-    const $guid = async (ver?: string, ...args: any[]) => {
+    // executeCommand()
+    const $c = async (id: string, ...cmdArgs: any[]) => {
+        id = $h.toStringSafe(
+            await $unwrap(id)
+        );
+        cmdArgs = $h.asArray(
+            await $unwrap(cmdArgs),
+            false,
+        );
+
+        const ARGS = [];
+        if (cmdArgs) {
+            for (const A of cmdArgs) {
+                ARGS.push(
+                    await $unwrap(A)
+                );
+            }
+        }
+
+        return await Promise.resolve(
+            $vs.commands.executeCommand
+                        .apply(null, [ <any>id ].concat( ARGS ))
+        );
+    };
+
+    const $guid = async (ver?: string, ...guidArgs: any[]) => {
         const UUID = require('uuid');
 
         ver = $h.normalizeString(
             await $unwrap(ver)
         );
-        args = $h.asArray(
-            await $unwrap(args),
-            false,
+        guidArgs = $h.normalizeString(
+            await $unwrap(guidArgs)
         );
+        
+        const ARGS = [];
+        if (guidArgs) {
+            for (const A of guidArgs) {
+                ARGS.push(
+                    await $unwrap(A)
+                );
+            }
+        }
 
         let func: (...a: any[]) => string;
         switch (ver) {
@@ -183,10 +225,11 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         }
 
         if (!func) {
-            throw new Error(`UUID version '${ver}' not supported!`);
+            throw new Error($i18.t('tools.quickExecution.uuid.notSupported',
+                                   ver));
         }
 
-        return func.apply(null, args);
+        return func.apply(null, ARGS);
     };
 
     const $hash = async (algo: string, val: any, asBinary?: boolean) => {
@@ -414,6 +457,13 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
 
 
     help += "## Functions\n";
+    // $c
+    help += "### $e\n";
+    help += "Executes a Visual Studio Code command.\n";
+    help += "```javascript\n";
+    help += "$c('editor.action.selectAll')\n";
+    help += "```\n";
+    help += "\n";
     // $e
     help += "### $e\n";
     help += "Executes code.\n";
@@ -489,7 +539,8 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "### $res\n";
     help += "Resolves a wrapped value.\n";
     help += "```javascript\n";
-    help += "$res( $dl.download('https://example.com', (data) => data.toString('utf8')) )\n";
+    help += "$res( $dl.download('https://example.com'), (data) => data.toString('utf8') )\n";
+    help += "$res( $dl.download('https://example.com'), (data) => data.toString('utf8'), (str) => str.toUpperCase() )\n";
     help += "```\n";
     help += "\n";
     // $rf

@@ -21,6 +21,7 @@ const CompareVersion = require('compare-versions');
 import * as deploy_commands from './commands';
 import * as deploy_compare from './compare';
 import * as deploy_contracts from './contracts';
+import * as deploy_gui from './gui';
 import * as deploy_helpers from './helpers';
 import * as deploy_html from './html';
 import * as deploy_log from './log';
@@ -36,6 +37,7 @@ import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
 import * as i18 from './i18';
 import * as Moment from 'moment';
+import * as OS from 'os';
 import * as Path from 'path';
 import * as vscode from 'vscode';
 
@@ -299,10 +301,20 @@ async function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?:
             }
 
             if (removeWorkspace) {
-                if (deploy_helpers.tryDispose(WS)) {
+                outputChannel.append(i18.t('workspaces.removing',
+                                           WS.folder.uri.fsPath) + ' ');
+                try {
+                    WS.dispose();
+
                     WORKSPACES.splice(i, 1);
                     hasBeenRemoved = true;
+
+                    outputChannel.appendLine(`[${i18.t('ok')}]`);
                 }
+                catch (e) {
+                    outputChannel.appendLine(`[${i18.t('error', e)}]`);
+                }
+                outputChannel.appendLine('');
             }
 
             if (!hasBeenRemoved) {
@@ -346,24 +358,29 @@ async function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?:
                 newWorkspace = new deploy_workspaces.Workspace(
                     nextWorkspaceId--, WSF, CTX
                 );
+
+                outputChannel.append(i18.t('workspaces.initializing',
+                                           WSF.uri.fsPath) + ' ');
                 try {
                     const HAS_BEEN_INITIALIZED = await newWorkspace.initialize();
                     if (HAS_BEEN_INITIALIZED) {
                         WORKSPACES.push(newWorkspace);
+
+                        outputChannel.appendLine(`[${i18.t('ok')}]`);
                     }
                     else {
-                        deploy_helpers.showErrorMessage(
+                        throw new Error(
                             i18.t('workspaces.errors.notInitialized',
                                   WSF.uri.fsPath)
                         );
                     }
                 }
                 catch (err) {
-                    deploy_log.CONSOLE
-                              .trace(err, 'extension.reloadWorkspaceFolders(2)');
-
                     deploy_helpers.tryDispose(newWorkspace);
+
+                    outputChannel.appendLine(`[${i18.t('error', err)}]`);
                 }
+                outputChannel.appendLine('');
             }
             catch (e) {
                 deploy_log.CONSOLE
@@ -637,7 +654,9 @@ async function activateExtension(context: vscode.ExtensionContext) {
 
     // output channel
     WF.next(() => {
-        outputChannel = vscode.window.createOutputChannel('Deploy (Reloaded)');
+        context.subscriptions.push(
+            outputChannel = vscode.window.createOutputChannel('Deploy Reloaded')
+        );
     });
 
     // active workspace provider
@@ -676,6 +695,12 @@ async function activateExtension(context: vscode.ExtensionContext) {
         outputChannel.appendLine(`GitHub : https://github.com/mkloubert/vscode-deploy-reloaded`);
         outputChannel.appendLine(`Twitter: https://twitter.com/mjkloubert`);
         outputChannel.appendLine(`Donate : https://paypal.me/MarcelKloubert`);
+
+        outputChannel.appendLine('');
+        outputChannel.appendLine('');
+        outputChannel.appendLine(i18.t('extension.initializing'));
+        outputChannel.appendLine('');
+        outputChannel.appendLine('');
     });
 
     // commands
@@ -752,6 +777,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
             vscode.commands.registerCommand('extension.deploy.reloaded.deployWorkspace', async () => {
                 try {
                     const PKG = await deploy_packages.showPackageQuickPick(
+                        context,
                         getAllPackagesSorted(),
                         {
                             placeHolder: i18.t('packages.selectPackage'),
@@ -836,6 +862,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
             vscode.commands.registerCommand('extension.deploy.reloaded.pullWorkspace', async () => {
                 try {
                     const PKG = await deploy_packages.showPackageQuickPick(
+                        context,
                         getAllPackagesSorted(),
                         {
                             placeHolder: i18.t('packages.selectPackage'),
@@ -919,6 +946,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
             vscode.commands.registerCommand('extension.deploy.reloaded.deletePackage', async () => {
                 try {
                     const PKG = await deploy_packages.showPackageQuickPick(
+                        context,
                         getAllPackagesSorted(),
                         {
                             placeHolder: i18.t('packages.selectPackage'),
@@ -965,6 +993,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
             vscode.commands.registerCommand('extension.deploy.reloaded.listDirectory', async () => {
                 try {
                     const TARGET = await deploy_targets.showTargetQuickPick(
+                        context,
                         getAllTargetsSorted(),
                         {
                             placeHolder: i18.t('listDirectory.selectSource'),
@@ -990,7 +1019,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
             vscode.commands.registerCommand('extension.deploy.reloaded.quickExecution', async () => {
                 try {
                     await deploy_tools_quick_execution._1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
-                        currentContext,
+                        context,
                         getAllWorkspacesSorted(),
                         activeWorkspaces.map(aws => aws),
                     );
@@ -1100,6 +1129,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
                             },
                             label: '$(code)  ' + i18.t('tools.quickExecution.label'),
                             description: i18.t('tools.quickExecution.description'),
+                            state: 0,
                         },
 
                         {
@@ -1110,49 +1140,57 @@ async function activateExtension(context: vscode.ExtensionContext) {
                             },
                             label: '$(plus)  ' + i18.t('tools.createDeployScript.label'),
                             description: i18.t('tools.createDeployScript.description'),
+                            state: 1,
                         },
 
                         {
                             action: async () => {
                                 await deploy_tools.createDeployOperationScript(
+                                    context,
                                     getActiveWorkspacesOrAll()
                                 );
                             },
                             label: '$(plus)  ' + i18.t('tools.createDeployOperationScript.label'),
                             description: i18.t('tools.createDeployOperationScript.description'),
+                            state: 2,
                         },
 
                         {
                             action: async () => {
                                 await deploy_tools.showPackageFiles(
+                                    context,
                                     getAllPackagesSorted()
                                 );
                             },
                             label: '$(microscope)  ' + i18.t('tools.showPackageFiles.label'),
                             description: i18.t('tools.showPackageFiles.description'),
+                            state: 3,
                         },
 
                         {
                             action: async () => {
-                                await deploy_tools_send_file.sendOrReceiveFile(currentContext);
+                                await deploy_tools_send_file.sendOrReceiveFile(context);
                             },
                             label: '$(broadcast)  ' + i18.t('tools.sendOrReceiveFile.label'),
                             description: i18.t('tools.sendOrReceiveFile.description'),
+                            state: 4,
                         }
                     ];
 
                     const SELECTED_ITEM = await vscode.window.showQuickPick(
-                        deploy_helpers.sortByLabel(
+                        deploy_gui.sortQuickPicksByUsage(
                             QUICK_PICKS,
-                            i => {
-                                // skip icons
-                                return i.label.substr(
-                                    i.label.indexOf(' ')
-                                ).toLowerCase()
-                                 .trim();
+                            context.workspaceState,
+                            deploy_tools.KEY_TOOL_USAGE,
+                            (i) => {
+                                // remove icon
+                                return i.label
+                                        .substr(i.label.indexOf(' '))
+                                        .trim();
                             }
                         )
                     );
+
                     if (SELECTED_ITEM) {
                         await Promise.resolve(
                             SELECTED_ITEM.action()
@@ -1172,7 +1210,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
             // receive file
             vscode.commands.registerCommand('extension.deploy.reloaded.receiveFile', async () => {
                 try {
-                    await deploy_tools_send_file.receiveFile(currentContext);
+                    await deploy_tools_send_file.receiveFile(context);
                 }
                 catch (e) {
                     deploy_log.CONSOLE
@@ -1187,7 +1225,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
             // send file
             vscode.commands.registerCommand('extension.deploy.reloaded.sendFile', async () => {
                 try {
-                    await deploy_tools_send_file.sendFile(currentContext);
+                    await deploy_tools_send_file.sendFile(context);
                 }
                 catch (e) {
                     deploy_log.CONSOLE
@@ -1251,16 +1289,19 @@ async function activateExtension(context: vscode.ExtensionContext) {
         }
     });
     
-    // reload plugins
+    // load plugins
     WF.next(async () => {
         await reloadPlugins();
 
-        outputChannel.appendLine('');
+        let pluginInfo = '';
 
-        outputChannel.appendLine(`Loaded ${PLUGINS.length} plugins:`);
+        pluginInfo += `${i18.t('plugins.__loaded', PLUGINS.length)}\n`;
         PLUGINS.forEach((pi) => {
-            outputChannel.appendLine(`- ${pi.__type}`);
+            pluginInfo += `- ${pi.__type}\n`;
         });
+
+        deploy_log.CONSOLE
+                  .info(pluginInfo, 'extension.deploy.reloaded.loadPlugins');
     });
 
     // global VSCode events
@@ -1283,6 +1324,10 @@ async function activateExtension(context: vscode.ExtensionContext) {
             }),
 
             vscode.workspace.onDidChangeConfiguration((e) => {
+                deploy_packages.resetPackageUsage(context);
+                deploy_targets.resetTargetUsage(context);
+                deploy_tools.resetToolUsage(context);
+
                 onDidChangeConfiguration(e).then(() => {
                 }).catch((err) => {
                     deploy_log.CONSOLE
@@ -1409,10 +1454,74 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 }
                 catch (e) {
                     deploy_log.CONSOLE
-                            .trace(e, 'extension.checkForNewVersion(2)');
+                              .trace(e, 'extension.checkForNewVersion(2)');
                 }
             }
         }
+    });
+
+    // display network info
+    WF.next(() => {
+        try {
+            outputChannel.appendLine(i18.t('network.hostname',
+                                           OS.hostname()));
+
+            const NETWORK_INTERFACES = OS.networkInterfaces();
+
+            const LIST_OF_IFNAMES = Object.keys(NETWORK_INTERFACES).sort((x, y) => {
+                return deploy_helpers.compareValuesBy(x, y, n => {
+                    return deploy_helpers.normalizeString(n);
+                });
+            });
+
+            if (Object.keys(NETWORK_INTERFACES).length > 0) {
+                outputChannel.appendLine(i18.t('network.interfaces.list'));
+                
+                for (const IFNAME of LIST_OF_IFNAMES) {
+                    const IFACES = NETWORK_INTERFACES[IFNAME].filter(x => {
+                        return !x.internal;
+                    }).filter(x => {
+                        let addr = deploy_helpers.normalizeString(x.address);
+                        
+                        if ('IPv4' === x.family) {
+                            return !/^(127\.[\d.]+|[0:]+1|localhost)$/.test(addr);
+                        }
+
+                        if ('IPv6' === x.family) {
+                            return '::1' !== addr;
+                        }
+
+                        return true;
+                    }).sort((x, y) => {
+                        return deploy_helpers.compareValuesBy(x, y, (i) => {
+                            return 'IPv4' === i.family ? 0 : 1;
+                        });
+                    });
+
+                    if (IFACES.length > 0) {
+                        outputChannel.appendLine(`    - '${IFNAME}':`);
+                        IFACES.forEach(x => {
+                                            outputChannel.appendLine(`      [${x.family}] '${x.address}' / '${x.netmask}' ('${x.mac}')`);
+                                       });
+
+                        outputChannel.appendLine('');
+                    }
+                }
+            }
+            else {
+                outputChannel.appendLine('');
+            }
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'extension.displayNetworkInfo()');
+        }
+    });
+
+    WF.next(() => {
+        outputChannel.appendLine('');
+        outputChannel.appendLine(i18.t('extension.initialized'));
+        outputChannel.appendLine('');
     });
 
     if (!isDeactivating) {

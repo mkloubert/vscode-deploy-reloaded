@@ -134,6 +134,10 @@ export const translation: Translation = {
         },
     },
     error: "ERROR:{0:trim,surround,leading_space}",
+    extension: {
+        initialized: "Extension has been initialized.",
+        initializing: "Extension is initializing ...",
+    },
     file: "File",
     files: "Files",
     ftp: {
@@ -169,6 +173,12 @@ export const translation: Translation = {
         size: "Size:{0:trim,leading_space}",
     },
     maxDepthReached: "Cannot go deeper than{0:trim,leading_space}!",
+    network: {
+        hostname: 'Your hostname:{0:trim,surround,leading_space}',
+        interfaces: {
+            list: 'Your network interfaces:',
+        }
+    },
     no: "No",
     noFiles: "No files found!",
     notFound: {
@@ -187,6 +197,7 @@ export const translation: Translation = {
         virtualTarget: "Virtual target for package{0:trim,surround,leading_space}",
     },
     plugins: {
+        __loaded: "Loaded{0:trim,leading_space} plugins:",
         compiler: {
             invalidDirectory: "{0:trim,surround,ending_space}is an invalid directory!",
         },
@@ -385,6 +396,9 @@ export const translation: Translation = {
             result: {
                 title: "'Quick execution' result",
             },
+            uuid: {
+                notSupported: "UUID version{0:trim,surround,leading_space} is not supported!",
+            },
         },
         sendOrReceiveFile: {
             description: "Sends or receives a file to/from a remote editor",
@@ -436,8 +450,10 @@ export const translation: Translation = {
             cannotUseTargetForFile: "Cannot use target{0:trim,surround,leading_space} for file{1:trim,surround,leading_space}!",
             notInitialized: "Workspace{0:trim,surround,leading_space} has not been initialized!",
         },
+        initializing: "Initializing workspace{0:trim,surround,leading_space} ...",
         noneFound: "No workspaces found!",
         noSelected: "no workspace selected",
+        removing: "Closing workspace{0:trim,surround,leading_space} ...",
         selectWorkspace: "Select a workspace ...",
     },
     yes: 'Yes',

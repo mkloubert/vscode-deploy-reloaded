@@ -15,7 +15,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as Crypto from 'crypto';
 import * as deploy_contracts from './contracts';
+import * as deploy_gui from './gui';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
 import * as deploy_targets from './targets';
@@ -119,6 +121,8 @@ export type PackageFileListResolverResult = string | string[];
 export interface SyncWhenOpenSetting extends deploy_contracts.FileFilter {
 }
 
+
+const KEY_PACKAGE_USAGE = 'vscdrLastExecutedPackageActions';
 
 /**
  * Handles an "auto deploy" of a file.
@@ -347,25 +351,46 @@ export function getTargetsOfPackage(pkg: Package): deploy_targets.Target[] | fal
     return targets;
 }
 
+
+/**
+ * Resets the package usage statistics.
+ * 
+ * @param {vscode.ExtensionContext} context The extension context.
+ */
+export function resetPackageUsage(context: vscode.ExtensionContext) {
+    context.workspaceState.update(KEY_PACKAGE_USAGE, undefined).then(() => {
+    }, (err) => {
+        deploy_log.CONSOLE
+                  .trace(err, 'packages.resetPackageUsage()');
+    });
+}
+
 /**
  * Shows a quick pick for a list of packages.
  * 
+ * @param {vscode.ExtensionContext} context The extension context.
  * @param {Package|Package[]} packages One or more packages.
  * @param {vscode.QuickPickOptions} [opts] Custom options for the quick picks.
  * 
  * @return {Promise<Package|false>} The promise that contains the selected package (if selected)
  *                                  or (false) if no package is available.
  */
-export async function showPackageQuickPick(packages: Package | Package[],
+export async function showPackageQuickPick(context: vscode.ExtensionContext,
+                                           packages: Package | Package[],
                                            opts?: vscode.QuickPickOptions): Promise<Package | false> {
-    const QUICK_PICKS: deploy_contracts.ActionQuickPick<Package>[] = deploy_helpers.asArray(packages).map(pkg => {
+    const QUICK_PICKS: deploy_contracts.ActionQuickPick<string>[] = deploy_helpers.asArray(packages).map(pkg => {
         const WORKSPACE = pkg.__workspace;
 
         return {
-            label: getPackageName(pkg),
+            action: () => {
+                return pkg;
+            },
+            label: '$(gift)  ' + getPackageName(pkg),
             description: deploy_helpers.toStringSafe(pkg.description),
             detail: WORKSPACE.rootPath,
-            state: pkg,
+            state: Crypto.createHash('sha256')
+                         .update( new Buffer(deploy_helpers.toStringSafe(pkg.__id), 'utf8') )
+                         .digest('hex'),
         };
     });
 
@@ -377,17 +402,26 @@ export async function showPackageQuickPick(packages: Package | Package[],
         return false;
     }
 
-    let selectedItem: deploy_contracts.ActionQuickPick<Package>;
+    let selectedItem: deploy_contracts.ActionQuickPick<string>;
     if (1 === QUICK_PICKS.length) {
         selectedItem = QUICK_PICKS[0];
     }
     else {
         selectedItem = await vscode.window.showQuickPick(
-            QUICK_PICKS, opts
+            deploy_gui.sortQuickPicksByUsage(QUICK_PICKS,
+                                             context.workspaceState,
+                                             KEY_PACKAGE_USAGE,
+                                             (i) => {
+                                                 // remove icon
+                                                 return i.label
+                                                         .substr(i.label.indexOf(' '))
+                                                         .trim();
+                                             }),
+            opts,
         );
     }
 
     if (selectedItem) {
-        return selectedItem.state;
+        return selectedItem.action();
     }
 }

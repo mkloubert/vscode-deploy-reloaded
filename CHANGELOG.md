@@ -1,5 +1,13 @@
 # Change Log (vscode-deploy-reloaded)
 
+## 0.4.0 (December 28th, 2017; enhancements)
+
+* bugfixes
+* code improvements
+* display network information
+* more information for the output channel
+* tool actions, packages and targets are sorted and displayed by usage in the GUI now
+
 ## 0.3.0 (December 27th, 2017; tools)
 
 * bugfixes

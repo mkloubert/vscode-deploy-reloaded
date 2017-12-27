@@ -134,6 +134,10 @@ export const translation: Translation = {
         },
     },
     error: "FEHLER:{0:trim,surround,leading_space}",
+    extension: {
+        initialized: "Erweiterung wurde erfolgreich initialisiert.",
+        initializing: "Erweiterung wird initialisiert ...",
+    },
     file: "Datei",
     files: "Dateien",
     ftp: {
@@ -169,6 +173,12 @@ export const translation: Translation = {
         size: "Grösse:{0:trim,leading_space}",
     },
     maxDepthReached: "Maximale Tiefe von{0:trim,leading_space} erreicht!",
+    network: {
+        hostname: 'Name dieses Computers:{0:trim,surround,leading_space}',
+        interfaces: {
+            list: 'Netzwerk-Adapter:',
+        }
+    },
     no: "Nein",
     noFiles: "Keine Dateien gefunden!",
     notFound: {
@@ -186,6 +196,7 @@ export const translation: Translation = {
         virtualTarget: "Virtuelles Ziel für Paket{0:trim,surround,leading_space}",
     },
     plugins: {
+        __loaded: "{0:trim,ending_space}Plug-Ins wurden geladen:",
         compiler: {
             invalidDirectory: "{0:trim,surround,ending_space}ist ein ungültiges Verzeichnis!",
         },
@@ -384,6 +395,9 @@ export const translation: Translation = {
             result: {
                 title: "Resultat der Ausführung",
             },
+            uuid: {
+                notSupported: "UUID Version{0:trim,surround,leading_space} wird nicht unterstützt!",
+            },
         },
         sendOrReceiveFile: {
             description: "Sendet oder empfängt eine Dateien an/von einen/einem entfernten Editor",
@@ -435,8 +449,10 @@ export const translation: Translation = {
             cannotUseTargetForFile: "Kann das Ziel{0:trim,surround,leading_space} nicht für die Datei{1:trim,surround,leading_space} verwenden!",
             notInitialized: "Der Arbeitsbereich{0:trim,surround,leading_space} wurde nicht initialisiert!",
         },
+        initializing: "Initialisiere Arbeitsbereich{0:trim,surround,leading_space} ...",
         noneFound: "Keine Arbeitsbereiche gefunden!",
         noSelected: "kein Arbeitsbereich ausgewählt",
+        removing: "Schliesse Arbeitsbereich{0:trim,surround,leading_space} ...",
         selectWorkspace: "Wählen Sie einen Arbeitsbereich ...",
     },
     yes: 'Ja',

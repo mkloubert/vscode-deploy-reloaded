@@ -18,6 +18,7 @@
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
 import * as deploy_html from './html';
+import * as deploy_log from './log';
 import * as deploy_packages from './packages';
 import * as deploy_targets from './targets';
 import * as deploy_workspaces from './workspaces';
@@ -27,6 +28,11 @@ import * as i18 from './i18';
 import * as Path from 'path';
 import * as vscode from 'vscode';
 
+
+/**
+ * The memento key for the tool usage statistics.
+ */
+export const KEY_TOOL_USAGE = 'vscdrLastExecutedToolActions';
 
 /**
  * Creates a deploy script.
@@ -446,9 +452,11 @@ function pullFiles(args) {
 /**
  * Creates a script for a deploy operation.
  * 
+ * @param {vscode.ExtensionContext} context The extension context.
  * @param {deploy_workspaces.Workspace|deploy_workspaces.Workspace[]} workspaces One or more workspaces. 
  */
-export async function createDeployOperationScript(workspaces: deploy_workspaces.Workspace | deploy_workspaces.Workspace[]) {
+export async function createDeployOperationScript(context: vscode.ExtensionContext,
+                                                  workspaces: deploy_workspaces.Workspace | deploy_workspaces.Workspace[]) {
     workspaces = deploy_helpers.asArray(workspaces);
 
     const QUICK_PICKS: deploy_contracts.ActionQuickPick<deploy_workspaces.Workspace>[] = workspaces.map(ws => {
@@ -637,6 +645,7 @@ exports.execute = function(args) {
             if (SELECTED_ITEM) {
                 if (1 === SELECTED_ITEM.value) {
                     const selectedTarget = await deploy_targets.showTargetQuickPick(
+                        context,
                         WORKSPACE_TARGETS,
                         {
                             placeHolder: selectedWorkspace.t('tools.createDeployOperationScript.selectTarget')
@@ -749,12 +758,28 @@ exports.execute = function(args) {
 }
 
 /**
+ * Resets the package usage statistics.
+ * 
+ * @param {vscode.ExtensionContext} context The extension context.
+ */
+export function resetToolUsage(context: vscode.ExtensionContext) {
+    context.workspaceState.update(KEY_TOOL_USAGE, undefined).then(() => {
+    }, (err) => {
+        deploy_log.CONSOLE
+                  .trace(err, 'tools.resetToolUsage()');
+    });
+}
+
+/**
  * Shows the list of files of a package.
  * 
+ * @param {context: vscode.ExtensionContext} context The extension context.
  * @param {deploy_packages.Package|deploy_packages.Package[]} packages The available packages. 
  */
-export async function showPackageFiles(packages: deploy_packages.Package | deploy_packages.Package[]) {
+export async function showPackageFiles(context: vscode.ExtensionContext,
+                                       packages: deploy_packages.Package | deploy_packages.Package[]) {
     const PACKAGE = await deploy_packages.showPackageQuickPick(
+        context,
         packages,
         {
             placeHolder: i18.t('packages.selectPackage'),
