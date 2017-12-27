@@ -679,8 +679,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
         outputChannel.appendLine('');
         outputChannel.appendLine(`GitHub : https://github.com/mkloubert/vscode-deploy-reloaded`);
         outputChannel.appendLine(`Twitter: https://twitter.com/mjkloubert`);
-        outputChannel.appendLine(`Donate : [PayPal] https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RB3WUETWG4QU2`);
-        outputChannel.appendLine(`         [Flattr] https://flattr.com/submit/auto?fid=o62pkd&url=https%3A%2F%2Fgithub.com%2Fmkloubert%2Fvs-deploy`);
+        outputChannel.appendLine(`Donate : [PayPal] https://paypal.me/MarcelKloubert`);
     });
 
     // commands
