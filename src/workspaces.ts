@@ -34,6 +34,7 @@ import * as deploy_transformers from './transformers';
 import * as deploy_tasks from './tasks';
 import * as deploy_values from './values';
 import * as Enumerable from 'node-enumerable';
+import * as Events from 'events';
 import * as Glob from 'glob';
 import * as i18 from './i18';
 import * as i18next from 'i18next';
@@ -427,8 +428,12 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
     private createSessionState(newCfg: WorkspaceSettings) {
         const NEW_SESSION_STATE: deploy_contracts.KeyValuePairs = {};
-            
+        
+        NEW_SESSION_STATE['commands'] = {};
+        NEW_SESSION_STATE['commands']['events'] = new Events.EventEmitter();
+
         NEW_SESSION_STATE['pull'] = {};
+        NEW_SESSION_STATE['pull']['events'] = new Events.EventEmitter();
         NEW_SESSION_STATE['pull']['states'] = {};
         NEW_SESSION_STATE['pull']['states']['global'] = {};
         NEW_SESSION_STATE['pull']['states']['data_transformers'] = {};
@@ -438,15 +443,18 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         NEW_SESSION_STATE['sync']['whenOpen']['states'] = {};
 
         NEW_SESSION_STATE['upload'] = {};
+        NEW_SESSION_STATE['upload']['events'] = new Events.EventEmitter();
         NEW_SESSION_STATE['upload']['states'] = {};
         NEW_SESSION_STATE['upload']['states']['global'] = {};
         NEW_SESSION_STATE['upload']['states']['data_transformers'] = {};
 
         NEW_SESSION_STATE['target_operations'] = {};
         NEW_SESSION_STATE['target_operations']['http'] = {};
+        NEW_SESSION_STATE['target_operations']['http']['events'] = new Events.EventEmitter();
         NEW_SESSION_STATE['target_operations']['http']['global'] = {};
         NEW_SESSION_STATE['target_operations']['http']['body_scripts'] = {};
         NEW_SESSION_STATE['target_operations']['script'] = {};
+        NEW_SESSION_STATE['target_operations']['script']['events'] = new Events.EventEmitter();
         NEW_SESSION_STATE['target_operations']['script']['global'] = {};
         NEW_SESSION_STATE['target_operations']['script']['scripts'] = {};
 

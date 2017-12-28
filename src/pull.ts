@@ -268,6 +268,7 @@ export async function pullFilesFrom(files: string[],
                                     );
 
                                     const CONTEXT: deploy_transformers.DataTransformerContext = {
+                                        events: ME.sessionState['pull']['events'],
                                         globalEvents: deploy_events.EVENTS,
                                         globals: ME.globals,
                                         globalState: ME.sessionState['pull']['states']['global'],

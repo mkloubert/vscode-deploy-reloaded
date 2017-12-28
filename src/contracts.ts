@@ -366,6 +366,10 @@ export interface PlatformItem {
  */
 export interface ScriptArguments {
     /**
+     * Event emitter for scripts of that kind.
+     */
+    readonly events: NodeJS.EventEmitter;
+    /**
      * Gets the emitter for global extension events.
      */
     readonly globalEvents: NodeJS.EventEmitter;

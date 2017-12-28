@@ -21,6 +21,7 @@ import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
 import * as deploy_values from './values';
 import * as deploy_workspaces from './workspaces';
+import * as Events from 'events';
 import * as vscode from 'vscode';
 
 
@@ -187,6 +188,7 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
                     const CTX: ScriptCommandExecutionContext = {
                         button: btn,
                         command: id,
+                        events: ME.sessionState['commands']['events'],
                         globalEvents: deploy_events.EVENTS,
                         globals: ME.globals,
                         globalState: GLOBAL_STATE,
@@ -221,7 +223,7 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
 
                     return await Promise.resolve(
                         EXECUTE.apply(SCRIPT_MODULE,
-                                        args.concat( deploy_helpers.toArray(arguments) ))
+                                      args.concat( deploy_helpers.toArray(arguments) ))
                     );
                 }
                 else {

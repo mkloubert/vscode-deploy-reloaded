@@ -534,6 +534,7 @@ export abstract class FileToUploadBase implements FileToUpload {
             );
 
             const CONTEXT: deploy_transformers.DataTransformerContext = {
+                events: ME.workspace.sessionState['upload']['events'],
                 globalEvents: deploy_events.EVENTS,
                 globals: ME.workspace.globals,
                 globalState: ME.workspace.sessionState['upload']['states']['global'],

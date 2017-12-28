@@ -23,6 +23,7 @@ import * as deploy_log from '../log';
 import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
 import * as deploy_workspaces from '../workspaces';
+import * as Events from 'events';
 
 
 /**
@@ -95,6 +96,7 @@ export interface ScriptTarget extends deploy_targets.Target {
 
 
 class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
+    private readonly _EVENTS = new Events.EventEmitter();
     private readonly _GLOBAL_STATE: deploy_contracts.KeyValuePairs = {};
     private readonly _SCRIPT_STATES: deploy_contracts.KeyValuePairs = {};
 
@@ -119,6 +121,7 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
         const ARGS: ScriptArguments = {
             cancellationToken: undefined,
             dir: context['dir'],
+            events: ME._EVENTS,
             files: context['files'],
             globalEvents: deploy_events.EVENTS,
             globals: context.target.__workspace.globals,
@@ -267,6 +270,10 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
         }
 
         return RESULT;
+    }
+
+    protected onDispose() {
+        this._EVENTS.removeAllListeners();
     }
 
     public async uploadFiles(context: deploy_plugins.UploadContext<ScriptTarget>): Promise<void> {

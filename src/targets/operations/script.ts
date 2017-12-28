@@ -101,6 +101,7 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
         if (EXECUTE) {
             const ARGS: ScriptTargetOperationExecutionArguments = {
                 context: context,
+                events: WORKSPACE.sessionState['target_operations']['script']['events'],
                 globalEvents: deploy_events.EVENTS,
                 globals: WORKSPACE.globals,
                 globalState: WORKSPACE.sessionState['target_operations']['script']['global'],
