@@ -21,6 +21,7 @@ import * as deploy_gui from './gui';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
 import * as deploy_targets from './targets';
+import * as deploy_values from './values';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
 import * as i18 from './i18';
@@ -33,7 +34,8 @@ import * as vscode from 'vscode';
 /**
  * A package.
  */
-export interface Package extends deploy_contracts.ConditionalItem,
+export interface Package extends deploy_values.Applyable,
+                                 deploy_contracts.ConditionalItem,
                                  deploy_contracts.FileFilter,
                                  deploy_contracts.PlatformItem,
                                  deploy_contracts.WithOptionalName,

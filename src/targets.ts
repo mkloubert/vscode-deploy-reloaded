@@ -29,6 +29,7 @@ import * as deploy_targets_operations_script from './targets/operations/script';
 import * as deploy_targets_operations_sql from './targets/operations/sql';
 import * as deploy_targets_operations_wait from './targets/operations/wait';
 import * as deploy_transformers from './transformers';
+import * as deploy_values from './values';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
 import * as i18 from './i18';
@@ -74,7 +75,8 @@ export interface ExecuteTargetOperationOptions {
 /**
  * A target.
  */
-export interface Target extends deploy_transformers.CanTransformData,
+export interface Target extends deploy_values.Applyable,
+                                deploy_transformers.CanTransformData,
                                 deploy_contracts.ConditionalItem,
                                 deploy_contracts.Encryptable,
                                 deploy_contracts.PlatformItem,

@@ -1,5 +1,11 @@
 # Change Log (vscode-deploy-reloaded)
 
+## 0.5.0 (December 28th, 2017; improvements)
+
+* bugfixes
+* code improvements
+* [placeholders](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/values) can be applied to properties of [packages](https://github.com/mkloubert/vscode-deploy-reloaded/wiki#packages-) and [targets](https://github.com/mkloubert/vscode-deploy-reloaded/wiki#targets-) now, s. [apply values](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/apply_values)
+
 ## 0.4.0 (December 28th, 2017; enhancements)
 
 * bugfixes

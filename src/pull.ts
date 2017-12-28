@@ -488,40 +488,17 @@ export async function pullPackage(pkg: deploy_packages.Package) {
         return;
     }
 
-    const QUICK_PICK_ITEMS: deploy_contracts.ActionQuickPick[] = TARGETS.map((t, i) => {
-        return {
-            action: async () => {
-                await pullFilesFrom.apply(ME,
-                                          [ FILES_TO_PULL, t, i + 1 ]);
-            },
-            description: deploy_helpers.toStringSafe( t.description ).trim(),
-            detail: t.__workspace.folder.uri.fsPath,
-            label: deploy_targets.getTargetName(t),
-            state: t,
-        };
-    }).filter(qp => deploy_targets.isVisibleForPackage(qp.state, pkg));
-
-    if (QUICK_PICK_ITEMS.length < 1) {
-        await ME.showWarningMessage(
-            ME.t('targets.noneFound')
-        );
-
+    const SELECTED_TARGET = await deploy_targets.showTargetQuickPick(
+        ME.context.extension,
+        TARGETS,
+        {
+            placeHolder: ME.t('pull.selectSource'),
+        }
+    );
+    if (!SELECTED_TARGET) {
         return;
     }
 
-    let selectedItem: deploy_contracts.ActionQuickPick;
-    if (1 === QUICK_PICK_ITEMS.length) {
-        selectedItem = QUICK_PICK_ITEMS[0];
-    }
-    else {
-        selectedItem = await vscode.window.showQuickPick(QUICK_PICK_ITEMS, {
-            placeHolder: ME.t('pull.selectSource')
-        });
-    }
-
-    if (selectedItem) {
-        await Promise.resolve(
-            selectedItem.action()
-        );
-    }
+    await pullFilesFrom.apply(ME,
+                              [ FILES_TO_PULL, SELECTED_TARGET, SELECTED_TARGET.__index + 1 ]);
 }

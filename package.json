@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.4.0",
+ "version": "0.5.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -313,6 +313,20 @@
        "items": {
         "type": "object",
         "properties": {
+         "applyValuesTo": {
+          "description": "Applies values to the properties of that package.",
+          "type": "object",
+          "patternProperties": {
+           "\\S+": {
+            "description": "The name of the property inside that package where the value should be applied to.",
+            "oneOf": [
+             {
+              "description": "A value to apply. If a string, it is handled as template with placesholders, which should be parsed and used as value to apply."
+             }
+            ]
+           }
+          }
+         },
          "button": {
           "oneOf": [
            {
@@ -673,6 +687,20 @@
            "account": {
             "type": "string",
             "description": "The account name."
+           },
+           "applyValuesTo": {
+            "description": "Applies values to the properties of that target.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The name of the property inside that target where the value should be applied to.",
+              "oneOf": [
+               {
+                "description": "A value to apply. If a string, it is handled as template with placesholders, which should be parsed and used as value to apply."
+               }
+              ]
+             }
+            }
            },
            "beforeDelete": {
             "description": "One or more operations that should be invoked BEFORE a delete operation starts.",
@@ -2602,6 +2630,20 @@
          {
           "type": "object",
           "properties": {
+           "applyValuesTo": {
+            "description": "Applies values to the properties of that target.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The name of the property inside that target where the value should be applied to.",
+              "oneOf": [
+               {
+                "description": "A value to apply. If a string, it is handled as template with placesholders, which should be parsed and used as value to apply."
+               }
+              ]
+             }
+            }
+           },
            "beforeDelete": {
             "description": "One or more operations that should be invoked BEFORE a delete operation starts.",
             "type": "array",
@@ -4518,6 +4560,20 @@
          {
           "type": "object",
           "properties": {
+           "applyValuesTo": {
+            "description": "Applies values to the properties of that target.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The name of the property inside that target where the value should be applied to.",
+              "oneOf": [
+               {
+                "description": "A value to apply. If a string, it is handled as template with placesholders, which should be parsed and used as value to apply."
+               }
+              ]
+             }
+            }
+           },
            "beforeDelete": {
             "description": "One or more operations that should be invoked BEFORE a delete operation starts.",
             "type": "array",
@@ -6451,6 +6507,20 @@
          {
           "type": "object",
           "properties": {
+           "applyValuesTo": {
+            "description": "Applies values to the properties of that target.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The name of the property inside that target where the value should be applied to.",
+              "oneOf": [
+               {
+                "description": "A value to apply. If a string, it is handled as template with placesholders, which should be parsed and used as value to apply."
+               }
+              ]
+             }
+            }
+           },
            "beforeDelete": {
             "description": "One or more operations that should be invoked BEFORE a delete operation starts.",
             "type": "array",
@@ -8368,6 +8438,20 @@
          {
           "type": "object",
           "properties": {
+           "applyValuesTo": {
+            "description": "Applies values to the properties of that target.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The name of the property inside that target where the value should be applied to.",
+              "oneOf": [
+               {
+                "description": "A value to apply. If a string, it is handled as template with placesholders, which should be parsed and used as value to apply."
+               }
+              ]
+             }
+            }
+           },
            "beforeDelete": {
             "description": "One or more operations that should be invoked BEFORE a delete operation starts.",
             "type": "array",
@@ -10315,6 +10399,20 @@
          {
           "type": "object",
           "properties": {
+           "applyValuesTo": {
+            "description": "Applies values to the properties of that target.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The name of the property inside that target where the value should be applied to.",
+              "oneOf": [
+               {
+                "description": "A value to apply. If a string, it is handled as template with placesholders, which should be parsed and used as value to apply."
+               }
+              ]
+             }
+            }
+           },
            "beforeDelete": {
             "description": "One or more operations that should be invoked BEFORE a delete operation starts.",
             "type": "array",
@@ -12256,6 +12354,20 @@
          {
           "type": "object",
           "properties": {
+           "applyValuesTo": {
+            "description": "Applies values to the properties of that target.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The name of the property inside that target where the value should be applied to.",
+              "oneOf": [
+               {
+                "description": "A value to apply. If a string, it is handled as template with placesholders, which should be parsed and used as value to apply."
+               }
+              ]
+             }
+            }
+           },
            "beforeDelete": {
             "description": "One or more operations that should be invoked BEFORE a delete operation starts.",
             "type": "array",
@@ -14214,6 +14326,20 @@
          {
           "type": "object",
           "properties": {
+           "applyValuesTo": {
+            "description": "Applies values to the properties of that target.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The name of the property inside that target where the value should be applied to.",
+              "oneOf": [
+               {
+                "description": "A value to apply. If a string, it is handled as template with placesholders, which should be parsed and used as value to apply."
+               }
+              ]
+             }
+            }
+           },
            "beforeDelete": {
             "description": "One or more operations that should be invoked BEFORE a delete operation starts.",
             "type": "array",
@@ -16130,6 +16256,20 @@
          {
           "type": "object",
           "properties": {
+           "applyValuesTo": {
+            "description": "Applies values to the properties of that target.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The name of the property inside that target where the value should be applied to.",
+              "oneOf": [
+               {
+                "description": "A value to apply. If a string, it is handled as template with placesholders, which should be parsed and used as value to apply."
+               }
+              ]
+             }
+            }
+           },
            "beforeDelete": {
             "description": "One or more operations that should be invoked BEFORE a delete operation starts.",
             "type": "array",
@@ -18092,6 +18232,20 @@
          {
           "type": "object",
           "properties": {
+           "applyValuesTo": {
+            "description": "Applies values to the properties of that target.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The name of the property inside that target where the value should be applied to.",
+              "oneOf": [
+               {
+                "description": "A value to apply. If a string, it is handled as template with placesholders, which should be parsed and used as value to apply."
+               }
+              ]
+             }
+            }
+           },
            "beforeDelete": {
             "description": "One or more operations that should be invoked BEFORE a delete operation starts.",
             "type": "array",
@@ -20034,6 +20188,20 @@
          {
           "type": "object",
           "properties": {
+           "applyValuesTo": {
+            "description": "Applies values to the properties of that target.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The name of the property inside that target where the value should be applied to.",
+              "oneOf": [
+               {
+                "description": "A value to apply. If a string, it is handled as template with placesholders, which should be parsed and used as value to apply."
+               }
+              ]
+             }
+            }
+           },
            "beforeDelete": {
             "description": "One or more operations that should be invoked BEFORE a delete operation starts.",
             "type": "array",
@@ -22062,6 +22230,20 @@
              }
             ]
            },
+           "applyValuesTo": {
+            "description": "Applies values to the properties of that target.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The name of the property inside that target where the value should be applied to.",
+              "oneOf": [
+               {
+                "description": "A value to apply. If a string, it is handled as template with placesholders, which should be parsed and used as value to apply."
+               }
+              ]
+             }
+            }
+           },
            "beforeDelete": {
             "description": "One or more operations that should be invoked BEFORE a delete operation starts.",
             "type": "array",
@@ -24005,6 +24187,20 @@
          {
           "type": "object",
           "properties": {
+           "applyValuesTo": {
+            "description": "Applies values to the properties of that target.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The name of the property inside that target where the value should be applied to.",
+              "oneOf": [
+               {
+                "description": "A value to apply. If a string, it is handled as template with placesholders, which should be parsed and used as value to apply."
+               }
+              ]
+             }
+            }
+           },
            "beforeDelete": {
             "description": "One or more operations that should be invoked BEFORE a delete operation starts.",
             "type": "array",
@@ -25935,6 +26131,20 @@
             "type": "boolean",
             "description": "Set to (true) to use OpenSSH agent forwarding (auth-agent@openssh.com) for the life of the connection. 'agent' property must also be set to use this feature.",
             "default": false
+           },
+           "applyValuesTo": {
+            "description": "Applies values to the properties of that target.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The name of the property inside that target where the value should be applied to.",
+              "oneOf": [
+               {
+                "description": "A value to apply. If a string, it is handled as template with placesholders, which should be parsed and used as value to apply."
+               }
+              ]
+             }
+            }
            },
            "beforeDelete": {
             "description": "One or more operations that should be invoked BEFORE a delete operation starts.",
@@ -27908,6 +28118,20 @@
          {
           "type": "object",
           "properties": {
+           "applyValuesTo": {
+            "description": "Applies values to the properties of that target.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The name of the property inside that target where the value should be applied to.",
+              "oneOf": [
+               {
+                "description": "A value to apply. If a string, it is handled as template with placesholders, which should be parsed and used as value to apply."
+               }
+              ]
+             }
+            }
+           },
            "beforeDelete": {
             "description": "One or more operations that should be invoked BEFORE a delete operation starts.",
             "type": "array",
@@ -29832,6 +30056,20 @@
          {
           "type": "object",
           "properties": {
+           "applyValuesTo": {
+            "description": "Applies values to the properties of that target.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The name of the property inside that target where the value should be applied to.",
+              "oneOf": [
+               {
+                "description": "A value to apply. If a string, it is handled as template with placesholders, which should be parsed and used as value to apply."
+               }
+              ]
+             }
+            }
+           },
            "beforeDelete": {
             "description": "One or more operations that should be invoked BEFORE a delete operation starts.",
             "type": "array",
@@ -31838,6 +32076,20 @@
          {
           "type": "object",
           "properties": {
+           "applyValuesTo": {
+            "description": "Applies values to the properties of that target.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The name of the property inside that target where the value should be applied to.",
+              "oneOf": [
+               {
+                "description": "A value to apply. If a string, it is handled as template with placesholders, which should be parsed and used as value to apply."
+               }
+              ]
+             }
+            }
+           },
            "beforeDelete": {
             "description": "One or more operations that should be invoked BEFORE a delete operation starts.",
             "type": "array",
@@ -33752,6 +34004,20 @@
          {
           "type": "object",
           "properties": {
+           "applyValuesTo": {
+            "description": "Applies values to the properties of that target.",
+            "type": "object",
+            "patternProperties": {
+             "\\S+": {
+              "description": "The name of the property inside that target where the value should be applied to.",
+              "oneOf": [
+               {
+                "description": "A value to apply. If a string, it is handled as template with placesholders, which should be parsed and used as value to apply."
+               }
+              ]
+             }
+            }
+           },
            "beforeDelete": {
             "description": "One or more operations that should be invoked BEFORE a delete operation starts.",
             "type": "array",

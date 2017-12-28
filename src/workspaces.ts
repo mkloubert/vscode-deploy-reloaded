@@ -285,6 +285,22 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     }
 
     /**
+     * Applies values to an object.
+     * 
+     * @param {TObj} obj The object to apply the values to.
+     * 
+     * @return {TObj} The new object.
+     */
+    public applyValuesTo<TObj extends deploy_values.Applyable = deploy_values.Applyable>(obj: TObj): TObj {
+        const ME = this;
+        
+        return deploy_values.applyValuesTo(
+            obj,
+            () => ME.getValues(),
+        );
+    }
+
+    /**
      * Checks if an object can be handled by that workspace.
      * 
      * @param {WorkspaceItem|WorkspaceItemFromSettings} obj The object to check.
@@ -2068,12 +2084,14 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             return 'object' === typeof p;
         }).select(p => {
             return deploy_helpers.cloneObject(p);
-        }).toArray()
+        }).toArray();
 
         packages = deploy_helpers.filterPlatformItems(packages);
 
         let index = -1;
-        packages = Enumerable.from(packages).pipe(p => {
+        packages = Enumerable.from(packages).select(p => {
+            return ME.applyValuesTo(p);
+        }).pipe(p => {
             ++index;
 
             (<any>p)['__index'] = index;
@@ -2202,7 +2220,9 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         targets = deploy_helpers.filterPlatformItems(targets);
 
         let index = -1;
-        targets = Enumerable.from(targets).pipe(t => {
+        targets = Enumerable.from(targets).select(t => {
+            return ME.applyValuesTo(t);
+        }).pipe(t => {
             ++index;
 
             (<any>t)['__index'] = index;

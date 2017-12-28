@@ -23,6 +23,18 @@ import * as OS from 'os';
 
 
 /**
+ * An object that can apply to (its) properties by using
+ * generated values by placeholders.
+ */
+export interface Applyable {
+    /**
+     * A list of property names and their values
+     * that should be applied to that object.
+     */
+    readonly applyValuesTo?: { [prop: string]: any };
+}
+
+/**
  * An item of a static value.
  */
 export interface CodeValueItem extends ValueItem {
@@ -194,6 +206,79 @@ export class StaticValue extends ValueBase<StaticValueItem> {
     }
 }
 
+
+/**
+ * Applies values to an object.
+ * 
+ * @param {TObj} obj The object to apply the values to.
+ * @param {Function} valueProvider The function that provides the values to apply to string based propertis.
+ * 
+ * @return {TObj} The new object.
+ */
+export function applyValuesTo<TObj extends Applyable = Applyable>(obj: TObj, 
+                                                                  valueProvider: () => Value | Value[]): TObj {
+    if (!valueProvider) {
+        valueProvider = () => [];
+    }
+
+    const DO_NOT_APPLY_SELF = Symbol('DO_NOT_APPLY_SELF');
+    const SELF_PROP = 'applyValuesTo';
+
+    if (obj) {
+        const NEW_OBJ: any = {};
+        for (const P in obj) {
+            NEW_OBJ[P] = obj[P];
+        }
+
+        const APPLY_TO = obj[SELF_PROP];
+        let selfValue: any = DO_NOT_APPLY_SELF;
+
+        const MAKE_PLACEHOLDER_PROPERTY = (prop: string, val: any) => {
+            delete NEW_OBJ[prop];
+
+            Object.defineProperty(NEW_OBJ, prop, {
+                enumerable: true,
+
+                get: () => {
+                    let resultValue = val;
+                    if (deploy_helpers.isString(resultValue)) {
+                        // handle as template
+                        // with placeholders
+                        resultValue = replaceWithValues(valueProvider(),
+                                                        resultValue);
+                    }
+
+                    return resultValue;
+                },
+
+                set: (newValue) => {
+                    val = newValue;
+                }
+            });
+        };
+
+        if (APPLY_TO) {
+            for (const P in APPLY_TO) {
+                const VALUE = APPLY_TO[P];
+                
+                if (SELF_PROP === P) {
+                    selfValue = VALUE;
+                }
+                else {
+                    MAKE_PLACEHOLDER_PROPERTY(P, VALUE);
+                }
+            }
+        }
+
+        if (selfValue !== DO_NOT_APPLY_SELF) {
+            MAKE_PLACEHOLDER_PROPERTY(SELF_PROP, selfValue);
+        }
+
+        obj = NEW_OBJ;
+    }
+    
+    return obj;
+}
 
 /**
  * Returns a list of predefined values.
