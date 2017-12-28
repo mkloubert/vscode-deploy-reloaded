@@ -161,7 +161,7 @@ export function applyFuncFor<TFunc extends Function = Function>(
     thisArgs: any
 ): TFunc {
     if (!func) {
-        return <any>func;
+        return func;
     }
 
     return <any>function() {

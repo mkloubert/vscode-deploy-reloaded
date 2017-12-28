@@ -630,7 +630,7 @@ export function isVisibleForPackage(target: Target, pkg: deploy_packages.Package
     }
 
     const SHOW_IF = deploy_helpers.asArray(
-        deploy_helpers.asArray(target.hideIf)
+        deploy_helpers.asArray(target.showIf)
     ).map(sif => deploy_helpers.normalizeString(sif))
      .filter(sif => '' !== sif);
 

@@ -33,10 +33,9 @@ let nextCancelBtnCommandId = Number.MIN_SAFE_INTEGER;
  * 
  * @param {string[]} files The files to deploy.
  * @param {deploy_targets.Target} target The target to deploy to.
- * @param {number} [targetNr] The number of the target.
  */
 export async function deployFilesTo(files: string[],
-                                    target: deploy_targets.Target, targetNr?: number) {
+                                    target: deploy_targets.Target) {
     const ME: deploy_workspaces.Workspace = this;
 
     target = ME.prepareTarget(target);
@@ -56,10 +55,6 @@ export async function deployFilesTo(files: string[],
 
     if (!target) {
         return;
-    }
-
-    if (isNaN(targetNr)) {
-        targetNr = target.__index + 1;
     }
 
     const TARGET_NAME = deploy_targets.getTargetName(target);
@@ -95,6 +90,8 @@ export async function deployFilesTo(files: string[],
         deploy_helpers.tryDispose(cancelBtn);
         deploy_helpers.tryDispose(cancelBtnCommand);
     };
+
+    const ALL_DIRS = await ME.getAllDirectories();
 
     const CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
     try {
@@ -182,9 +179,10 @@ export async function deployFilesTo(files: string[],
 
                 const FILES_TO_UPLOAD: deploy_plugins.LocalFileToUpload[] = [];
                 for (const F of files) {
-                    const NAME_AND_PATH = ME.getNameAndPathForFileDeployment(F, target);
+                    const NAME_AND_PATH = ME.getNameAndPathForFileDeployment(target, F,
+                                                                             ALL_DIRS);
                     if (false === NAME_AND_PATH) {
-                        return null;
+                        continue;
                     }
 
                     const LF = new deploy_plugins.LocalFileToUpload(ME, F, NAME_AND_PATH);
@@ -436,7 +434,7 @@ export async function deployPackage(pkg: deploy_packages.Package) {
 
         const SELECTED_TARGET = await deploy_targets.showTargetQuickPick(
             ME.context.extension,
-            TARGETS,
+            TARGETS.filter(t => deploy_targets.isVisibleForPackage(t, pkg)),
             {
                 placeHolder: ME.t('deploy.selectTarget'),
             }
@@ -444,9 +442,11 @@ export async function deployPackage(pkg: deploy_packages.Package) {
         if (!SELECTED_TARGET) {
             return;
         }
-    
-        await deployFilesTo.apply(ME,
-                                  [ FILES_TO_DEPLOY, SELECTED_TARGET, SELECTED_TARGET.__index + 1 ]);
+
+        await deploy_helpers.applyFuncFor(
+            deployFilesTo, ME
+        )(FILES_TO_DEPLOY,
+          SELECTED_TARGET);
     }
     finally {
         if (PACKAGE_BTN) {

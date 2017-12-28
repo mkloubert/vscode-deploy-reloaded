@@ -34,6 +34,7 @@ The extension supports the following destinations:
    * [List remote files](#list-remote-files-)
    * [Tools](#tools-)
      * [Quick code execution](#quick-code-execution-)
+     * [Send files to other editors](#send-files-to-other-editors-)
 2. [Preview](#preview-)
 3. [Install](#install-)
 4. [How to use](#how-to-use-)
@@ -74,6 +75,12 @@ The extension supports the following destinations:
 #### Quick code execution [[&uarr;](#tools-)]
 
 ![Demo Quick code execution](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo7.gif)
+
+#### Send files to other editors [[&uarr;](#tools-)]
+
+The following demo shows, how you can send a file to another VS Code instance over a secure and encrypted TCP connection:
+
+![Demo Send files to other editors](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo8.gif)
 
 ## Preview [[&uarr;](#table-of-contents)]
 

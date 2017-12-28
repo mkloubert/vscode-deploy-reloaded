@@ -1,5 +1,12 @@
 # Change Log (vscode-deploy-reloaded)
 
+## 0.6.0 (December 28th, 2017; bugfixes)
+
+* fixed [folder mappings](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/folder_mappings)
+* fixed `hideIf` and `showIf` properties for [targets](https://github.com/mkloubert/vscode-deploy-reloaded/wiki#targets-)
+* code cleanups
+* added [demo](https://github.com/mkloubert/vscode-deploy-reloaded#send-files-to-other-editors-), which shows how to send files to another editor
+
 ## 0.5.0 (December 28th, 2017; improvements)
 
 * bugfixes

@@ -23,6 +23,7 @@ import * as deploy_download from './download';
 import * as deploy_helpers from './helpers';
 import * as deploy_list from './list';
 import * as deploy_log from './log';
+import * as deploy_mappings from './mappings';
 import * as deploy_objects from './objects';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
@@ -629,6 +630,25 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                                          MergeDeep(DEFAULT_OPTS, opts));
     }
 
+    /**
+     * Returns all directories of that workspace.
+     * 
+     * @return {Promise<string[]>} The promise with the directories.
+     */
+    public async getAllDirectories() {
+        return Enumerable.from(
+            await scanForDirectoriesRecursive(this.rootPath, true)
+        ).orderBy(d => {
+            return deploy_helpers.normalizeString(
+                Path.dirname(d)
+            );
+        }).thenBy(d => {
+            return deploy_helpers.normalizeString(
+                Path.basename(d)
+            );
+        }).toArray();
+    }
+
     private getAllSwitchOptions(target: SwitchTarget): SwitchTargetOption[] {
         if (!target) {
             return <any>target;
@@ -766,50 +786,117 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * 
      * @param {string} file The file.
      * @param {deploy_targets.Target} target The target.
+     * @param {string|string[]} dirs One or more scope directories.
+     * 
+     * @return {deploy_contracts.WithNameAndPath|false} The object or (false) if not possible.
      */
-    public getNameAndPathForFileDeployment(file: string, target: deploy_targets.Target) {
+    public getNameAndPathForFileDeployment(target: deploy_targets.Target,
+                                           file: string,
+                                           dirs: string | string[]): deploy_contracts.WithNameAndPath | false {
         const ME = this;
-
-        file = deploy_helpers.toStringSafe(file);
-
-        if (!target) {
-            return;
-        }
-
-        if (!ME.canBeHandledByMe) {
-            ME.context.outputChannel.append(
-                ME.t('workspaces.errors.cannotUseTargetForFile',
-                     deploy_targets.getTargetName(target), file)
-            );
-
+        
+        dirs = deploy_helpers.asArray(dirs);
+        
+        if (!ME.canBeHandledByMe(target)) {
             return false;
         }
 
-        const NAME_AND_PATH = ME.toNameAndPath(file);
-        if (false === NAME_AND_PATH) {
-            ME.context.outputChannel.append(
-                ME.t('workspaces.errors.cannotDetectPathInfoForFile',
-                     file)
-            );
-
+        if (ME.isFileIgnored(file)) {
             return false;
         }
 
-        const MAPPED_PATH = deploy_targets.getMappedTargetFilePath(target,
-                                                                   NAME_AND_PATH.path,
-                                                                   NAME_AND_PATH.name);
-
-        const MAPPED_NAME_AND_PATH = ME.toNameAndPath(MAPPED_PATH);
-        if (false === MAPPED_NAME_AND_PATH) {
-            ME.context.outputChannel.append(
-                ME.t('workspaces.errors.cannotDetectMappedPathInfoForFile',
-                     file)
-            );
-
+        let relPath = ME.toRelativePath(file);
+        if (false === relPath) {
             return false;
         }
 
-        return MAPPED_NAME_AND_PATH;
+        const TO_MINIMATCH = (str: string) => {
+            str = deploy_helpers.toStringSafe(str);
+            if (!str.startsWith('/')) {
+                str = '/' + str;
+            }
+
+            return str;
+        };
+
+        let name = Path.basename(relPath);
+        let path = Path.dirname(relPath);
+        let pathSuffix = '';
+        
+        const MAPPINGS = target.mappings;
+        if (MAPPINGS) {
+            for (const P in MAPPINGS) {
+                let settings = MAPPINGS[P];
+                if (deploy_helpers.isNullOrUndefined(settings)) {
+                    continue;
+                }
+
+                if (!deploy_helpers.isObject<deploy_mappings.FolderMappingSettings>(settings)) {
+                    settings = {
+                        to: deploy_helpers.toStringSafe(settings),
+                    };
+                }
+
+                const PATTERN = TO_MINIMATCH(P);
+                const PATH_TO_CHECK = TO_MINIMATCH(relPath);
+                
+                if (deploy_helpers.doesMatch(PATH_TO_CHECK, PATTERN)) {
+                    const DIR_NAME = Path.dirname(<string>relPath);
+
+                    const MATCHING_DIRS = <string[]>dirs.map(d => {
+                        return ME.toRelativePath(d);
+                    }).filter(d => false !== d).filter((d: string) => {
+                        return d === DIR_NAME || 
+                               DIR_NAME.startsWith(d + '/');
+                    }).sort((x, y) => {
+                        return deploy_helpers.compareValuesBy(x, y,
+                                                              (d: string) => d.length);
+                    });
+
+                    if (MATCHING_DIRS.length > 0) {
+                        pathSuffix = DIR_NAME.substr(
+                            MATCHING_DIRS[0].length
+                        );
+                    }
+
+                    path = deploy_helpers.normalizeString(settings.to);
+                    break;
+                }
+            }
+        }                                   
+
+        return {
+            name: name,
+            path: deploy_helpers.normalizePath(
+                Path.join(
+                    '/' +
+                    deploy_helpers.normalizePath(path) + 
+                    '/' + 
+                    deploy_helpers.normalizePath(pathSuffix)
+                )
+            ),
+        };
+    }
+
+    private async getAllDirectoriesInner(dir: string) {
+        const RESULT: string[] = [];
+
+        const FILES_AND_FOLDERS = await deploy_helpers.readDir(dir);
+        for (const FF of FILES_AND_FOLDERS) {
+            const FULL_PATH = Path.resolve(
+                Path.join( dir, FF )
+            );
+            const STATS = await deploy_helpers.lstat(FULL_PATH);
+
+            if (STATS.isDirectory()) {
+                RESULT.push(FULL_PATH);
+
+                RESULT.push
+                      .apply(RESULT, await this.getAllDirectoriesInner(FULL_PATH));
+            }
+        }
+
+        return RESULT;
     }
 
     /**
@@ -1262,6 +1349,10 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             return true;  // not from settings folder
         }
 
+        if (this.isInGitFolder(file)) {
+            return true;  // not from Git folder
+        }
+
         const RELATIVE_PATH = this.toRelativePath(file);
         if (false === RELATIVE_PATH) {
             return true;  // is not part of that workspace
@@ -1283,6 +1374,30 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
         return deploy_helpers.checkIfDoesMatchByFileFilter('/' + RELATIVE_PATH,
                                                            deploy_helpers.toMinimatchFileFilter(FILTER));
+    }
+
+    /**
+     * Checks if a path is inside the Git folder.
+     * 
+     * @param {string} path The path to check.
+     * 
+     * @return {boolean} Is in Git folder or not.
+     */
+    public isInGitFolder(path: string) {
+        const GIT_DIR = Path.resolve(
+            Path.join(
+                this.rootPath,
+                '.git'
+            )
+        );
+
+        path = deploy_helpers.toStringSafe(path);
+        if (!Path.isAbsolute(path)) {
+            return true;
+        }
+        path = Path.resolve(path);
+
+        return path.startsWith(GIT_DIR);
     }
 
     /**
@@ -2661,4 +2776,33 @@ export function isSwitchTarget(target: deploy_targets.Target): target is SwitchT
     }
 
     return false;
+}
+
+async function scanForDirectoriesRecursive(dir: string, isRoot: boolean) {
+    const RESULT: string[] = [];
+
+    const FILES_AND_FOLDERS = await deploy_helpers.readDir(dir);
+    for (const FF of FILES_AND_FOLDERS) {
+        const FULL_PATH = Path.resolve(
+            Path.join( dir, FF )
+        );
+        const STATS = await deploy_helpers.lstat(FULL_PATH);
+
+        if (STATS.isDirectory()) {
+            if (isRoot) {
+                switch (FF) {
+                    case '.git':
+                    case '.vscode':
+                        continue;
+                }
+            }
+
+            RESULT.push(FULL_PATH);
+
+            RESULT.push
+                  .apply(RESULT, await scanForDirectoriesRecursive(FULL_PATH, false));
+        }
+    }
+
+    return RESULT;
 }

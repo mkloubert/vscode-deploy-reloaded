@@ -64,10 +64,9 @@ export async function pullFileFrom(file: string, target: deploy_targets.Target) 
  * 
  * @param {string[]} files The files to pull.
  * @param {deploy_targets.Target} target The target from where to pull from.
- * @param {number} [targetNr] The number of the target.
  */
 export async function pullFilesFrom(files: string[],
-                                    target: deploy_targets.Target, targetNr?: number) {
+                                    target: deploy_targets.Target) {
     const ME: deploy_workspaces.Workspace = this;
 
     target = ME.prepareTarget(target);
@@ -87,10 +86,6 @@ export async function pullFilesFrom(files: string[],
 
     if (!target) {
         return;
-    }
-
-    if (isNaN(targetNr)) {
-        targetNr = target.__index + 1;
     }
 
     const TARGET_NAME = deploy_targets.getTargetName(target);
@@ -123,6 +118,8 @@ export async function pullFilesFrom(files: string[],
         deploy_helpers.tryDispose(cancelBtn);
         deploy_helpers.tryDispose(cancelBtnCommand);
     };
+
+    const ALL_DIRS = await ME.getAllDirectories();
 
     const CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
     try {
@@ -211,7 +208,8 @@ export async function pullFilesFrom(files: string[],
                 }
 
                 const FILES_TO_PULL = files.map(f => {
-                    const NAME_AND_PATH = ME.getNameAndPathForFileDeployment(f, target);
+                    const NAME_AND_PATH = ME.getNameAndPathForFileDeployment(target, f,
+                                                                             ALL_DIRS);
                     if (false === NAME_AND_PATH) {
                         return null;
                     }
@@ -490,7 +488,7 @@ export async function pullPackage(pkg: deploy_packages.Package) {
 
     const SELECTED_TARGET = await deploy_targets.showTargetQuickPick(
         ME.context.extension,
-        TARGETS,
+        TARGETS.filter(t => deploy_targets.isVisibleForPackage(t, pkg)),
         {
             placeHolder: ME.t('pull.selectSource'),
         }
@@ -499,6 +497,8 @@ export async function pullPackage(pkg: deploy_packages.Package) {
         return;
     }
 
-    await pullFilesFrom.apply(ME,
-                              [ FILES_TO_PULL, SELECTED_TARGET, SELECTED_TARGET.__index + 1 ]);
+    await deploy_helpers.applyFuncFor(
+        pullFilesFrom, ME
+    )(FILES_TO_PULL,
+      SELECTED_TARGET);
 }

@@ -102,7 +102,7 @@ export async function deleteFileIn(file: string, target: deploy_targets.Target,
  * @param {boolean} [deleteLocalFiles] Also delete local files or not.
  */
 export async function deleteFilesIn(files: string[],
-                                    target: deploy_targets.Target, targetNr?: number,
+                                    target: deploy_targets.Target,
                                     deleteLocalFiles?: boolean) {
     const ME: deploy_workspaces.Workspace = this;
 
@@ -127,10 +127,6 @@ export async function deleteFilesIn(files: string[],
 
     deleteLocalFiles = deploy_helpers.toBooleanSafe(deleteLocalFiles);
 
-    if (isNaN(targetNr)) {
-        targetNr = target.__index + 1;
-    }
-
     const TARGET_NAME = deploy_targets.getTargetName(target);
 
     const PLUGINS = ME.getDeletePlugins(target);
@@ -148,6 +144,8 @@ export async function deleteFilesIn(files: string[],
         deploy_helpers.tryDispose(cancelBtn);
         deploy_helpers.tryDispose(cancelBtnCommand);
     };
+
+    const ALL_DIRS = await ME.getAllDirectories();
 
     const CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
     try {
@@ -234,7 +232,8 @@ export async function deleteFilesIn(files: string[],
                 }
 
                 const FILES_TO_DELETE = files.map(f => {
-                    const NAME_AND_PATH = ME.getNameAndPathForFileDeployment(f, target);
+                    const NAME_AND_PATH = ME.getNameAndPathForFileDeployment(target, f,
+                                                                             ALL_DIRS);
                     if (false === NAME_AND_PATH) {
                         return null;
                     }
@@ -499,7 +498,7 @@ export async function deletePackage(pkg: deploy_packages.Package,
 
     const SELECTED_TARGET = await deploy_targets.showTargetQuickPick(
         ME.context.extension,
-        TARGETS,
+        TARGETS.filter(t => deploy_targets.isVisibleForPackage(t, pkg)),
         {
             placeHolder: ME.t('DELETE.selectTarget'),
         }
@@ -508,8 +507,11 @@ export async function deletePackage(pkg: deploy_packages.Package,
         return;
     }
 
-    await deleteFilesIn.apply(ME,
-                              [ FILES_TO_DELETE, SELECTED_TARGET, SELECTED_TARGET.__index + 1, deleteLocalFiles ]);
+    await deploy_helpers.applyFuncFor(
+        deleteFilesIn, ME
+    )(FILES_TO_DELETE,
+      SELECTED_TARGET,
+      deleteLocalFiles);
 }
 
 /**

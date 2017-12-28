@@ -57,6 +57,8 @@ export async function compareFiles(workspaces: deploy_workspaces.Workspace | dep
                             action: async () => {
                                 let remoteFile: Buffer;
 
+                                const ALL_DIRS = await WS.getAllDirectories();
+
                                 const CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
                                 try {
                                     const PLUGINS = t.__workspace.getDownloadPlugins(t);
@@ -67,7 +69,8 @@ export async function compareFiles(workspaces: deploy_workspaces.Workspace | dep
 
                                         const PI = PLUGINS.shift();
 
-                                        const NAME_AND_PATH = WS.getNameAndPathForFileDeployment(DOC.fileName, t);
+                                        const NAME_AND_PATH = WS.getNameAndPathForFileDeployment(t, DOC.fileName,
+                                                                                                 ALL_DIRS);
                                         if (false === NAME_AND_PATH) {
                                             continue;
                                         }
