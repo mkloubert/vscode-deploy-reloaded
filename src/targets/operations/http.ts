@@ -16,6 +16,7 @@
  */
 
 import * as deploy_contracts from '../../contracts';
+import * as deploy_events from '../../events';
 import * as deploy_helpers from '../../helpers';
 import * as deploy_http from '../../http';
 import * as deploy_log from '../../log';
@@ -202,6 +203,7 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
                 getBodyToSend = async () => {
                     const ARGS: HttpBodyModuleExecutionArguments = {
                         context: context,
+                        globalEvents: deploy_events.EVENTS,
                         globals: WORKSPACE.globals,
                         globalState: WORKSPACE.sessionState['target_operations']['http']['global'],
                         logger: deploy_log.CONSOLE,

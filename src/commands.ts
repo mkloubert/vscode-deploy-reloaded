@@ -16,6 +16,7 @@
  */
 
 import * as deploy_contracts from './contracts';
+import * as deploy_events from './events';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
 import * as deploy_values from './values';
@@ -186,6 +187,7 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
                     const CTX: ScriptCommandExecutionContext = {
                         button: btn,
                         command: id,
+                        globalEvents: deploy_events.EVENTS,
                         globals: ME.globals,
                         globalState: GLOBAL_STATE,
                         logger: deploy_log.CONSOLE,

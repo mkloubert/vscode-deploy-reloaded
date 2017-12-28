@@ -16,6 +16,7 @@
  */
 
 import * as deploy_contracts from '../contracts';
+import * as deploy_events from '../events';
 import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
 import * as deploy_log from '../log';
@@ -119,6 +120,7 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
             cancellationToken: undefined,
             dir: context['dir'],
             files: context['files'],
+            globalEvents: deploy_events.EVENTS,
             globals: context.target.__workspace.globals,
             globalState: this._GLOBAL_STATE,
             isCancelling: undefined,

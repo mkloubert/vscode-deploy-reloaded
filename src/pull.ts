@@ -16,6 +16,7 @@
  */
 
 import * as deploy_contracts from './contracts';
+import * as deploy_events from './events';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
 import * as deploy_packages from './packages';
@@ -267,6 +268,7 @@ export async function pullFilesFrom(files: string[],
                                     );
 
                                     const CONTEXT: deploy_transformers.DataTransformerContext = {
+                                        globalEvents: deploy_events.EVENTS,
                                         globals: ME.globals,
                                         globalState: ME.sessionState['pull']['states']['global'],
                                         logger: deploy_log.CONSOLE,

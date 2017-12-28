@@ -17,6 +17,7 @@
 
 import * as deploy_clients from './clients';
 import * as deploy_contracts from './contracts';
+import * as deploy_events from './events';
 import * as deploy_files from './files';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
@@ -533,6 +534,7 @@ export abstract class FileToUploadBase implements FileToUpload {
             );
 
             const CONTEXT: deploy_transformers.DataTransformerContext = {
+                globalEvents: deploy_events.EVENTS,
                 globals: ME.workspace.globals,
                 globalState: ME.workspace.sessionState['upload']['states']['global'],
                 logger: deploy_log.CONSOLE,

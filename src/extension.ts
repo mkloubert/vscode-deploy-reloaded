@@ -21,6 +21,7 @@ const CompareVersion = require('compare-versions');
 import * as deploy_commands from './commands';
 import * as deploy_compare from './compare';
 import * as deploy_contracts from './contracts';
+import * as deploy_events from './events';
 import * as deploy_gui from './gui';
 import * as deploy_helpers from './helpers';
 import * as deploy_html from './html';
@@ -650,6 +651,16 @@ async function activateExtension(context: vscode.ExtensionContext) {
 
     WF.next(() => {
         currentContext = context;
+    });
+
+    // events
+    WF.next(() => {
+        context.subscriptions.push({
+            dispose: () => {
+                deploy_events.EVENTS
+                             .removeAllListeners();
+            }
+        });
     });
 
     // output channel

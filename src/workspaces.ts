@@ -260,10 +260,6 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      */
     protected _startTime: Moment.Moment;
     private readonly _SWITCH_BUTTONS: TargetWithButton<SwitchTarget>[] = [];
-    /**
-     * Stores the states for 'sync when open'.
-     */
-    protected _syncWhenOpenStates: SyncWhenOpenStates;
     private _targets: deploy_targets.Target[];
     /**
      * The current translation function.
@@ -436,6 +432,10 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         NEW_SESSION_STATE['pull']['states'] = {};
         NEW_SESSION_STATE['pull']['states']['global'] = {};
         NEW_SESSION_STATE['pull']['states']['data_transformers'] = {};
+
+        NEW_SESSION_STATE['sync'] = {};
+        NEW_SESSION_STATE['sync']['whenOpen'] = {};
+        NEW_SESSION_STATE['sync']['whenOpen']['states'] = {};
 
         NEW_SESSION_STATE['upload'] = {};
         NEW_SESSION_STATE['upload']['states'] = {};
@@ -1625,12 +1625,6 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         await this.deployOnSave(e.fileName);
     }
 
-
-    /** @inheritdoc */
-    protected onDispose() {
-        this._syncWhenOpenStates = null;
-    }
-
     /**
      * Gets the name of that workspace.
      */
@@ -1883,8 +1877,6 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             }
 
             finalizer = async () => {
-                ME._syncWhenOpenStates = {};
-
                 // runBuildTaskOnStartup
                 try {
                     await deploy_tasks.runBuildTaskOnStartup
@@ -2519,7 +2511,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Gets the states for 'sync when open'.
      */
     public get syncWhenOpenStates(): SyncWhenOpenStates {
-        return this._syncWhenOpenStates;
+        return this.sessionState['sync']['whenOpen']['states'];
     }
 
     /** @inheritdoc */
