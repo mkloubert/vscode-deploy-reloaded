@@ -24,6 +24,7 @@ import * as deploy_contracts from './contracts';
 import * as deploy_delete from './delete';
 import * as deploy_deploy from './deploy';
 import * as deploy_download from './download';
+import * as deploy_git from './git';
 import * as deploy_gui from './gui';
 import * as deploy_helpers from './helpers';
 import * as deploy_list from './list';
@@ -237,6 +238,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Stores the source of the configuration data.
      */
     protected _configSource: deploy_contracts.ConfigSource;
+    private _gitFolder: string | false;
     /**
      * Stores if 'deploy on change' feature is freezed or not.
      */
@@ -260,6 +262,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     private _OLD_ENV_VARS: deploy_contracts.KeyValuePairs = {};
     private _PACKAGE_BUTTONS: PackageWithButton[] = [];
     private _packages: deploy_packages.Package[];
+    private _rootPath: string;
     private _sessionState: deploy_contracts.KeyValuePairs;
     private _selectedSwitches: deploy_contracts.KeyValuePairs;
     /**
@@ -284,6 +287,10 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 public readonly folder: vscode.WorkspaceFolder,
                 public readonly context: WorkspaceContext) {
         super();
+
+        this._rootPath = Path.resolve(
+            this.folder.uri.fsPath
+        );
 
         this.state = new WorkspaceMemento(this);
     }
@@ -430,6 +437,32 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      */
     public get configSource(): deploy_contracts.ConfigSource {
         return this._configSource;
+    }
+
+    /**
+     * Creates a new git client (if possible).
+     * 
+     * @return {Promise<deploy_git.GitClient|false>} The promise with the client or (false) if not found.
+     */
+    public async createGitClient(): Promise<deploy_git.GitClient | false> {
+        try {
+            const GIT = await deploy_git.tryFindGitPath();
+            if (false !== GIT) {
+                let gitCwd = this.gitFolder;
+                if (false === gitCwd) {
+                    gitCwd = this.rootPath;
+                }
+                
+                return new deploy_git.GitClient(GIT,
+                                                gitCwd);
+            }
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'workspaces.Workspace.createGitClient()');
+        }
+
+        return false;
     }
 
     private createSessionState(newCfg: WorkspaceSettings) {
@@ -1318,6 +1351,13 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     }
 
     /**
+     * Gets the path to the '.git' folder (if available).
+     */
+    public get gitFolder() {
+        return this._gitFolder;
+    }
+
+    /**
      * Global data as defined in the settings.
      */
     public get globals(): any {
@@ -1396,7 +1436,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 }
                 catch (e) {
                     deploy_log.CONSOLE
-                              .trace(e, 'workspaces.Workspace.initialize()');
+                              .trace(e, 'workspaces.Workspace.initialize(1)');
                 }
 
                 return false;
@@ -1416,6 +1456,45 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 section: settingsData.section,
                 resource: vscode.Uri.file(settingsData.file),
             };
+        }
+
+        // git folder
+        {
+            ME._gitFolder = false;
+
+            const DEFAULT_DIR = this.folder.uri.fsPath;
+
+            let searchForNextFolder: (dir: string) => Promise<string | false>;
+            searchForNextFolder = async (dir) => {
+                try {
+                    dir = Path.resolve(dir);
+
+                    const GIT_FOLDER = Path.resolve(
+                        Path.join(dir, '.git')
+                    );
+
+                    if (await deploy_helpers.exists(GIT_FOLDER)) {
+                        if ((await deploy_helpers.lstat(GIT_FOLDER)).isDirectory()) {
+                            return GIT_FOLDER;  // found
+                        }
+                    }
+
+                    const PARENT_DIR = Path.resolve(
+                        Path.join(dir, '../')
+                    );
+                    if (dir !== PARENT_DIR && !deploy_helpers.isEmptyString(PARENT_DIR)) {
+                        return await searchForNextFolder(PARENT_DIR);
+                    }
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'workspaces.Workspace.initialize(2)');
+                }
+
+                return false;
+            };
+
+            ME._gitFolder = await searchForNextFolder(DEFAULT_DIR);
         }
 
         await ME.reloadConfiguration();
@@ -2581,9 +2660,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Gets the root path of that workspace.
      */
     public get rootPath(): string {
-        return Path.resolve(
-            this.folder.uri.fsPath
-        );
+        return this._rootPath;
     }
 
     /**

@@ -689,6 +689,63 @@ export async function exec(command: string, opts?: ChildProcess.ExecOptions) {
 }
 
 /**
+ * Executes a file.
+ * 
+ * @param {string} command The thing / command to execute.
+ * @param {any[]} [args] One or more argument for the execution.
+ * @param {ChildProcess.ExecFileOptions} [opts] Custom options.
+ * 
+ * @return {Promise<ExecResult>} The promise with the result.
+ */
+export async function execFile(command: string, args?: any[], opts?: ChildProcess.ExecFileOptions) {
+    command = toStringSafe(command);
+
+    if (isNullOrUndefined(args)) {
+        args = [];
+    }
+    else {
+        args = asArray(args, false).map(a => {
+            return toStringSafe(a);
+        });
+    }
+
+    if (!opts) {
+        opts = {};
+    }
+
+    if (isNullOrUndefined(opts.env)) {
+        opts.env = process.env;
+    }
+
+    return new Promise<ExecResult>((resolve, reject) => {
+        const COMPLETED = createCompletedAction(resolve, reject);
+
+        try {
+            const RESULT: ExecResult = {
+                stdErr: undefined,
+                stdOut: undefined,
+                process: undefined,
+            };
+
+            (<any>RESULT)['process'] = ChildProcess.execFile(command, args, opts, (err, stdout, stderr) => {
+                if (err) {
+                    COMPLETED(err);
+                }
+                else {
+                    (<any>RESULT)['stdErr'] = stderr;
+                    (<any>RESULT)['stdOut'] = stdout;
+
+                    COMPLETED(null, RESULT);
+                }
+            });
+        }
+        catch (e) {
+            COMPLETED(e);
+        }
+    });
+}
+
+/**
  * Promise version of 'FS.exists()' function.
  * 
  * @param {string|Buffer} path The path.
@@ -1923,6 +1980,34 @@ export function sortByLabel<T extends { label?: any }>(
     return asArray(items).sort((x, y) => {
         return compareValuesBy(x, y,
                                i => normalizeString( valueResolver(i) ));
+    });
+}
+
+
+/**
+ * Promise version of 'FS.stat()' function.
+ * 
+ * @param {string|Buffer} path The path.
+ * 
+ * @return {Promise<FS.Stats>} The promise with the stats.
+ */
+export function stat(path: string | Buffer) {
+    return new Promise<FS.Stats>((resolve, reject) => {
+        const COMPLETED = createCompletedAction(resolve, reject);
+
+        try {
+            FS.stat(path, (err, stats) => {
+                if (err) {
+                    COMPLETED(err);
+                }
+                else {
+                    COMPLETED(null, stats);
+                }
+            });
+        }
+        catch (e) {
+            COMPLETED(e);
+        }
     });
 }
 
