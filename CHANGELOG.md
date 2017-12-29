@@ -1,9 +1,10 @@
 # Change Log (vscode-deploy-reloaded)
 
-## 0.9.0 (December 30th, 2017; scripts)
+## 0.9.0 (December 30th, 2017; [composer](https://getcomposer.org/))
 
 * bugfixes
 * code improvements
+* added `initComposer` [setting](https://github.com/mkloubert/vscode-deploy-reloaded/wiki#settings--), which runs `composer install` inside the workspace folder on startup, if a `composer.json` file exists and NO `vendor` sub folder has been found
 * added `extension`, `folder` and `sessionState` properties to [ScriptArguments](https://mkloubert.github.io/vscode-deploy-reloaded/interfaces/_contracts_.scriptarguments.html)
 
 ## 0.8.0 (December 29th, 2017; target operations)
@@ -14,7 +15,7 @@
 * improved use of `if` properties and [placeholders](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/values)
 * fixed loading settings from parent folder
 
-## 0.7.0 (December 29th, 2017; npm)
+## 0.7.0 (December 29th, 2017; [npm](https://www.npmjs.com/package/npm))
 
 * bugfixes
 * code improvements

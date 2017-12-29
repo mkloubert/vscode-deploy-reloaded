@@ -298,8 +298,13 @@
         }
        ]
       },
+      "initComposer": {
+       "description": "Runs 'composer install' inside the workspace folder on startup, if a 'composer.json' file exists and NO 'vendor' folder has been found.",
+       "type": "boolean",
+       "default": false
+      },
       "initNodeModules": {
-       "description": "Runs 'npm install' inside the workspace folder on startup, if a 'package.json' file exists and NO 'node_modules' has been found.",
+       "description": "Runs 'npm install' inside the workspace folder on startup, if a 'package.json' file exists and NO 'node_modules' folder has been found.",
        "type": "boolean",
        "default": false
       },

@@ -474,6 +474,14 @@ export interface Translation {
             noneFound?: string;
             selectWorkspace?: string;
         };
+        composer?: {
+            install?: {
+                errors?: {
+                    failed?: string;
+                };
+                running?: string;
+            }
+        };
         errors?: {
             cannotDetectMappedPathInfoForFile?: string;
             cannotDetectPathInfoForFile?: string;

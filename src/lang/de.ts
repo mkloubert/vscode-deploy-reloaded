@@ -468,6 +468,14 @@ export const translation: Translation = {
             noneFound: "Keine aktiven Arbeitsbereiche gefunden!",
             selectWorkspace: "Wählen Sie den aktiven Arbeitsbereich aus ...",
         },
+        composer: {
+            install: {
+                errors: {
+                    failed: "'composer install' konnte nicht ausgeführt werden:{0:trim,surround,leading_space}",
+                },
+                running: "Führe 'composer install' in{0:trim,surround,leading_space} aus ...",
+            }
+        },
         errors: {
             cannotDetectMappedPathInfoForFile: "Gemappte Pfad-Informationen konnten für die Datei{0:trim,surround,leading_space} nicht ermittelt werden!",
             cannotDetectPathInfoForFile: "Pfad-Informationen konnten für die Datei{0:trim,surround,leading_space} nicht ermittelt werden!",

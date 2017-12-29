@@ -162,7 +162,11 @@ export interface Configuration extends deploy_values.WithValueItems {
      */
     readonly imports?: ImportType | ImportType[];
     /**
-     * Runs 'npm install' inside the workspace folder on startup, if a 'package.json' file exists and NO 'node_modules' has been found.
+     * Runs 'composer install' inside the workspace folder on startup, if a 'composer.json' file exists and NO 'vendor' folder has been found.
+     */
+    readonly initComposer?: boolean;
+    /**
+     * Runs 'npm install' inside the workspace folder on startup, if a 'package.json' file exists and NO 'node_modules' folder has been found.
      */
     readonly initNodeModules?: boolean;
     /**

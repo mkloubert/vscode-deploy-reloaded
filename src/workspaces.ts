@@ -1375,6 +1375,64 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         return deploy_helpers.cloneObject(this.config.globals);
     }
 
+    private async initComposer(cfg: WorkspaceSettings) {
+        if (!cfg) {
+            return;
+        }
+
+        if (!deploy_helpers.toBooleanSafe(cfg.initComposer)) {
+            return;
+        }
+
+        const ME = this;
+
+        try {
+            const COMPOSER_JSON = Path.resolve(
+                Path.join(
+                    ME.rootPath, 'composer.json',
+                )
+            );
+
+            const VENDOR = Path.resolve(
+                Path.join(
+                    ME.rootPath, 'vendor',
+                )
+            );
+
+            if (!(await deploy_helpers.exists(COMPOSER_JSON))) {
+                return;  // no 'composer.json'
+            }
+
+            if (await deploy_helpers.exists(VENDOR)) {
+                return;  // 'vendor' already exist
+            }
+
+            ME.context.outputChannel.appendLine('');
+            ME.context.outputChannel.append(
+                ME.t('workspaces.composer.install.running',
+                     ME.rootPath) + ' '
+            );
+            try {
+                await ME.exec('composer install');
+
+                ME.context.outputChannel.appendLine(
+                    `[${ME.t('ok')}]`
+                );
+            }
+            catch (e) {
+                ME.context.outputChannel.appendLine(
+                    `[${ME.t('error', e)}]`
+                );
+            }
+        }
+        catch (e) {
+            ME.showErrorMessage(
+                ME.t('workspaces.composer.install.errors.failed',
+                     e)
+            );
+        }
+    }
+
     /**
      * Initializes that workspace.
      * 
@@ -2173,6 +2231,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
             finalizer = async () => {
                 await ME.initNodeModules(loadedCfg);
+                await ME.initComposer(loadedCfg);
 
                 // runBuildTaskOnStartup
                 try {

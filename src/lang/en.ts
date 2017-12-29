@@ -469,6 +469,14 @@ export const translation: Translation = {
             noneFound: "No active workspaces found!",
             selectWorkspace: "Select the active workspace ...",
         },
+        composer: {
+            install: {
+                errors: {
+                    failed: "'composer install' failed:{0:trim,surround,leading_space}",
+                },
+                running: "Running 'composer install' in{0:trim,surround,leading_space} ...",
+            }
+        },
         errors: {
             cannotDetectMappedPathInfoForFile: "Cannot detect mapped path information for file{0:trim,surround,leading_space}!",
             cannotDetectPathInfoForFile: "Cannot detect path information for file{0:trim,surround,leading_space}!",
