@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.7.0",
+ "version": "0.8.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -752,6 +752,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -1053,6 +1095,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -1345,6 +1429,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -1659,6 +1785,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -1951,6 +2119,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -2347,6 +2557,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -2694,6 +2946,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -2986,6 +3280,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -3296,6 +3632,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -3597,6 +3975,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -3889,6 +4309,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -4271,6 +4733,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -4624,6 +5128,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -4925,6 +5471,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -5217,6 +5805,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -5543,6 +6173,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -5835,6 +6507,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -6226,6 +6940,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -6571,6 +7327,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -6863,6 +7661,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -7173,6 +8013,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -7474,6 +8356,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -7766,6 +8690,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -8153,6 +9119,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -8502,6 +9510,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -8794,6 +9844,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -9104,6 +10196,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -9405,6 +10539,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -9697,6 +10873,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -10095,6 +11313,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -10463,6 +11723,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -10755,6 +12057,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -11065,6 +12409,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -11366,6 +12752,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -11658,6 +13086,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -12071,6 +13541,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -12418,6 +13930,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -12710,6 +14264,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -13020,6 +14616,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -13321,6 +14959,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -13613,6 +15293,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -14036,6 +15758,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -14390,6 +16154,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -14682,6 +16488,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -14992,6 +16840,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -15293,6 +17183,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -15585,6 +17517,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -15977,6 +17951,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -16320,6 +18336,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -16612,6 +18670,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -16922,6 +19022,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -17223,6 +19365,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -17515,6 +19699,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -17922,6 +20148,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -18296,6 +20564,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -18588,6 +20898,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -18898,6 +21250,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -19199,6 +21593,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -19491,6 +21927,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -19898,6 +22376,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -20252,6 +22772,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -20544,6 +23106,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -20854,6 +23458,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -21155,6 +23801,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -21447,6 +24135,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -21895,6 +24625,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -22294,6 +25066,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -22595,6 +25409,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -22887,6 +25743,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -23228,6 +26126,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -23520,6 +26460,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -23906,6 +26888,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -24251,6 +27275,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -24552,6 +27618,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -24844,6 +27952,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -25159,6 +28309,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -25451,6 +28643,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -25836,6 +29070,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -26196,6 +29472,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -26497,6 +29815,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -26789,6 +30149,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -27104,6 +30506,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -27396,6 +30840,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -27825,6 +31311,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -28182,6 +31710,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -28483,6 +32053,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -28775,6 +32387,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -29094,6 +32748,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -29386,6 +33082,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -29768,6 +33506,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -30120,6 +33900,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -30421,6 +34243,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -30713,6 +34577,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -31070,6 +34976,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -31362,6 +35310,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -31795,6 +35785,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -32140,6 +36172,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -32432,6 +36506,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -32742,6 +36858,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -33043,6 +37201,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -33335,6 +37535,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -33726,6 +37968,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -34068,6 +38352,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -34360,6 +38686,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -34670,6 +39038,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -34971,6 +39381,48 @@
               {
                "type": "object",
                "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
                 "body": {
                  "type": "string",
                  "description": "The body or the path to a script that returns the body to send."
@@ -35263,6 +39715,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [
@@ -35646,6 +40140,48 @@
                  ],
                  "type": "string",
                  "description": "Executes a Visual Studio Code command."
+                }
+               },
+               "required": [
+                "command"
+               ]
+              },
+              {
+               "type": "object",
+               "properties": {
+                "command": {
+                 "type": "string",
+                 "description": "The (shell) command to execute."
+                },
+                "cwd": {
+                 "type": "string",
+                 "description": "The custom working directory for the execution to use."
+                },
+                "if": {
+                 "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+                 "type": "string"
+                },
+                "ignoreIfFail": {
+                 "description": "Continue when operation fails or not.",
+                 "type": "boolean",
+                 "default": false
+                },
+                "name": {
+                 "description": "The (display) name of that operation.",
+                 "type": "string"
+                },
+                "noPlaceHolders": {
+                 "type": "string",
+                 "description": "Do not use placeholders in 'command' property.",
+                 "default": false
+                },
+                "type": {
+                 "enum": [
+                  "exec",
+                  "execute"
+                 ],
+                 "type": "string",
+                 "description": "Executes a shell command inside the workspace."
                 }
                },
                "required": [

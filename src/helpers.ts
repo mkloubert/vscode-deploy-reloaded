@@ -652,6 +652,14 @@ export function doesMatch(val: any, patterns: string | string[], options?: Minim
 export async function exec(command: string, opts?: ChildProcess.ExecOptions) {
     command = toStringSafe(command);
 
+    if (!opts) {
+        opts = {};
+    }
+
+    if (isNullOrUndefined(opts.env)) {
+        opts.env = process.env;
+    }
+
     return new Promise<ExecResult>((resolve, reject) => {
         const COMPLETED = createCompletedAction(resolve, reject);
 
@@ -708,6 +716,8 @@ export function exists(path: string | Buffer) {
  * @param {TItem | TItem[]} items The items to filter.
  * @param {boolean} [throwOnError] Throw on error or not. 
  * @param {any} [errorResult] The custom result when an error occurred.
+ * 
+ * @return {TItem[]} The filtered items.
  */
 export function filterConditionalItems<TItem extends deploy_contracts.ConditionalItem = deploy_contracts.ConditionalItem>(
     items: TItem | TItem[],

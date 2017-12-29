@@ -1,5 +1,12 @@
 # Change Log (vscode-deploy-reloaded)
 
+## 0.8.0 (December 29th, 2017; target operations)
+
+* bugfixes
+* code improvements
+* added [exec](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_operations#exec-) target operation
+* improved use of `if` properties and [placeholders](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/values)
+
 ## 0.7.0 (December 29th, 2017; npm)
 
 * bugfixes

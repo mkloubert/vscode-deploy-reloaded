@@ -48,7 +48,8 @@ export function exec<TResult = any, TContext = any>(context: CodeExecutionContex
     if (!context) {
         return;
     }
-    
+
+    const $ctx = context.context;
     const $h = require('./helpers');
     const $r = (id) => {
         return $h.requireFromExtension(id);

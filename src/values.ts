@@ -348,10 +348,12 @@ export function getEnvVars(): Value[] {
  * Loads values from value item settings.
  * 
  * @param {WithValueItems} items The item settings.
+ * @param {Function} [conditialFilter] A custom filter for the items.
  * 
  * @return {Value[]} The loaded values.
  */
-export function loadFromItems(items: WithValueItems) {
+export function loadFromItems(items: WithValueItems,
+                              conditialFilter?: (item: ValueItem, others: Value[]) => boolean) {
     const VALUES: Value[] = [];
 
     const CREATE_OTHERS_PROVIDER = (thisValue: Value) => {
@@ -368,6 +370,35 @@ export function loadFromItems(items: WithValueItems) {
         VALUES.push(newValue);
     };
 
+    if (!conditialFilter) {
+        conditialFilter = (i, o) => {
+            let doesMatch: any;
+
+            try {
+                const IF_CODE = deploy_helpers.toStringSafe(i.if);
+                if (!deploy_helpers.isEmptyString(IF_CODE)) {
+                    doesMatch = deploy_code.exec({
+                        code: IF_CODE,
+                        context: {
+                            i: i,
+                        },
+                        values: [].concat( getPredefinedValues() )
+                                  .concat( getEnvVars() )
+                                  .concat( o ),
+                    });
+                }
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .trace('values.loadFromItems().conditialFilter()');
+
+                doesMatch = false;
+            }
+
+            return doesMatch;
+        };
+    }
+
     if (items && items.values) {
         for (const NAME in items.values) {
             const VI = items.values[NAME];
@@ -379,7 +410,7 @@ export function loadFromItems(items: WithValueItems) {
                     continue;  // not for platform
                 }
 
-                if (deploy_helpers.filterConditionalItems(VI).length < 1) {
+                if (!deploy_helpers.toBooleanSafe( conditialFilter(VI, VALUES), true )) {
                     continue;  // condition failed
                 }
 
@@ -499,9 +530,9 @@ export function toValueStorage(values: Value | Value[]): ValueStorage {
     const STORAGE: ValueStorage = {};
     const APPEND_VALUE = (v: Value) => {
         // STORAGE[NAME] => v.name
-        Object.defineProperty(STORAGE, deploy_helpers.toStringSafe(v.name), {
+        Object.defineProperty(STORAGE, deploy_helpers.normalizeString(v.name), {
             enumerable: true,
-            configurable: false,
+            configurable: true,
 
             get: () => {
                 return v.value;

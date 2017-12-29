@@ -18,6 +18,7 @@
  
 import * as ChildProcess from 'child_process';
 import * as Crypto from 'crypto';
+import * as deploy_code from './code';
 import * as deploy_commands from './commands';
 import * as deploy_contracts from './contracts';
 import * as deploy_delete from './delete';
@@ -629,6 +630,54 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     }
 
     /**
+     * Filters items with 'if' code.
+     * 
+     * @param {TItem | TItem[]} items The items to filter.
+     * @param {boolean} [throwOnError] Throw on error or not. 
+     * @param {any} [errorResult] The custom result when an error occurred.
+     * 
+     * @return {TItem[]} The filtered items.
+     */
+    public filterConditionalItems<TItem extends deploy_contracts.ConditionalItem = deploy_contracts.ConditionalItem>(
+        items: TItem | TItem[],
+        throwOnError = false,
+        errorResult: any = false,
+    ) {
+        const ME = this;
+
+        items = deploy_helpers.asArray(items);
+        throwOnError = deploy_helpers.toBooleanSafe(throwOnError);
+
+        return items.filter(i => {
+            const IF_CODE = deploy_helpers.toStringSafe(i.if);
+            if (!deploy_helpers.isEmptyString(IF_CODE)) {
+                try {
+                    return deploy_code.exec({
+                        code: IF_CODE,
+                        context: {
+                            i: i,
+                            ws: ME,
+                        },
+                        values: ME.getValues(),
+                    });
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'workspaces.Workspace.filterConditionalItems()');
+
+                    if (throwOnError) {
+                        throw e;
+                    }
+
+                    return errorResult;
+                }
+            }
+
+            return true;
+        });
+    }
+
+    /**
      * Finds files inside that workspace.
      * 
      * @param {deploy_contracts.FileFilter} filter The filter to use.
@@ -959,7 +1008,9 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     public getPackages(): deploy_packages.Package[] {
         let packages = this._packages;
 
-        packages = deploy_helpers.filterConditionalItems(packages);
+        packages = this.filterConditionalItems(
+            packages
+        );
 
         return packages;
     }
@@ -1102,7 +1153,9 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     public getTargets(): deploy_targets.Target[] {
         let targets = this._targets;
 
-        targets = deploy_helpers.filterConditionalItems(targets);
+        targets = this.filterConditionalItems(
+            targets
+        );
 
         return targets;
     }
@@ -1234,7 +1287,31 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         }
 
         values = values.concat(
-            deploy_values.loadFromItems(CFG)
+            deploy_values.loadFromItems(CFG, (i, o) => {
+                let doesMatch: any;
+
+                try {
+                    const IF_CODE = deploy_helpers.toStringSafe(i.if);
+                    if (!deploy_helpers.isEmptyString(IF_CODE)) {
+                        doesMatch = deploy_code.exec({
+                            code: IF_CODE,
+                            context: {
+                                i: i,
+                                ws: ME,
+                            },
+                            values: values.concat(o),
+                        });
+                    }
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace('workspaces.Workspace.getValues(2)');
+
+                    doesMatch = false;
+                }
+
+                return doesMatch;
+            })
         );
 
         return values;
@@ -1884,16 +1961,26 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                     let importFile: string;
 
                     if (deploy_helpers.isObject<deploy_contracts.Import>(IE)) {
-                        let doesMatch = true;
+                        let doesMatch = false;
                         
                         const PI = deploy_helpers.filterPlatformItems(IE);
-                        if (PI.length < 1) {
-                            doesMatch = false;
+                        if (PI.length > 0) {
+                            doesMatch = undefined;
 
-                            const CI = deploy_helpers.filterConditionalItems(IE);
-                            if (CI.length > 0) {
-                                doesMatch = true;
+                            const IF_CODE = deploy_helpers.toStringSafe(IE.if);
+                            if (!deploy_helpers.isEmptyString(IF_CODE)) {
+                                doesMatch = deploy_code.exec({
+                                    code: IF_CODE,
+                                    context: {
+                                        i: IE,
+                                        ws: ME,
+                                    },
+                                    values: [].concat( deploy_values.getPredefinedValues() )
+                                              .concat( deploy_values.getEnvVars() ),
+                                });
                             }
+
+                            doesMatch = deploy_helpers.toBooleanSafe(doesMatch, true);
                         }
 
                         if (doesMatch) {

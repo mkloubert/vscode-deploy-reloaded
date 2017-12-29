@@ -23,6 +23,7 @@ import * as deploy_log from './log';
 import * as deploy_mappings from './mappings';
 import * as deploy_packages from './packages';
 import * as deploy_targets_operations_command from './targets/operations/command';
+import * as deploy_targets_operations_exec from './targets/operations/exec';
 import * as deploy_targets_operations_http from './targets/operations/http';
 import * as deploy_targets_operations_open from './targets/operations/open';
 import * as deploy_targets_operations_script from './targets/operations/script';
@@ -388,9 +389,8 @@ export async function executeTargetOperations(opts: ExecuteTargetOperationOption
         }
 
         operationToExecute = Enumerable.from(
-            deploy_helpers.filterConditionalItems(
-                [ operationToExecute ], true
-            )).firstOrDefault(null);
+            WORKSPACE.filterConditionalItems(operationToExecute, true)
+        ).singleOrDefault(null);
 
         if (!deploy_helpers.isObject<TargetOperation>(operationToExecute)) {
             continue;
@@ -410,6 +410,11 @@ export async function executeTargetOperations(opts: ExecuteTargetOperationOption
 
             case 'command':
                 executor = deploy_targets_operations_command.execute;
+                break;
+
+            case 'exec':
+            case 'execute':
+                executor = deploy_targets_operations_exec.execute;
                 break;
 
             case 'http':
