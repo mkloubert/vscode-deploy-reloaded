@@ -383,6 +383,30 @@ export const translation: Translation = {
         errors: {
             operationFailed: "Tool operation failed (s. debug output 'CTRL + SHIFT + Y')!",
         },
+        npm: {
+            description: "Tools for simple use of 'npm'",
+            executing: "Running{0:trim,surround,leading_space} ...",
+            label: "Node Package Manager (npm)",
+            runInstall: {
+                description: "Runs 'npm install' inside the current workspace",
+                enterModuleName: "Enter the name of the NPM module ...",
+                label: "Run 'npm install' ...",
+            },
+            runLink: {
+                description: "Runs 'npm link' inside the current workspace",
+                enterModuleName: "Enter the name of the NPM module ...",
+                label: "Run 'npm link' ...",
+            },
+            runUninstall: {
+                description: "Runs 'npm uninstall' inside the current workspace",
+                errors: {
+                    loadingPackageFileFailed: "Loading{0:trim,surround,leading_space} failed:{1:trim,surround,leading_space}",
+                },
+                packageFileContainsNoModules: "{0:trim,surround,ending_space} contains no modules!",
+                packageFileNotFound: "No 'package.json' file found in{0:trim,surround,leading_space}!",
+                label: "Run 'npm UNinstall' ...",
+            },
+        },
         quickExecution: {
             description: "Executes JavaScript code",
             errors: {
@@ -442,17 +466,27 @@ export const translation: Translation = {
             errors: {
                 selectWorkspaceFailed: "Selecting active workspace failed (s. debug output 'CTRL + SHIFT + Y')!",
             },
+            noneFound: "No active workspaces found!",
             selectWorkspace: "Select the active workspace ...",
         },
         errors: {
             cannotDetectMappedPathInfoForFile: "Cannot detect mapped path information for file{0:trim,surround,leading_space}!",
             cannotDetectPathInfoForFile: "Cannot detect path information for file{0:trim,surround,leading_space}!",
             cannotUseTargetForFile: "Cannot use target{0:trim,surround,leading_space} for file{1:trim,surround,leading_space}!",
+            initNodeModulesFailed: "Execution of 'npm install' failed:{0:trim,surround,leading_space}",
             notInitialized: "Workspace{0:trim,surround,leading_space} has not been initialized!",
         },
         initializing: "Initializing workspace{0:trim,surround,leading_space} ...",
         noneFound: "No workspaces found!",
         noSelected: "no workspace selected",
+        npm: {
+            install: {
+                errors: {
+                    failed: "'npm install' failed:{0:trim,surround,leading_space}",
+                },
+                running: "Running 'npm install' in{0:trim,surround,leading_space} ..."
+            }
+        },
         removing: "Closing workspace{0:trim,surround,leading_space} ...",
         selectWorkspace: "Select a workspace ...",
     },

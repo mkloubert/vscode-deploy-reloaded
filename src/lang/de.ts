@@ -382,6 +382,30 @@ export const translation: Translation = {
         errors: {
             operationFailed: "Konnte Funktion nicht ausführen (s. Debugkonsole 'STRG + SHIFT + Y')!",
         },
+        npm: {
+            description: "Werkzeuge für das einfache Arbeiten mit 'npm'",
+            executing: "Führe{0:trim,surround,leading_space} aus ...",
+            label: "Node Paket Manager (npm)",
+            runInstall: {
+                description: "Führt den Befehl 'npm install' im aktuellen Arbeitsbereich aus",
+                enterModuleName: "Geben Sie den Namen des NPM-Moduls an ...",
+                label: "'npm install' ausführen ...",
+            },
+            runLink: {
+                description: "Führt den Befehl 'npm link' im aktuellen Arbeitsbereich aus",
+                enterModuleName: "Geben Sie den Namen des NPM-Moduls an ...",
+                label: "'npm link' ausführen ...",
+            },
+            runUninstall: {
+                description: "Führt den Befehl 'npm uninstall' im aktuellen Arbeitsbereich aus",
+                errors: {
+                    loadingPackageFileFailed: "Das Laden von{0:trim,surround,leading_space} ist fehlgeschlagen:{1:trim,surround,leading_space}",
+                },
+                packageFileContainsNoModules: "{0:trim,surround,ending_space} beinhaltet keine Module!",
+                packageFileNotFound: "Es wurde keine 'package.json'-Datei in{0:trim,surround,leading_space} gefunden!",
+                label: "'npm UNinstall' ausführen ...",
+            },
+        },
         quickExecution: {
             description: "Führt JavaScript-Code aus",
             errors: {
@@ -441,17 +465,27 @@ export const translation: Translation = {
             errors: {
                 selectWorkspaceFailed: "Das Selektieren des aktiven Arbeitsbereiches ist fehlgeschlagen (s. Debugkonsole 'STRG + SHIFT + Y')!",
             },
+            noneFound: "Keine aktiven Arbeitsbereiche gefunden!",
             selectWorkspace: "Wählen Sie den aktiven Arbeitsbereich aus ...",
         },
         errors: {
             cannotDetectMappedPathInfoForFile: "Gemappte Pfad-Informationen konnten für die Datei{0:trim,surround,leading_space} nicht ermittelt werden!",
             cannotDetectPathInfoForFile: "Pfad-Informationen konnten für die Datei{0:trim,surround,leading_space} nicht ermittelt werden!",
             cannotUseTargetForFile: "Kann das Ziel{0:trim,surround,leading_space} nicht für die Datei{1:trim,surround,leading_space} verwenden!",
+            initNodeModulesFailed: "Der Aufruf von 'npm install' ist fehlgeschlagen:{0:trim,surround,leading_space}",
             notInitialized: "Der Arbeitsbereich{0:trim,surround,leading_space} wurde nicht initialisiert!",
         },
         initializing: "Initialisiere Arbeitsbereich{0:trim,surround,leading_space} ...",
         noneFound: "Keine Arbeitsbereiche gefunden!",
         noSelected: "kein Arbeitsbereich ausgewählt",
+        npm: {
+            install: {
+                errors: {
+                    failed: "'npm install' konnte nicht ausgeführt werden:{0:trim,surround,leading_space}",
+                },
+                running: "Führe 'npm install' in{0:trim,surround,leading_space} aus ..."
+            }
+        },
         removing: "Schliesse Arbeitsbereich{0:trim,surround,leading_space} ...",
         selectWorkspace: "Wählen Sie einen Arbeitsbereich ...",
     },

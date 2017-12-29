@@ -162,6 +162,10 @@ export interface Configuration extends deploy_values.WithValueItems {
      */
     readonly imports?: ImportType | ImportType[];
     /**
+     * Runs 'npm install' inside the workspace folder on startup, if a 'package.json' file exists and NO 'node_modules' has been found.
+     */
+    readonly initNodeModules?: boolean;
+    /**
      * The custom ID of the language to use (e.g. 'en', 'de').
      */
     readonly language?: string;

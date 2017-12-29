@@ -15,11 +15,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+ 
+import * as ChildProcess from 'child_process';
+import * as Crypto from 'crypto';
 import * as deploy_commands from './commands';
 import * as deploy_contracts from './contracts';
 import * as deploy_delete from './delete';
 import * as deploy_deploy from './deploy';
 import * as deploy_download from './download';
+import * as deploy_gui from './gui';
 import * as deploy_helpers from './helpers';
 import * as deploy_list from './list';
 import * as deploy_log from './log';
@@ -215,6 +219,7 @@ export interface WorkspaceSettings extends deploy_contracts.Configuration, vscod
 
 let activeWorkspaceProvider: WorkspaceProvider;
 const FILES_CHANGES: { [path: string]: deploy_contracts.FileChangeType } = {};
+const KEY_WORKSPACE_USAGE = 'vscdrLastExecutedWorkspaceActions';
 let nextPackageButtonId = Number.MIN_SAFE_INTEGER;
 let nextSwitchButtonId = Number.MIN_SAFE_INTEGER;
 const SWITCH_STATE_REPO_COLLECTION_KEY = 'SwitchStates';
@@ -558,6 +563,25 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     public async deployPackage(pkg: deploy_packages.Package) {
         await deploy_deploy.deployPackage
                            .apply(this, arguments);
+    }
+
+    /**
+     * Executes something for that workspace.
+     * 
+     * @param {string} command The thing / command to execute. 
+     * @param {ChildProcess.ExecOptions} [opts] Custom options.
+     * 
+     * @return {Promise<ExecResult>} The promise with the result.
+     */
+    public async exec(command: string, opts?: ChildProcess.ExecOptions) {
+        const DEFAULT_OPTS: ChildProcess.ExecOptions = {
+            cwd: this.rootPath,  
+        };
+
+        return await deploy_helpers.exec(
+            command,
+            MergeDeep(DEFAULT_OPTS, opts),
+        );
     }
 
     private async executeStartupCommands() {
@@ -1325,6 +1349,64 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         return true;
     }
 
+    private async initNodeModules(cfg: WorkspaceSettings) {
+        if (!cfg) {
+            return;
+        }
+
+        if (!deploy_helpers.toBooleanSafe(cfg.initNodeModules)) {
+            return;
+        }
+
+        const ME = this;
+
+        try {
+            const PACKAGE_JSON = Path.resolve(
+                Path.join(
+                    ME.rootPath, 'package.json',
+                )
+            );
+
+            const NODE_MODULES = Path.resolve(
+                Path.join(
+                    ME.rootPath, 'node_modules',
+                )
+            );
+
+            if (!(await deploy_helpers.exists(PACKAGE_JSON))) {
+                return;  // no 'package.json'
+            }
+
+            if (await deploy_helpers.exists(NODE_MODULES)) {
+                return;  // 'node_modules' already exist
+            }
+
+            ME.context.outputChannel.appendLine('');
+            ME.context.outputChannel.append(
+                ME.t('workspaces.npm.install.running',
+                     ME.rootPath) + ' '
+            );
+            try {
+                await ME.exec('npm install');
+
+                ME.context.outputChannel.appendLine(
+                    `[${ME.t('ok')}]`
+                );
+            }
+            catch (e) {
+                ME.context.outputChannel.appendLine(
+                    `[${ME.t('error', e)}]`
+                );
+            }
+        }
+        catch (e) {
+            ME.showErrorMessage(
+                ME.t('workspaces.npm.install.errors.failed',
+                     e)
+            );
+        }
+    }
+
     /**
      * Gets if the workspace is active or not.
      */
@@ -1885,6 +1967,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             }
 
             finalizer = async () => {
+                await ME.initNodeModules(loadedCfg);
+
                 // runBuildTaskOnStartup
                 try {
                     await deploy_tasks.runBuildTaskOnStartup
@@ -2753,15 +2837,6 @@ export function getActiveWorkspaces(): Workspace[] {
 }
 
 /**
- * Sets the global function for providing the list of active workspaces.
- * 
- * @param {WorkspaceProvider} newProvider The new function.
- */
-export function setActiveWorkspaceProvider(newProvider: WorkspaceProvider) {
-    activeWorkspaceProvider = newProvider;
-}
-
-/**
  * Checks if a target is a switch or not.
  * 
  * @param {deploy_targets.Target} target The target to check.
@@ -2776,6 +2851,88 @@ export function isSwitchTarget(target: deploy_targets.Target): target is SwitchT
     }
 
     return false;
+}
+
+/**
+ * Resets the workspace usage statistics.
+ * 
+ * @param {vscode.ExtensionContext} context The extension context.
+ */
+export function resetWorkspaceUsage(context: vscode.ExtensionContext) {
+    context.workspaceState.update(KEY_WORKSPACE_USAGE, undefined).then(() => {
+    }, (err) => {
+        deploy_log.CONSOLE
+                  .trace(err, 'workspaces.resetWorkspaceUsage()');
+    });
+}
+
+/**
+ * Sets the global function for providing the list of active workspaces.
+ * 
+ * @param {WorkspaceProvider} newProvider The new function.
+ */
+export function setActiveWorkspaceProvider(newProvider: WorkspaceProvider) {
+    activeWorkspaceProvider = newProvider;
+}
+
+
+/**
+ * Shows a quick pick for a list of packages.
+ * 
+ * @param {vscode.ExtensionContext} context The extension context.
+ * @param {Workspace|Workspace[]} workspaces One or more workspaces.
+ * @param {vscode.QuickPickOptions} [opts] Custom options for the quick picks.
+ * 
+ * @return {Promise<Workspace|false>} The promise that contains the selected workspace (if selected)
+ *                                    or (false) if no package is available.
+ */
+export async function showWorkspaceQuickPick(context: vscode.ExtensionContext,
+                                             workspaces: Workspace | Workspace[],
+                                             opts?: vscode.QuickPickOptions): Promise<Workspace | false> {
+    const QUICK_PICKS: deploy_contracts.ActionQuickPick<string>[] = deploy_helpers.asArray(workspaces).map(ws => {
+        return {
+            action: () => {
+                return ws;
+            },
+            label: '$(file-directory)  ' + ws.name,
+            description: '',
+            detail: ws.rootPath,
+            state: Crypto.createHash('sha256')
+                         .update( new Buffer(deploy_helpers.toStringSafe(ws.id), 'utf8') )
+                         .digest('hex'),
+        };
+    });
+
+    if (QUICK_PICKS.length < 1) {
+        deploy_helpers.showWarningMessage(
+            i18.t('noneFound.noneFound')
+        );
+        
+        return false;
+    }
+
+    let selectedItem: deploy_contracts.ActionQuickPick<string>;
+    if (1 === QUICK_PICKS.length) {
+        selectedItem = QUICK_PICKS[0];
+    }
+    else {
+        selectedItem = await vscode.window.showQuickPick(
+            deploy_gui.sortQuickPicksByUsage(QUICK_PICKS,
+                                             context.globalState,
+                                             KEY_WORKSPACE_USAGE,
+                                             (i) => {
+                                                 // remove icon
+                                                 return i.label
+                                                         .substr(i.label.indexOf(' '))
+                                                         .trim();
+                                             }),
+            opts,
+        );
+    }
+
+    if (selectedItem) {
+        return selectedItem.action();
+    }
 }
 
 async function scanForDirectoriesRecursive(dir: string, isRoot: boolean) {

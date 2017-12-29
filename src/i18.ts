@@ -388,6 +388,30 @@ export interface Translation {
         errors?: {
             operationFailed?: string;
         };
+        npm?: {
+            description?: string;
+            executing?: string;
+            label?: string;
+            runInstall?: {
+                description?: string;
+                enterModuleName?: string;
+                label?: string;
+            };
+            runLink?: {
+                description?: string;
+                enterModuleName?: string;
+                label?: string;
+            };
+            runUninstall?: {
+                description?: string;
+                errors?: {
+                    loadingPackageFileFailed?: string;
+                };
+                packageFileContainsNoModules?: string;
+                packageFileNotFound?: string;
+                label?: string;
+            };
+        },
         quickExecution?: {
             description?: string;
             errors?: {
@@ -447,17 +471,27 @@ export interface Translation {
             errors?: {
                 selectWorkspaceFailed?: string;
             };
+            noneFound?: string;
             selectWorkspace?: string;
         };
         errors?: {
             cannotDetectMappedPathInfoForFile?: string;
             cannotDetectPathInfoForFile?: string;
             cannotUseTargetForFile?: string;
+            initNodeModulesFailed?: string;
             notInitialized?: string;
         };
         initializing?: string;
         noneFound?: string;
         noSelected?: string;
+        npm?: {
+            install?: {
+                errors?: {
+                    failed?: string;
+                };
+                running?: string;
+            }
+        };
         removing?: string;
         selectWorkspace?: string;
     };

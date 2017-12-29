@@ -35,6 +35,7 @@ The extension supports the following destinations:
    * [Tools](#tools-)
      * [Quick code execution](#quick-code-execution-)
      * [Send files to other editors](#send-files-to-other-editors-)
+     * [NPM helpers](#npm-helpers-)
 2. [Preview](#preview-)
 3. [Install](#install-)
 4. [How to use](#how-to-use-)
@@ -81,6 +82,12 @@ The extension supports the following destinations:
 The following demo shows, how you can send a file to another VS Code instance over a secure and encrypted TCP connection:
 
 ![Demo Send files to other editors](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo8.gif)
+
+#### NPM helpers [[&uarr;](#tools-)]
+
+Provides some helpers for handling [npm](https://www.npmjs.com/package/npm):
+
+![Demo NPM helpers](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo9.gif)
 
 ## Preview [[&uarr;](#table-of-contents)]
 

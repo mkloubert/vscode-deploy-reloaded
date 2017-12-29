@@ -41,6 +41,24 @@ import * as vscode from 'vscode';
 
 
 /**
+ * Result of an execution.
+ */
+export interface ExecResult {
+    /**
+     * The output from 'standard error' stream.
+     */
+    readonly stdErr: string;
+    /**
+     * The output from 'standard output' stream.
+     */
+    readonly stdOut: string;
+    /**
+     * The underlying process.
+     */
+    readonly process: ChildProcess.ChildProcess;
+}
+
+/**
  * Options for 'invokeForTempFile' function.
  */
 export interface InvokeForTempFileOptions {
@@ -621,6 +639,45 @@ export function doesMatch(val: any, patterns: string | string[], options?: Minim
     }
     
     return false;
+}
+
+/**
+ * Executes something.
+ * 
+ * @param {string} command The thing / command to execute. 
+ * @param {ChildProcess.ExecOptions} [opts] Custom options.
+ * 
+ * @return {Promise<ExecResult>} The promise with the result.
+ */
+export async function exec(command: string, opts?: ChildProcess.ExecOptions) {
+    command = toStringSafe(command);
+
+    return new Promise<ExecResult>((resolve, reject) => {
+        const COMPLETED = createCompletedAction(resolve, reject);
+
+        try {
+            const RESULT: ExecResult = {
+                stdErr: undefined,
+                stdOut: undefined,
+                process: undefined,
+            };
+
+            (<any>RESULT)['process'] = ChildProcess.exec(command, opts, (err, stdout, stderr) => {
+                if (err) {
+                    COMPLETED(err);
+                }
+                else {
+                    (<any>RESULT)['stdErr'] = stderr;
+                    (<any>RESULT)['stdOut'] = stdout;
+
+                    COMPLETED(null, RESULT);
+                }
+            });
+        }
+        catch (e) {
+            COMPLETED(e);
+        }
+    });
 }
 
 /**

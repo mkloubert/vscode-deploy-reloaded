@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.6.0",
+ "version": "0.7.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -297,6 +297,11 @@
          }
         }
        ]
+      },
+      "initNodeModules": {
+       "description": "Runs 'npm install' inside the workspace folder on startup, if a 'package.json' file exists and NO 'node_modules' has been found.",
+       "type": "boolean",
+       "default": false
       },
       "language": {
        "description": "The custom ID of the language to use (e.g. 'en', 'de').",

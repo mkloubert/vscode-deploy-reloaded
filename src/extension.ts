@@ -31,6 +31,7 @@ import * as deploy_plugins from './plugins';
 import * as deploy_switch from './switch';
 import * as deploy_targets from './targets';
 import * as deploy_tools from './tools';
+import * as deploy_tools_npm from './tools/npm';
 import * as deploy_tools_quick_execution from './tools/quickexecution';
 import * as deploy_tools_send_file from './tools/sendfile';
 import * as deploy_workflows from './workflows';
@@ -1185,6 +1186,15 @@ async function activateExtension(context: vscode.ExtensionContext) {
                             label: '$(broadcast)  ' + i18.t('tools.sendOrReceiveFile.label'),
                             description: i18.t('tools.sendOrReceiveFile.description'),
                             state: 4,
+                        },
+
+                        {
+                            action: async () => {
+                                await deploy_tools_npm.showNPMTools(context);
+                            },
+                            label: '$(package)  ' + i18.t('tools.npm.label'),
+                            description: i18.t('tools.npm.description'),
+                            state: 5,
                         }
                     ];
 
@@ -1338,6 +1348,8 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 deploy_packages.resetPackageUsage(context);
                 deploy_targets.resetTargetUsage(context);
                 deploy_tools.resetToolUsage(context);
+                deploy_tools_npm.resetNPMToolsUsage(context);
+                deploy_workspaces.resetWorkspaceUsage(context);
 
                 onDidChangeConfiguration(e).then(() => {
                 }).catch((err) => {
