@@ -449,7 +449,6 @@ export async function deletePackage(pkg: deploy_packages.Package,
     if (exclude.length < 1) {
         exclude = undefined;
     }
-    const ROOT_DIR = ME.folder.uri.fsPath;
 
     const FILES_TO_DELETE = await ME.findFilesByFilter(pkg);
     if (FILES_TO_DELETE.length < 1) {

@@ -215,7 +215,7 @@ export type WorkspaceProvider = () => Workspace | Workspace[];
 /**
  * Workspace settings.
  */
-export interface WorkspaceSettings extends deploy_contracts.Configuration, vscode.WorkspaceConfiguration {
+export interface WorkspaceSettings extends deploy_contracts.Configuration {
 }
 
 
@@ -262,7 +262,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     private _OLD_ENV_VARS: deploy_contracts.KeyValuePairs = {};
     private _PACKAGE_BUTTONS: PackageWithButton[] = [];
     private _packages: deploy_packages.Package[];
-    private _rootPath: string;
+    private _rootPath: string | false;
     private _sessionState: deploy_contracts.KeyValuePairs;
     private _selectedSwitches: deploy_contracts.KeyValuePairs;
     /**
@@ -287,10 +287,6 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 public readonly folder: vscode.WorkspaceFolder,
                 public readonly context: WorkspaceContext) {
         super();
-
-        this._rootPath = Path.resolve(
-            this.folder.uri.fsPath
-        );
 
         this.state = new WorkspaceMemento(this);
     }
@@ -600,6 +596,15 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     }
 
     /**
+     * Gets the root path of the editor.
+     */
+    public get editorRootPath() {
+        return Path.resolve(
+            this.folder.uri.fsPath,
+        );
+    }
+
+    /**
      * Executes something for that workspace.
      * 
      * @param {string} command The thing / command to execute. 
@@ -735,9 +740,9 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         }
 
         const DEFAULT_OPTS: Glob.IOptions = {
-            cwd: this.folder.uri.fsPath,
+            cwd: this.rootPath,
             ignore: exclude,
-            root: this.folder.uri.fsPath,
+            root: this.rootPath,
         };
 
         return await deploy_helpers.glob(patterns,
@@ -1293,6 +1298,11 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             deploy_values.getPredefinedValues()
         );
 
+        // ${editorRoot}
+        values.push(new deploy_values.FunctionValue(() => {
+            return ME.editorRootPath;
+        }, 'editorRoot'));
+
         // ${workspace}
         values.push(new deploy_values.FunctionValue(() => {
             return ME.name;
@@ -1376,6 +1386,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             return false;
         }
 
+        ME._rootPath = false;
+
         // settings file
         {
             interface SettingsData {
@@ -1451,6 +1463,14 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                     section: DEFAULT_SECTION_NAME,
                 };
             }
+            else {
+                this._rootPath = Path.resolve(
+                    Path.join(
+                        Path.dirname(settingsData.file),
+                        '..'
+                    )
+                );
+            }
 
             ME._configSource = {
                 section: settingsData.section,
@@ -1461,8 +1481,6 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         // git folder
         {
             ME._gitFolder = false;
-
-            const DEFAULT_DIR = this.folder.uri.fsPath;
 
             let searchForNextFolder: (dir: string) => Promise<string | false>;
             searchForNextFolder = async (dir) => {
@@ -1494,7 +1512,9 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 return false;
             };
 
-            ME._gitFolder = await searchForNextFolder(DEFAULT_DIR);
+            ME._gitFolder = await searchForNextFolder(
+                ME.folder.uri.fsPath
+            );
         }
 
         await ME.reloadConfiguration();
@@ -1875,7 +1895,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Gets the name of that workspace.
      */
     public get name(): string {
-        return Path.basename(this.folder.uri.fsPath);
+        return Path.basename(this.rootPath);
     }
 
     /**
@@ -2027,6 +2047,24 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             let loadedCfg: WorkspaceSettings = vscode.workspace.getConfiguration(ME.configSource.section,
                                                                                  ME.configSource.resource) || <any>{};
             loadedCfg = deploy_helpers.cloneObjectFlat(loadedCfg);
+
+            if (ME.editorRootPath !== ME.rootPath) {
+                if (await deploy_helpers.exists(ME.configSource.resource.fsPath)) {
+                    const CONFIG_TO_MERGE: WorkspaceSettings = 
+                        JSON.parse(
+                            (await deploy_helpers.readFile(
+                                ME.configSource.resource.fsPath,
+                            )).toString('utf8')
+                        );
+
+                    if (CONFIG_TO_MERGE) {
+                        loadedCfg = MergeDeep(
+                            loadedCfg,
+                            CONFIG_TO_MERGE[ME.configSource.section],  
+                        );
+                    }
+                }
+            }
 
             // runGitPullOnStartup
             await deploy_tasks.runGitPullOnStartup
@@ -2660,7 +2698,18 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Gets the root path of that workspace.
      */
     public get rootPath(): string {
-        return this._rootPath;
+        let rp = this._rootPath;
+        if (false === rp) {
+            rp = this.folder.uri.fsPath;
+        }
+
+        if (!Path.isAbsolute(rp)) {
+            rp = Path.join(
+                this.folder.uri.fsPath, rp
+            );
+        }
+
+        return Path.resolve(rp);
     }
 
     /**
@@ -2799,7 +2848,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             return;
         }
 
-        let workspaceDir = Path.resolve(this.folder.uri.fsPath);
+        let workspaceDir = this.rootPath;
         workspaceDir = deploy_helpers.replaceAllStrings(workspaceDir, Path.sep, '/');
 
         if (!Path.isAbsolute(file)) {
@@ -2847,7 +2896,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
         return Path.resolve(
             Path.join(
-                this.folder.uri.fsPath,
+                this.rootPath,
                 RELATIVE_PATH
             )
         );
@@ -2870,7 +2919,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         );
 
         const WORKSPACE_DIR = deploy_helpers.replaceAllStrings(
-            Path.resolve(this.folder.uri.fsPath),
+            this.rootPath,
             Path.sep,
             '/'
         );

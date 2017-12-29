@@ -6,6 +6,7 @@
 * code improvements
 * added [exec](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_operations#exec-) target operation
 * improved use of `if` properties and [placeholders](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/values)
+* fixed loading settings from parent folder
 
 ## 0.7.0 (December 29th, 2017; npm)
 

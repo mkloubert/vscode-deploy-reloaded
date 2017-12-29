@@ -309,14 +309,6 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
                                 },
                                 'options'
                             ),
-                            new deploy_values.FunctionValue(
-                                () => ME.name,
-                                'workspace'
-                            ),
-                            new deploy_values.FunctionValue(
-                                () => ME.rootPath,
-                                'workspace_folder'
-                            )
                         ];
 
                         btn.text = ME.replaceWithValues(

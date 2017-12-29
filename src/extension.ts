@@ -136,7 +136,7 @@ async function invokeForActiveEditor(placeHolder: string,
                     }
                 },
                 description: deploy_helpers.toStringSafe( t.description ).trim(),
-                detail: t.__workspace.folder.uri.fsPath,
+                detail: t.__workspace.rootPath,
                 label: deploy_targets.getTargetName(t),
             };
         });
@@ -1046,44 +1046,13 @@ async function activateExtension(context: vscode.ExtensionContext) {
             // select workspace
             vscode.commands.registerCommand('extension.deploy.reloaded.selectWorkspace', async () => {
                 try {
-                    const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = WORKSPACES.map(ws => {
-                        return {
-                            label: ws.name,
-                            description: Path.dirname(
-                                ws.folder.uri.fsPath
-                            ),
+                    const SELECTED_WORKSPACE = await deploy_workspaces.showWorkspaceQuickPick(
+                        context,
+                        WORKSPACES
+                    );
 
-                            action: async () => {
-                                activeWorkspaces = [ ws ];
-                            }
-                        };
-                    });
-
-                    if (QUICK_PICKS.length < 1) {
-                        deploy_helpers.showWarningMessage(
-                            i18.t('workspaces.noneFound')
-                        );
-                        
-                        return;
-                    }
-
-                    let selectedItem: deploy_contracts.ActionQuickPick;
-                    if (1 === QUICK_PICKS.length) {
-                        selectedItem = QUICK_PICKS[0];
-                    }
-                    else {
-                        selectedItem = await vscode.window.showQuickPick(
-                            QUICK_PICKS,
-                            {
-                                placeHolder: i18.t('workspaces.active.selectWorkspace'),
-                            }
-                        );
-                    }
-
-                    if (selectedItem) {
-                        await Promise.resolve(
-                            selectedItem.action()
-                        );
+                    if (SELECTED_WORKSPACE) {
+                        activeWorkspaces = [ SELECTED_WORKSPACE ];
                     }
                 }
                 catch (e) {
