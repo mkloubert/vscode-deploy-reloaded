@@ -206,6 +206,7 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
                         context: context,
                         events: WORKSPACE.workspaceSessionState['target_operations']['http']['events'],
                         extension: WORKSPACE.context.extension,
+                        folder: WORKSPACE.folder,
                         globalEvents: deploy_events.EVENTS,
                         globals: WORKSPACE.globals,
                         globalState: WORKSPACE.workspaceSessionState['target_operations']['http']['global'],

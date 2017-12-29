@@ -125,6 +125,7 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
             events: ME._EVENTS,
             extension: context.target.__workspace.context.extension,
             files: context['files'],
+            folder: context.target.__workspace.folder,
             globalEvents: deploy_events.EVENTS,
             globals: context.target.__workspace.globals,
             globalState: ME._GLOBAL_STATE,

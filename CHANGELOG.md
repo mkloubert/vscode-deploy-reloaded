@@ -1,9 +1,10 @@
 # Change Log (vscode-deploy-reloaded)
 
-## 0.9.0 (December 30th, 2017; improvements)
+## 0.9.0 (December 30th, 2017; scripts)
 
 * bugfixes
 * code improvements
+* added `extension`, `folder` and `sessionState` properties to [ScriptArguments](https://mkloubert.github.io/vscode-deploy-reloaded/interfaces/_contracts_.scriptarguments.html)
 
 ## 0.8.0 (December 29th, 2017; target operations)
 

@@ -271,6 +271,7 @@ export async function pullFilesFrom(files: string[],
                                     const CONTEXT: deploy_transformers.DataTransformerContext = {
                                         events: ME.workspaceSessionState['pull']['events'],
                                         extension: ME.context.extension,
+                                        folder: ME.folder,
                                         globalEvents: deploy_events.EVENTS,
                                         globals: ME.globals,
                                         globalState: ME.workspaceSessionState['pull']['states']['global'],

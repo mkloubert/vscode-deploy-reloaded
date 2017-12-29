@@ -378,6 +378,10 @@ export interface ScriptArguments {
      */
     readonly extension: vscode.ExtensionContext;
     /**
+     * Gets the underlying workspace folder.
+     */
+    readonly folder: vscode.WorkspaceFolder;
+    /**
      * Gets the emitter for global extension events.
      */
     readonly globalEvents: NodeJS.EventEmitter;

@@ -191,6 +191,7 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
                         command: id,
                         events: ME.workspaceSessionState['commands']['events'],
                         extension: ME.context.extension,
+                        folder: ME.folder,
                         globalEvents: deploy_events.EVENTS,
                         globals: ME.globals,
                         globalState: GLOBAL_STATE,
