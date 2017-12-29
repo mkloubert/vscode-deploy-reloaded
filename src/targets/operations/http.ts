@@ -20,6 +20,7 @@ import * as deploy_events from '../../events';
 import * as deploy_helpers from '../../helpers';
 import * as deploy_http from '../../http';
 import * as deploy_log from '../../log';
+import * as deploy_session from '../../session';
 import * as deploy_targets from '../../targets';
 import * as i18 from '../../i18';
 import * as OS from 'os';
@@ -203,10 +204,11 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
                 getBodyToSend = async () => {
                     const ARGS: HttpBodyModuleExecutionArguments = {
                         context: context,
-                        events: WORKSPACE.sessionState['target_operations']['http']['events'],
+                        events: WORKSPACE.workspaceSessionState['target_operations']['http']['events'],
+                        extension: WORKSPACE.context.extension,
                         globalEvents: deploy_events.EVENTS,
                         globals: WORKSPACE.globals,
-                        globalState: WORKSPACE.sessionState['target_operations']['http']['global'],
+                        globalState: WORKSPACE.workspaceSessionState['target_operations']['http']['global'],
                         logger: deploy_log.CONSOLE,
                         options: deploy_helpers.cloneObject(OPERATION.options),
                         replaceWithValues: (val) => {
@@ -215,6 +217,7 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
                         require: (id) => {
                             return deploy_helpers.requireFromExtension(id);
                         },
+                        sessionState: deploy_session.SESSION_STATE,
                         state: undefined,
                         url: URL,
                     };
@@ -224,11 +227,11 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
                         enumerable: true,
 
                         get: () => {
-                            return WORKSPACE.sessionState['target_operations']['http']['body_scripts'][<string>bodyScriptFullPath];
+                            return WORKSPACE.workspaceSessionState['target_operations']['http']['body_scripts'][<string>bodyScriptFullPath];
                         },
 
                         set: (newValue) => {
-                            WORKSPACE.sessionState['target_operations']['http']['body_scripts'][<string>bodyScriptFullPath] = newValue;
+                            WORKSPACE.workspaceSessionState['target_operations']['http']['body_scripts'][<string>bodyScriptFullPath] = newValue;
                         }
                     });
 

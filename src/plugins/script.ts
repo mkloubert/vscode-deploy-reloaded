@@ -21,6 +21,7 @@ import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
 import * as deploy_log from '../log';
 import * as deploy_plugins from '../plugins';
+import * as deploy_session from '../session';
 import * as deploy_targets from '../targets';
 import * as deploy_workspaces from '../workspaces';
 import * as Events from 'events';
@@ -122,10 +123,11 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
             cancellationToken: undefined,
             dir: context['dir'],
             events: ME._EVENTS,
+            extension: context.target.__workspace.context.extension,
             files: context['files'],
             globalEvents: deploy_events.EVENTS,
             globals: context.target.__workspace.globals,
-            globalState: this._GLOBAL_STATE,
+            globalState: ME._GLOBAL_STATE,
             isCancelling: undefined,
             logger: deploy_log.CONSOLE,
             operation: operation,
@@ -137,6 +139,7 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
             require: (id) => {
                 return deploy_helpers.requireFromExtension(id);
             },
+            sessionState: deploy_session.SESSION_STATE,
             state: undefined,
             target: context.target,
             workspace: undefined,

@@ -22,6 +22,7 @@ import * as deploy_files from './files';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
 import * as deploy_objects from './objects';
+import * as deploy_session from './session';
 import * as deploy_targets from './targets';
 import * as deploy_transformers from './transformers';
 import * as deploy_values from './values';
@@ -534,10 +535,11 @@ export abstract class FileToUploadBase implements FileToUpload {
             );
 
             const CONTEXT: deploy_transformers.DataTransformerContext = {
-                events: ME.workspace.sessionState['upload']['events'],
+                events: ME.workspace.workspaceSessionState['upload']['events'],
+                extension: ME.workspace.context.extension,
                 globalEvents: deploy_events.EVENTS,
                 globals: ME.workspace.globals,
-                globalState: ME.workspace.sessionState['upload']['states']['global'],
+                globalState: ME.workspace.workspaceSessionState['upload']['states']['global'],
                 logger: deploy_log.CONSOLE,
                 mode: deploy_transformers.DataTransformerMode.Transform,
                 options: ME.transformerOptions,
@@ -548,6 +550,7 @@ export abstract class FileToUploadBase implements FileToUpload {
                 require: (id) => {
                     return deploy_helpers.requireFromExtension(id);
                 },
+                sessionState: deploy_session.SESSION_STATE,
                 state: undefined,
             };
 
@@ -556,11 +559,11 @@ export abstract class FileToUploadBase implements FileToUpload {
                 enumerable: true,
 
                 get: () => {
-                    return ME.workspace.sessionState['upload']['states']['data_transformers'][STATE_KEY];
+                    return ME.workspace.workspaceSessionState['upload']['states']['data_transformers'][STATE_KEY];
                 },
 
                 set: (newValue) => {
-                    ME.workspace.sessionState['upload']['states']['data_transformers'][STATE_KEY] = newValue;
+                    ME.workspace.workspaceSessionState['upload']['states']['data_transformers'][STATE_KEY] = newValue;
                 }
             });
             

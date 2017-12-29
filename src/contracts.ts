@@ -374,6 +374,10 @@ export interface ScriptArguments {
      */
     readonly events: NodeJS.EventEmitter;
     /**
+     * The context of the underlying extension.
+     */
+    readonly extension: vscode.ExtensionContext;
+    /**
      * Gets the emitter for global extension events.
      */
     readonly globalEvents: NodeJS.EventEmitter;
@@ -406,6 +410,11 @@ export interface ScriptArguments {
      * Imports a module from the extension context.
      */
     readonly require: (id: any) => any;
+    /**
+     * The extension wide object that shares data with anything
+     * across the extension.
+     */
+    readonly sessionState: KeyValuePairs;
     /**
      * Gets or sets a state value for the underlying script.
      */

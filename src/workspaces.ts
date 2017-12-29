@@ -263,7 +263,6 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     private _PACKAGE_BUTTONS: PackageWithButton[] = [];
     private _packages: deploy_packages.Package[];
     private _rootPath: string | false;
-    private _sessionState: deploy_contracts.KeyValuePairs;
     private _selectedSwitches: deploy_contracts.KeyValuePairs;
     /**
      * Stores the start time.
@@ -275,6 +274,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * The current translation function.
      */
     protected _translator: i18next.TranslationFunction;
+    private _workspaceSessionState: deploy_contracts.KeyValuePairs;
 
     /**
      * Initializes a new instance of that class.
@@ -288,7 +288,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 public readonly context: WorkspaceContext) {
         super();
 
-        this.state = new WorkspaceMemento(this);
+        this.state = new WorkspaceMemento(this,
+                                          context.extension.workspaceState);
     }
 
     /**
@@ -461,7 +462,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         return false;
     }
 
-    private createSessionState(newCfg: WorkspaceSettings) {
+    private createWorkspaceSessionState(newCfg: WorkspaceSettings) {
         const NEW_SESSION_STATE: deploy_contracts.KeyValuePairs = {};
         
         NEW_SESSION_STATE['commands'] = {};
@@ -2142,7 +2143,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
             const OLD_CFG = ME._config;
             ME._config = loadedCfg;
-            ME._sessionState = ME.createSessionState(loadedCfg);
+            ME._workspaceSessionState = ME.createWorkspaceSessionState(loadedCfg);
             ME._lastConfigUpdate = Moment();
 
             try {
@@ -2392,6 +2393,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                     const PACKAGE_TO_DEPLOY = P;
                     const PACKAGE_NAME = deploy_packages.getPackageName(PACKAGE_TO_DEPLOY);
 
+                    // additional values
                     const VALUES: deploy_values.Value[] = [
                         new deploy_values.StaticValue({
                                 value: pb
@@ -2403,14 +2405,6 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                             },
                             'package'
                         ),
-                        new deploy_values.FunctionValue(
-                            () => ME.name,
-                            'workspace'
-                        ),
-                        new deploy_values.FunctionValue(
-                            () => ME.rootPath,
-                            'workspace_folder'
-                        )
                     ];
 
                     let newCmdId = deploy_helpers.toStringSafe(pb.command);
@@ -2431,11 +2425,13 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                             }
                         });
 
+                        //TODO: translate
                         deploy_log.CONSOLE
                                   .info(`Registrated command '${newCmdId}' for button of package '${PACKAGE_NAME}'.`,
                                         'workspaces.Workspace.reloadPackageButtons()');
                     }
                     else {
+                        //TODO: translate
                         deploy_log.CONSOLE
                                   .warn(`Button of package '${PACKAGE_NAME}' will use the existing command '${newCmdId}'.`,
                                         'workspaces.Workspace.reloadPackageButtons()');
@@ -2720,13 +2716,6 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     }
 
     /**
-     * Gets the current session data storage.
-     */
-    public get sessionState(): deploy_contracts.KeyValuePairs {
-        return this._sessionState;
-    }
-
-    /**
      * Gets the full path of a settings folder.
      */
     public get settingFolder(): string {
@@ -2816,7 +2805,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Gets the states for 'sync when open'.
      */
     public get syncWhenOpenStates(): SyncWhenOpenStates {
-        return this.sessionState['sync']['whenOpen']['states'];
+        return this.workspaceSessionState['sync']['whenOpen']['states'];
     }
 
     /** @inheritdoc */
@@ -2964,7 +2953,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                     ME.replaceWithValues(SB.settings.color, ADDITIONAL_VALUES)
                 );
                 if ('' === color) {
-                    color = '#ffffff';
+                    color = false === OPTION ? '#ffff00' : '#ffff00';
                 }
 
                 let text = deploy_helpers.toStringSafe(
@@ -2984,8 +2973,6 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                     if (false === OPTION) {
                         tooltip = i18.t('plugins.switch.button.tooltip',
                                         i18.t('plugins.switch.noOptionSelected'));
-
-                        color = '#ffff00';
                     }
                     else {
                         tooltip = i18.t('plugins.switch.button.tooltip',
@@ -3002,6 +2989,13 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                       .trace(e, 'workspaces.Workspace.updateSwitchButtons()');
         }
     }
+
+    /**
+     * Gets the current session data storage.
+     */
+    public get workspaceSessionState(): deploy_contracts.KeyValuePairs {
+        return this._workspaceSessionState;
+    }
 }
 
 /**
@@ -3012,13 +3006,15 @@ export class WorkspaceMemento implements vscode.Memento {
      * Initializes a new instance of that class.
      * 
      * @param {Workspace} workspace The underlying workspace.
+     * @param {vscode.Memento} _MEMENTO The memento to use.
      */
-    constructor(public readonly workspace: Workspace) {
+    constructor(public readonly workspace: Workspace,
+                private readonly _MEMENTO: vscode.Memento) {
     }
 
     /** @inheritdoc */
     public get<T = any, TDefault = T>(key: any, defaultValue?: TDefault): T | TDefault {
-        return this.workspace.context.extension.workspaceState.get<T | TDefault>(
+        return this._MEMENTO.get<T | TDefault>(
             this.normalizeKey(key),
             defaultValue
         );
@@ -3030,7 +3026,7 @@ export class WorkspaceMemento implements vscode.Memento {
 
     /** @inheritdoc */
     public async update(key: any, value: any) {
-        await this.workspace.context.extension.workspaceState.update(
+        await this._MEMENTO.update(
             this.normalizeKey(key),
             value,
         );

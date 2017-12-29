@@ -19,6 +19,7 @@ import * as deploy_contracts from './contracts';
 import * as deploy_events from './events';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
+import * as deploy_session from './session';
 import * as deploy_values from './values';
 import * as deploy_workspaces from './workspaces';
 import * as Events from 'events';
@@ -188,7 +189,8 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
                     const CTX: ScriptCommandExecutionContext = {
                         button: btn,
                         command: id,
-                        events: ME.sessionState['commands']['events'],
+                        events: ME.workspaceSessionState['commands']['events'],
+                        extension: ME.context.extension,
                         globalEvents: deploy_events.EVENTS,
                         globals: ME.globals,
                         globalState: GLOBAL_STATE,
@@ -200,6 +202,7 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
                         require: (moduleId) => {
                             return deploy_helpers.requireFromExtension(moduleId);
                         },
+                        sessionState: deploy_session.SESSION_STATE,
                         state: undefined,
                     };
 

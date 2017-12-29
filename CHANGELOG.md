@@ -1,5 +1,10 @@
 # Change Log (vscode-deploy-reloaded)
 
+## 0.9.0 (December 30th, 2017; improvements)
+
+* bugfixes
+* code improvements
+
 ## 0.8.0 (December 29th, 2017; target operations)
 
 * bugfixes

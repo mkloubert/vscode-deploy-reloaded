@@ -19,6 +19,7 @@ import * as deploy_contracts from '../../contracts';
 import * as deploy_events from '../../events';
 import * as deploy_helpers from '../../helpers';
 import * as deploy_log from '../../log';
+import * as deploy_session from '../../session';
 import * as deploy_targets from '../../targets';
 import * as i18 from '../../i18';
 
@@ -101,10 +102,11 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
         if (EXECUTE) {
             const ARGS: ScriptTargetOperationExecutionArguments = {
                 context: context,
-                events: WORKSPACE.sessionState['target_operations']['script']['events'],
+                events: WORKSPACE.workspaceSessionState['target_operations']['script']['events'],
+                extension: WORKSPACE.context.extension,
                 globalEvents: deploy_events.EVENTS,
                 globals: WORKSPACE.globals,
-                globalState: WORKSPACE.sessionState['target_operations']['script']['global'],
+                globalState: WORKSPACE.workspaceSessionState['target_operations']['script']['global'],
                 logger: deploy_log.CONSOLE,
                 options: deploy_helpers.cloneObject(OPERATION.options),
                 replaceWithValues: (val) => {
@@ -113,6 +115,7 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
                 require: (id) => {
                     return deploy_helpers.requireFromExtension(id);
                 },
+                sessionState: deploy_session.SESSION_STATE,
                 state: undefined,
             };
 
@@ -121,11 +124,11 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
                 enumerable: true,
 
                 get: () => {
-                    return WORKSPACE.sessionState['target_operations']['script']['scripts'][<string>scriptFullPath];
+                    return WORKSPACE.workspaceSessionState['target_operations']['script']['scripts'][<string>scriptFullPath];
                 },
 
                 set: (newValue) => {
-                    WORKSPACE.sessionState['target_operations']['script']['scripts'][<string>scriptFullPath] = newValue;
+                    WORKSPACE.workspaceSessionState['target_operations']['script']['scripts'][<string>scriptFullPath] = newValue;
                 }
             });
 

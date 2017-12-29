@@ -21,6 +21,7 @@ import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
+import * as deploy_session from './session';
 import * as deploy_targets from './targets';
 import * as deploy_transformers from './transformers';
 import * as deploy_workspaces from './workspaces';
@@ -268,10 +269,11 @@ export async function pullFilesFrom(files: string[],
                                     );
 
                                     const CONTEXT: deploy_transformers.DataTransformerContext = {
-                                        events: ME.sessionState['pull']['events'],
+                                        events: ME.workspaceSessionState['pull']['events'],
+                                        extension: ME.context.extension,
                                         globalEvents: deploy_events.EVENTS,
                                         globals: ME.globals,
-                                        globalState: ME.sessionState['pull']['states']['global'],
+                                        globalState: ME.workspaceSessionState['pull']['states']['global'],
                                         logger: deploy_log.CONSOLE,
                                         mode: deploy_transformers.DataTransformerMode.Restore,
                                         options: TRANSFORMER_OPTIONS,
@@ -281,6 +283,7 @@ export async function pullFilesFrom(files: string[],
                                         require: (id) => {
                                             return deploy_helpers.requireFromExtension(id);
                                         },
+                                        sessionState: deploy_session.SESSION_STATE,
                                         state: undefined,
                                     };
 
@@ -289,11 +292,11 @@ export async function pullFilesFrom(files: string[],
                                         enumerable: true,
 
                                         get: () => {
-                                            return ME.sessionState['pull']['states']['data_transformers'][STATE_KEY];
+                                            return ME.workspaceSessionState['pull']['states']['data_transformers'][STATE_KEY];
                                         },
 
                                         set: (newValue) => {
-                                            ME.sessionState['pull']['states']['data_transformers'][STATE_KEY] = newValue;
+                                            ME.workspaceSessionState['pull']['states']['data_transformers'][STATE_KEY] = newValue;
                                         }
                                     });
 
