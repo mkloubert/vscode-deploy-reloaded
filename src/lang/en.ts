@@ -299,6 +299,9 @@ export const translation: Translation = {
     sftp: {
         privateKeyNotFound: "Private key file{0:trim,surround,leading_space} not found!",
     },
+    shell: {
+        executing: "Executing{0:trim,surround,leading_space} ...",
+    },
     sql: {
         notSupported: "SQL type{0:trim,surround,leading_space} is not supported!",
     },

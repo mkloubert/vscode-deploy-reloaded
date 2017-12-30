@@ -298,6 +298,9 @@ export const translation: Translation = {
     sftp: {
         privateKeyNotFound: "Der private Schlüssel{0:trim,surround,leading_space} wurde nicht gefunden!",
     },
+    shell: {
+        executing: "Führe{0:trim,surround,leading_space} aus ...",
+    },
     sql: {
         notSupported: "Der SQL-Typ{0:trim,surround,leading_space} wird nicht unterstützt!",
     },

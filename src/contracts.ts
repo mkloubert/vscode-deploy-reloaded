@@ -149,6 +149,10 @@ export interface Configuration extends deploy_values.WithValueItems {
         readonly vars?: KeyValuePairs;
     };
     /**
+     * One or more shell commands that should be run on startup.
+     */
+    readonly executeOnStartup?: ShellCommand | ShellCommand[];
+    /**
      * Global data to define.
      */
     readonly globals?: any;
@@ -427,6 +431,33 @@ export interface ScriptArguments {
      * Gets or sets a state value for the underlying script.
      */
     state: any;
+}
+
+/**
+ * A shell command value.
+ */
+export type ShellCommand = string | ShellCommandSettings;
+
+/**
+ * Settings of a shell command.
+ */
+export interface ShellCommandSettings extends ConditionalItem, WithOptionalName {
+    /**
+     * The command to execute.
+     */
+    readonly command: string;
+    /**
+     * The custom working directory to use.
+     */
+    readonly cwd?: string;
+    /**
+     * Ignore if execution fails or not.
+     */
+    readonly ignoreIfFail?: boolean;
+    /**
+     * Do not use placeholders in 'command' property.
+     */
+    readonly noPlaceHolders?: boolean;
 }
 
 /**

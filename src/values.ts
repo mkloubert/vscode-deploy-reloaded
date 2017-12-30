@@ -19,6 +19,7 @@ import * as deploy_code from './code';
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
+import * as Enumerable from 'node-enumerable';
 import * as OS from 'os';
 
 
@@ -375,18 +376,24 @@ export function loadFromItems(items: WithValueItems,
             let doesMatch: any;
 
             try {
-                const IF_CODE = deploy_helpers.toStringSafe(i.if);
-                if (!deploy_helpers.isEmptyString(IF_CODE)) {
-                    doesMatch = deploy_code.exec({
-                        code: IF_CODE,
-                        context: {
-                            i: i,
-                        },
-                        values: [].concat( getPredefinedValues() )
-                                  .concat( getEnvVars() )
-                                  .concat( o ),
-                    });
-                }
+                doesMatch = Enumerable.from( deploy_helpers.asArray(i.if) ).all((c) => {
+                    let res: any;
+
+                    const IF_CODE = deploy_helpers.toStringSafe(c);
+                    if (!deploy_helpers.isEmptyString(IF_CODE)) {
+                        res = deploy_code.exec({
+                            code: IF_CODE,
+                            context: {
+                                i: i,
+                            },
+                            values: [].concat( getPredefinedValues() )
+                                      .concat( getEnvVars() )
+                                      .concat( o ),
+                        });
+                    }
+
+                    return deploy_helpers.toBooleanSafe(res, true);
+                });
             }
             catch (e) {
                 deploy_log.CONSOLE

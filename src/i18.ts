@@ -304,6 +304,9 @@ export interface Translation {
     sftp?: {
         privateKeyNotFound?: string;
     };
+    shell?: {
+        executing?: string;
+    };
     sql?: {
         notSupported?: string;
     };

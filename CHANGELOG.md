@@ -1,5 +1,10 @@
 # Change Log (vscode-deploy-reloaded)
 
+## 0.10.0 (December 30th, 2017; shell commands)
+
+* added `executeOnStartup` [setting](https://github.com/mkloubert/vscode-deploy-reloaded/wiki#settings--), which runs [shell commands on startup](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/execute_on_startup)
+* fixed use of [if](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/if) property in setting objects
+
 ## 0.9.0 (December 30th, 2017; [Composer](https://getcomposer.org/))
 
 * added tools for handling [Composer](https://getcomposer.org/) packages:

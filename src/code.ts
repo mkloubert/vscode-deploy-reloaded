@@ -56,7 +56,13 @@ export function exec<TResult = any, TContext = any>(context: CodeExecutionContex
     };
     const $v = deploy_values.toValueStorage(context.values);
 
-    return eval(
-        $h.toStringSafe(context.code)
+    const $e = (code: any) => {
+        return eval(
+            $h.toStringSafe(code)
+        );
+    };
+
+    return $e(
+        context.code
     );
 }

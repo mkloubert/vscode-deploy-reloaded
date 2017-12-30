@@ -624,6 +624,89 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         );
     }
 
+    private async executeOnStartup(cfg: WorkspaceSettings) {
+        if (!cfg) {
+            return;
+        }
+
+        const ME = this;
+
+        const SHELL_COMMANDS = deploy_helpers.asArray(
+            cfg.executeOnStartup
+        ).map(sc => {
+            if (!deploy_helpers.isObject<deploy_contracts.ShellCommandSettings>(sc)) {
+                sc = {
+                    command: deploy_helpers.toStringSafe(sc),
+                };
+            }
+
+            return sc;
+        });
+
+        for (let sc of SHELL_COMMANDS) {
+            sc = Enumerable.from( ME.filterConditionalItems(sc, true) )
+                           .singleOrDefault(null);
+            if (!sc) {
+                continue;
+            }
+
+            let shellCmdToExecute = deploy_helpers.toStringSafe(sc.command);
+            if (!deploy_helpers.toBooleanSafe(sc.noPlaceHolders)) {
+                shellCmdToExecute = ME.replaceWithValues(shellCmdToExecute);
+            }
+
+            if (deploy_helpers.isEmptyString(shellCmdToExecute)) {
+                continue;
+            }
+
+            // display name
+            let name = deploy_helpers.toStringSafe(
+                ME.replaceWithValues(
+                    sc.name
+                )
+            ).trim();
+            if ('' === name) {
+                name = shellCmdToExecute;
+            }
+
+            // working directory
+            let cwd = ME.replaceWithValues(sc.cwd);
+            if (deploy_helpers.isEmptyString(cwd)) {
+                cwd = this.rootPath;
+            }
+            if (!Path.isAbsolute(cwd)) {
+                cwd = Path.join(this.rootPath, cwd);
+            }
+            cwd = Path.resolve(cwd);
+
+            const IGNORE_IF_FAIL = deploy_helpers.toBooleanSafe(sc.ignoreIfFail);
+
+            ME.context.outputChannel.appendLine('');
+            ME.context.outputChannel.append(
+                ME.t('shell.executing',
+                     name) + ' '
+            );
+            try {
+                await ME.exec(shellCmdToExecute, {
+                    cwd: cwd,
+                });
+
+                ME.context.outputChannel.appendLine(
+                    `[${ME.t('ok')}]`
+                );
+            }
+            catch (e) {
+                ME.context.outputChannel.appendLine(
+                    `[${ME.t('error', e)}]`
+                );
+                
+                if (!IGNORE_IF_FAIL) {
+                    throw e;
+                }
+            }
+        }
+    }
+
     private async executeStartupCommands() {
         const ME = this;
 
@@ -688,17 +771,21 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         throwOnError = deploy_helpers.toBooleanSafe(throwOnError);
 
         return items.filter(i => {
-            const IF_CODE = deploy_helpers.toStringSafe(i.if);
-            if (!deploy_helpers.isEmptyString(IF_CODE)) {
+            return Enumerable.from( deploy_helpers.asArray(i.if) ).all(c => {
+                let res: any;
+
                 try {
-                    return deploy_code.exec({
-                        code: IF_CODE,
-                        context: {
-                            i: i,
-                            ws: ME,
-                        },
-                        values: ME.getValues(),
-                    });
+                    const IF_CODE = deploy_helpers.toStringSafe(c);
+                    if (!deploy_helpers.isEmptyString(IF_CODE)) {
+                        res = deploy_code.exec({
+                            code: IF_CODE,
+                            context: {
+                                i: i,
+                                ws: ME,
+                            },
+                            values: ME.getValues(),
+                        });
+                    }
                 }
                 catch (e) {
                     deploy_log.CONSOLE
@@ -710,9 +797,9 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
                     return errorResult;
                 }
-            }
-
-            return true;
+                
+                return deploy_helpers.toBooleanSafe(res, true);
+            });
         });
     }
 
@@ -1335,17 +1422,23 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 let doesMatch: any;
 
                 try {
-                    const IF_CODE = deploy_helpers.toStringSafe(i.if);
-                    if (!deploy_helpers.isEmptyString(IF_CODE)) {
-                        doesMatch = deploy_code.exec({
-                            code: IF_CODE,
-                            context: {
-                                i: i,
-                                ws: ME,
-                            },
-                            values: values.concat(o),
-                        });
-                    }
+                    doesMatch = Enumerable.from( deploy_helpers.asArray(i.if) ).all(c => {
+                        let res: any;
+                        
+                        const IF_CODE = deploy_helpers.toStringSafe(c);
+                        if (!deploy_helpers.isEmptyString(IF_CODE)) {
+                            res = deploy_code.exec({
+                                code: IF_CODE,
+                                context: {
+                                    i: i,
+                                    ws: ME,
+                                },
+                                values: values.concat(o),
+                            });
+                        }
+
+                        return deploy_helpers.toBooleanSafe(res, true);
+                    });
                 }
                 catch (e) {
                     deploy_log.CONSOLE
@@ -2141,22 +2234,24 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                         
                         const PI = deploy_helpers.filterPlatformItems(IE);
                         if (PI.length > 0) {
-                            doesMatch = undefined;
+                            doesMatch = Enumerable.from( IE.if ).all(c => {
+                                let res: any;
+                                
+                                const IF_CODE = deploy_helpers.toStringSafe(c);
+                                if (!deploy_helpers.isEmptyString(IF_CODE)) {
+                                    res = deploy_code.exec({
+                                        code: IF_CODE,
+                                        context: {
+                                            i: IE,
+                                            ws: ME,
+                                        },
+                                        values: [].concat( deploy_values.getPredefinedValues() )
+                                                .concat( deploy_values.getEnvVars() ),
+                                    });
+                                }    
 
-                            const IF_CODE = deploy_helpers.toStringSafe(IE.if);
-                            if (!deploy_helpers.isEmptyString(IF_CODE)) {
-                                doesMatch = deploy_code.exec({
-                                    code: IF_CODE,
-                                    context: {
-                                        i: IE,
-                                        ws: ME,
-                                    },
-                                    values: [].concat( deploy_values.getPredefinedValues() )
-                                              .concat( deploy_values.getEnvVars() ),
-                                });
-                            }
-
-                            doesMatch = deploy_helpers.toBooleanSafe(doesMatch, true);
+                                return deploy_helpers.toBooleanSafe(res, true);
+                            });
                         }
 
                         if (doesMatch) {
@@ -2230,6 +2325,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             }
 
             finalizer = async () => {
+                await ME.executeOnStartup(loadedCfg);
                 await ME.initNodeModules(loadedCfg);
                 await ME.initComposer(loadedCfg);
 

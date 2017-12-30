@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.9.0",
+ "version": "0.10.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -236,6 +236,51 @@
           }
          }
         }
+       }
+      },
+      "executeOnStartup": {
+       "description": "One or more shell commands to execute.",
+       "type": "array",
+       "items": {
+        "oneOf": [
+         {
+          "description": "The shell command to execute.",
+          "type": "string",
+          "pattern": "\\S+"
+         },
+         {
+          "description": "Settings for a shell command to execute.",
+          "type": "object",
+          "properties": {
+           "command": {
+            "description": "The shell command to execute.",
+            "type": "string",
+            "pattern": "\\S+"
+           },
+           "cwd": {
+            "description": "The custom working directory.",
+            "type": "string"
+           },
+           "ignoreIfFail": {
+            "description": "Ignore if command fails or not.",
+            "type": "boolean",
+            "default": false
+           },
+           "name": {
+            "description": "The custom name to display.",
+            "type": "string"
+           },
+           "noPlaceHolders": {
+            "description": "Do not use placeholders in 'command' property.",
+            "type": "boolean",
+            "default": false
+           }
+          },
+          "required": [
+           "command"
+          ]
+         }
+        ]
        }
       },
       "globals": {
