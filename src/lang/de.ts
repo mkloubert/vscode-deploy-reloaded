@@ -350,6 +350,25 @@ export const translation: Translation = {
         dateTimeWithSeconds: "DD.MM.YYYY HH:mm:ss",
     },
     tools: {
+        composer: {
+            description: "Werkzeuge für das einfache Arbeiten mit 'composer'",
+            executing: "Führe{0:trim,surround,leading_space} aus ...",
+            label: "Composer Paket Manager (composer)",
+            packageExample: "z.B. 'psr/log'",
+            runRemove: {
+                composerFileContainsNoPackages: "{0:trim,surround,ending_space}beinhaltet keine Pakete!",
+                composerFileNotFound: "Es wurde keine 'composer.json'-Datei in{0:trim,surround,leading_space} gefunden!",
+                errors: {
+                    loadingComposerFileFailed: "Das Laden von{0:trim,surround,leading_space} ist fehlgeschlagen:{1:trim,surround,leading_space}",
+                },
+                description: "Führt den Befehl 'composer remove' im aktuellen Arbeitsbereich aus",
+                label: "'composer remove' ausführen ...",
+            },
+            runRequire: {
+                description: "Führt den Befehl 'composer require' im aktuellen Arbeitsbereich aus",
+                label: "'composer require' ausführen ...",
+            },
+        },
         createDeployScript: {
             askForNewTargetName: "Geben Sie bitte den Namen des neuen Ziels ein ...",
             askForScriptPath: "Wo soll das Skript gespeichert werden?",
@@ -386,6 +405,7 @@ export const translation: Translation = {
             description: "Werkzeuge für das einfache Arbeiten mit 'npm'",
             executing: "Führe{0:trim,surround,leading_space} aus ...",
             label: "Node Paket Manager (npm)",
+            moduleExample: "z.B. 'node-enumerable'",
             runInstall: {
                 description: "Führt den Befehl 'npm install' im aktuellen Arbeitsbereich aus",
                 enterModuleName: "Geben Sie den Namen des NPM-Moduls an ...",
@@ -401,7 +421,7 @@ export const translation: Translation = {
                 errors: {
                     loadingPackageFileFailed: "Das Laden von{0:trim,surround,leading_space} ist fehlgeschlagen:{1:trim,surround,leading_space}",
                 },
-                packageFileContainsNoModules: "{0:trim,surround,ending_space} beinhaltet keine Module!",
+                packageFileContainsNoModules: "{0:trim,surround,ending_space}beinhaltet keine Module!",
                 packageFileNotFound: "Es wurde keine 'package.json'-Datei in{0:trim,surround,leading_space} gefunden!",
                 label: "'npm UNinstall' ausführen ...",
             },

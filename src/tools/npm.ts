@@ -55,6 +55,7 @@ async function runNPMInstall(ws: deploy_workspaces.Workspace) {
     const NPM_MODULE = deploy_helpers.normalizeString(
         await vscode.window.showInputBox(
             {
+                placeHolder: i18.t('tools.npm.moduleExample'),
                 prompt: i18.t('tools.npm.runInstall.enterModuleName'),
                 value: deploy_helpers.normalizeString(
                     EXTENSION.globalState.get(KEY_LAST_RUN_NPM_INSTALL_MODULE)
@@ -99,6 +100,7 @@ async function runNPMLink(ws: deploy_workspaces.Workspace) {
     const NPM_MODULE = deploy_helpers.normalizeString(
         await vscode.window.showInputBox(
             {
+                placeHolder: i18.t('tools.npm.moduleExample'),
                 prompt: i18.t('tools.npm.runLink.enterModuleName'),
                 value: deploy_helpers.normalizeString(
                     EXTENSION.globalState.get(KEY_LAST_RUN_NPM_LINK_MODULE)
@@ -245,6 +247,11 @@ async function runNPMUnInstall(ws: deploy_workspaces.Workspace) {
     }
 }
 
+/**
+ * Shows npm tools.
+ * 
+ * @param {vscode.ExtensionContext} context The extension context. 
+ */
 export async function showNPMTools(context: vscode.ExtensionContext) {
     const SELECTED_WORKSPACE = await deploy_workspaces.showWorkspaceQuickPick(
         context,

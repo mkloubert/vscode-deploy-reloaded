@@ -31,6 +31,7 @@ import * as deploy_plugins from './plugins';
 import * as deploy_switch from './switch';
 import * as deploy_targets from './targets';
 import * as deploy_tools from './tools';
+import * as deploy_tools_composer from './tools/composer';
 import * as deploy_tools_npm from './tools/npm';
 import * as deploy_tools_quick_execution from './tools/quickexecution';
 import * as deploy_tools_send_file from './tools/sendfile';
@@ -1164,6 +1165,15 @@ async function activateExtension(context: vscode.ExtensionContext) {
                             label: '$(package)  ' + i18.t('tools.npm.label'),
                             description: i18.t('tools.npm.description'),
                             state: 5,
+                        },
+
+                        {
+                            action: async () => {
+                                await deploy_tools_composer.showComposerTools(context);
+                            },
+                            label: '$(package)  ' + i18.t('tools.composer.label'),
+                            description: i18.t('tools.composer.description'),
+                            state: 6,
                         }
                     ];
 
@@ -1314,10 +1324,11 @@ async function activateExtension(context: vscode.ExtensionContext) {
             }),
 
             vscode.workspace.onDidChangeConfiguration((e) => {
+                deploy_tools_composer.resetComposerToolsUsage(context);
+                deploy_tools_npm.resetNPMToolsUsage(context);
                 deploy_packages.resetPackageUsage(context);
                 deploy_targets.resetTargetUsage(context);
                 deploy_tools.resetToolUsage(context);
-                deploy_tools_npm.resetNPMToolsUsage(context);
                 deploy_workspaces.resetWorkspaceUsage(context);
 
                 onDidChangeConfiguration(e).then(() => {

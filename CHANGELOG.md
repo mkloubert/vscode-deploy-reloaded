@@ -1,6 +1,10 @@
 # Change Log (vscode-deploy-reloaded)
 
-## 0.9.0 (December 30th, 2017; [composer](https://getcomposer.org/))
+## 0.9.0 (December 30th, 2017; [Composer](https://getcomposer.org/))
+
+* added tools for handling [Composer](https://getcomposer.org/) packages:
+
+![Demo Composer helpers](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo10.gif)
 
 * bugfixes
 * code improvements

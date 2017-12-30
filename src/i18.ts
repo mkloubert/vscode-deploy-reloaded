@@ -356,6 +356,25 @@ export interface Translation {
         dateTimeWithSeconds?: string;
     };
     tools?: {
+        composer?: {
+            description?: string;
+            executing?: string;
+            label?: string;
+            packageExample?: string;
+            runRemove?: {
+                composerFileContainsNoPackages?: string;
+                composerFileNotFound?: string;
+                description?: string;
+                errors?: {
+                    loadingComposerFileFailed?: string;
+                };
+                label?: string;
+            };
+            runRequire?: {
+                description?: string;
+                label?: string;
+            };
+        };
         createDeployScript?: {
             askForNewTargetName?: string;
             askForScriptPath?: string;
@@ -392,6 +411,7 @@ export interface Translation {
             description?: string;
             executing?: string;
             label?: string;
+            moduleExample?: string;
             runInstall?: {
                 description?: string;
                 enterModuleName?: string;

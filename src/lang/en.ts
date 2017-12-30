@@ -351,6 +351,25 @@ export const translation: Translation = {
         dateTimeWithSeconds: "YYYY-MM-DD HH:mm:ss",
     },
     tools: {
+        composer: {
+            description: "Tools for simple use of 'composer'",
+            executing: "Running{0:trim,surround,leading_space} ...",
+            label: "Composer Package Manager (composer)",
+            packageExample: "'psr/log' e.g.",
+            runRemove: {
+                composerFileContainsNoPackages: "{0:trim,surround,ending_space}contains no packages!",
+                composerFileNotFound: "No 'composer.json' file found in{0:trim,surround,leading_space}!",
+                errors: {
+                    loadingComposerFileFailed: "Loading{0:trim,surround,leading_space} failed:{1:trim,surround,leading_space}",
+                },
+                description: "Runs 'composer remove' inside the current workspace",
+                label: "Run 'composer remove' ...",
+            },
+            runRequire: {
+                description: "Runs 'composer require' inside the current workspace",
+                label: "Run 'composer require' ...",
+            },
+        },
         createDeployScript: {
             askForNewTargetName: "Please define the name of the new target ...",
             askForScriptPath: "What should be the path of the new file?",
@@ -387,6 +406,7 @@ export const translation: Translation = {
             description: "Tools for simple use of 'npm'",
             executing: "Running{0:trim,surround,leading_space} ...",
             label: "Node Package Manager (npm)",
+            moduleExample: "'node-enumerable' e.g.",
             runInstall: {
                 description: "Runs 'npm install' inside the current workspace",
                 enterModuleName: "Enter the name of the NPM module ...",
@@ -402,7 +422,7 @@ export const translation: Translation = {
                 errors: {
                     loadingPackageFileFailed: "Loading{0:trim,surround,leading_space} failed:{1:trim,surround,leading_space}",
                 },
-                packageFileContainsNoModules: "{0:trim,surround,ending_space} contains no modules!",
+                packageFileContainsNoModules: "{0:trim,surround,ending_space}contains no modules!",
                 packageFileNotFound: "No 'package.json' file found in{0:trim,surround,leading_space}!",
                 label: "Run 'npm UNinstall' ...",
             },
