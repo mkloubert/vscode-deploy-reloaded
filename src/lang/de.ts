@@ -478,6 +478,11 @@ export const translation: Translation = {
             title: "Dateien des Paketes{0:trim,surround,leading_space}",
         },
     },
+    values: {
+        errors: {
+            targetFormatNotSupported: "Das Zielformat{0:trim,surround,leading_space} wird nicht unterstützt!",
+        },
+    },
     'vs-deploy': {
         continueAndInitialize: 'Fortfahren und initialisieren...',
         currentlyActive: "Die 'vs-deploy' Erweiterung ist derzeit aktiv. Es wird empfohlen diese zu DEAKTIVIEREN, bevor Sie forfahren und die neue Erweiterung nutzen!",

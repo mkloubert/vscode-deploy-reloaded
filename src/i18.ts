@@ -484,6 +484,11 @@ export interface Translation {
             title?: string;
         };
     };
+    values?: {
+        errors?: {
+            targetFormatNotSupported?: string;
+        };
+    };
     'vs-deploy'?: {
         continueAndInitialize?: string;
         currentlyActive?: string;

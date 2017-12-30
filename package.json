@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.10.0",
+ "version": "0.11.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -40651,6 +40651,77 @@
            },
            "required": [
             "code"
+           ]
+          },
+          {
+           "type": "object",
+           "properties": {
+            "cache": {
+             "description": "Cache value or not.",
+             "type": "boolean",
+             "default": true
+            },
+            "encoding": {
+             "description": "The encoding to use for converting from binary data to string.",
+             "type": "string",
+             "default": "utf8"
+            },
+            "file": {
+             "description": "The path to the file from where to load the data from.",
+             "type": "string"
+            },
+            "format": {
+             "description": "The target format to use.",
+             "type": "string",
+             "default": "string",
+             "enum": [
+              "",
+              "str",
+              "string",
+              "bin",
+              "binary",
+              "blob",
+              "buffer",
+              "b64",
+              "base64",
+              "json",
+              "template",
+              "tpl"
+             ]
+            },
+            "if": {
+             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+             "type": "string"
+            },
+            "name": {
+             "description": "The name of that value.",
+             "type": "string"
+            },
+            "platforms": {
+             "description": "One or more platform names the value is available for.",
+             "type": "array",
+             "items": {
+              "description": "The name of the platform.",
+              "type": "string",
+              "enum": [
+               "darwin",
+               "freebsd",
+               "linux",
+               "sunos",
+               "win32"
+              ]
+             }
+            },
+            "type": {
+             "enum": [
+              "file"
+             ],
+             "type": "string",
+             "description": "A value based on a local file."
+            }
+           },
+           "required": [
+            "file"
            ]
           }
          ]

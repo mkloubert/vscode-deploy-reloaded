@@ -1418,36 +1418,42 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         }
 
         values = values.concat(
-            deploy_values.loadFromItems(CFG, (i, o) => {
-                let doesMatch: any;
+            deploy_values.loadFromItems(CFG, {
+                conditialFilter: (i, o) => {
+                    let doesMatch: any;
+    
+                    try {
+                        doesMatch = Enumerable.from( deploy_helpers.asArray(i.if) ).all(c => {
+                            let res: any;
+                            
+                            const IF_CODE = deploy_helpers.toStringSafe(c);
+                            if (!deploy_helpers.isEmptyString(IF_CODE)) {
+                                res = deploy_code.exec({
+                                    code: IF_CODE,
+                                    context: {
+                                        i: i,
+                                        ws: ME,
+                                    },
+                                    values: values.concat(o),
+                                });
+                            }
+    
+                            return deploy_helpers.toBooleanSafe(res, true);
+                        });
+                    }
+                    catch (e) {
+                        deploy_log.CONSOLE
+                                  .trace('workspaces.Workspace.getValues(2)');
+    
+                        doesMatch = false;
+                    }
+    
+                    return doesMatch;
+                },
 
-                try {
-                    doesMatch = Enumerable.from( deploy_helpers.asArray(i.if) ).all(c => {
-                        let res: any;
-                        
-                        const IF_CODE = deploy_helpers.toStringSafe(c);
-                        if (!deploy_helpers.isEmptyString(IF_CODE)) {
-                            res = deploy_code.exec({
-                                code: IF_CODE,
-                                context: {
-                                    i: i,
-                                    ws: ME,
-                                },
-                                values: values.concat(o),
-                            });
-                        }
-
-                        return deploy_helpers.toBooleanSafe(res, true);
-                    });
-                }
-                catch (e) {
-                    deploy_log.CONSOLE
-                              .trace('workspaces.Workspace.getValues(2)');
-
-                    doesMatch = false;
-                }
-
-                return doesMatch;
+                directoryScopeProvider: () => {
+                    return ME.getSettingScopes();
+                },
             })
         );
 

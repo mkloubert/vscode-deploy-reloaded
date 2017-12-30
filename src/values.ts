@@ -20,8 +20,11 @@ import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
 import * as Enumerable from 'node-enumerable';
+import * as FS from 'fs';
+import * as i18 from './i18';
 import * as OS from 'os';
-
+import * as Path from 'path';
+import * as SanitizeFilename from 'sanitize-filename';
 
 /**
  * An object that can apply to (its) properties by using
@@ -43,6 +46,48 @@ export interface CodeValueItem extends ValueItem {
      * The code to execute.
      */
     readonly code: string;
+}
+
+/**
+ * A function that provides one or more scope directories
+ * to map from relative paths.
+ */
+export type DirectoryScopeProvider = () => string | string[];
+
+/**
+ * An item of a file value.
+ */
+export interface FileValueItem extends ValueItem {
+    /**
+     * Cache value or not.
+     */
+    readonly cache?: boolean;
+    /**
+     * The encoding to use for converting from binary data to string.
+     */
+    readonly encoding?: string;
+    /**
+     * The path to the file where the data is stored.
+     */
+    readonly file: string;
+    /**
+     * The target format to use.
+     */
+    readonly format?: string;
+}
+
+/**
+ * Options for 'loadFromItems()' function.
+ */
+export interface LoadFromItemsOptions {
+    /**
+     * A custom filter for the items.
+     */
+    readonly conditialFilter?: (item: ValueItem, others: Value[]) => boolean;
+    /**
+     * The optional scope directory provider.
+     */
+    readonly directoryScopeProvider?: DirectoryScopeProvider;
 }
 
 /**
@@ -106,6 +151,8 @@ export interface WithValueItems {
 }
 
 
+const NOT_CACHED_YET = Symbol('NOT_CACHED_YET');
+
 /**
  * A basic value.
  */
@@ -129,12 +176,26 @@ export abstract class ValueBase<TItem extends ValueItem = ValueItem> implements 
     }
 
     /**
+     * Gets the list of "other" values.
+     */
+    public get others(): Value[] {
+        let provider = this.othersProvider;
+        if (!provider) {
+            provider = () => [];
+        }
+
+        return deploy_helpers.asArray(
+            provider(),
+        );
+    }
+
+    /**
      * Gets or sets the function that returns the "other" values.
      */
     public othersProvider: ValuesProvider;
 
     /** @inheritdoc */
-    public abstract get value();
+    public abstract get value(): any;
 }
 
 /**
@@ -142,18 +203,166 @@ export abstract class ValueBase<TItem extends ValueItem = ValueItem> implements 
  */
 export class CodeValue extends ValueBase<CodeValueItem> {
     /** @inheritdoc */
-    constructor(item: CodeValueItem, name?: string) {
+    public get value() {
+        const CTX: deploy_code.CodeExecutionContext = {
+            code: this.item.code,
+            context: {
+                v: this,
+            },
+            values: this.others,
+        };
+
+        return deploy_code.exec(CTX);
+    }
+}
+
+/**
+ * A value based on a local file.
+ */
+export class FileValue extends ValueBase<FileValueItem> {
+    private _cachedValue?: any = NOT_CACHED_YET;
+
+    /**
+     * Initializes a new instance of that class.
+     * 
+     * @param {FileValueItem} item The underlying item.
+     * @param {DirectoryScopeProvider} [scopes] A optional function that provides one or more directories for mapping relative paths.
+     * @param {string} [name] The additional name of the value.
+     */
+    constructor(public readonly item: FileValueItem,
+                private _SCOPE_PROVIDER?: DirectoryScopeProvider,
+                name?: string) {
         super(item, name);
+
+        if (!this._SCOPE_PROVIDER) {
+            this._SCOPE_PROVIDER = () => [];
+        }
+    }
+
+    /**
+     * Gets if value should be cached or not.
+     */
+    public get cache(): boolean {
+        return deploy_helpers.toBooleanSafe(
+            this.item.cache, true
+        );
+    }
+
+    /**
+     * Gets the full path of the underlying or (false) if it does not exist.
+     */
+    public get file(): string | false {
+        let filePath = deploy_helpers.toStringSafe(this.item.file);
+        if (deploy_helpers.isEmptyString(filePath)) {
+            let fn = deploy_helpers.toStringSafe(this.name).trim();
+            if ('' === fn) {
+                fn = 'value';
+            }
+            fn = SanitizeFilename(fn);
+
+            filePath = `./${fn}`;
+        }
+
+        if (Path.isAbsolute(filePath)) {
+            if (FS.existsSync(filePath)) {
+                if (FS.lstatSync(filePath).isFile()) {
+                    return Path.resolve(filePath);  // exists         
+                }
+            }
+        }
+        else {
+            // try to find existing full path
+            for (const S of this.scopes) {
+                const FULL_PATH = Path.join(
+                    S, filePath
+                );
+
+                if (FS.existsSync(FULL_PATH)) {
+                    if (FS.lstatSync(FULL_PATH).isFile()) {
+                        return Path.resolve(FULL_PATH);  // found              
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Gets if that value provides a cached value or not.
+     */
+    public get isCached() {
+        return this._cachedValue !== NOT_CACHED_YET;
+    }
+
+    /**
+     * Resets the cache state of that value.
+     */
+    public reset(): this {
+        this._cachedValue = NOT_CACHED_YET;
+        
+        return this;
+    }
+
+    /**
+     * Gets the list of directory scopes.
+     */
+    public get scopes(): string[] {
+        let listOfScopes = deploy_helpers.asArray(
+            this._SCOPE_PROVIDER()
+        );
+
+        listOfScopes = Enumerable.from(listOfScopes).select(s => {
+            return deploy_helpers.toStringSafe(s);
+        }).where(s => {
+            return !deploy_helpers.isEmptyString(s);
+        }).select(s => {
+            if (!Path.isAbsolute(s)) {
+                s = Path.join(process.cwd(), s);
+            }
+
+            return s;
+        }).toArray();
+
+        if (listOfScopes.length < 1) {
+            listOfScopes.push(
+                Path.join(OS.homedir(), deploy_contracts.HOMEDIR_SUBFOLDER)
+            );
+
+            listOfScopes.push( process.cwd() );
+        }
+
+        return listOfScopes.map(s => {
+            return Path.resolve(s);
+        });
     }
 
     /** @inheritdoc */
     public get value() {
-        const CTX: deploy_code.CodeExecutionContext = {
-            code: deploy_helpers.toStringSafe(this.item.code),
-            values: this.othersProvider(),
-        };
+        if (this.cache) {
+            if (this.isCached) {
+                return this._cachedValue;
+            }
+        }
 
-        return deploy_code.exec(CTX);
+        const FILE = this.file;
+        if (false === FILE) {
+            throw new Error(i18.t('fileNotFound',
+                                  this.item.file));
+        }
+
+        let val = fromBuffer(
+            FS.readFileSync(FILE),
+            this.item.format,
+            this.item.encoding,
+            this.others,
+        );
+
+        if (this.cache) {
+            this._cachedValue = val;
+        }
+
+        return val;
     }
 }
 
@@ -281,6 +490,53 @@ export function applyValuesTo<TObj extends Applyable = Applyable>(obj: TObj,
     return obj;
 }
 
+function fromBuffer(buff: Buffer, format?: string, enc?: string,
+                    values?: Value | Value[]): any {
+    format = deploy_helpers.normalizeString(format);
+
+    enc = deploy_helpers.normalizeString(enc);
+    if ('' === enc) {
+        enc = 'utf8';
+    }
+
+    if (!buff) {
+        return <any>buff;
+    }
+    
+    switch (format) {
+        case '':
+        case 'str':
+        case 'string':
+            return buff.toString(enc);
+
+        case 'bin':
+        case 'binary':
+        case 'blob':
+        case 'buffer':
+            return buff;
+
+        case 'b64':
+        case 'base64':
+            return buff.toString('base64');
+
+        case 'json':
+            return JSON.parse(
+                buff.toString(enc)
+            );
+
+        case 'template':
+        case 'tpl':
+            return replaceWithValues(
+                values,
+                buff.toString(enc),
+            );
+
+        default:
+            throw new Error(i18.t('values.errors.targetFormatNotSupported',
+                                  format));
+    }
+}
+
 /**
  * Returns a list of predefined values.
  * 
@@ -349,15 +605,21 @@ export function getEnvVars(): Value[] {
  * Loads values from value item settings.
  * 
  * @param {WithValueItems} items The item settings.
- * @param {Function} [conditialFilter] A custom filter for the items.
+ * @param {Function} [conditialFilter] 
  * 
  * @return {Value[]} The loaded values.
  */
-export function loadFromItems(items: WithValueItems,
-                              conditialFilter?: (item: ValueItem, others: Value[]) => boolean) {
+export function loadFromItems(items: WithValueItems, opts?: LoadFromItemsOptions) {
+    if (!opts) {
+        opts = <any>{};
+    }
+
+    let conditialFilter = opts.conditialFilter;
+    let directoryScopeProvider = opts.directoryScopeProvider;
+
     const VALUES: Value[] = [];
 
-    const CREATE_OTHERS_PROVIDER = (thisValue: Value) => {
+    const CREATE_OTHERS_PROVIDER = (thisValue: Value): ValuesProvider => {
         return () => VALUES.filter(v => v !== thisValue);
     };
 
@@ -406,6 +668,10 @@ export function loadFromItems(items: WithValueItems,
         };
     }
 
+    if (!directoryScopeProvider) {
+        directoryScopeProvider = () => [];
+    }
+
     if (items && items.values) {
         for (const NAME in items.values) {
             const VI = items.values[NAME];
@@ -433,6 +699,14 @@ export function loadFromItems(items: WithValueItems,
                     case 'javascript':
                     case 'js':
                         newValue = new CodeValue(<CodeValueItem>VI, NAME);
+                        break;
+
+                    case 'file':
+                        newValue = new FileValue(
+                            <FileValueItem>VI,
+                            directoryScopeProvider,
+                            NAME,
+                        );
                         break;
                 }
             }
