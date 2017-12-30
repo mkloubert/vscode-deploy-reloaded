@@ -1,9 +1,10 @@
 # Change Log (vscode-deploy-reloaded)
 
-## 0.10.0 (December 30th, 2017; shell commands)
+## 0.10.0 (December 30th, 2017; shell commands and S3)
 
 * added `executeOnStartup` [setting](https://github.com/mkloubert/vscode-deploy-reloaded/wiki#settings--), which runs [shell commands on startup](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/execute_on_startup)
 * fixed use of [if](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/if) property in setting objects
+* better handling of [credentials config](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_s3bucket#credentials) of [S3 target](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_s3bucket)
 
 ## 0.9.0 (December 30th, 2017; [Composer](https://getcomposer.org/))
 

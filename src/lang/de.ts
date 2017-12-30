@@ -139,6 +139,7 @@ export const translation: Translation = {
         initializing: "Erweiterung wird initialisiert ...",
     },
     file: "Datei",
+    fileNotFound: "Datei{0:trim,surround,leading_space} nicht gefunden!",
     files: "Dateien",
     ftp: {
         couldNotConnect: "Konnte keine Verbindung aufbauen!",

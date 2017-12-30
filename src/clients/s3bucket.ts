@@ -19,9 +19,11 @@ import * as AWS from 'aws-sdk';
 import * as deploy_clients from '../clients';
 import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
+import * as deploy_values from '../values';
 import * as Enumerable from 'node-enumerable';
 import * as i18 from '../i18';
 import * as MimeTypes from 'mime-types';
+import * as OS from 'os';
 import * as Path from 'path';
 import * as Moment from 'moment';
 
@@ -62,10 +64,34 @@ export interface S3BucketOptions {
         readonly type?: string;
     };
     /**
+     * A custom function that provides scopes directories for relative paths.
+     */
+    readonly directoryScopeProvider?: S3DirectoryScopeProvider;
+    /**
      * A function that detects the ACL for a file
      * when uploading it.
      */
     readonly fileAcl?: S3BucketFileAclDetector;
+    /**
+     * A function that provides values for a client.
+     */
+    readonly valueProvider?: S3ValueProvider;
+}
+
+/**
+ * A function that provides the scope directories for relative paths.
+ */
+export type S3DirectoryScopeProvider = () => string | string[] | PromiseLike<string | string[]>;
+
+/**
+ * A function that provides values for use in settings for a client.
+ */
+export type S3ValueProvider = () => deploy_values.Value | deploy_values.Value[] | PromiseLike<deploy_values.Value | deploy_values.Value[]>;
+
+interface SharedIniFileCredentialsOptions {
+    profile?: string
+    filename?: string
+    disableAssumeRole?: boolean
 }
 
 
@@ -100,7 +126,86 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
         super();
     }
 
-    private createInstance(): AWS.S3 {
+    private async createInstance(): Promise<AWS.S3> {
+        const AWS_DIR = Path.resolve(
+            Path.join(
+                OS.homedir(),
+                '.aws'
+            )
+        );
+
+        let directoryScopeProvider = this.options.directoryScopeProvider;
+        if (!directoryScopeProvider) {
+            directoryScopeProvider = () => [];
+        }
+
+        const DIRECTORY_SCOPES = Enumerable.from(
+            deploy_helpers.asArray(
+                await Promise.resolve( directoryScopeProvider() )
+            )
+        ).select(s => {
+            return deploy_helpers.toStringSafe(s);
+        }).where(s => {
+            return !deploy_helpers.isEmptyString(s);
+        }).select(s => {
+            if (!Path.isAbsolute(s)) {
+                s = Path.join(AWS_DIR, s);
+            }
+
+            return Path.resolve(s);
+        }).toArray();
+
+        if (DIRECTORY_SCOPES.length < 1) {
+            DIRECTORY_SCOPES.push( AWS_DIR );  // .aws by default
+        }
+
+        let valueProvider = this.options.valueProvider;
+        if (!valueProvider) {
+            valueProvider = () => [];
+        }
+
+        const VALUES = deploy_helpers.asArray(
+            await Promise.resolve( valueProvider() )
+        );
+
+        const REPLACE_WITH_VALUES = (val: any) => {
+            return deploy_values.replaceWithValues(
+                VALUES,
+                val,
+            );
+        };
+
+        const FIND_FULL_FILE_PATH = async (p: string): Promise<string> => {
+            p = deploy_helpers.toStringSafe(p);
+            
+            if (Path.isAbsolute(p)) {
+                // exist if file exists
+
+                if (await deploy_helpers.exists(p)) {
+                    if ((await deploy_helpers.lstat(p)).isFile()) {
+                        return Path.resolve(p);  // file exists
+                    }
+                }
+            }
+            else {
+                // detect existing, full path
+                for (const DS of DIRECTORY_SCOPES) {
+                    let fullPath = REPLACE_WITH_VALUES(p);
+                    fullPath = Path.join(DS, fullPath);
+                    fullPath = Path.resolve(fullPath);
+
+                    if (await deploy_helpers.exists(fullPath)) {
+                        if ((await deploy_helpers.lstat(fullPath)).isFile()) {
+                            return fullPath;  // file found
+                        }
+                    }
+                }
+            }
+
+            throw new Error(i18.t('fileNotFound',
+                                  p));
+        };
+
         let bucket = deploy_helpers.toStringSafe(this.options.bucket).trim();
         if ('' === bucket) {
             bucket = 'vscode-deploy-reloaded';
@@ -116,6 +221,65 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
             }
     
             credentialConfig = this.options.credentials.config;
+
+            switch (credentialType) {
+                case 'environment':
+                    // EnvironmentCredentials
+                    if (!deploy_helpers.isNullOrUndefined(credentialConfig)) {
+                        credentialConfig = REPLACE_WITH_VALUES(credentialConfig).trim();
+                    }
+                    break;
+
+                case 'file':
+                    // FileSystemCredentials
+                    if (!deploy_helpers.isNullOrUndefined(credentialConfig)) {
+                        credentialConfig = deploy_helpers.toStringSafe(credentialConfig);
+                        
+                        if (!deploy_helpers.isEmptyString(credentialConfig)) {
+                            credentialConfig = await FIND_FULL_FILE_PATH(credentialConfig); 
+                        }
+                    }
+                    break;
+
+                case 'shared':
+                    // SharedIniFileCredentials
+                    {
+                        const GET_PROFILE_SAFE = (profile: any): string => {
+                            profile = deploy_helpers.toStringSafe(
+                                REPLACE_WITH_VALUES(profile)
+                            ).trim();
+                            if ('' === profile) {
+                                profile = undefined;
+                            }
+
+                            return profile;
+                        };
+
+                        let sharedCfg: string | SharedIniFileCredentialsOptions = deploy_helpers.cloneObject(
+                            credentialConfig
+                        );
+                        if (deploy_helpers.isObject<SharedIniFileCredentialsOptions>(sharedCfg)) {
+                            sharedCfg.filename = deploy_helpers.toStringSafe(sharedCfg.filename);
+                        }
+                        else {
+                            sharedCfg = {
+                                profile: deploy_helpers.toStringSafe(sharedCfg),
+                            };
+                        }
+
+                        if (deploy_helpers.isEmptyString(sharedCfg.filename)) {
+                            sharedCfg.filename = undefined;
+                        }
+                        else {
+                            sharedCfg.filename = await FIND_FULL_FILE_PATH(sharedCfg.filename);
+                        }
+
+                        sharedCfg.profile = GET_PROFILE_SAFE(sharedCfg.profile);
+
+                        credentialConfig = sharedCfg;
+                    }
+                    break;
+            }
         }
     
         if (!credentialClass) {
@@ -138,11 +302,11 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
 
         path = toS3Path(path);
 
-        return new Promise<boolean>((resolve, reject) => {
+        return new Promise<boolean>(async (resolve, reject) => {
             const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
 
             try {
-                const S3 = ME.createInstance();
+                const S3 = await ME.createInstance();
 
                 const PARAMS: any = {
                     Key: path,
@@ -169,11 +333,11 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
 
         path = toS3Path(path);
         
-        return new Promise<Buffer>((resolve, reject) => {
+        return new Promise<Buffer>(async (resolve, reject) => {
             const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
 
             try {
-                const S3 = ME.createInstance();
+                const S3 = await ME.createInstance();
 
                 const PARAMS: any = {
                     Key: path,
@@ -208,7 +372,7 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
 
         path = toS3Path(path);
 
-        return new Promise<deploy_files.FileSystemInfo[]>((resolve, reject) => {
+        return new Promise<deploy_files.FileSystemInfo[]>(async (resolve, reject) => {
             const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
 
             const ALL_OBJS: AWS.S3.Object[] = [];
@@ -280,7 +444,7 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
             };
 
             try {
-                const S3 = ME.createInstance();
+                const S3 = await ME.createInstance();
 
                 let currentContinuationToken: string | false = false;
 
@@ -348,11 +512,11 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
             data = Buffer.alloc(0);
         }
         
-        return new Promise<void>((resolve, reject) => {
+        return new Promise<void>(async (resolve, reject) => {
             const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
 
             try {
-                const S3 = ME.createInstance();
+                const S3 = await ME.createInstance();
 
                 let contentType = MimeTypes.lookup( Path.basename(path) );
                 if (false === contentType) {

@@ -22,6 +22,8 @@ import * as deploy_helpers from '../helpers';
 import * as deploy_log from '../log';
 import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
+import * as OS from 'os';
+import * as Path from 'path';
 
 
 interface S3BucketContext extends deploy_plugins.AsyncFileClientPluginContext<S3BucketTarget,
@@ -97,11 +99,27 @@ class S3BucketPlugin extends deploy_plugins.AsyncFileClientPluginBase<S3BucketTa
             };
         }
 
+        const SCOPES: string[] = [];
+        SCOPES.push
+              .apply(SCOPES,
+                     target.__workspace.getSettingScopes());
+        SCOPES.push(
+            Path.resolve(
+                Path.join(
+                    OS.homedir(),
+                    '.aws'
+                )
+            )
+        );
+
         return {
             client: deploy_clients_s3bucket.createClient({
                 acl: ME.replaceWithValues(target, target.acl),
                 bucket: ME.replaceWithValues(target, target.bucket),
                 credentials: target.credentials,
+                directoryScopeProvider: () => {
+                    return SCOPES;
+                },
                 fileAcl: (file, defAcl) => {
                     for (const ACL in FILTERS) {
                         if (deploy_helpers.checkIfDoesMatchByFileFilter('/' + file,
@@ -111,6 +129,9 @@ class S3BucketPlugin extends deploy_plugins.AsyncFileClientPluginBase<S3BucketTa
                     }
 
                     return defAcl;
+                },
+                valueProvider: () => {
+                    return target.__workspace.getValues();
                 }
             }),
             getDir: (subDir) => {

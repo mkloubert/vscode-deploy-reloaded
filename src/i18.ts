@@ -146,6 +146,7 @@ export interface Translation {
         initializing?: string;
     };
     file?: string;
+    fileNotFound?: string;
     files?: string;
     ftp?: {
         couldNotConnect?: string;
