@@ -1,3 +1,4 @@
 
 Icons:
     - /icon.png (DinosoftLabs; https://www.iconfinder.com/dinosoftlabs)
+    - /img/share/* (https://simplesharingbuttons.com)

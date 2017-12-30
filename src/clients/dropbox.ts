@@ -179,8 +179,10 @@ export class DropBoxClient extends deploy_clients.AsyncFileListBase {
  * Creates a new client.
  * 
  * @param {DropboxOptions} opts The options for the new client.
+ * 
+ * @return {DropBoxClient} The new client.
  */
-export function createClient(opts: DropboxOptions) {
+export function createClient(opts: DropboxOptions): DropBoxClient {
     if (!opts) {
         return <any>opts;
     }
