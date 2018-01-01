@@ -10,6 +10,7 @@
  "license": "LGPL-3.0",
  "preview": true,
  "categories": [
+  "Azure",
   "Other"
  ],
  "keywords": [
@@ -40662,6 +40663,51 @@
            "required": [
             "code"
            ]
+          },
+          {
+           "type": "object",
+           "properties": {
+            "alias": {
+             "description": "The optional alias to use.",
+             "type": "string"
+            },
+            "cache": {
+             "description": "Cache value or not.",
+             "type": "boolean",
+             "default": true
+            },
+            "if": {
+             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+             "type": "string"
+            },
+            "name": {
+             "description": "The name of that value.",
+             "type": "string"
+            },
+            "platforms": {
+             "description": "One or more platform names the value is available for.",
+             "type": "array",
+             "items": {
+              "description": "The name of the platform.",
+              "type": "string",
+              "enum": [
+               "darwin",
+               "freebsd",
+               "linux",
+               "sunos",
+               "win32"
+              ]
+             }
+            },
+            "type": {
+             "enum": [
+              "env",
+              "environment"
+             ],
+             "type": "string",
+             "description": "A value from a process' environment variable."
+            }
+           }
           },
           {
            "type": "object",

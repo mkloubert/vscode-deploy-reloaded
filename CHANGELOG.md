@@ -5,7 +5,7 @@
 
 ## 0.11.0 (January 1st, 2018; SFTP and values)
 
-* can load [placeholders](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/values) from files now
+* can get [placeholders](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/values) from files and environment variables now
 * fixed `tryKeyboard` support in [SFTP targets](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_sftp)
 
 ## 0.10.0 (December 30th, 2017; shell commands, S3 and external sources)

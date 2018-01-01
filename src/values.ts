@@ -754,6 +754,11 @@ export function loadFromItems(items: WithValueItems, opts?: LoadFromItemsOptions
                         newValue = new CodeValue(<CodeValueItem>VI, NAME);
                         break;
 
+                    case 'env':
+                    case 'environment':
+                        newValue = new EnvVarValue(NAME, <EnvVarValueItem>VI);
+                        break;
+
                     case 'file':
                         newValue = new FileValue(
                             <FileValueItem>VI,
