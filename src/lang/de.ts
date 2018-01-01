@@ -482,6 +482,7 @@ export const translation: Translation = {
         errors: {
             targetFormatNotSupported: "Das Zielformat{0:trim,surround,leading_space} wird nicht unterstützt!",
         },
+        typeNotSupported: "Der Wertetyp{0:trim,surround,leading_space} wird nicht unterstützt!",
     },
     'vs-deploy': {
         continueAndInitialize: 'Fortfahren und initialisieren...',

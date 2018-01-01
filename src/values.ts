@@ -55,13 +55,19 @@ export interface CodeValueItem extends ValueItem {
 export type DirectoryScopeProvider = () => string | string[];
 
 /**
+ * An item for an value based on an environment variable.
+ */
+export interface EnvVarValueItem extends ValueItem {
+    /**
+     * The optional alias to use.
+     */
+    readonly alias?: string;
+}
+
+/**
  * An item of a file value.
  */
 export interface FileValueItem extends ValueItem {
-    /**
-     * Cache value or not.
-     */
-    readonly cache?: boolean;
     /**
      * The encoding to use for converting from binary data to string.
      */
@@ -119,6 +125,10 @@ export interface Value {
  */
 export interface ValueItem extends deploy_contracts.ConditionalItem,
                                    deploy_contracts.PlatformItem {
+    /**
+     * Cache value or not.
+     */
+    readonly cache?: boolean;
     /**
      * The type of the item.
      */
@@ -217,35 +227,58 @@ export class CodeValue extends ValueBase<CodeValueItem> {
 }
 
 /**
+ * A value of an environment variable.
+ */
+export class EnvVarValue extends ValueBase<EnvVarValueItem> {
+    /**
+     * Initializes a new instance of that class.
+     * 
+     * @param {string} name The name of the environment variable.
+     * @param {EnvVarValueItem} item The underlying item.
+     */
+    constructor(name: string, item?: EnvVarValueItem) {
+        super(item || <any>{},
+              name);
+    }
+
+    /** @inheritdoc */
+    public get name() {
+        if (!deploy_helpers.isEmptyString(this.item.alias)) {
+            return deploy_helpers.toStringSafe(this.item.alias);
+        }
+
+        return super.name;
+    }
+
+    /** @inheritdoc */
+    public get value() {
+        const ENV = process.env;
+        if (ENV) {
+            return process.env[ super.name ];
+        }
+    }
+} 
+
+/**
  * A value based on a local file.
  */
 export class FileValue extends ValueBase<FileValueItem> {
-    private _cachedValue?: any = NOT_CACHED_YET;
 
     /**
      * Initializes a new instance of that class.
      * 
      * @param {FileValueItem} item The underlying item.
-     * @param {DirectoryScopeProvider} [scopes] A optional function that provides one or more directories for mapping relative paths.
      * @param {string} [name] The additional name of the value.
+     * @param {DirectoryScopeProvider} [scopes] A optional function that provides one or more directories for mapping relative paths.
      */
-    constructor(public readonly item: FileValueItem,
-                private _SCOPE_PROVIDER?: DirectoryScopeProvider,
-                name?: string) {
+    constructor(item: FileValueItem,
+                name?: string,
+                private _SCOPE_PROVIDER?: DirectoryScopeProvider) {
         super(item, name);
 
         if (!this._SCOPE_PROVIDER) {
             this._SCOPE_PROVIDER = () => [];
         }
-    }
-
-    /**
-     * Gets if value should be cached or not.
-     */
-    public get cache(): boolean {
-        return deploy_helpers.toBooleanSafe(
-            this.item.cache, true
-        );
     }
 
     /**
@@ -289,22 +322,6 @@ export class FileValue extends ValueBase<FileValueItem> {
     }
 
     /**
-     * Gets if that value provides a cached value or not.
-     */
-    public get isCached() {
-        return this._cachedValue !== NOT_CACHED_YET;
-    }
-
-    /**
-     * Resets the cache state of that value.
-     */
-    public reset(): this {
-        this._cachedValue = NOT_CACHED_YET;
-        
-        return this;
-    }
-
-    /**
      * Gets the list of directory scopes.
      */
     public get scopes(): string[] {
@@ -339,12 +356,6 @@ export class FileValue extends ValueBase<FileValueItem> {
 
     /** @inheritdoc */
     public get value() {
-        if (this.cache) {
-            if (this.isCached) {
-                return this._cachedValue;
-            }
-        }
-
         const FILE = this.file;
         if (false === FILE) {
             throw new Error(i18.t('fileNotFound',
@@ -357,10 +368,6 @@ export class FileValue extends ValueBase<FileValueItem> {
             this.item.encoding,
             this.others,
         );
-
-        if (this.cache) {
-            this._cachedValue = val;
-        }
 
         return val;
     }
@@ -413,6 +420,53 @@ export class StaticValue extends ValueBase<StaticValueItem> {
     /** @inheritdoc */
     public get value() {
         return this.item.value;
+    }
+}
+
+class WrappedBaseValue implements Value {
+    private _cachedValue?: any = NOT_CACHED_YET;
+
+    constructor(public readonly baseValue: ValueBase) {
+    }
+
+    public get cache(): boolean {
+        return deploy_helpers.toBooleanSafe(
+            this.item.cache, true
+        );
+    }
+    
+    public get isCached() {
+        return this._cachedValue !== NOT_CACHED_YET;
+    }
+
+    public get item() {
+        return this.baseValue.item;
+    }
+
+    public get name() {
+        return this.baseValue.name;
+    }
+
+    public reset(): this {
+        this._cachedValue = NOT_CACHED_YET;
+        
+        return this;
+    }
+
+    public get value() {
+        if (this.cache) {
+            if (this.isCached) {
+                return this._cachedValue;
+            }
+        }
+
+        let valueToReturn = this.baseValue.value;
+
+        if (this.cache) {
+            this._cachedValue = valueToReturn;
+        }
+
+        return valueToReturn;
     }
 }
 
@@ -585,16 +639,13 @@ export function getPredefinedValues(): Value[] {
  */
 export function getEnvVars(): Value[] {
     const ENV_VARS: Value[] = [];
-    const APPEND_VAR = (name: string) => {
-        ENV_VARS.push(new FunctionValue(() => {
-            return process.env[name];
-        }, name));
-    };
-    
+
     const ENV = process.env;
     if (ENV) {
         for (const N in ENV) {
-            APPEND_VAR(N);
+            ENV_VARS.push(
+                new EnvVarValue(N),
+            );
         }
     }
 
@@ -630,7 +681,9 @@ export function loadFromItems(items: WithValueItems, opts?: LoadFromItemsOptions
 
         newValue.othersProvider = CREATE_OTHERS_PROVIDER(newValue);
 
-        VALUES.push(newValue);
+        VALUES.push(
+            new WrappedBaseValue(newValue)
+        );
     };
 
     if (!conditialFilter) {
@@ -704,9 +757,16 @@ export function loadFromItems(items: WithValueItems, opts?: LoadFromItemsOptions
                     case 'file':
                         newValue = new FileValue(
                             <FileValueItem>VI,
-                            directoryScopeProvider,
                             NAME,
+                            directoryScopeProvider,
                         );
+                        break;
+
+                    default:
+                        deploy_log.CONSOLE
+                                  .warn(i18.t('values.typeNotSupported',
+                                              TYPE),
+                                        'values.loadFromItems().ValueItem');
                         break;
                 }
             }

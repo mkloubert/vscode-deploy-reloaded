@@ -87,20 +87,20 @@ export interface OpenOptions {
     /**
      * The app (or options) to open.
      */
-    app?: string | string[];
+    readonly app?: string | string[];
     /**
      * The custom working directory.
      */
-    cwd?: string;
+    readonly cwd?: string;
     /**
      * An optional list of environment variables
      * to submit to the new process.
      */
-    env?: any;
+    readonly env?: any;
     /**
      * Wait until exit or not.
      */
-    wait?: boolean;
+    readonly wait?: boolean;
 }
 
 /**

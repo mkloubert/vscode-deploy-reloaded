@@ -488,6 +488,7 @@ export interface Translation {
         errors?: {
             targetFormatNotSupported?: string;
         };
+        typeNotSupported?: string;
     };
     'vs-deploy'?: {
         continueAndInitialize?: string;

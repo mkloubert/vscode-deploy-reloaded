@@ -40569,6 +40569,11 @@
           {
            "type": "object",
            "properties": {
+            "cache": {
+             "description": "Cache value or not.",
+             "type": "boolean",
+             "default": true
+            },
             "if": {
              "description": "(JavaScript) Code, which indicates, if entry is available or not.",
              "type": "string"
@@ -40611,6 +40616,11 @@
           {
            "type": "object",
            "properties": {
+            "cache": {
+             "description": "Cache value or not.",
+             "type": "boolean",
+             "default": true
+            },
             "code": {
              "description": "The code to execute.",
              "type": "string"
