@@ -106,6 +106,20 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
         super();
 
         this.client = new SFTP();
+
+        if (deploy_helpers.toBooleanSafe(options.tryKeyboard)) {
+            let pwd = deploy_helpers.toStringSafe(options.password);
+
+            this.client['client'].on('keyboard-interactive', (name, instructions, instructionsLang, prompts, finish) => {
+                try {
+                    finish([ pwd ]);
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'clients.sftp.SFTPClient(keyboard-interactive)');
+                }
+            });
+        }
     }
 
     /**
