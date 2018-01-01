@@ -109,6 +109,21 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         return val;
     };
 
+    const $unwrapArgs = async (args: IArguments | ArrayLike<any>): Promise<any[]> => {
+        const UNWRAPPED_ARGS: any[] = [];
+
+        args = await $unwrap(args);
+        if (args) {
+            for (let i = 0; i < args.length; i++) {
+                UNWRAPPED_ARGS.push(
+                    await $unwrap( args[i] ),
+                );
+            }
+        }
+
+        return UNWRAPPED_ARGS;
+    };
+
     // resolve()
     const $res = async (val: any, ...funcs: ((v: any) => any)[]) => {
         val = await $unwrap(val);
@@ -186,6 +201,22 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         );
     };
 
+    // showErrorMessage
+    const $err = async function() {
+        const ARGS = await $unwrapArgs(arguments);
+
+        let msg = '';
+        let moreParams = [];
+        if (ARGS.length > 0) {
+            msg = $h.toStringSafe(ARGS[0]);
+            moreParams = ARGS.filter((x, i) => i > 0);    
+        }
+
+        return await $vs.window
+                        .showErrorMessage
+                        .apply(null, [ msg ].concat(moreParams));
+    };
+
     const $guid = async (ver?: string, ...guidArgs: any[]) => {
         const UUID = require('uuid');
 
@@ -259,9 +290,72 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
                         : RESULT.digest('hex');
     };
 
+    // showInformationMessage
+    const $info = async function() {
+        const ARGS = await $unwrapArgs(arguments);
+
+        let msg = '';
+        let moreParams = [];
+        if (ARGS.length > 0) {
+            msg = $h.toStringSafe(ARGS[0]);
+            moreParams = ARGS.filter((x, i) => i > 0);    
+        }
+
+        return await $vs.window
+                        .showInformationMessage
+                        .apply(null, [ msg ].concat(moreParams));
+    };
+
+    const $ip = async (v6 = false, timeout?: number, useHttps = false) => {
+        const PublicIP = require('public-ip');
+
+        v6 = $h.toBooleanSafe(
+            await $unwrap(v6)
+        );
+        
+        timeout = parseInt(
+            $h.toStringSafe(
+                await $unwrap(v6)
+            ).trim()
+        );
+        if (isNaN(timeout)) {
+            timeout = 5000;
+        }
+
+        useHttps = $h.toBooleanSafe(
+            await $unwrap(useHttps)
+        );
+
+        const OPTS = {
+            https: useHttps,
+            timeout: timeout,
+        };
+
+        const GET_IP = v6 ? PublicIP.v6
+                          : PublicIP.v4;
+
+        return await GET_IP(OPTS);
+    };
+
     const $md5 = async (val: any, asBinary?: boolean) => {
         return await $hash('md5',
                            val, asBinary);
+    };
+
+    const $now = async (timeZone?: string) => {
+        const Moment = require('moment');
+        const MomentTimezone = require('moment-timezone');  // keep sure to have
+                                                            // 'tz()' method available in
+                                                            // Moment instances
+
+        const NOW = Moment();
+        
+        timeZone = $h.toStringSafe(
+            await $unwrap(timeZone)
+        ).trim();
+
+        return '' === timeZone ? NOW
+                               : NOW.tz(timeZone);
     };
 
     const $pwd = async (size = 20, chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789') => {
@@ -326,8 +420,28 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
                            val, asBinary);
     };
 
+    const $utc = async () => {
+        return require('moment').utc();
+    };
+
     const $uuid = async function (ver?: string, ...args: any[]) {
         return await $guid.apply(null, arguments);
+    };
+
+    // showWarningMessage
+    const $warn = async function() {
+        const ARGS = await $unwrapArgs(arguments);
+
+        let msg = '';
+        let moreParams = [];
+        if (ARGS.length > 0) {
+            msg = $h.toStringSafe(ARGS[0]);
+            moreParams = ARGS.filter((x, i) => i > 0);    
+        }
+
+        return await $vs.window
+                        .showWarningMessage
+                        .apply(null, [ msg ].concat(moreParams));
     };
 
     // writeFile()
@@ -347,8 +461,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         await require('../html').openMarkdownDocument(
             _27adf674_b653_4ee0_a33d_4f60be7859d2(),
             {
-                css: 'a { color: red; }',
-                documentTitle: '[vscode-deploy-reloaded] ' + $i18.t('tools.quickExecution.help.title')
+                documentTitle: '[vscode-deploy-reloaded] ' + $i18.t('tools.quickExecution.help.title'),
             }
         );
     };
@@ -458,7 +571,7 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
 
     help += "## Functions\n";
     // $c
-    help += "### $e\n";
+    help += "### $c\n";
     help += "Executes a Visual Studio Code command.\n";
     help += "```javascript\n";
     help += "$c('editor.action.selectAll')\n";
@@ -469,6 +582,13 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "Executes code.\n";
     help += "```javascript\n";
     help += "$e(\"require('vscode').window.showWarningMessage('Test')\")\n";
+    help += "```\n";
+    help += "\n";
+    // $err
+    help += "### $err\n";
+    help += "Shows an error popup.\n";
+    help += "```javascript\n";
+    help += "$err('Test')\n";
     help += "```\n";
     help += "\n";
     // $fp
@@ -502,12 +622,36 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "$hash('md5', 'abc', true)\n";
     help += "```\n";
     help += "\n";
+    // $info
+    help += "### $info\n";
+    help += "Shows an info popup.\n";
+    help += "```javascript\n";
+    help += "$info('Test')\n";
+    help += "```\n";
+    help += "\n";
+    // $ip
+    help += "### $ip\n";
+    help += "Tries to detect the public IP address.\n";
+    help += "```javascript\n";
+    help += "$ip\n";
+    help += "$ip(true)  // IPv6\n";
+    help += "$ip(false, 2000)  // IPv4 and 2000ms timeout\n";
+    help += "```\n";
+    help += "\n";
     // $md5
     help += "### $md5\n";
     help += "Hashes data with MD5.\n";
     help += "```javascript\n";
     help += "$md5('abc')\n";
     help += "$md5('abc', true)\n";
+    help += "```\n";
+    help += "\n";
+    // $now
+    help += "### $utc\n";
+    help += "Returns the current time.\n";
+    help += "```javascript\n";
+    help += "$now\n";
+    help += "$now('America/New_York')\n";
     help += "```\n";
     help += "\n";
     // $pwd
@@ -573,12 +717,26 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "$sha256('abc', true)\n";
     help += "```\n";
     help += "\n";
+    // $utc
+    help += "### $utc\n";
+    help += "Returns the current UTC time.\n";
+    help += "```javascript\n";
+    help += "$utc\n";
+    help += "```\n";
+    help += "\n";
     // $uuid
     help += "### $uuid\n";
     help += "Generates a GUID.\n";
     help += "```javascript\n";
     help += "$uuid\n";
     help += "$uuid('v5')\n";
+    help += "```\n";
+    help += "\n";
+    // $warn
+    help += "### $warn\n";
+    help += "Shows a warning popup.\n";
+    help += "```javascript\n";
+    help += "$warn('Test')\n";
     help += "```\n";
     help += "\n";
     // $wf
