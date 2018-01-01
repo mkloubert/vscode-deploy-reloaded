@@ -1417,6 +1417,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                       .trace(e, 'workspaces.Workspace.getValues(1)');
         }
 
+        const WORKSPACE_VALUES = values.map(v => v);
+
         values = values.concat(
             deploy_values.loadFromItems(CFG, {
                 conditialFilter: (i, o) => {
@@ -1434,7 +1436,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                                         i: i,
                                         ws: ME,
                                     },
-                                    values: values.concat(o),
+                                    values: WORKSPACE_VALUES.concat(o),
                                 });
                             }
     
@@ -1453,6 +1455,10 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
                 directoryScopeProvider: () => {
                     return ME.getSettingScopes();
+                },
+
+                prefixValuesProvider: () => {
+                    return WORKSPACE_VALUES;
                 },
             })
         );

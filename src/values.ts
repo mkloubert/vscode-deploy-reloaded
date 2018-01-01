@@ -94,6 +94,11 @@ export interface LoadFromItemsOptions {
      * The optional scope directory provider.
      */
     readonly directoryScopeProvider?: DirectoryScopeProvider;
+    /**
+     * An optional function with provides "more" values
+     * which are added at the beginning.
+     */
+    readonly prefixValuesProvider?: ValuesProvider;
 }
 
 /**
@@ -667,11 +672,18 @@ export function loadFromItems(items: WithValueItems, opts?: LoadFromItemsOptions
 
     let conditialFilter = opts.conditialFilter;
     let directoryScopeProvider = opts.directoryScopeProvider;
+    
+    let prefixValuesProvider = opts.prefixValuesProvider;
+    if (!prefixValuesProvider) {
+        prefixValuesProvider = () => [];
+    }
 
     const VALUES: Value[] = [];
 
     const CREATE_OTHERS_PROVIDER = (thisValue: Value): ValuesProvider => {
-        return () => VALUES.filter(v => v !== thisValue);
+        return () => deploy_helpers.asArray( prefixValuesProvider() ).concat(
+            VALUES
+        ).filter(v => v !== thisValue);
     };
 
     const APPEND_VALUE = (newValue: ValueBase) => {
