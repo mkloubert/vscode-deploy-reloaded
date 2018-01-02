@@ -53,6 +53,7 @@ export interface Translation {
         };
         notSupported?: string;
     };
+    'continue'?: string;
     DELETE?: {
         askForCancelOperation?: string;
         askIfDeleteLocalFile?: string;
@@ -298,6 +299,13 @@ export interface Translation {
         pullingFile?: string;
         selectSource?: string;
         startOperation?: string;
+    };
+    requirements?: {
+        extensions?: {
+            mustBeInstalled?: string;
+            openInMarketplace?: string;
+            shouldBeInstalled?: string;
+        };
     };
     s3bucket?: {
         credentialTypeNotSupported?: string;

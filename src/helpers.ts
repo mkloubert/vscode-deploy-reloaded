@@ -768,6 +768,55 @@ export function exists(path: string | Buffer) {
 }
 
 /**
+ * Filters items with 'if' code.
+ * 
+ * @param {TItem | TItem[]} items The items to filter.
+ * @param {boolean} [throwOnError] Throw on error or not. 
+ * @param {any} [errorResult] The custom result when an error occurred.
+ * 
+ * @return {TItem[]} The filtered items.
+ */
+export function filterConditionalItems<TItem extends deploy_contracts.ConditionalItem = deploy_contracts.ConditionalItem>(
+    items: TItem | TItem[],
+    throwOnError = false,
+    errorResult: any = false,
+) {
+    items = asArray(items);
+    throwOnError = toBooleanSafe(throwOnError);
+
+    return items.filter(i => {
+        return Enumerable.from( asArray(i.if) ).all(c => {
+            let res: any;
+
+            try {
+                const IF_CODE = toStringSafe(c);
+                if (!isEmptyString(IF_CODE)) {
+                    res = deploy_code.exec({
+                        code: IF_CODE,
+                        context: {
+                            i: i,
+                        },
+                        values: [],
+                    });
+                }
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .trace(e, 'helpers.filterConditionalItems()');
+
+                if (throwOnError) {
+                    throw e;
+                }
+
+                return errorResult;
+            }
+            
+            return toBooleanSafe(res, true);
+        });
+    });
+}
+
+/**
  * Filters platform specific objects.
  * 
  * @param {TItem|TItem[]} items The items to filter.

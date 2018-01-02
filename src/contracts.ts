@@ -186,6 +186,10 @@ export interface Configuration extends deploy_values.WithValueItems {
      */
     readonly packages?: deploy_packages.Package | deploy_packages.Package[];
     /**
+     * Checks for one or more required extensions.
+     */
+    readonly requiredExtensions?: { [ id: string ]: null | boolean | RequiredExtensionSettings };
+    /**
      * Activates or deactivates "remove on change" feature for all packages.
      */
     readonly removeOnChange?: boolean;
@@ -371,6 +375,17 @@ export interface PlatformItem {
      * One or more platform names, the object is available for.
      */
     readonly platforms?: string | string[];
+}
+
+/**
+ * Settings for a required extension.
+ */
+export interface RequiredExtensionSettings extends ConditionalItem,
+                                                   PlatformItem {
+    /**
+     * Do not continue (true), when extension has not been found, or show a warning message instead (false).
+     */
+    readonly isMustHave?: boolean;
 }
 
 /**

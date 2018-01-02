@@ -46,6 +46,7 @@ export const translation: Translation = {
         },
         notSupported: "Compiler{0:trim,surround,leading_space} wird nicht unterstützt!",
     },
+    'continue': "Fortfahren",
     DELETE: {
         askForCancelOperation: "Sind Sie sicher, dass Sie das Löschen der Datei(en) in{0:trim,surround,leading_space} abbrechen wollen?",
         askIfDeleteLocalFile: "Auch die lokale Datei löschen?",
@@ -292,6 +293,13 @@ export const translation: Translation = {
         pullingFile: "Lade Datei{0:trim,surround,leading_space} von {1:trim,surround,leading_space} ...",
         selectSource: "Wählen Sie die Quelle von der Sie die Datei(en) laden wollen ...",
         startOperation: "Beginne Ladevorgang von{0:trim,surround,leading_space} ...",
+    },
+    requirements: {
+        extensions: {
+            mustBeInstalled: "Die Erweiterung{0:trim,surround,leading_space} ist nicht installiert und wird vorausgesetzt!",
+            openInMarketplace: "Abbrechen und Visual Studio Marketplace öffnen ...",
+            shouldBeInstalled: "Es wird empfohlen die Erweiterung{0:trim,surround,leading_space} zu installieren!",
+        },
     },
     s3bucket: {
         credentialTypeNotSupported: "Das Anmeldeverfahren{0:trim,surround,leading_space} wird nicht unterstützt!",

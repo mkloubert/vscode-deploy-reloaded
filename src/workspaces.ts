@@ -404,6 +404,100 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         await ME.updateSwitchButtons();
     }
 
+    private async checkForRequiredExtensions(loadedCfg: WorkspaceSettings) {
+        if (!loadedCfg) {
+            return true;
+        }
+
+        const REQUIRED_EXTENSIONS = loadedCfg.requiredExtensions;
+        if (!deploy_helpers.isObject(REQUIRED_EXTENSIONS)) {
+            return true;
+        }
+
+        const ALL_EXTENSIONS = vscode.extensions.all.map(e => {
+            return deploy_helpers.normalizeString(e);
+        });
+        for (const EXT in REQUIRED_EXTENSIONS) {
+            const EXTENSION_ID = deploy_helpers.toStringSafe(EXT).trim();
+            if ('' === EXTENSION_ID) {
+                continue;
+            }
+
+            const OPEN_IN_MARKETPLACE = () => {
+                deploy_helpers.open(`https://marketplace.visualstudio.com/items?itemName=${encodeURIComponent(EXTENSION_ID)}`).then(() => {
+                }, (err) => {
+                    deploy_log.CONSOLE
+                              .trace(err, 'workspaces.Workspace.checkForRequiredExtensions().OPEN_IN_MARKETPLACE()');
+                });
+            };
+
+            let settings = REQUIRED_EXTENSIONS[EXT];
+            if (!deploy_helpers.isObject<deploy_contracts.RequiredExtensionSettings>(settings)) {
+                settings = {
+                    isMustHave: deploy_helpers.toBooleanSafe(settings),
+                };
+            }
+
+            if (deploy_helpers.filterPlatformItems(settings).length < 1) {
+                continue;  // not for platform
+            }
+            if (deploy_helpers.filterConditionalItems(settings).length < 1) {
+                continue;  // condition failed
+            }
+
+            if (ALL_EXTENSIONS.indexOf(EXTENSION_ID.toLowerCase()) > -1) {
+                // found
+                continue;
+            }
+
+            if (deploy_helpers.toBooleanSafe(settings.isMustHave)) {
+                // must be installed
+
+                const SELECTED_ITEM = await this.showErrorMessage<deploy_contracts.MessageItemWithValue>(
+                    i18.t('requirements.extensions.mustBeInstalled',
+                          EXTENSION_ID),
+                    {
+                        isCloseAffordance: true,
+                        title: i18.t('requirements.extensions.openInMarketplace'),
+                        value: 0,
+                    },
+                );
+
+                if (SELECTED_ITEM) {
+                    if (0 === SELECTED_ITEM.value) {
+                        OPEN_IN_MARKETPLACE();
+                    }
+                }
+                
+                return false;
+            }
+
+            const SELECTED_ITEM = await this.showWarningMessage<deploy_contracts.MessageItemWithValue>(
+                i18.t('requirements.extensions.shouldBeInstalled',
+                      EXTENSION_ID),
+                {
+                    isCloseAffordance: true,
+                    title: i18.t('requirements.extensions.openInMarketplace'),
+                    value: 0,
+                },
+                {
+                    title: i18.t('continue'),
+                    value: 1,
+                }
+            );
+
+            if (SELECTED_ITEM) {
+                if (0 === SELECTED_ITEM.value) {
+                    OPEN_IN_MARKETPLACE();
+
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     private cleanupPackageButtons() {
         while (this._PACKAGE_BUTTONS.length > 0) {
             const PBTN = this._PACKAGE_BUTTONS.shift();
@@ -2301,6 +2395,11 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 delete (<any>loadedCfg).imports;
             }
 
+            // check for requirements
+            if (!(await ME.checkForRequiredExtensions(loadedCfg))) {
+                return;  // failed
+            }
+
             await deploy_helpers.applyFuncFor(deploy_commands.reloadCommands, ME)(loadedCfg);
 
             await ME.reloadTargets(loadedCfg);
@@ -2489,6 +2588,9 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      */
     public reloadEnvVars() {
         const CFG = this.config;
+        if (!CFG) {
+            return;
+        }
 
         try {
             // restore old values

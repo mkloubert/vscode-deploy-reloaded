@@ -46,6 +46,7 @@ export const translation: Translation = {
         },
         notSupported: "Compiler{0:trim,surround,leading_space} is not supported!",
     },
+    'continue': "Continue",
     DELETE: {
         askForCancelOperation: "You are about to cancel the delete operation in{0:trim,surround,leading_space}. Are you sure?",
         askIfDeleteLocalFile: "Also delete local file?",
@@ -293,6 +294,13 @@ export const translation: Translation = {
         },
         selectSource: "Select the source from where to pull from ...",
         startOperation: "Start pulling files from{0:trim,surround,leading_space} ...",
+    },
+    requirements: {
+        extensions: {
+            mustBeInstalled: "The extension{0:trim,surround,leading_space} is required, but not installed!",
+            openInMarketplace: "Cancel and open Visual Studio Marketplace ...",
+            shouldBeInstalled: "It is recommended to install the extension{0:trim,surround,leading_space}!",
+        },
     },
     s3bucket: {
         credentialTypeNotSupported: "Credental type{0:trim,surround,leading_space} is not supported!",
