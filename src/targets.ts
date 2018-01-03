@@ -819,3 +819,45 @@ export function throwOnRecurrence(parentTarget: Target, childTargets: Target | T
         }
     }
 }
+
+/**
+ * Wraps a 'before' callback of a file (context) object for a target.
+ * 
+ * @param {TFile} file The file (context).
+ * @param {Target} target The underlying target.
+ * @param {string|symbol} property The property (key) of the callback.
+ * 
+ * @return {TFile} The new object. 
+ */
+export function wrapOnBeforeFileCallbackForTarget<TFile extends deploy_contracts.WithNameAndPath = deploy_contracts.WithNameAndPath>(
+    file: TFile,
+    target: Target,
+    property: string | symbol
+) {
+    if (!file) {
+        return file;
+    }
+
+    const TARGET_NAME = getTargetName(target);
+
+    const CALLBACK_TO_WRAP: (destinationOrSource?: string) => PromiseLike<void> =
+        file[property];
+
+    file = deploy_helpers.cloneObjectFlat(file, false);
+
+    file[property] = async (destinationOrSource?: string) => {
+        if (arguments.length < 1) {
+            destinationOrSource = `${deploy_helpers.toStringSafe(file.path)}`;
+        }
+        destinationOrSource = `[${TARGET_NAME}] ${deploy_helpers.toStringSafe(destinationOrSource)}`;
+
+        if (CALLBACK_TO_WRAP) {
+            await deploy_helpers.applyFuncFor(
+                CALLBACK_TO_WRAP,
+                file
+            )(destinationOrSource);
+        }
+    };
+
+    return file;
+}

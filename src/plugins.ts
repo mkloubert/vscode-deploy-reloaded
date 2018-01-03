@@ -1074,11 +1074,17 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
             async (target, plugin) => {
                 const CTX: DeleteContext = {
                     cancellationToken: undefined,
-                    files: await ME.mapFilesForTarget(
+                    files: (await ME.mapFilesForTarget(
                         context.target,
                         target,
                         context.files
-                    ),
+                    )).map(f => {
+                        return deploy_targets.wrapOnBeforeFileCallbackForTarget(
+                            f,
+                            target,
+                            'onBeforeDelete'
+                        );
+                    }),
                     isCancelling: undefined,
                     target: target,
                 };
@@ -1122,11 +1128,17 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
             async (target, plugin) => {
                 const CTX: DownloadContext = {
                     cancellationToken: undefined,
-                    files: await ME.mapFilesForTarget(
+                    files: (await ME.mapFilesForTarget(
                         context.target,
                         target,
                         context.files
-                    ),
+                    )).map(f => {
+                        return deploy_targets.wrapOnBeforeFileCallbackForTarget(
+                            f,
+                            target,
+                            'onBeforeDownload'
+                        );
+                    }),
                     isCancelling: undefined,
                     target: target,
                 };
@@ -1410,11 +1422,17 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
             async (target, plugin) => {
                 const CTX: UploadContext = {
                     cancellationToken: undefined,
-                    files: await ME.mapFilesForTarget(
+                    files: (await ME.mapFilesForTarget(
                         context.target,
                         target,
                         context.files
-                    ),
+                    )).map(f => {
+                        return deploy_targets.wrapOnBeforeFileCallbackForTarget(
+                            f,
+                            target,
+                            'onBeforeUpload'
+                        );
+                    }),
                     isCancelling: undefined,
                     target: target,
                 };
