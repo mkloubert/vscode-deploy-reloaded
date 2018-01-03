@@ -25,7 +25,10 @@
 
 import * as ChildProcess from 'child_process';
 import * as deploy_helpers from './helpers';
+import * as deploy_scm from './scm';
+import * as Enumerable from 'node-enumerable';
 const MergeDeep = require('merge-deep');
+import * as Moment from 'moment';
 import * as Path from 'path';
 
 
@@ -48,13 +51,14 @@ export interface GitExecutable {
     readonly version: string;
 }
 
-const IS_WINDOWS = process.platform === 'win32';
 
+const COMMITS_PER_PAGE = 25;
+const IS_WINDOWS = process.platform === 'win32';
 
 /**
  * A git client.
  */
-export class GitClient {
+export class GitClient implements deploy_scm.SourceControlClient {
     /**
      * Initializes a new instance of that class.
      * 
@@ -66,6 +70,144 @@ export class GitClient {
         if (deploy_helpers.isEmptyString(this.cwd)) {
             this.cwd = undefined;
         }
+    }
+
+    /** @inheritdoc */
+    public async branches() : Promise<deploy_scm.Branch[]> {
+        const ME = this;
+
+        const BRANCHES: deploy_scm.Branch[] = [];
+
+        const RESULT = deploy_helpers.toStringSafe(
+            await this.exec([ 'branch', '-v' ])
+        ).trim();
+
+        const LINES = RESULT.split("\n").map(l => {
+            return l.trim();
+        });
+
+        LINES.forEach(l => {
+            const SEP = l.indexOf(' ', 2);
+            const NAME = l.substr(2, SEP - 2).trim();
+
+            BRANCHES.push({
+                client: ME,
+                commitCount: async function(skip?: number) {
+                    return parseInt(
+                        deploy_helpers.toStringSafe(
+                            await ME.exec([ "rev-list", "--count", "HEAD" ]),
+                        )
+                    );
+                },
+                commits: async function(page?: number) {
+                    page = parseInt(
+                        deploy_helpers.toStringSafe(page).trim()
+                    );
+                    if (isNaN(page)) {
+                        page = 0;
+                    }
+                    if (page < 1) {
+                        page = 1;
+                    }
+
+                    const ITEMS_TO_SKIP = (page - 1) * COMMITS_PER_PAGE;
+
+                    const BRANCH: deploy_scm.Branch = this;
+
+                    const LOADED_COMMITS: deploy_scm.Commit[] = [];
+
+                    const ALL_COUNT: number = await this.commitCount();
+
+                    const COMMITS_RESULT = await ME.exec([
+                        'log',
+                        '--pretty=%H %aI %s',
+                        '--skip=' + ITEMS_TO_SKIP,
+                        '-' + COMMITS_PER_PAGE
+                    ]);
+                    
+                    const LINES = COMMITS_RESULT.split("\n").map(l => {
+                        return l.trim();
+                    }).filter(l => '' !== l);
+
+                    LINES.forEach((l, i) => {
+                        const HASH = l.substr(0, 39);
+                        const DATE = l.substr(41, 25);
+                        const SUBJECT = l.substr(67).trim();
+
+                        LOADED_COMMITS.push({
+                            branch: BRANCH,
+                            changes: async function() {
+                                const COMMIT: deploy_scm.Commit = this;
+
+                                const LOADED_CHANGES: deploy_scm.FileChange[] = [];
+
+                                const CHANGES_RESULT = await ME.exec([
+                                    'log',
+                                    COMMIT.id,
+                                    '--pretty=',
+                                    '--name-status',
+                                    '-1'
+                                ]);
+
+                                const LINES = CHANGES_RESULT.split("\n").map(l => {
+                                    return l.trim();
+                                }).filter(l => '' !== l);
+
+                                LINES.forEach(l => {
+                                    let changeType: deploy_scm.FileChangeType;
+                                    switch (deploy_helpers.normalizeString(l.substr(0, 1))) {
+                                        case 'a':
+                                            changeType = deploy_scm.FileChangeType.Added;
+                                            break;
+                                        
+                                        case 'd':
+                                            changeType = deploy_scm.FileChangeType.Deleted;
+                                            break;
+
+                                        case 'm':
+                                            changeType = deploy_scm.FileChangeType.Modified;
+                                            break;
+                                    }
+
+                                    LOADED_CHANGES.push({
+                                        commit: COMMIT,
+                                        file: l.substr(2).trim(),
+                                        type: changeType,
+                                    });
+                                });
+
+                                return LOADED_CHANGES;
+                            },
+                            date: deploy_helpers.asUTC( Moment(DATE) ),
+                            id: HASH,
+                            index: ALL_COUNT - ITEMS_TO_SKIP - i - 1,
+                            subject: SUBJECT,
+                        });
+                    });
+
+                    return LOADED_COMMITS;
+                },
+                id: NAME,
+            });
+        });
+
+        const MAX_BRANCH_LEN = Enumerable.from( BRANCHES )
+                                         .select(b => b.id.length)
+                                         .max();
+        if (!deploy_helpers.isSymbol(MAX_BRANCH_LEN)) {
+            const START_AT = MAX_BRANCH_LEN + 3;
+            
+            BRANCHES.forEach((b, i) => {
+                const L = LINES[i];
+
+                (<any>b).lastCommit = {
+                    id: L.substr(START_AT, 7),
+                    subject: L.substr(START_AT + 7).trim(),
+                };
+            });
+        }
+
+        return BRANCHES;
     }
 
     /**

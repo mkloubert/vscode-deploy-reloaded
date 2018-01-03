@@ -16,9 +16,11 @@
  */
 
 import * as deploy_contracts from './contracts';
+import * as deploy_delete from './delete';
 import * as deploy_helpers from './helpers';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
+import * as deploy_scm from './scm';
 import * as deploy_targets from './targets';
 import * as deploy_transformers from './transformers';
 import * as deploy_workspaces from './workspaces';
@@ -27,6 +29,71 @@ import * as vscode from 'vscode';
 
 
 let nextCancelBtnCommandId = Number.MIN_SAFE_INTEGER;
+
+/**
+ * Deploys a commit of a SCM client.
+ * 
+ * @param {deploy_scm.SourceControlClient} client The scm client.
+ * @param {deploy_targets.Target} target The target to deploy to.
+ */
+export async function deployScmCommit(client: deploy_scm.SourceControlClient,
+                                      target: deploy_targets.Target) {
+    if (!client) {
+        return;
+    }
+
+    const ME: deploy_workspaces.Workspace = this;
+
+    const COMMIT = await deploy_scm.showSCMCommitQuickPick(client);
+    if (!COMMIT) {
+        return;
+    }
+
+    const CHANGES = await COMMIT.changes();
+
+    const FILES_TO_DELETE: string[] = [];
+    const FILES_TO_UPLOAD: string[] = [];
+    for (const C of CHANGES) {
+        const FILE = deploy_helpers.toStringSafe(C.file);
+        if (deploy_helpers.isEmptyString(FILE)) {
+            continue;
+        }
+
+        const FULL_PATH = Path.resolve(
+            Path.join(
+                ME.rootPath,
+                FILE,
+            )
+        );
+
+        switch (C.type) {
+            case deploy_scm.FileChangeType.Added:
+            case deploy_scm.FileChangeType.Modified:
+                FILES_TO_UPLOAD.push( FULL_PATH );
+                break;
+
+            case deploy_scm.FileChangeType.Deleted:
+                FILES_TO_DELETE.push( FULL_PATH );
+                break;
+        }
+    }
+
+    // first delete files
+    if (FILES_TO_DELETE.length > 0) {
+        await deploy_helpers.applyFuncFor(
+            deploy_delete.deleteFilesIn,
+            ME,
+        )(FILES_TO_DELETE, target, false);
+    }
+
+    // then upload files
+    if (FILES_TO_UPLOAD.length > 0) {
+        await deploy_helpers.applyFuncFor(
+            deployFilesTo,
+            ME,
+        )(FILES_TO_UPLOAD, target);
+    }
+}
 
 /**
  * Deploys files to a target.

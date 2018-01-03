@@ -641,6 +641,25 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     }
 
     /**
+     * Deploys a files of a git commit.
+     * 
+     * @param {deploy_targets.Target} target The target to deploy to. 
+     */
+    public async deployGitCommit(target: deploy_targets.Target) {
+        if (!this.canBeHandledByMe(target)) {
+            return;
+        }
+        
+        const GIT = await this.createGitClient();
+        if (!GIT) {
+            return;
+        }
+
+        await deploy_deploy.deployScmCommit
+                           .apply(this, [ GIT, target ]);
+    }
+
+    /**
      * Deploys a file when is has been changed.
      * 
      * @param {string} file The file to check. 
@@ -3035,6 +3054,26 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             deploy_log.CONSOLE
                       .trace(e, 'workspaces.Workspace.showInformationMessage()');
         }
+    }
+
+    /**
+     * Shows a quick pick for a list of targets of that workspace.
+     * 
+     * @param {vscode.QuickPickOptions} [opts] Custom options for the quick picks.
+     * 
+     * @return {Promise<Target|false>} The promise that contains the selected target (if selected)
+     *                                 or (false) if no target is available.
+     */
+    public async showTargetQuickPick(opts?: vscode.QuickPickOptions): Promise<deploy_targets.Target | false> {
+        const DEFAULT_OPTS: vscode.QuickPickOptions = {
+            placeHolder: this.t('targets.selectTarget')
+        };
+        
+        return await deploy_targets.showTargetQuickPick(
+            this.context.extension,
+            this.getTargets(),
+            MergeDeep(DEFAULT_OPTS, opts),
+        );
     }
 
     /**

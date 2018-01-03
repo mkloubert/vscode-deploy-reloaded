@@ -106,6 +106,10 @@ export const translation: Translation = {
         },
         finishedOperation: "Das Bereitstellen der Dateien in{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",
         finishedOperationWithErrors: "[FEHLER] Konnte Dateien nicht in{0:trim,surround,leading_space} bereitstellen:{1:trim,surround,leading_space}",
+        gitCommit: {
+            description: "Stellt Änderungen eines git-Commits bereit",
+            label: "git-Commit ...",
+        },
         onChange: {
             activated: "Das Bereitstellen nach dem Ändern wurde für den Arbeitsbereich{0:trim,surround,leading_space} aktiviert.",
             failed: "Das Bereitstellen nach dem Ändern von{0:trim,surround,leading_space} nach{1:trim,surround,leading_space} ist fehlgeschlagen:{2:trim,surround,leading_space}",
@@ -196,6 +200,10 @@ export const translation: Translation = {
         noneFound: "Keine Pakete gefunden!",
         selectPackage: "Wählen Sie ein Paket aus ...",
         virtualTarget: "Virtuelles Ziel für Paket{0:trim,surround,leading_space}",
+    },
+    pagination: {
+        previousPage: "Vorherige Seite ({0:trim}) ...",
+        nextPage: "Nächste Seite ({0:trim}) ...",
     },
     plugins: {
         __loaded: "{0:trim,ending_space}Plug-Ins wurden geladen:",
@@ -303,6 +311,19 @@ export const translation: Translation = {
     },
     s3bucket: {
         credentialTypeNotSupported: "Das Anmeldeverfahren{0:trim,surround,leading_space} wird nicht unterstützt!",
+    },
+    scm: {
+        branches: {
+            noneFound: "Es wurden keine Branches gefunden!",
+            selectBranch: "Wählen Sie einen Branch ...",
+        },
+        commits: {
+            errors: {
+                selectingCommitFailed: "Commit konnte nicht ausgewählt werden:{0:trim,surround,leading_space}",
+            },
+            noneFound: "Es wurden keine Commits gefunden!",
+            selectCommit: "Wählen Sie einen Commit ...",
+        },
     },
     sftp: {
         privateKeyNotFound: "Der private Schlüssel{0:trim,surround,leading_space} wurde nicht gefunden!",

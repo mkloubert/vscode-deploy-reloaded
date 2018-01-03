@@ -766,6 +766,13 @@ async function activateExtension(context: vscode.ExtensionContext) {
                             },
                             label: '$(rocket)  ' + i18.t('deploy.package.label'),
                             description: i18.t('deploy.package.description'),
+                        },
+                        {
+                            action: async () => {
+                                await vscode.commands.executeCommand('extension.deploy.reloaded.deployGitCommit');
+                            },
+                            label: '$(git-commit)  ' + i18.t('deploy.gitCommit.label'),
+                            description: i18.t('deploy.gitCommit.description'),
                         }
                     ];
 
@@ -826,6 +833,38 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 catch (e) {
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.deployFile');
+                    
+                    deploy_helpers.showErrorMessage(
+                        i18.t('deploy.errors.operationFailed')
+                    );
+                }
+            }),
+
+            // deploy git commit
+            vscode.commands.registerCommand('extension.deploy.reloaded.deployGitCommit', async () => {
+                try {
+                    const WORKSPACE = await deploy_workspaces.showWorkspaceQuickPick(
+                        context,
+                        WORKSPACES,
+                        {
+                            placeHolder: i18.t('workspaces.selectWorkspace')
+                        }
+                    );
+
+                    if (!WORKSPACE) {
+                        return;
+                    }
+
+                    const TARGET = await WORKSPACE.showTargetQuickPick();
+                    if (!TARGET) {
+                        return;
+                    }
+
+                    await WORKSPACE.deployGitCommit(TARGET);
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'extension.deploy.reloaded.deployGitCommit');
                     
                     deploy_helpers.showErrorMessage(
                         i18.t('deploy.errors.operationFailed')
@@ -1526,7 +1565,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
         outputChannel.appendLine(i18.t('extension.initialized'));
         outputChannel.appendLine('');
     });
-
+    
     if (!isDeactivating) {
         await WF.start();
     }

@@ -106,6 +106,10 @@ export const translation: Translation = {
             invalidWorkspaceForPackage: "Cannot deploy package{0:trim,surround,leading_space} from workspace{1:trim,surround,leading_space}!",
             operationFailed: "Deploy operation failed (s. debug output 'CTRL + SHIFT + Y')!",
         },
+        gitCommit: {
+            description: "Deploys the changes of a git commit",
+            label: "git commit ...",
+        },
         onChange: {
             activated: "Deploy on change has been activated for workspace{0:trim,surround,leading_space}.",
             failed: "Deploy on change from{0:trim,surround,leading_space} to{1:trim,surround,leading_space} failed:{2:trim,surround,leading_space}",
@@ -197,6 +201,10 @@ export const translation: Translation = {
         noneFound: "No packages found!",
         selectPackage: "Select a package ...",
         virtualTarget: "Virtual target for package{0:trim,surround,leading_space}",
+    },
+    pagination: {
+        previousPage: "Previous page ({0:trim}) ...",
+        nextPage: "Next page ({0:trim}) ...",
     },
     plugins: {
         __loaded: "Loaded{0:trim,leading_space} plugins:",
@@ -304,6 +312,19 @@ export const translation: Translation = {
     },
     s3bucket: {
         credentialTypeNotSupported: "Credental type{0:trim,surround,leading_space} is not supported!",
+    },
+    scm: {
+        branches: {
+            noneFound: "No branches found!",
+            selectBranch: "Select branch ...",
+        },
+        commits: {
+            errors: {
+                selectingCommitFailed: "Could not select commit:{0:trim,surround,leading_space}",
+            },
+            noneFound: "No commits found!",
+            selectCommit: "Select commit ..."
+        },
     },
     sftp: {
         privateKeyNotFound: "Private key file{0:trim,surround,leading_space} not found!",

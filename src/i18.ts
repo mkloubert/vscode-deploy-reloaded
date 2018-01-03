@@ -113,6 +113,10 @@ export interface Translation {
         };
         finishedOperation?: string;
         finishedOperationWithErrors?: string;
+        gitCommit?: {
+            description?: string;
+            label?: string;
+        };
         onChange?: {
             activated?: string;
             failed?: string;
@@ -204,6 +208,10 @@ export interface Translation {
         noneFound?: string;
         selectPackage?: string;
         virtualTarget?: string;
+    };
+    pagination?: {
+        previousPage?: string;
+        nextPage?: string;
     };
     plugins?: {
         __loaded?: string;
@@ -309,6 +317,19 @@ export interface Translation {
     };
     s3bucket?: {
         credentialTypeNotSupported?: string;
+    };
+    scm?: {
+        branches?: {
+            noneFound?: string;
+            selectBranch?: string;
+        };
+        commits?: {
+            errors?: {
+                selectingCommitFailed?: string;
+            };
+            noneFound?: string;
+            selectCommit?: string;
+        };
     };
     sftp?: {
         privateKeyNotFound?: string;
