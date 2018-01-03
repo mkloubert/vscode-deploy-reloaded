@@ -385,9 +385,9 @@ export async function openConnection(opts: SFTPConnectionOptions): Promise<SFTPC
         pwd = undefined;
     }
 
-    let privateKeyFile: string = deploy_helpers.toStringSafe(opts.privateKey);
+    let privateKeyFile: string | false = deploy_helpers.toStringSafe(opts.privateKey);
     if (deploy_helpers.isEmptyString(privateKeyFile)) {
-        privateKeyFile = undefined;
+        privateKeyFile = false;
     }
 
     let privateKeyPassphrase = deploy_helpers.toStringSafe(opts.privateKeyPassphrase);
@@ -398,6 +398,11 @@ export async function openConnection(opts: SFTPConnectionOptions): Promise<SFTPC
     let readyTimeout = parseInt( deploy_helpers.toStringSafe(opts.readyTimeout).trim() );
     if (isNaN(readyTimeout)) {
         readyTimeout = 20000;
+    }
+
+    let privateKey: Buffer;
+    if (false !== privateKeyFile) {
+        privateKey = await deploy_helpers.readFile(privateKeyFile);
     }
 
     const DEBUG = deploy_helpers.toBooleanSafe(opts.debug);
@@ -418,7 +423,7 @@ export async function openConnection(opts: SFTPConnectionOptions): Promise<SFTPC
         passphrase: privateKeyPassphrase,
         password: pwd,
         port: port,
-        privateKey: FS.readFileSync(privateKeyFile, {'encoding':'utf8'}),
+        privateKey: privateKey,
         readyTimeout: readyTimeout,
         tryKeyboard: deploy_helpers.toBooleanSafe(opts.tryKeyboard),
         username: user,
