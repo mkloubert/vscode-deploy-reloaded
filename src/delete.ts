@@ -241,11 +241,9 @@ export async function deleteFilesIn(files: string[],
                     const SF = new deploy_plugins.SimpleFileToDelete(ME, f, NAME_AND_PATH);
                     SF.onBeforeDelete = async function (destination?: string) {
                         if (arguments.length < 1) {
-                            destination = `${deploy_helpers.toDisplayablePath(NAME_AND_PATH.path)} (${TARGET_NAME})`;
+                            destination = NAME_AND_PATH.path;
                         }
-                        else {
-                            destination = `${deploy_helpers.toStringSafe(destination)}`;
-                        }
+                        destination = `${deploy_helpers.toStringSafe(destination)} (${TARGET_NAME})`;
 
                         ME.context.outputChannel.append(
                             ME.t('DELETE.deletingFile',

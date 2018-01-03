@@ -269,11 +269,9 @@ export async function deployFilesTo(files: string[],
                     const LF = new deploy_plugins.LocalFileToUpload(ME, F, NAME_AND_PATH);
                     LF.onBeforeUpload = async function(destination?: string) {
                         if (arguments.length < 1) {
-                            destination = `${deploy_helpers.toDisplayablePath(NAME_AND_PATH.path)} (${TARGET_NAME})`;
+                            destination = NAME_AND_PATH.path;
                         }
-                        else {
-                            destination = `${deploy_helpers.toStringSafe(destination)}`;
-                        }
+                        destination = `${deploy_helpers.toStringSafe(destination)} (${TARGET_NAME})`;
 
                         ME.context.outputChannel.append(
                             ME.t('deploy.deployingFile',

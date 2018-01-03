@@ -29,6 +29,7 @@ The extension supports the following destinations:
 
 1. [Demos](#demos-)
    * [Deploying to SFTP](#deploying-to-sftp-)
+   * [Deploy git commit](#deploy-git-commit-)
    * [Sync when open](#sync-when-open-)
    * [Auto remove on remote](#auto-remove-on-remote-)
    * [Compare files](#compare-files-)
@@ -54,6 +55,10 @@ The extension supports the following destinations:
 ### Deploying to SFTP [[&uarr;](#demos-)]
 
 ![Demo Deploying to SFTP](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo1.gif)
+
+### Deploy git commit [[&uarr;](#demos-)]
+
+![Demo Deploy git commit](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo12.gif)
 
 ### Sync when open [[&uarr;](#demos-)]
 
