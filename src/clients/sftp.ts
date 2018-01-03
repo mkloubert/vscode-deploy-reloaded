@@ -418,7 +418,7 @@ export async function openConnection(opts: SFTPConnectionOptions): Promise<SFTPC
         passphrase: privateKeyPassphrase,
         password: pwd,
         port: port,
-        privateKey: privateKeyFile,
+        privateKey: FS.readFileSync(privateKeyFile, {'encoding':'utf8'}),
         readyTimeout: readyTimeout,
         tryKeyboard: deploy_helpers.toBooleanSafe(opts.tryKeyboard),
         username: user,
