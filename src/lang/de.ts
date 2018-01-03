@@ -303,6 +303,11 @@ export const translation: Translation = {
         startOperation: "Beginne Ladevorgang von{0:trim,surround,leading_space} ...",
     },
     requirements: {
+        conditions: {
+            defaultName: "Bedingung #{0:trim}",
+            mustMatch: "Die Bedingung{0:trim,surround,leading_space} ist fehlgeschlagen und wird vorausgesetzt!",
+            shouldMatch: "Die Bedingung{0:trim,surround,leading_space} ist fehlgeschlagen und wird empfohlen!",
+        },
         extensions: {
             mustBeInstalled: "Die Erweiterung{0:trim,surround,leading_space} ist nicht installiert und wird vorausgesetzt!",
             openInMarketplace: "Abbrechen und Visual Studio Marketplace öffnen ...",

@@ -498,6 +498,88 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         return true;
     }
 
+    private async checkForRequirements(loadedCfg: WorkspaceSettings) {
+        if (loadedCfg) {
+            const CHECK_FOR_REQUIREMENTS = deploy_helpers.asArray(
+                loadedCfg.checkForRequirements
+            );
+
+            let index = -1;
+            const GET_CONDITION_NAME = (settings: deploy_contracts.CheckForRequirementsSettings) =>
+            {
+                let name = deploy_helpers.toStringSafe(settings.name);
+                if ('' === name) {
+                    name = i18.t('requirements.conditions.defaultName',
+                                 index + 1);
+                }
+
+                return name;
+            };
+            
+            for (const R of CHECK_FOR_REQUIREMENTS) {
+                ++index;
+
+                let settings = R;
+                if (!deploy_helpers.isObject<deploy_contracts.CheckForRequirementsSettings>(settings)) {
+                    settings = {
+                        condition: deploy_helpers.toStringSafe(settings),
+                    };
+                }
+
+                if (deploy_helpers.filterPlatformItems(settings).length < 1) {
+                    continue;  // not for platform
+                }
+
+                const CONDITION: deploy_contracts.ConditionalItem = {
+                    if: settings.condition,
+                };
+                if (deploy_helpers.filterConditionalItems(CONDITION).length > 0) {
+                    continue;  // does match
+                }
+
+                const NAME = GET_CONDITION_NAME(settings);
+
+                if (deploy_helpers.toBooleanSafe(settings.isMustHave)) {
+                    // must match
+    
+                    const SELECTED_ITEM = await this.showErrorMessage<deploy_contracts.MessageItemWithValue>(
+                        i18.t('requirements.conditions.mustMatch',
+                              NAME),
+                        {
+                            isCloseAffordance: true,
+                            title: i18.t('cancel'),
+                            value: 0,
+                        },
+                    );
+
+                    return false;
+                }
+
+                const SELECTED_ITEM = await this.showWarningMessage<deploy_contracts.MessageItemWithValue>(
+                    i18.t('requirements.conditions.shouldMatch',
+                          NAME),
+                    {
+                        isCloseAffordance: true,
+                        title: i18.t('cancel'),
+                        value: 0,
+                    },
+                    {
+                        title: i18.t('continue'),
+                        value: 1,
+                    }
+                );
+    
+                if (SELECTED_ITEM) {
+                    if (0 === SELECTED_ITEM.value) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
     private cleanupPackageButtons() {
         while (this._PACKAGE_BUTTONS.length > 0) {
             const PBTN = this._PACKAGE_BUTTONS.shift();
@@ -2416,6 +2498,9 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
             // check for requirements
             if (!(await ME.checkForRequiredExtensions(loadedCfg))) {
+                return;  // failed
+            }
+            if (!(await ME.checkForRequirements(loadedCfg))) {
                 return;  // failed
             }
 

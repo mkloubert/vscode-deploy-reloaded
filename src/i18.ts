@@ -309,6 +309,11 @@ export interface Translation {
         startOperation?: string;
     };
     requirements?: {
+        conditions?: {
+            defaultName?: string;
+            mustMatch?: string;
+            shouldMatch?: string;
+        };
         extensions?: {
             mustBeInstalled?: string;
             openInMarketplace?: string;

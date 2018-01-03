@@ -304,6 +304,11 @@ export const translation: Translation = {
         startOperation: "Start pulling files from{0:trim,surround,leading_space} ...",
     },
     requirements: {
+        conditions: {
+            defaultName: "Condition #{0:trim}",
+            mustMatch: "The condition{0:trim,surround,leading_space} failed, but must not!",
+            shouldMatch: "The condition{0:trim,surround,leading_space} failed, but is recommended!",
+        },
         extensions: {
             mustBeInstalled: "The extension{0:trim,surround,leading_space} is required, but not installed!",
             openInMarketplace: "Cancel and open Visual Studio Marketplace ...",

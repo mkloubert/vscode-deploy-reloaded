@@ -92,6 +92,26 @@ export interface Cancelable {
 }
 
 /**
+ * Possible values for a 'checkForRequirements' setting.
+ */
+export type CheckForRequirementsEntry = string | CheckForRequirementsSettings;
+
+/**
+ * Settings for an entry of 'checkForRequirements'.
+ */
+export interface CheckForRequirementsSettings extends PlatformItem,
+                                                      WithOptionalName {
+    /**
+     * The condition.
+     */
+    readonly condition: string;
+    /**
+     * Skip loading the configuration (true), when condition fails, or show a warning message instead (false).
+     */
+    readonly isMustHave?: boolean;
+}
+
+/**
  * An item that uses JavaScript code if it is available or not.
  */
 export interface ConditionalItem {
@@ -119,6 +139,10 @@ export interface ConfigSource {
  * Deploy settings.
  */
 export interface Configuration extends deploy_values.WithValueItems {
+    /**
+     * One or more requirements to check.
+     */
+    readonly checkForRequirements?: CheckForRequirementsEntry | CheckForRequirementsEntry[];
     /**
      * Clear output on after config has been reloaded or not.
      */

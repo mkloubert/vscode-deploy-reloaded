@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.14.2",
+ "version": "0.15.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -128,6 +128,61 @@
      "type": "object",
      "scope": "resource",
      "properties": {
+      "checkForRequirements": {
+       "description": "Defines one or more conditions by (JavaScript) code.",
+       "type": "array",
+       "items": {
+        "oneOf": [
+         {
+          "description": "The condition.",
+          "type": "string",
+          "pattern": "\\S+"
+         },
+         {
+          "description": "Settings for a condition.",
+          "type": "object",
+          "properties": {
+           "condition": {
+            "description": "The condition.",
+            "type": "string"
+           },
+           "isMustHave": {
+            "description": "Skip loading the configuration (true), when condition fails, or show a warning message instead (false).",
+            "type": "boolean",
+            "default": false
+           },
+           "name": {
+            "description": "The custom (display) name of the condition.",
+            "type": "string"
+           },
+           "platforms": {
+            "description": "One or more platform names the entry is available for.",
+            "type": "array",
+            "items": {
+             "description": "The name of the platform.",
+             "type": "string",
+             "enum": [
+              "darwin",
+              "freebsd",
+              "linux",
+              "sunos",
+              "win32"
+             ]
+            }
+           }
+          },
+          "required": [
+           "condition"
+          ]
+         }
+        ]
+       }
+      },
+      "clearOutputOnStartup": {
+       "description": "Clear output on after config has been reloaded or not.",
+       "type": "boolean",
+       "default": false
+      },
       "commands": {
        "description": "Registers one or more commands for the editor.",
        "type": "object",
@@ -203,11 +258,6 @@
          ]
         }
        }
-      },
-      "clearOutputOnStartup": {
-       "description": "Clear output on after config has been reloaded or not.",
-       "type": "boolean",
-       "default": false
       },
       "deployOnChange": {
        "description": "Activates or deactivates 'deploy on change' feature for all packages.",
@@ -40875,6 +40925,13 @@
   "vscode": "^1.1.6"
  },
  "icon": "icon.png",
+ "badges": [
+  {
+   "description": "PayPal Donate",
+   "url": "https://img.shields.io/badge/Donate-PayPal-green.svg",
+   "href": "https://paypal.me/MarcelKloubert"
+  }
+ ],
  "author": {
   "name": "Marcel Joachim Kloubert"
  },

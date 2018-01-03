@@ -313,11 +313,7 @@ You can also use the following, predefined, shortcuts:
 
 ## Support and contribute [[&uarr;](#table-of-contents)]
 
-If you like the extension, you can support the project by sending a donation
-
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/MarcelKloubert)
-
-to [me](https://github.com/mkloubert).
+If you like the extension, you can support the project by sending a [donation via PayPal](https://paypal.me/MarcelKloubert) to [me](https://github.com/mkloubert).
 
 To contribute, you can [open an issue](https://github.com/mkloubert/vscode-deploy-reloaded/issues) and/or fork this repository.
 
