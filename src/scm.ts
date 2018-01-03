@@ -218,15 +218,20 @@ export async function showSCMCommitQuickPick(client: SourceControlClient): Promi
             );
 
             const COMMIT_QUICK_PICKS: deploy_contracts.ActionQuickPick[] = COMMITS.map(c => {
+                let description: string;
+                if (c.date && c.date.isValid()) {
+                    description = deploy_helpers.asLocalTime(c.date).format(
+                        i18.t('time.dateTimeWithSeconds')
+                    );
+                }
+
                 return {
                     action: () => {
                         return c;
                     },
     
                     label: '$(git-commit)  ' + deploy_helpers.toStringSafe(c.subject).trim(),
-                    description: deploy_helpers.toStringSafe(
-                        c.date.format( i18.t('time.dateTimeWithSeconds') )
-                    ),
+                    description: deploy_helpers.toStringSafe(description),
                     detail: deploy_helpers.toStringSafe(c.id).trim(),
                 };
             });
