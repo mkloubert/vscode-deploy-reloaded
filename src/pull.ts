@@ -26,6 +26,7 @@ import * as deploy_targets from './targets';
 import * as deploy_transformers from './transformers';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
+import * as FS from 'fs';
 import * as i18 from './i18';
 import * as IsStream from 'is-stream';
 import * as Path from 'path';
@@ -49,7 +50,10 @@ export async function pullAllOpenFiles(workspaces: deploy_workspaces.Workspace |
         return;
     }
 
-    const DOCUMENTS = deploy_helpers.asArray(vscode.workspace.textDocuments);
+    const DOCUMENTS = deploy_helpers.asArray(vscode.workspace.textDocuments).filter(d => {
+        return !d.isClosed &&
+               !d.isUntitled;
+    });
     if (DOCUMENTS.length < 1) {
         deploy_helpers.showWarningMessage(
             i18.t('editors.noOpen')
@@ -59,7 +63,7 @@ export async function pullAllOpenFiles(workspaces: deploy_workspaces.Workspace |
     }
 
     for (const WS of workspaces) {
-        const MATCHING_EDITORS = DOCUMENTS.map(doc => {
+        const FILES = DOCUMENTS.map(doc => {
             if (!deploy_helpers.isEmptyString(doc.fileName)) {
                 if (WS.isPathOf(doc.fileName)) {
                     return doc;
@@ -70,13 +74,11 @@ export async function pullAllOpenFiles(workspaces: deploy_workspaces.Workspace |
         }).filter(e => {
             return false !== e;
         }).map((doc: vscode.TextDocument) => {
-            return doc.fileName;
+            return Path.resolve(doc.fileName);
+        }).filter(f => {
+            return FS.existsSync(f) &&
+                   FS.lstatSync(f).isFile();
         });
-
-        const FILES = Enumerable.from( MATCHING_EDITORS ).select(e => {
-            return Path.resolve(e);
-        }).distinct()
-          .toArray();
 
         if (FILES.length < 1) {
             continue;
