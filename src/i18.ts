@@ -92,6 +92,10 @@ export interface Translation {
         startOperation?: string;
     };
     deploy?: {
+        allOpenFiles?: {
+            description?: string;
+            label?: string;
+        };
         askForCancelOperation?: string;
         buttons?: {
             cancel?: {
@@ -110,6 +114,7 @@ export interface Translation {
             invalidWorkspace?: string;
             invalidWorkspaceForPackage?: string;
             operationFailed?: string;
+            operationToTargetFailed?: string;
         };
         finishedOperation?: string;
         finishedOperationWithErrors?: string;
@@ -144,6 +149,7 @@ export interface Translation {
         active?: {
             noOpen?: string;
         };
+        noOpen?: string;
     };
     error?: string;
     extension?: {
@@ -280,6 +286,10 @@ export interface Translation {
         };
     };
     pull?: {
+        allOpenFiles?: {
+            description?: string;
+            label?: string;
+        };
         askForCancelOperation?: string;
         buttons?: {
             cancel?: {
@@ -297,6 +307,7 @@ export interface Translation {
             invalidWorkspace?: string;
             invalidWorkspaceForPackage?: string;
             operationFailed?: string;
+            operationForSourceFailed?: string;
         };
         finishedOperation?: string;
         finishedOperationWithErrors?: string;
@@ -565,6 +576,8 @@ export interface Translation {
             }
         };
         removing?: string;
+        selectSource?: string;
+        selectTarget?: string;
         selectWorkspace?: string;
     };
     yes?: string;

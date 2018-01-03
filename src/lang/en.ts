@@ -85,6 +85,10 @@ export const translation: Translation = {
         startOperation: "Start deleting files in{0:trim,surround,leading_space} ...",
     },
     deploy: {
+        allOpenFiles: {
+            description: "Deploys the files of all opened text editors",
+            label: "All open files ...",
+        },
         askForCancelOperation: "You are about to cancel the deploy operation to{0:trim,surround,leading_space}. Are you sure?",
         buttons: {
             cancel: {
@@ -105,6 +109,7 @@ export const translation: Translation = {
             invalidWorkspace: "Cannot deploy file{0:trim,surround,leading_space} from workspace{1:trim,surround,leading_space}!",
             invalidWorkspaceForPackage: "Cannot deploy package{0:trim,surround,leading_space} from workspace{1:trim,surround,leading_space}!",
             operationFailed: "Deploy operation failed (s. debug output 'CTRL + SHIFT + Y')!",
+            operationToTargetFailed: "Deploying to target{0:trim,surround,leading_space} failed:{1:trim,surround,leading_space}",
         },
         gitCommit: {
             description: "Deploys the changes of a git commit",
@@ -137,6 +142,7 @@ export const translation: Translation = {
         active: {
             noOpen: "No active text editor found!",
         },
+        noOpen: "No open text editor found!",
     },
     error: "ERROR:{0:trim,surround,leading_space}",
     extension: {
@@ -275,6 +281,10 @@ export const translation: Translation = {
         },
     },
     pull: {
+        allOpenFiles: {
+            description: "Pulls the files of all opened text editors",
+            label: "All open files ...",
+        },
         askForCancelOperation: "You are about to cancel the pull operation from{0:trim,surround,leading_space}. Are you sure?",
         buttons: {
             cancel: {
@@ -292,6 +302,7 @@ export const translation: Translation = {
             invalidWorkspace: "Cannot pull file{0:trim,surround,leading_space} to workspace{1:trim,surround,leading_space}!",
             invalidWorkspaceForPackage: "Cannot pull package{0:trim,surround,leading_space} to workspace{1:trim,surround,leading_space}!",
             operationFailed: "Pull operation failed (s. debug output 'CTRL + SHIFT + Y')!",
+            operationForSourceFailed: "Pulling file(s) from source{0:trim,surround,leading_space} failed:{1:trim,surround,leading_space}",
         },
         finishedOperation: "Pulling files from{0:trim,surround,leading_space} has been finished.",
         finishedOperationWithErrors: "[ERROR] Could not pull files from{0:trim,surround,leading_space}:{1:trim,surround,leading_space}",
@@ -560,6 +571,8 @@ export const translation: Translation = {
             }
         },
         removing: "Closing workspace{0:trim,surround,leading_space} ...",
+        selectSource: "Select source for workspace{0:trim,surround,leading_space} ...",
+        selectTarget: "Select target for workspace{0:trim,surround,leading_space} ...",
         selectWorkspace: "Select a workspace ...",
     },
     yes: 'Yes',

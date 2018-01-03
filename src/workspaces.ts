@@ -1122,6 +1122,19 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     }
 
     /**
+     * Gets all targets that can download.
+     * 
+     * @return {deploy_targets.Target[]} The targets.
+     */
+    public getDownloadTargets(): deploy_targets.Target[] {
+        const ME = this;
+        
+        return this.getTargets().filter(t => {
+            return ME.getDownloadPlugins(t).length > 0;
+        });
+    }
+
+    /**
      * Returns an existing path based on the settings folder.
      * 
      * @param {string} path The path.
@@ -1564,6 +1577,19 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
             return '' === PLUGIN_TYPE || 
                    (TARGET_TYPE === PLUGIN_TYPE && pi.canUpload && pi.uploadFiles);
+        });
+    }
+
+    /**
+     * Gets all targets that can upload.
+     * 
+     * @return {deploy_targets.Target[]} The targets.
+     */
+    public getUploadTargets(): deploy_targets.Target[] {
+        const ME = this;
+        
+        return this.getTargets().filter(t => {
+            return ME.getUploadPlugins(t).length > 0;
         });
     }
 
@@ -3151,7 +3177,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      */
     public async showTargetQuickPick(opts?: vscode.QuickPickOptions): Promise<deploy_targets.Target | false> {
         const DEFAULT_OPTS: vscode.QuickPickOptions = {
-            placeHolder: this.t('targets.selectTarget')
+            placeHolder: this.t('workspaces.selectTarget',
+                                this.name)
         };
         
         return await deploy_targets.showTargetQuickPick(

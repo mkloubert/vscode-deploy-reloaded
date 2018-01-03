@@ -24,6 +24,8 @@ import * as deploy_scm from './scm';
 import * as deploy_targets from './targets';
 import * as deploy_transformers from './transformers';
 import * as deploy_workspaces from './workspaces';
+import * as Enumerable from 'node-enumerable';
+import * as i18 from './i18';
 import * as Path from 'path';
 import * as vscode from 'vscode';
 
@@ -31,67 +33,79 @@ import * as vscode from 'vscode';
 let nextCancelBtnCommandId = Number.MIN_SAFE_INTEGER;
 
 /**
- * Deploys a commit of a SCM client.
+ * Deploys all opened files.
  * 
- * @param {deploy_scm.SourceControlClient} client The scm client.
- * @param {deploy_targets.Target} target The target to deploy to.
+ * @param {deploy_workspaces.Workspace|deploy_workspaces.Workspace[]} workspaces The available workspaces.
  */
-export async function deployScmCommit(client: deploy_scm.SourceControlClient,
-                                      target: deploy_targets.Target) {
-    if (!client) {
+export async function deployAllOpenFiles(workspaces: deploy_workspaces.Workspace | deploy_workspaces.Workspace[]) {
+    workspaces = deploy_helpers.asArray(workspaces);
+    if (workspaces.length < 1) {
+        deploy_helpers.showWarningMessage(
+            i18.t('workspaces.noneFound')
+        );
+
         return;
     }
 
-    const ME: deploy_workspaces.Workspace = this;
+    const DOCUMENTS = deploy_helpers.asArray(vscode.workspace.textDocuments);
+    if (DOCUMENTS.length < 1) {
+        deploy_helpers.showWarningMessage(
+            i18.t('editors.noOpen')
+        );
 
-    const COMMIT = await deploy_scm.showSCMCommitQuickPick(client);
-    if (!COMMIT) {
         return;
     }
 
-    const CHANGES = await COMMIT.changes();
+    for (const WS of workspaces) {
+        const MATCHING_EDITORS = DOCUMENTS.map(doc => {
+            if (!deploy_helpers.isEmptyString(doc.fileName)) {
+                if (WS.isPathOf(doc.fileName)) {
+                    return doc;
+                }
+            }
 
-    const FILES_TO_DELETE: string[] = [];
-    const FILES_TO_UPLOAD: string[] = [];
-    for (const C of CHANGES) {
-        const FILE = deploy_helpers.toStringSafe(C.file);
-        if (deploy_helpers.isEmptyString(FILE)) {
+            return false;
+        }).filter(e => {
+            return false !== e;
+        }).map((doc: vscode.TextDocument) => {
+            return doc.fileName;
+        });
+
+        const FILES = Enumerable.from( MATCHING_EDITORS ).select(e => {
+            return Path.resolve(e);
+        }).distinct()
+          .toArray();
+
+        if (FILES.length < 1) {
             continue;
         }
 
-        const FULL_PATH = Path.resolve(
-            Path.join(
-                ME.rootPath,
-                FILE,
-            )
+        const TARGET = await deploy_targets.showTargetQuickPick(
+            WS.context.extension,
+            WS.getUploadTargets(),
+            {
+                placeHolder: WS.t('workspaces.selectTarget',
+                                  WS.name),
+            },
         );
-
-        switch (C.type) {
-            case deploy_scm.FileChangeType.Added:
-            case deploy_scm.FileChangeType.Modified:
-                FILES_TO_UPLOAD.push( FULL_PATH );
-                break;
-
-            case deploy_scm.FileChangeType.Deleted:
-                FILES_TO_DELETE.push( FULL_PATH );
-                break;
+        if (!TARGET) {
+            continue;
         }
-    }
 
-    // first delete files
-    if (FILES_TO_DELETE.length > 0) {
-        await deploy_helpers.applyFuncFor(
-            deploy_delete.deleteFilesIn,
-            ME,
-        )(FILES_TO_DELETE, target, false);
-    }
+        const TARGET_NAME = deploy_targets.getTargetName(TARGET);
 
-    // then upload files
-    if (FILES_TO_UPLOAD.length > 0) {
-        await deploy_helpers.applyFuncFor(
-            deployFilesTo,
-            ME,
-        )(FILES_TO_UPLOAD, target);
+        try {
+            await deploy_helpers.applyFuncFor(
+                deployFilesTo,
+                WS
+            )(FILES, TARGET);
+        }
+        catch (e) {
+            WS.showErrorMessage(
+                WS.t('deploy.errors.operationToTargetFailed',
+                     TARGET_NAME, e),
+            );
+        }
     }
 }
 
@@ -556,4 +570,69 @@ export async function deployOnSave(file: string) {
 
     return await deploy_packages.autoDeployFile
                                 .apply(ME, ARGS);
+}
+
+/**
+ * Deploys a commit of a SCM client.
+ * 
+ * @param {deploy_scm.SourceControlClient} client The scm client.
+ * @param {deploy_targets.Target} target The target to deploy to.
+ */
+export async function deployScmCommit(client: deploy_scm.SourceControlClient,
+                                      target: deploy_targets.Target) {
+    if (!client) {
+        return;
+    }
+
+    const ME: deploy_workspaces.Workspace = this;
+
+    const COMMIT = await deploy_scm.showSCMCommitQuickPick(client);
+    if (!COMMIT) {
+        return;
+    }
+
+    const CHANGES = await COMMIT.changes();
+
+    const FILES_TO_DELETE: string[] = [];
+    const FILES_TO_UPLOAD: string[] = [];
+    for (const C of CHANGES) {
+        const FILE = deploy_helpers.toStringSafe(C.file);
+        if (deploy_helpers.isEmptyString(FILE)) {
+            continue;
+        }
+
+        const FULL_PATH = Path.resolve(
+            Path.join(
+                ME.rootPath,
+                FILE,
+            )
+        );
+
+        switch (C.type) {
+            case deploy_scm.FileChangeType.Added:
+            case deploy_scm.FileChangeType.Modified:
+                FILES_TO_UPLOAD.push( FULL_PATH );
+                break;
+
+            case deploy_scm.FileChangeType.Deleted:
+                FILES_TO_DELETE.push( FULL_PATH );
+                break;
+        }
+    }
+
+    // first delete files
+    if (FILES_TO_DELETE.length > 0) {
+        await deploy_helpers.applyFuncFor(
+            deploy_delete.deleteFilesIn,
+            ME,
+        )(FILES_TO_DELETE, target, false);
+    }
+
+    // then upload files
+    if (FILES_TO_UPLOAD.length > 0) {
+        await deploy_helpers.applyFuncFor(
+            deployFilesTo,
+            ME,
+        )(FILES_TO_UPLOAD, target);
+    }
 }

@@ -85,6 +85,10 @@ export const translation: Translation = {
         startOperation: "Beginne das Löschen der Dateien in{0:trim,surround,leading_space} ...",
     },
     deploy: {
+        allOpenFiles: {
+            description: "Stellt die Dateien aller geöffneten Editoren bereit",
+            label: "Alle geöffneten Dateien ...",
+        },
         askForCancelOperation: "Sind Sie sicher, dass Sie das Bereitstellen der Datei(en) in{0:trim,surround,leading_space} abbrechen wollen?",
         buttons: {
             cancel: {
@@ -103,6 +107,7 @@ export const translation: Translation = {
             invalidWorkspace: "Die Datei{0:trim,surround,leading_space} kann nicht über den Arbeitsbereich{1:trim,surround,leading_space} bereitgestellt werden!",
             invalidWorkspaceForPackage: "Das Paket{0:trim,surround,leading_space} kann nicht über den Arbeitsbereich{1:trim,surround,leading_space} bereitgestellt werden!",
             operationFailed: "Konnte das Bereitstellen nicht durchführen (s. Debugkonsole 'STRG + SHIFT + Y')!",
+            operationToTargetFailed: "Das Bereitstellen der Datei(en) ins Ziel{0:trim,surround,leading_space} schlug fehl:{1:trim,surround,leading_space}",
         },
         finishedOperation: "Das Bereitstellen der Dateien in{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",
         finishedOperationWithErrors: "[FEHLER] Konnte Dateien nicht in{0:trim,surround,leading_space} bereitstellen:{1:trim,surround,leading_space}",
@@ -137,6 +142,7 @@ export const translation: Translation = {
         active: {
             noOpen: "Es ist derzeit kein aktiver Texteditor geöffnet!",
         },
+        noOpen: "Es ist derzeit kein Texteditor geöffnet!",
     },
     error: "FEHLER:{0:trim,surround,leading_space}",
     extension: {
@@ -274,6 +280,10 @@ export const translation: Translation = {
         },
     },
     pull: {
+        allOpenFiles: {
+            description: "Lädt die Dateien aller geöffneten Editoren",
+            label: "Alle geöffneten Dateien ...",
+        },
         askForCancelOperation: "Sind Sie sicher, dass Sie das Laden der Datei(en) von{0:trim,surround,leading_space} abbrechen wollen?",
         buttons: {
             cancel: {
@@ -291,6 +301,7 @@ export const translation: Translation = {
             invalidWorkspace: "Die Datei{0:trim,surround,leading_space} kann nicht in den Arbeitsbereich{1:trim,surround,leading_space} geladen werden!",
             invalidWorkspaceForPackage: "Das Paket{0:trim,surround,leading_space} kann nicht in den Arbeitsbereich{1:trim,surround,leading_space} geladen werden!",
             operationFailed: "Konnte das Laden nicht durchführen (s. Debugkonsole 'STRG + SHIFT + Y')!",
+            operationForSourceFailed: "Das Laden der Datei(en) aus der Quelle{0:trim,surround,leading_space} schlug fehl:{1:trim,surround,leading_space}",
         },
         finishedOperation: "Das Laden der Dateien von{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",
         finishedOperationWithErrors: "[FEHLER] Konnte Dateien nicht von{0:trim,surround,leading_space} laden:{1:trim,surround,leading_space}",
@@ -559,6 +570,8 @@ export const translation: Translation = {
             }
         },
         removing: "Schliesse Arbeitsbereich{0:trim,surround,leading_space} ...",
+        selectSource: "Wählen Sie eine Quelle für den Arbeitsbereich{0:trim,surround,leading_space} ...",
+        selectTarget: "Wählen Sie ein Ziel für den Arbeitsbereich{0:trim,surround,leading_space} ...",
         selectWorkspace: "Wählen Sie einen Arbeitsbereich ...",
     },
     yes: 'Ja',

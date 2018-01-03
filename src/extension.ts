@@ -21,6 +21,7 @@ const CompareVersion = require('compare-versions');
 import * as deploy_commands from './commands';
 import * as deploy_compare from './compare';
 import * as deploy_contracts from './contracts';
+import * as deploy_deploy from './deploy';
 import * as deploy_events from './events';
 import * as deploy_gui from './gui';
 import * as deploy_helpers from './helpers';
@@ -28,6 +29,7 @@ import * as deploy_html from './html';
 import * as deploy_log from './log';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
+import * as deploy_pull from './pull';
 import * as deploy_switch from './switch';
 import * as deploy_targets from './targets';
 import * as deploy_tools from './tools';
@@ -769,6 +771,13 @@ async function activateExtension(context: vscode.ExtensionContext) {
                         },
                         {
                             action: async () => {
+                                await vscode.commands.executeCommand('extension.deploy.reloaded.deployAllOpenFiles');
+                            },
+                            label: '$(rocket)  ' + i18.t('deploy.allOpenFiles.label'),
+                            description: i18.t('deploy.allOpenFiles.description'),
+                        },
+                        {
+                            action: async () => {
                                 await vscode.commands.executeCommand('extension.deploy.reloaded.deployGitCommit');
                             },
                             label: '$(git-commit)  ' + i18.t('deploy.gitCommit.label'),
@@ -840,6 +849,23 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 }
             }),
 
+            // deploy all open files
+            vscode.commands.registerCommand('extension.deploy.reloaded.deployAllOpenFiles', async () => {
+                try {
+                    await deploy_deploy.deployAllOpenFiles(
+                        WORKSPACES
+                    );
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'extension.deploy.reloaded.deployAllOpenFiles');
+                    
+                    deploy_helpers.showErrorMessage(
+                        i18.t('deploy.errors.operationFailed')
+                    );
+                }
+            }),
+
             // deploy git commit
             vscode.commands.registerCommand('extension.deploy.reloaded.deployGitCommit', async () => {
                 try {
@@ -890,6 +916,14 @@ async function activateExtension(context: vscode.ExtensionContext) {
                             },
                             label: '$(cloud-download)  ' + i18.t('pull.package.label'),
                             description: i18.t('pull.package.description'),
+                        },
+
+                        {
+                            action: async () => {
+                                await vscode.commands.executeCommand('extension.deploy.reloaded.pullAllOpenFiles');
+                            },
+                            label: '$(cloud-download)  ' + i18.t('pull.allOpenFiles.label'),
+                            description: i18.t('pull.allOpenFiles.description'),
                         }
                     ];
 
@@ -950,6 +984,23 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 catch (e) {
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.pullFile');
+
+                    deploy_helpers.showErrorMessage(
+                        i18.t('pull.errors.operationFailed')
+                    );
+                }
+            }),
+
+            // pull all open files
+            vscode.commands.registerCommand('extension.deploy.reloaded.pullAllOpenFiles', async () => {
+                try {
+                    await deploy_pull.pullAllOpenFiles(
+                        WORKSPACES
+                    );
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'extension.deploy.reloaded.pullAllOpenFiles');
 
                     deploy_helpers.showErrorMessage(
                         i18.t('pull.errors.operationFailed')
