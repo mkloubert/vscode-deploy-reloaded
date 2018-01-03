@@ -66,6 +66,10 @@ export interface SFTPTarget extends deploy_targets.Target {
      */
     readonly host?: string;
     /**
+     * Defines the modes for files, after they have been uploaded.
+     */
+    readonly modes?: deploy_clients_sftp.SFTPFileModeSettings;
+    /**
      * The password.
      */
     readonly password?: string;
@@ -133,6 +137,7 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
                 hashAlgorithm: this.replaceWithValues(target, target.hashAlgorithm),
                 hashes: target.hashes,
                 host: this.replaceWithValues(target, target.host),
+                modes: target.modes,
                 password: target.password,
                 port: parseInt(
                     deploy_helpers.toStringSafe(

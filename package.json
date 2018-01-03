@@ -31379,6 +31379,25 @@
              }
             }
            },
+           "modes": {
+            "description": "Defines (umask) modes for files on the server, after they have been uploaded.",
+            "oneOf": [
+             {
+              "description": "The (octal) value for all files.",
+              "type": "integer"
+             },
+             {
+              "description": "File patterns with octal values.",
+              "type": "object",
+              "patternProperties": {
+               "(.*)": {
+                "description": "The (octal) value for all files.",
+                "type": "integer"
+               }
+              }
+             }
+            ]
+           },
            "name": {
             "description": "The (display) name of that target.",
             "type": "string"

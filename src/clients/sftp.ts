@@ -55,6 +55,10 @@ export interface SFTPConnectionOptions {
      */
     readonly host?: string;
     /**
+     * Defines the modes for files, after they have been uploaded.
+     */
+    readonly modes?: SFTPFileModeSettings;
+    /**
      * The password.
      */
     readonly password?: string;
@@ -83,6 +87,21 @@ export interface SFTPConnectionOptions {
      */
     readonly user?: string;
 }
+
+/**
+ * A value for a file mode.
+ */
+export type SFTPFileMode = number | string;
+
+/**
+ * Patterns with file modes.
+ */
+export type SFTPFileModePatterns = { [ pattern: string ]: SFTPFileMode };
+
+/**
+ * A possible file mode setting value.
+ */
+export type SFTPFileModeSettings = SFTPFileMode | SFTPFileModePatterns;
 
 
 /**
@@ -267,33 +286,79 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
     }
 
     /** @inheritdoc */
-    public async uploadFile(path: string, data: Buffer): Promise<void> {
-        const REMOTE_DIR = toSFTPPath(
-            Path.dirname(path)
-        );
-        const FILE = Path.basename(path);
+    public uploadFile(path: string, data: Buffer): Promise<void> {
+        return new Promise<void>(async (resolve, reject) => {
+            const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
 
-        path = toSFTPPath(path);
-
-        // check if remote directory exists
-        if (true !== this._checkedRemoteDirs[REMOTE_DIR]) {
             try {
-                // check if exist
-                await this.client.list(REMOTE_DIR);
+                const REMOTE_DIR = toSFTPPath(
+                    Path.dirname(path)
+                );
+                const FILE = Path.basename(path);
+
+                path = toSFTPPath(path);
+
+                let fileModes: SFTPFileModePatterns | false = false;
+                if (!deploy_helpers.isNullOrUndefined(this.options.modes)) {
+                    let modes = this.options.modes;
+                    if (!deploy_helpers.isObject<SFTPFileModePatterns>(modes)) {
+                        modes = {
+                            '**': modes
+                        };
+                    }
+
+                    fileModes = modes;
+                }
+
+                // check if remote directory exists
+                if (true !== this._checkedRemoteDirs[REMOTE_DIR]) {
+                    try {
+                        // check if exist
+                        await this.client.list(REMOTE_DIR);
+                    }
+                    catch (e) {
+                        // no, try to create
+                        await this.client.mkdir(REMOTE_DIR, true);
+                    }
+
+                    // mark as checked
+                    this._checkedRemoteDirs[REMOTE_DIR] = true;
+                }
+
+                let modeToSet: number | false = false;
+                if (false !== fileModes) {
+                    for (const P in fileModes) {
+                        let pattern = P;
+                        if (!pattern.startsWith('/')) {
+                            pattern = '/' + pattern;
+                        }
+
+                        if (deploy_helpers.doesMatch(path, pattern)) {
+                            modeToSet = parseInt(deploy_helpers.toStringSafe(fileModes[P]).trim(),
+                                                 8);
+                            break;
+                        }
+                    }
+                }
+
+                await this.client.put(
+                    data,
+                    path,
+                );
+
+                if (false !== modeToSet) {
+                    this.client['sftp'].chmod(path, modeToSet, (err) => {
+                        COMPLETED(err);
+                    });
+                }
+                else {
+                    COMPLETED(null);
+                }
             }
             catch (e) {
-                // no, try to create
-                await this.client.mkdir(REMOTE_DIR, true);
+                COMPLETED(e);
             }
-
-            // mark as checked
-            this._checkedRemoteDirs[REMOTE_DIR] = true;
-        }
-
-        await this.client.put(
-            data,
-            path,
-        );
+        });
     }
 }
 

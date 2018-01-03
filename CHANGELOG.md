@@ -5,7 +5,8 @@
 
 ## 0.15.0 (January 3rd, 2018; check for requirements)
 
-* added `checkForRequirements`, which can execute one or more conditions by (JavaScript) code to check for (project) requirements
+* added `checkForRequirements`, which can [execute one or more conditions](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/check_for_requirements) by (JavaScript) code to check for (project) requirements
+* can define [umask values](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_sftp#modes-for-specific-files) for files uploaded via [sftp](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_sftp#modes-for-specific-files) now
 
 ## 0.14.2 (January 3rd, 2018; deploy git commits)
 
