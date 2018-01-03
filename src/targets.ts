@@ -647,6 +647,59 @@ export function isVisibleForPackage(target: Target, pkg: deploy_packages.Package
 }
 
 /**
+ * Maps file objects for a specific target.
+ * 
+ * @param {Target} target The underlying target.
+ * @param {TFile|TFile[]} files The file targets to (re)map.
+ * 
+ * @return {Promise<TFile[]>} The promise with the new, mapped objects.
+ */
+export async function mapFilesForTarget<TFile extends deploy_contracts.WithNameAndPath = deploy_contracts.WithNameAndPath>(
+    target: Target,
+    files: TFile | TFile[]
+) {
+    const WORKSPACE = target.__workspace;
+
+    const ALL_DIRS = await WORKSPACE.getAllDirectories();
+
+    files = deploy_helpers.asArray(files);
+
+    const MAPPED_FILES: TFile[] = [];
+    for (const F of files) {
+        const CLONED_FILE = deploy_helpers.cloneObjectFlat(F, false);
+
+        const FULL_PATH = Path.resolve(
+            Path.join(
+                WORKSPACE.rootPath,
+                deploy_helpers.normalizePath(
+                    F.path + '/' + F.name
+                )
+            )
+        );
+        if (!WORKSPACE.isPathOf(FULL_PATH)) {
+            continue;
+        }
+
+        const NEW_MAPPING = await WORKSPACE.getNameAndPathForFileDeployment(
+            target, FULL_PATH,
+            ALL_DIRS
+        );
+        if (false === NEW_MAPPING) {
+            continue;
+        }
+
+        (<any>CLONED_FILE).name = NEW_MAPPING.name;
+        (<any>CLONED_FILE).path = NEW_MAPPING.path;
+
+        MAPPED_FILES.push(
+            CLONED_FILE
+        );
+    }
+
+    return MAPPED_FILES;
+}
+
+/**
  * Normalizes the type of a target.
  * 
  * @param {Target} target The target.

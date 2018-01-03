@@ -515,7 +515,7 @@ export abstract class FileToUploadBase implements FileToUpload {
     }
 
     /** @inheritdoc */
-    public async read() {
+    public readonly read = async function() {
         const ME = this;
 
         let data = await ME.onRead();
@@ -576,7 +576,7 @@ export abstract class FileToUploadBase implements FileToUpload {
         }
 
         return data;
-    }
+    };
 
     /**
      * The logic for the 'read()' method.
@@ -1074,7 +1074,11 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
             async (target, plugin) => {
                 const CTX: DeleteContext = {
                     cancellationToken: undefined,
-                    files: context.files,
+                    files: await ME.mapFilesForTarget(
+                        context.target,
+                        target,
+                        context.files
+                    ),
                     isCancelling: undefined,
                     target: target,
                 };
@@ -1118,7 +1122,11 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
             async (target, plugin) => {
                 const CTX: DownloadContext = {
                     cancellationToken: undefined,
-                    files: context.files,
+                    files: await ME.mapFilesForTarget(
+                        context.target,
+                        target,
+                        context.files
+                    ),
                     isCancelling: undefined,
                     target: target,
                 };
@@ -1370,6 +1378,24 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
         return result;
     }
 
+    /**
+     * Maps file objects for a specific target.
+     * 
+     * @param {TTarget} baseTarget The base target, using by that plugin.
+     * @param {Target} target The underlying target.
+     * @param {TFile|TFile[]} files The file targets to (re)map.
+     * 
+     * @return {Promise<TFile[]>} The promise with the new, mapped objects.
+     */
+    protected async mapFilesForTarget<TFile extends deploy_contracts.WithNameAndPath = deploy_contracts.WithNameAndPath>(
+        baseTarget: TTarget,
+        target: deploy_targets.Target,
+        files: TFile | TFile[]
+    )
+    {
+        return await deploy_targets.mapFilesForTarget(target, files);
+    }
+
     /** @inheritdoc */
     public async uploadFiles(context: UploadContext<TTarget>) {
         const ME = this;
@@ -1384,7 +1410,11 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
             async (target, plugin) => {
                 const CTX: UploadContext = {
                     cancellationToken: undefined,
-                    files: context.files,
+                    files: await ME.mapFilesForTarget(
+                        context.target,
+                        target,
+                        context.files
+                    ),
                     isCancelling: undefined,
                     target: target,
                 };

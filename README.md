@@ -47,6 +47,7 @@ The extension supports the following destinations:
      * [Targets](#targets-)
    * [How to execute](#how-to-execute-)
 5. [Support and contribute](#support-and-contribute-)
+   * [Contributors](#contributors-)
 
 ## Demos [[&uarr;](#table-of-contents)]
 
@@ -333,3 +334,7 @@ To work with the code:
 If you like to create a translation, for example, you can take a look at [this directory](https://github.com/mkloubert/vscode-deploy-reloaded/tree/master/src/lang).
 
 The API documentation can be found [here](https://mkloubert.github.io/vscode-deploy-reloaded/).
+
+### Contributors [[&uarr;](#support-and-contribute-)]
+
+* [Robert Ehlers](https://github.com/rehlers)
