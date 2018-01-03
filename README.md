@@ -116,6 +116,8 @@ ext install vscode-deploy-reloaded
 
 Or search for things like `vscode-deploy-reloaded` in your editor.
 
+![Demo Install extension](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/screenshot1.png)
+
 ## How to use [[&uarr;](#table-of-contents)]
 
 Detailed information can be found at the [wiki](https://github.com/mkloubert/vscode-deploy-reloaded/wiki).
