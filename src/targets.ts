@@ -42,6 +42,24 @@ import * as vscode from 'vscode';
 
 
 /**
+ * Options for executing 'prepare' target operations.
+ */
+export interface ExecutePrepareTargetOperationOptions {
+    /**
+     * The underlying files.
+     */
+    readonly files: string[];
+    /**
+     * The deploy operation.
+     */
+    readonly deployOperation: deploy_contracts.DeployOperation;
+    /**
+     * The underlying target.
+     */
+    readonly target: Target;
+}
+
+/**
  * Options for executing target operations.
  */
 export interface ExecuteTargetOperationOptions {
@@ -68,10 +86,33 @@ export interface ExecuteTargetOperationOptions {
      */
     readonly operation: TargetOperationEvent;
     /**
+     * Deploy operation value for 'prepare' operations.
+     */
+    readonly prepareDeployOperation?: deploy_contracts.DeployOperation;
+    /**
+     * List of operations to execute when prepare.
+     */
+    readonly prepareOperations?: PrepareTargetOperationValue | PrepareTargetOperationValue[];
+    /**
      * The underlying target.
      */
     readonly target: Target;
 }
+
+/**
+ * A (prepare) target operation.
+ */
+export interface PrepareTargetOperation extends TargetOperation {
+    /**
+     * A list of one or more deploy events the entry is executed when.
+     */
+    readonly onlyWhen?: string | string[];
+}
+
+/**
+ * A possible (prepare) target operation (setting) value.
+ */
+export type PrepareTargetOperationValue = PrepareTargetOperation | string;
 
 /**
  * A target.
@@ -122,6 +163,11 @@ export interface Target extends deploy_values.Applyable,
      * Defines folder mappings.
      */
     readonly mappings?: deploy_mappings.FolderMappings;
+    /**
+     * Operations which are executed even before the operations of
+     * 'beforeDeploy' and even if no file is going to be handled.
+     */
+    readonly prepare?: PrepareTargetOperationValue | PrepareTargetOperationValue[];
     /**
      * One or more target operations that should be invoked
      * AFTER a pullment from that target has been done.
@@ -181,6 +227,10 @@ export enum TargetOperationEvent {
      * After deleted
      */
     AfterDeleted = 5,
+    /**
+     * Prepare
+     */
+    Prepare = 6,
 }
 
 /**
@@ -276,47 +326,80 @@ export const REGEX_ZIP_FILENAME = /^(vscode\-ws)(.*)(_)([0-9]{8})(\-)([0-9]{6})(
 
 
 /**
- * Returns the mapped file path by a target.
+ * Executes 'prepare' operations for a target.
  * 
- * @param {Target} target The target.
- * @param {string} dir The path / directory of the file.
- * @param {string} fileName The name of the underlying file.
- * @param {Minimatch.IOptions} [opts] Custom options.
+ * @param {ExecutePrepareTargetOperationOptions} opts The options.
  * 
- * @return {string} The mapped (directory) path.
+ * @return {Promise<boolean>} The promise with the value, that indicates if whole operation has been cancelled (false) or not (true).
  */
-export function getMappedTargetFilePath(target: Target,
-                                        dir: string, fileName: string,
-                                        opts?: Minimatch.IOptions) {
-    const REMOVE_SURROUNDING_SEPS = (str: string) => {
-        str = deploy_helpers.replaceAllStrings(str, Path.sep, '/').trim();
-        while (str.startsWith('/')) {
-            str = str.substr(1).trim();
-        }
-        while (str.endsWith('/')) {
-            str = str.substr(0, str.length - 1).trim();
+export async function executePrepareTargetOperations(opts: ExecutePrepareTargetOperationOptions) {
+    const TARGET = opts.target;
+    const WORKSPACE = TARGET.__workspace;
+
+    const PREPARE_OPERATIONS = deploy_helpers.asArray(TARGET.prepare).map(p => {
+        return getTargetOperationSafe<PrepareTargetOperation>(p);
+    }).filter(p => {
+        const ONLY_WHEN = deploy_helpers.asArray(p.onlyWhen).map(ow => {
+            return deploy_helpers.normalizeString(ow);
+        }).filter(ow => '' !== ow);
+
+        if (ONLY_WHEN.length < 1) {
+            return opts.deployOperation === deploy_contracts.DeployOperation.Deploy;
         }
 
-        return str;
+        switch (opts.deployOperation) {
+            case deploy_contracts.DeployOperation.Delete:
+                return ONLY_WHEN.indexOf( 'delete' ) > -1;
+
+            case deploy_contracts.DeployOperation.Deploy:
+                return ONLY_WHEN.indexOf( 'deploy' ) > -1;
+
+            case deploy_contracts.DeployOperation.Pull:
+                return ONLY_WHEN.indexOf( 'pull' ) > -1;
+        }
+
+        return false;
+    });
+
+    let operationIndex = -1;
+
+    const GET_OPERATION_NAME = (operation: PrepareTargetOperation) => {
+        let operationName = deploy_helpers.toStringSafe(operation.name).trim();
+        if ('' === operationName) {
+            operationName = deploy_helpers.normalizeString(operation.type);
+            if ('' === operationName) {
+                operationName = DEFAULT_OPERATION_TYPE;
+            }
+
+            operationName += ' #' + (operationIndex + 1);
+        }
+
+        return operationName;
     };
 
-    dir = '/' + REMOVE_SURROUNDING_SEPS(dir);
-    fileName = REMOVE_SURROUNDING_SEPS(fileName);
+    return await executeTargetOperations({
+        files: opts.files,
+        onBeforeExecute: async (operation: PrepareTargetOperation) => {
+            ++operationIndex;
 
-    let mappings: deploy_mappings.FolderMappings;
-    if (target) {
-        mappings = target.mappings;
-    }
-
-    let mappedPath = deploy_helpers.getMappedPath(mappings,
-                                                  '/' + REMOVE_SURROUNDING_SEPS(dir + '/' + fileName));
-    if (false === mappedPath) {
-        mappedPath = dir;
-    }
-
-    return REMOVE_SURROUNDING_SEPS(
-        REMOVE_SURROUNDING_SEPS(mappedPath + '/' + fileName)
-    );
+            WORKSPACE.context.outputChannel.append(
+                WORKSPACE.t('targets.operations.runningPrepare',
+                            GET_OPERATION_NAME(operation))
+            );
+        },
+        onExecutionCompleted: async (operation: PrepareTargetOperation, err, doesContinue) => {
+            if (err) {
+                WORKSPACE.context.outputChannel.appendLine(`[${WORKSPACE.t('error', err)}]`);
+            }
+            else {
+                WORKSPACE.context.outputChannel.appendLine(`[${WORKSPACE.t('ok')}]`);
+            }
+        },
+        operation: TargetOperationEvent.Prepare,
+        prepareDeployOperation: opts.deployOperation,
+        prepareOperations: PREPARE_OPERATIONS,
+        target: TARGET,
+    });
 }
 
 /**
@@ -324,7 +407,7 @@ export function getMappedTargetFilePath(target: Target,
  * 
  * @param {ExecuteTargetOperationOptions} opts The options.
  * 
- * @return {boolean} Operation has been cancelled (false) or not (true).
+ * @return {Promise<boolean>} The promise with the value, that indicates if whole operation has been cancelled (false) or not (true).
  */
 export async function executeTargetOperations(opts: ExecuteTargetOperationOptions) {
     const TARGET = opts.target;
@@ -363,6 +446,11 @@ export async function executeTargetOperations(opts: ExecuteTargetOperationOption
             operationsFromTarget = TARGET.beforePull;
             deployOperation = deploy_contracts.DeployOperation.Pull;
             break;
+
+        case TargetOperationEvent.Prepare:
+            operationsFromTarget = opts.prepareOperations;
+            deployOperation = opts.prepareDeployOperation;
+            break;
     }
 
     let prevOperation: TargetOperationExecutionContext;
@@ -371,22 +459,7 @@ export async function executeTargetOperations(opts: ExecuteTargetOperationOption
             return false;
         }
 
-        let operationToExecute: TargetOperation;
-
-        if (deploy_helpers.isObject<TargetOperation>(OPERATION_VAL)) {
-            operationToExecute = OPERATION_VAL;
-        }
-        else {
-            const APP = deploy_helpers.toStringSafe(OPERATION_VAL);
-            if (!deploy_helpers.isEmptyString(APP)) {
-                const APP_OPERATION: deploy_targets_operations_open.OpenTargetOperation = {
-                    target: APP,
-                    type: ''
-                };
-
-                operationToExecute = APP_OPERATION;
-            }
-        }
+        let operationToExecute = getTargetOperationSafe(OPERATION_VAL);
 
         operationToExecute = Enumerable.from(
             WORKSPACE.filterConditionalItems(operationToExecute, true)
@@ -492,6 +565,50 @@ export async function executeTargetOperations(opts: ExecuteTargetOperationOption
 }
 
 /**
+ * Returns the mapped file path by a target.
+ * 
+ * @param {Target} target The target.
+ * @param {string} dir The path / directory of the file.
+ * @param {string} fileName The name of the underlying file.
+ * @param {Minimatch.IOptions} [opts] Custom options.
+ * 
+ * @return {string} The mapped (directory) path.
+ */
+export function getMappedTargetFilePath(target: Target,
+                                        dir: string, fileName: string,
+                                        opts?: Minimatch.IOptions) {
+    const REMOVE_SURROUNDING_SEPS = (str: string) => {
+        str = deploy_helpers.replaceAllStrings(str, Path.sep, '/').trim();
+        while (str.startsWith('/')) {
+            str = str.substr(1).trim();
+        }
+        while (str.endsWith('/')) {
+            str = str.substr(0, str.length - 1).trim();
+        }
+
+        return str;
+    };
+
+    dir = '/' + REMOVE_SURROUNDING_SEPS(dir);
+    fileName = REMOVE_SURROUNDING_SEPS(fileName);
+
+    let mappings: deploy_mappings.FolderMappings;
+    if (target) {
+        mappings = target.mappings;
+    }
+
+    let mappedPath = deploy_helpers.getMappedPath(mappings,
+                                                  '/' + REMOVE_SURROUNDING_SEPS(dir + '/' + fileName));
+    if (false === mappedPath) {
+        mappedPath = dir;
+    }
+
+    return REMOVE_SURROUNDING_SEPS(
+        REMOVE_SURROUNDING_SEPS(mappedPath + '/' + fileName)
+    );
+}
+
+/**
  * Returns the name for a target.
  * 
  * @param {Target} target The target.
@@ -511,6 +628,24 @@ export function getTargetName(target: Target): string {
     }
 
     return name;
+}
+
+function getTargetOperationSafe<TOperation extends TargetOperation = TargetOperation>(
+    val: TargetOperation | string
+): TOperation
+{
+    if (!deploy_helpers.isNullOrUndefined(val)) {
+        if (!deploy_helpers.isObject<TOperation>(val)) {
+            const APP_OPERATION: deploy_targets_operations_open.OpenTargetOperation = {
+                target: deploy_helpers.toStringSafe(val),
+                type: ''
+            };
+
+            val = <any>APP_OPERATION;
+        }
+    }
+
+    return <any>val;
 }
 
 /**

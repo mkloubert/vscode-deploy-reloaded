@@ -117,6 +117,20 @@ export async function deleteFilesIn(files: string[],
     }
 
     files = files.filter(f => !ME.isFileIgnored(f));
+
+    // preparements
+    const PREPARE_CANCELLED = !deploy_helpers.toBooleanSafe(
+        await deploy_targets.executePrepareTargetOperations({
+            files: files,
+            deployOperation: deploy_contracts.DeployOperation.Delete,
+            target: target,
+        }),
+        true
+    );
+    if (PREPARE_CANCELLED) {
+        return;
+    }
+
     if (files.length < 1) {
         return;
     }

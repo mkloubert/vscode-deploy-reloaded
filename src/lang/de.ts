@@ -390,6 +390,7 @@ export const translation: Translation = {
             runningBeforeDelete: "Führe Operation{0:trim,surround,leading_space} vor dem Löschen aus... ",
             runningBeforeDeploy: "Führe Operation{0:trim,surround,leading_space} vor dem Bereitstellen aus... ",
             runningBeforePull: "Führe Operation{0:trim,surround,leading_space} vor dem Laden aus... ",
+            runningPrepare: "Führe Operation{0:trim,surround,leading_space} zur Vorbereitung aus... ",
             script: {
                 noScriptFunction: "Das Skript{0:trim,surround,leading_space} enthält keine 'execute' Funktion!",
                 noScriptModule: "Das Skript{0:trim,surround,leading_space} enthält kein Modul!",

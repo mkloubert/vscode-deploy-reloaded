@@ -391,6 +391,7 @@ export const translation: Translation = {
             runningBeforeDelete: "Running 'before delete' operation{0:trim,surround,leading_space}... ",
             runningBeforeDeploy: "Running 'before deploy' operation{0:trim,surround,leading_space}... ",
             runningBeforePull: "Running 'before pull' operation{0:trim,surround,leading_space}... ",
+            runningPrepare: "Running 'prepare' operation{0:trim,surround,leading_space}... ",
             script: {
                 noScriptFunction: "Script{0:trim,surround,leading_space} does not contain an 'execute' function!",
                 noScriptModule: "Script{0:trim,surround,leading_space} does not contain a module!",

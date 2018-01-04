@@ -396,6 +396,7 @@ export interface Translation {
             runningBeforeDelete?: string;
             runningBeforeDeploy?: string;
             runningBeforePull?: string;
+            runningPrepare?: string;
             script?: {
                 noScriptFunction?: string;
                 noScriptModule?: string;
