@@ -221,6 +221,10 @@ export interface Translation {
     };
     plugins?: {
         __loaded?: string;
+
+        app?: {
+            invalidDirectory?: string;
+        };
         compiler?: {
             invalidDirectory?: string;
         };

@@ -678,6 +678,26 @@ export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_
         throw new Error(`'downloadFiles()' is NOT implemented!`);
     }
 
+    /**
+     * Returns an existing path for a target, based on the settings folder.
+     * 
+     * @param {deploy_targets.Target} target The underlying target.
+     * @param {string} path The path.
+     * 
+     * @return {string|boolean} The existing, full normalized path or (false) if path does not exist.
+     */
+    public async getExistingSettingPath(target: deploy_targets.Target,
+                                        path: string)
+        : Promise<false | string>
+    {
+        if (!target) {
+            return <any>target;
+        }
+
+        return await target.__workspace
+                           .getExistingSettingPath(path);
+    }
+
     /** @inheritdoc */
     public async initialize() {
     }

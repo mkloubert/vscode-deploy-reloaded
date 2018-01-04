@@ -213,6 +213,10 @@ export const translation: Translation = {
     },
     plugins: {
         __loaded: "{0:trim,ending_space}Plug-Ins wurden geladen:",
+
+        app: {
+            invalidDirectory: "{0:trim,surround,ending_space}ist ein ungültiges Verzeichnis!",
+        },
         compiler: {
             invalidDirectory: "{0:trim,surround,ending_space}ist ein ungültiges Verzeichnis!",
         },

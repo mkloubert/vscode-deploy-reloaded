@@ -214,6 +214,10 @@ export const translation: Translation = {
     },
     plugins: {
         __loaded: "Loaded{0:trim,leading_space} plugins:",
+
+        app: {
+            invalidDirectory: "{0:trim,surround,ending_space}is an invalid directory!",
+        },
         compiler: {
             invalidDirectory: "{0:trim,surround,ending_space}is an invalid directory!",
         },

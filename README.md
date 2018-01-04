@@ -14,6 +14,7 @@ The extension supports the following destinations:
 | Type |
 | ---- |
 | [Amazon AWS S3 buckets](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_s3bucket) |
+| [Apps or shell/batch scripts](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_app) |
 | [Azure blob storages](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_azureblob) |
 | [Compiler](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_compiler) |
 | [DropBox](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_dropbox) |
