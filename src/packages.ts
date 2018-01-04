@@ -40,6 +40,7 @@ export interface Package extends deploy_values.Applyable,
                                  deploy_contracts.PlatformItem,
                                  deploy_contracts.WithOptionalName,
                                  deploy_targets.TargetProvider,
+                                 WithFastFileCheckSettings, 
                                  deploy_workspaces.WorkspaceItemFromSettings {
     /**
      * [INTERNAL] DO NOT DEFINE OR OVERWRITE THIS PROPERTY BY YOUR OWN!
@@ -93,6 +94,16 @@ export interface PackageDeployFileFilter extends deploy_contracts.FileFilter,
 export type PackageDeploySettings = boolean | string | string[] | PackageDeployFileFilter;
 
 /**
+ * A function that resolves the package flag, which indicates, if a "fast file check"
+ * should be made or not.
+ * 
+ * @param {Package} pkg The underlying package.
+ * 
+ * @return {boolean|PromiseLike<boolean>} The result with the flag.
+ */
+export type PackageFastFileCheckFlagResolver = (pkg: Package) => boolean | PromiseLike<boolean>;
+
+/**
  * A function that resolves deploy settings for a package.
  * 
  * @param {Package} pkg The underlying package.
@@ -101,16 +112,8 @@ export type PackageDeploySettings = boolean | string | string[] | PackageDeployF
  */
 export type PackageDeploySettingsResolver = (pkg: Package) => PackageDeploySettings;
 
-/**
- * A package file list resolver.
- * 
- * @param {deploy_contracts.FileFilter} The filter.
- * @param {string} The scope file.
- * 
- * @return {PackageFileListResolverResult|PromiseLike<PackageFileListResolverResult>} The result.
- */
-export type PackageFileListResolver = (filter: deploy_contracts.FileFilter, file: string) => PackageFileListResolverResult |
-                                                                                             PromiseLike<PackageFileListResolverResult>;
+type PackageFileListResolver = (filter: deploy_contracts.FileFilter, file: string) => PackageFileListResolverResult |
+                                                                                      PromiseLike<PackageFileListResolverResult>;
 
 /**
  * Possible results of a package file list resolver.
@@ -123,6 +126,28 @@ export type PackageFileListResolverResult = string | string[];
 export interface SyncWhenOpenSetting extends deploy_contracts.FileFilter {
 }
 
+/**
+ * Object that contains settings for "fast file checks".
+ */
+export interface WithFastFileCheckSettings {
+    /**
+     * Indicates if 'fast file check' should be used for 'deploy on change' in that package. 
+     */
+    readonly fastCheckOnChange?: boolean;
+    /**
+     * Indicates if 'fast file check' should be used for 'deploy on save' in that package. 
+     */
+    readonly fastCheckOnSave?: boolean;
+    /**
+     * Indicates if 'fast file check' should be used for 'sync when open' in that package. 
+     */
+    readonly fastCheckOnSync?: boolean;
+    /**
+     * Default value for other, not-set "fast file check" settings. 
+     */
+    readonly fastFileCheck?: boolean;
+}
+
 
 const KEY_PACKAGE_USAGE = 'vscdrLastExecutedPackageActions';
 
@@ -131,10 +156,12 @@ const KEY_PACKAGE_USAGE = 'vscdrLastExecutedPackageActions';
  * 
  * @param {string} file The file to check. 
  * @param {PackageDeploySettingsResolver} settingsResolver The settings resolver.
+ * @param {PackageFastFileCheckFlagResolver} fastFileCheckFlagResolver A custom "fast file check" resolver.
  * @param {string} errorMsgTemplate The template for an error message.
  */
 export async function autoDeployFile(file: string,
                                      settingsResolver: PackageDeploySettingsResolver,
+                                     fastFileCheckFlagResolver: PackageFastFileCheckFlagResolver,
                                      errorMsgTemplate: string) {
     const ME: deploy_workspaces.Workspace = this;
 
@@ -142,7 +169,8 @@ export async function autoDeployFile(file: string,
         const TARGETS = await deploy_helpers.applyFuncFor(
             findTargetsForFileOfPackage, ME
         )(file,
-          settingsResolver);
+          settingsResolver,
+          fastFileCheckFlagResolver);
         if (false === TARGETS) {
             return;
         }
@@ -172,15 +200,16 @@ export async function autoDeployFile(file: string,
  * 
  * @param {string} file The path to the file.
  * @param {PackageDeploySettingsResolver} settingsResolver The resolver for the settings.
- * @param {PackageFileListResolver} [fileListResolver] A custom file list resolver.
+ * @param {PackageFastFileCheckFlagResolver} fastFileCheckFlagResolver A custom "fast file check" resolver.
  * 
  * @return {Promise<deploy_targets.Target[]>|false} The List of targets or (false) if at least one target name could not be resolved.
  */
 export async function findTargetsForFileOfPackage(
     file: string,
     settingsResolver: PackageDeploySettingsResolver,
-    fileListResolver?: PackageFileListResolver,
-): Promise<deploy_targets.Target[] | false> {
+    fastFileCheckFlagResolver: PackageFastFileCheckFlagResolver,
+): Promise<deploy_targets.Target[] | false>
+{
     const ME: deploy_workspaces.Workspace = this;
     
     file = deploy_helpers.toStringSafe(file);
@@ -246,11 +275,30 @@ export async function findTargetsForFileOfPackage(
             return false;
         }
 
-        let flr = fileListResolver;
-        if (!flr) {
-            // use default
+        const FAST_FILE_CHECK = deploy_helpers.toBooleanSafe(
+            await Promise.resolve(
+                fastFileCheckFlagResolver(pkg)
+            )
+        );
 
-            flr = async () => {
+        let fileListResolver: PackageFileListResolver;
+        if (FAST_FILE_CHECK) {
+            fileListResolver = () => {
+                const FILE_LIST: string[] = [];
+                const REL_PATH = ME.toRelativePath(file);
+                if (false !== REL_PATH) {
+                    const DOES_MATCH = deploy_helpers.checkIfDoesMatchByFileFilter('/' + REL_PATH,
+                                                                                   deploy_helpers.toMinimatchFileFilter(filter));
+                    if (DOES_MATCH) {
+                        FILE_LIST.push(file);
+                    }
+                }
+
+                return FILE_LIST;
+            };
+        }
+        else {
+            fileListResolver = async () => {
                 let fileList = await ME.findFilesByFilter(pkg);
                 if (filter !== pkg) {
                     fileList = fileList.filter(f => {
@@ -270,7 +318,7 @@ export async function findTargetsForFileOfPackage(
 
         const FILE_LIST = deploy_helpers.asArray(
             await Promise.resolve(
-                flr(filter, file)
+                fileListResolver(filter, file)
             )
         );
 
@@ -281,6 +329,53 @@ export async function findTargetsForFileOfPackage(
     }
 
     return TARGETS;
+}
+
+/**
+ * Detects a "fast file check" flag value.
+ * 
+ * @param {TObj} obj The child object.
+ * @param {Function} flagResolver The function that detects the flag value from the child object.
+ * @param {TParentObj} parentObj The parent object.
+ * @param {Function} parentFlagResolver The function that detects the flag value from the parent object.
+ * 
+ * @return {boolean} The detected flag.
+ */
+export function getFastFileCheckFlag<TObj extends WithFastFileCheckSettings = WithFastFileCheckSettings,
+                                     TParentObj extends WithFastFileCheckSettings = WithFastFileCheckSettings>
+(
+    obj: TObj, flagResolver: (o: TObj) => boolean,
+    parentObj: TParentObj, parentFlagResolver: (po: TParentObj) => boolean 
+)
+{
+    if (!obj) {
+        obj = <any>{};
+    }
+
+    if (!flagResolver) {
+        flagResolver = () => undefined;
+    }
+
+    if (!parentObj) {
+        parentObj = <any>{};
+    }
+
+    if (!parentFlagResolver) {
+        parentFlagResolver = () => undefined;
+    }
+
+    const FAST_FILE_CHECK = deploy_helpers.toBooleanSafe(
+        flagResolver(obj),
+        deploy_helpers.toBooleanSafe(obj.fastFileCheck),
+    );
+
+    const PARENT_FAST_FILE_CHECK = deploy_helpers.toBooleanSafe(
+        parentFlagResolver(parentObj),
+        deploy_helpers.toBooleanSafe(parentObj.fastFileCheck),
+    );
+
+    return deploy_helpers.toBooleanSafe(FAST_FILE_CHECK,
+                                        PARENT_FAST_FILE_CHECK);
 }
 
 /**

@@ -78,7 +78,13 @@ export async function syncDocumentWhenOpen(doc: vscode.TextDocument) {
     const TARGETS = await deploy_helpers.applyFuncFor(
         deploy_packages.findTargetsForFileOfPackage, ME
     )(FILE,
-      (pkg) => pkg.syncWhenOpen);
+      (pkg) => pkg.syncWhenOpen,
+      (pkg) => {
+          return deploy_packages.getFastFileCheckFlag(
+              pkg, (p) => p.fastCheckOnSync,
+              ME.config, (c) => c.fastCheckOnSync,
+          );
+      });
 
     if (false === TARGETS) {
         return;

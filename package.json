@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.16.2",
+ "version": "0.17.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -334,6 +334,26 @@
         ]
        }
       },
+      "fastCheckOnChange": {
+       "description": "Value that indicates, if fast file check should be made for 'deploy on change' in all packages by default.",
+       "type": "boolean",
+       "default": false
+      },
+      "fastCheckOnSave": {
+       "description": "Value that indicates, if fast file check should be made for 'deploy on save' in all packages by default.",
+       "type": "boolean",
+       "default": false
+      },
+      "fastCheckOnSync": {
+       "description": "Value that indicates, if fast file check should be made for 'sync when open' in all packages by default.",
+       "type": "boolean",
+       "default": false
+      },
+      "fastFileCheck": {
+       "description": "Value that indicates, to do a fast file check for any 'auto deploy' settings in all packages by default.",
+       "type": "boolean",
+       "default": false
+      },
       "globals": {
        "description": "Global data to define, which can be access by scripts, e.g."
       },
@@ -585,6 +605,26 @@
           "items": {
            "type": "string"
           }
+         },
+         "fastCheckOnChange": {
+          "description": "Value that indicates, if fast file check should be made for 'deploy on change' in that package.",
+          "type": "boolean",
+          "default": false
+         },
+         "fastCheckOnSave": {
+          "description": "Value that indicates, if fast file check should be made for 'deploy on save' in that package.",
+          "type": "boolean",
+          "default": false
+         },
+         "fastCheckOnSync": {
+          "description": "Value that indicates, if fast file check should be made for 'sync when open' in that package.",
+          "type": "boolean",
+          "default": false
+         },
+         "fastFileCheck": {
+          "description": "Value that indicates, to do a fast file check for any 'auto deploy' settings in that package by default.",
+          "type": "boolean",
+          "default": false
          },
          "files": {
           "description": "A list of one or more (glob) patterns of files that should be deployed. By default ALL files will be deployed.",

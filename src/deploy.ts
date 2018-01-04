@@ -544,14 +544,18 @@ export async function deployPackage(pkg: deploy_packages.Package) {
 export async function deployOnChange(file: string) {
     const ME: deploy_workspaces.Workspace = this;
 
-    const ARGS = [
-        file,
-        (pkg: deploy_packages.Package) => pkg.deployOnChange,
-        'deploy.onChange.failed',
-    ];
-
-    return await deploy_packages.autoDeployFile
-                                .apply(ME, ARGS);
+    return await deploy_helpers.applyFuncFor(
+        deploy_packages.autoDeployFile,
+        ME
+    )(file,
+     (pkg) => pkg.deployOnChange,
+     (pkg) => {
+         return deploy_packages.getFastFileCheckFlag(
+             pkg, (p) => p.fastCheckOnChange,
+             ME.config, (c) => c.fastCheckOnChange,
+         );
+     },
+     'deploy.onChange.failed');
 }
 
 /**
@@ -562,14 +566,18 @@ export async function deployOnChange(file: string) {
 export async function deployOnSave(file: string) {
     const ME: deploy_workspaces.Workspace = this;
 
-    const ARGS = [
-        file,
-        (pkg: deploy_packages.Package) => pkg.deployOnSave,
-        'deploy.onSave.failed',
-    ];
-
-    return await deploy_packages.autoDeployFile
-                                .apply(ME, ARGS);
+    return await deploy_helpers.applyFuncFor(
+        deploy_packages.autoDeployFile,
+        ME
+    )(file,
+     (pkg) => pkg.deployOnSave,
+     (pkg) => {
+        return deploy_packages.getFastFileCheckFlag(
+            pkg, (p) => p.fastCheckOnSave,
+            ME.config, (c) => c.fastCheckOnSave,
+        );
+     },
+     'deploy.onSave.failed');
 }
 
 /**

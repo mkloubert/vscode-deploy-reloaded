@@ -830,7 +830,13 @@ export async function showPackageFiles(context: vscode.ExtensionContext,
                     deploy_packages.findTargetsForFileOfPackage,
                     WORKSPACE
                 )(FULL_PATH,
-                  () => PACKAGE.deployOnSave);
+                  () => PACKAGE.deployOnSave,
+                  () => {
+                      return deploy_packages.getFastFileCheckFlag(
+                          PACKAGE, (p) => p.fastCheckOnSave,
+                          WORKSPACE.config, (c) => c.fastCheckOnSave,
+                      );
+                  });
                 
                 if (false !== deployOnSaveTargets) {
                     if (deployOnSaveTargets.length > 0) {
@@ -851,7 +857,13 @@ export async function showPackageFiles(context: vscode.ExtensionContext,
                     deploy_packages.findTargetsForFileOfPackage,
                     WORKSPACE
                 )(FULL_PATH,
-                  () => PACKAGE.deployOnChange);
+                  () => PACKAGE.deployOnChange,
+                  () => {
+                      return deploy_packages.getFastFileCheckFlag(
+                          PACKAGE, (p) => p.fastCheckOnChange,
+                          WORKSPACE.config, (c) => c.fastCheckOnChange,
+                      );
+                  });
                 
                 if (false !== deployOnChangeTargets) {
                     if (deployOnChangeTargets.length > 0) {
@@ -872,7 +884,13 @@ export async function showPackageFiles(context: vscode.ExtensionContext,
                     deploy_packages.findTargetsForFileOfPackage,
                     WORKSPACE
                 )(FULL_PATH,
-                  () => PACKAGE.syncWhenOpen);
+                  () => PACKAGE.syncWhenOpen,
+                  () => {
+                      return deploy_packages.getFastFileCheckFlag(
+                          PACKAGE, (p) => p.fastCheckOnSync,
+                          WORKSPACE.config, (c) => c.fastCheckOnSync,
+                      );
+                  });
                 
                 if (false !== syncWhenOpenTargets) {
                     if (syncWhenOpenTargets.length > 0) {
@@ -894,19 +912,7 @@ export async function showPackageFiles(context: vscode.ExtensionContext,
                     WORKSPACE
                 )(FULL_PATH,
                   () => PACKAGE.removeOnChange,
-                  (filter, file) => {
-                      const FILE_LIST: string[] = [];
-                      const REL_PATH = WORKSPACE.toRelativePath(file);
-                      if (false !== REL_PATH) {
-                          const DOES_MATCH = deploy_helpers.checkIfDoesMatchByFileFilter('/' + REL_PATH,
-                                                                                         deploy_helpers.toMinimatchFileFilter(filter));
-                          if (DOES_MATCH) {
-                              FILE_LIST.push(file);
-                          }
-                      }
-       
-                      return FILE_LIST;
-                  });
+                  () => true);
                 
                 if (false !== removeOnChangeTargets) {
                     if (removeOnChangeTargets.length > 0) {

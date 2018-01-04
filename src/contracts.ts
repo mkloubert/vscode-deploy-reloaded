@@ -138,7 +138,9 @@ export interface ConfigSource {
 /**
  * Deploy settings.
  */
-export interface Configuration extends deploy_values.WithValueItems {
+export interface Configuration extends deploy_packages.WithFastFileCheckSettings,
+                                       deploy_values.WithValueItems
+{
     /**
      * One or more requirements to check.
      */
