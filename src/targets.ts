@@ -54,6 +54,10 @@ export interface ExecutePrepareTargetOperationOptions {
      */
     readonly deployOperation: deploy_contracts.DeployOperation;
     /**
+     * Callback that indicates the client to reload the file list.
+     */
+    readonly onReloadFileList: (operation: PrepareTargetOperation) => void | PromiseLike<void>;
+    /**
      * The underlying target.
      */
     readonly target: Target;
@@ -107,6 +111,10 @@ export interface PrepareTargetOperation extends TargetOperation {
      * A list of one or more deploy events the entry is executed when.
      */
     readonly onlyWhen?: string | string[];
+    /**
+     * Reload list of files or not.
+     */
+    readonly reloadFileList?: boolean;
 }
 
 /**
@@ -393,6 +401,12 @@ export async function executePrepareTargetOperations(opts: ExecutePrepareTargetO
             }
             else {
                 WORKSPACE.context.outputChannel.appendLine(`[${WORKSPACE.t('ok')}]`);
+
+                if (deploy_helpers.toBooleanSafe(operation.reloadFileList, true)) {
+                    await Promise.resolve(
+                        opts.onReloadFileList(operation)
+                    );
+                }
             }
         },
         operation: TargetOperationEvent.Prepare,

@@ -16,6 +16,7 @@
  */
 
 import * as deploy_helpers from '../../helpers';
+import * as deploy_log from '../../log';
 import * as deploy_targets from '../../targets';
 import * as Path from 'path';
 import * as vscode from 'vscode';
@@ -34,16 +35,30 @@ export interface ExecTargetOperation extends deploy_targets.TargetOperation {
      */
     readonly cwd?: string;
     /**
+     * Largest amount of data in bytes allowed on stdout or stderr.
+     */
+    readonly maxBuffer?: number;
+    /**
      * Do not use placeholders in 'command' property.
      */
     readonly noPlaceHolders?: boolean;
+    /**
+     * Print the result from stdout to output channel or not.
+     */
+    readonly printOutput?: boolean;
+    /**
+     * Execution timeout.
+     */
+    readonly timeout?: number;
 }
 
 
 /** @inheritdoc */
 export async function execute(context: deploy_targets.TargetOperationExecutionContext<ExecTargetOperation>) {
     const OPERATION = context.operation;
+    const OPERATION_NAME = deploy_helpers.toStringSafe(OPERATION.name).trim();
     const TARGET = context.target;
+    const TARGET_NAME = deploy_targets.getTargetName(TARGET);
     const WORKSPACE = TARGET.__workspace;
 
     let command = deploy_helpers.toStringSafe(OPERATION.command);
@@ -62,7 +77,42 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
     }
     cwd = Path.resolve(cwd);
 
-    await deploy_helpers.exec(command, {
+    let maxBuffer = parseInt(
+        deploy_helpers.toStringSafe(OPERATION.maxBuffer).trim()
+    );
+    if (isNaN(maxBuffer)) {
+        maxBuffer = undefined;
+    }
+
+    let timeout = parseInt(
+        deploy_helpers.toStringSafe(OPERATION.timeout).trim()
+    );
+    if (isNaN(timeout)) {
+        timeout = undefined;
+    }
+
+    const RESULT = await deploy_helpers.exec(command, {
         cwd: cwd,
+        maxBuffer: maxBuffer,
+        timeout: timeout,
     });
+
+    if (deploy_helpers.toBooleanSafe(OPERATION.printOutput, true)) {
+        const OUTPUT = deploy_helpers.toStringSafe(RESULT.stdOut);
+
+        if ('' !== OUTPUT) {
+            WORKSPACE.context.outputChannel.appendLine('');
+            WORKSPACE.context.outputChannel.appendLine('');
+
+            WORKSPACE.context.outputChannel.appendLine(OUTPUT); 
+            
+            WORKSPACE.context.outputChannel.appendLine('');
+        }
+    }
+
+    const ERR = deploy_helpers.toStringSafe(RESULT.stdErr);
+    if ('' !== ERR) {
+        deploy_log.CONSOLE
+                  .err(ERR, `targets.operations.exec('${TARGET_NAME}' :: '${OPERATION_NAME}')`);
+    }
 }

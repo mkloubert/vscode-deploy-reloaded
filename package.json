@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.19.0",
+ "version": "0.20.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -985,6 +985,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -993,6 +998,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -1328,6 +1343,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -1336,6 +1356,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -1671,6 +1701,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -1679,6 +1714,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -2018,6 +2063,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -2026,6 +2076,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -2361,6 +2421,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -2369,6 +2434,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -2798,6 +2873,11 @@
                   ]
                  }
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "command"
@@ -2830,6 +2910,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -2854,6 +2939,21 @@
                    "pull"
                   ]
                  }
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -2953,6 +3053,11 @@
                  "type": "string",
                  "description": "The password for basic auth."
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "http"
@@ -3005,6 +3110,11 @@
                 },
                 "options": {
                  "description": "Additional options for the script execution."
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "script": {
                  "type": "string",
@@ -3089,6 +3199,11 @@
                   }
                  ]
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "sql"
@@ -3133,6 +3248,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "target": {
                  "description": "The thing to open.",
@@ -3188,6 +3308,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "time": {
                  "type": "integer",
@@ -3274,6 +3399,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -3282,6 +3412,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -3693,6 +3833,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -3701,6 +3846,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -4036,6 +4191,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -4044,6 +4204,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -4379,6 +4549,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -4387,6 +4562,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -4726,6 +4911,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -4734,6 +4924,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -5069,6 +5269,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -5077,6 +5282,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -5482,6 +5697,11 @@
                   ]
                  }
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "command"
@@ -5514,6 +5734,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -5538,6 +5763,21 @@
                    "pull"
                   ]
                  }
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -5637,6 +5877,11 @@
                  "type": "string",
                  "description": "The password for basic auth."
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "http"
@@ -5689,6 +5934,11 @@
                 },
                 "options": {
                  "description": "Additional options for the script execution."
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "script": {
                  "type": "string",
@@ -5773,6 +6023,11 @@
                   }
                  ]
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "sql"
@@ -5817,6 +6072,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "target": {
                  "description": "The thing to open.",
@@ -5872,6 +6132,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "time": {
                  "type": "integer",
@@ -5953,6 +6218,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -5961,6 +6231,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -6342,6 +6622,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -6350,6 +6635,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -6685,6 +6980,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -6693,6 +6993,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -7028,6 +7338,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -7036,6 +7351,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -7371,6 +7696,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -7379,6 +7709,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -7714,6 +8054,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -7722,6 +8067,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -8113,6 +8468,11 @@
                   ]
                  }
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "command"
@@ -8145,6 +8505,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -8169,6 +8534,21 @@
                    "pull"
                   ]
                  }
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -8268,6 +8648,11 @@
                  "type": "string",
                  "description": "The password for basic auth."
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "http"
@@ -8320,6 +8705,11 @@
                 },
                 "options": {
                  "description": "Additional options for the script execution."
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "script": {
                  "type": "string",
@@ -8404,6 +8794,11 @@
                   }
                  ]
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "sql"
@@ -8448,6 +8843,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "target": {
                  "description": "The thing to open.",
@@ -8503,6 +8903,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "time": {
                  "type": "integer",
@@ -8584,6 +8989,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -8592,6 +9002,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -8979,6 +9399,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -8987,6 +9412,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -9322,6 +9757,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -9330,6 +9770,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -9665,6 +10115,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -9673,6 +10128,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -10024,6 +10489,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -10032,6 +10502,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -10367,6 +10847,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -10375,6 +10860,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -10775,6 +11270,11 @@
                   ]
                  }
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "command"
@@ -10807,6 +11307,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -10831,6 +11336,21 @@
                    "pull"
                   ]
                  }
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -10930,6 +11450,11 @@
                  "type": "string",
                  "description": "The password for basic auth."
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "http"
@@ -10982,6 +11507,11 @@
                 },
                 "options": {
                  "description": "Additional options for the script execution."
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "script": {
                  "type": "string",
@@ -11066,6 +11596,11 @@
                   }
                  ]
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "sql"
@@ -11110,6 +11645,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "target": {
                  "description": "The thing to open.",
@@ -11165,6 +11705,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "time": {
                  "type": "integer",
@@ -11246,6 +11791,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -11254,6 +11804,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -11633,6 +12193,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -11641,6 +12206,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -11976,6 +12551,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -11984,6 +12564,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -12319,6 +12909,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -12327,6 +12922,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -12662,6 +13267,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -12670,6 +13280,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -13005,6 +13625,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -13013,6 +13638,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -13409,6 +14044,11 @@
                   ]
                  }
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "command"
@@ -13441,6 +14081,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -13465,6 +14110,21 @@
                    "pull"
                   ]
                  }
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -13564,6 +14224,11 @@
                  "type": "string",
                  "description": "The password for basic auth."
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "http"
@@ -13616,6 +14281,11 @@
                 },
                 "options": {
                  "description": "Additional options for the script execution."
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "script": {
                  "type": "string",
@@ -13700,6 +14370,11 @@
                   }
                  ]
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "sql"
@@ -13744,6 +14419,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "target": {
                  "description": "The thing to open.",
@@ -13799,6 +14479,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "time": {
                  "type": "integer",
@@ -13880,6 +14565,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -13888,6 +14578,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -14271,6 +14971,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -14279,6 +14984,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -14614,6 +15329,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -14622,6 +15342,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -14957,6 +15687,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -14965,6 +15700,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -15300,6 +16045,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -15308,6 +16058,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -15643,6 +16403,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -15651,6 +16416,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -16058,6 +16833,11 @@
                   ]
                  }
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "command"
@@ -16090,6 +16870,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -16114,6 +16899,21 @@
                    "pull"
                   ]
                  }
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -16213,6 +17013,11 @@
                  "type": "string",
                  "description": "The password for basic auth."
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "http"
@@ -16265,6 +17070,11 @@
                 },
                 "options": {
                  "description": "Additional options for the script execution."
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "script": {
                  "type": "string",
@@ -16349,6 +17159,11 @@
                   }
                  ]
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "sql"
@@ -16393,6 +17208,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "target": {
                  "description": "The thing to open.",
@@ -16448,6 +17268,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "time": {
                  "type": "integer",
@@ -16529,6 +17354,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -16537,6 +17367,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -16939,6 +17779,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -16947,6 +17792,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -17282,6 +18137,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -17290,6 +18150,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -17625,6 +18495,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -17633,6 +18508,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -17968,6 +18853,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -17976,6 +18866,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -18311,6 +19211,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -18319,6 +19224,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -18741,6 +19656,11 @@
                   ]
                  }
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "command"
@@ -18773,6 +19693,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -18797,6 +19722,21 @@
                    "pull"
                   ]
                  }
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -18896,6 +19836,11 @@
                  "type": "string",
                  "description": "The password for basic auth."
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "http"
@@ -18948,6 +19893,11 @@
                 },
                 "options": {
                  "description": "Additional options for the script execution."
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "script": {
                  "type": "string",
@@ -19032,6 +19982,11 @@
                   }
                  ]
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "sql"
@@ -19076,6 +20031,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "target": {
                  "description": "The thing to open.",
@@ -19131,6 +20091,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "time": {
                  "type": "integer",
@@ -19212,6 +20177,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -19220,6 +20190,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -19601,6 +20581,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -19609,6 +20594,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -19944,6 +20939,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -19952,6 +20952,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -20287,6 +21297,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -20295,6 +21310,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -20630,6 +21655,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -20638,6 +21668,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -20973,6 +22013,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -20981,6 +22026,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -21413,6 +22468,11 @@
                   ]
                  }
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "command"
@@ -21445,6 +22505,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -21469,6 +22534,21 @@
                    "pull"
                   ]
                  }
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -21568,6 +22648,11 @@
                  "type": "string",
                  "description": "The password for basic auth."
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "http"
@@ -21620,6 +22705,11 @@
                 },
                 "options": {
                  "description": "Additional options for the script execution."
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "script": {
                  "type": "string",
@@ -21704,6 +22794,11 @@
                   }
                  ]
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "sql"
@@ -21748,6 +22843,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "target": {
                  "description": "The thing to open.",
@@ -21803,6 +22903,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "time": {
                  "type": "integer",
@@ -21884,6 +22989,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -21892,6 +23002,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -22280,6 +23400,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -22288,6 +23413,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -22623,6 +23758,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -22631,6 +23771,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -22966,6 +24116,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -22974,6 +24129,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -23309,6 +24474,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -23317,6 +24487,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -23652,6 +24832,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -23660,6 +24845,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -24061,6 +25256,11 @@
                   ]
                  }
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "command"
@@ -24093,6 +25293,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -24117,6 +25322,21 @@
                    "pull"
                   ]
                  }
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -24216,6 +25436,11 @@
                  "type": "string",
                  "description": "The password for basic auth."
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "http"
@@ -24268,6 +25493,11 @@
                 },
                 "options": {
                  "description": "Additional options for the script execution."
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "script": {
                  "type": "string",
@@ -24352,6 +25582,11 @@
                   }
                  ]
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "sql"
@@ -24396,6 +25631,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "target": {
                  "description": "The thing to open.",
@@ -24451,6 +25691,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "time": {
                  "type": "integer",
@@ -24532,6 +25777,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -24540,6 +25790,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -24917,6 +26177,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -24925,6 +26190,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -25260,6 +26535,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -25268,6 +26548,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -25603,6 +26893,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -25611,6 +26906,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -25946,6 +27251,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -25954,6 +27264,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -26289,6 +27609,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -26297,6 +27622,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -26713,6 +28048,11 @@
                   ]
                  }
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "command"
@@ -26745,6 +28085,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -26769,6 +28114,21 @@
                    "pull"
                   ]
                  }
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -26868,6 +28228,11 @@
                  "type": "string",
                  "description": "The password for basic auth."
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "http"
@@ -26920,6 +28285,11 @@
                 },
                 "options": {
                  "description": "Additional options for the script execution."
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "script": {
                  "type": "string",
@@ -27004,6 +28374,11 @@
                   }
                  ]
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "sql"
@@ -27048,6 +28423,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "target": {
                  "description": "The thing to open.",
@@ -27103,6 +28483,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "time": {
                  "type": "integer",
@@ -27184,6 +28569,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -27192,6 +28582,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -27600,6 +29000,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -27608,6 +29013,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -27943,6 +29358,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -27951,6 +29371,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -28286,6 +29716,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -28294,6 +29729,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -28629,6 +30074,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -28637,6 +30087,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -28972,6 +30432,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -28980,6 +30445,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -29396,6 +30871,11 @@
                   ]
                  }
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "command"
@@ -29428,6 +30908,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -29452,6 +30937,21 @@
                    "pull"
                   ]
                  }
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -29551,6 +31051,11 @@
                  "type": "string",
                  "description": "The password for basic auth."
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "http"
@@ -29603,6 +31108,11 @@
                 },
                 "options": {
                  "description": "Additional options for the script execution."
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "script": {
                  "type": "string",
@@ -29687,6 +31197,11 @@
                   }
                  ]
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "sql"
@@ -29731,6 +31246,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "target": {
                  "description": "The thing to open.",
@@ -29786,6 +31306,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "time": {
                  "type": "integer",
@@ -29867,6 +31392,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -29875,6 +31405,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -30263,6 +31803,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -30271,6 +31816,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -30606,6 +32161,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -30614,6 +32174,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -30949,6 +32519,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -30957,6 +32532,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -31292,6 +32877,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -31300,6 +32890,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -31635,6 +33235,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -31643,6 +33248,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -32034,6 +33649,11 @@
                   ]
                  }
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "command"
@@ -32066,6 +33686,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -32090,6 +33715,21 @@
                    "pull"
                   ]
                  }
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -32189,6 +33829,11 @@
                  "type": "string",
                  "description": "The password for basic auth."
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "http"
@@ -32241,6 +33886,11 @@
                 },
                 "options": {
                  "description": "Additional options for the script execution."
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "script": {
                  "type": "string",
@@ -32325,6 +33975,11 @@
                   }
                  ]
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "sql"
@@ -32369,6 +34024,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "target": {
                  "description": "The thing to open.",
@@ -32424,6 +34084,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "time": {
                  "type": "integer",
@@ -32571,6 +34236,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -32579,6 +34249,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -33012,6 +34692,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -33020,6 +34705,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -33355,6 +35050,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -33363,6 +35063,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -33698,6 +35408,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -33706,6 +35421,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -34072,6 +35797,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -34080,6 +35810,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -34415,6 +36155,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -34423,6 +36168,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -34818,6 +36573,11 @@
                   ]
                  }
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "command"
@@ -34850,6 +36610,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -34874,6 +36639,21 @@
                    "pull"
                   ]
                  }
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -34973,6 +36753,11 @@
                  "type": "string",
                  "description": "The password for basic auth."
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "http"
@@ -35025,6 +36810,11 @@
                 },
                 "options": {
                  "description": "Additional options for the script execution."
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "script": {
                  "type": "string",
@@ -35109,6 +36899,11 @@
                   }
                  ]
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "sql"
@@ -35153,6 +36948,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "target": {
                  "description": "The thing to open.",
@@ -35208,6 +37008,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "time": {
                  "type": "integer",
@@ -35289,6 +37094,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -35297,6 +37107,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -35676,6 +37496,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -35684,6 +37509,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -36019,6 +37854,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -36027,6 +37867,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -36362,6 +38212,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -36370,6 +38225,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -36710,6 +38575,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -36718,6 +38588,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -37053,6 +38933,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -37061,6 +38946,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -37455,6 +39350,11 @@
                   ]
                  }
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "command"
@@ -37487,6 +39387,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -37511,6 +39416,21 @@
                    "pull"
                   ]
                  }
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -37610,6 +39530,11 @@
                  "type": "string",
                  "description": "The password for basic auth."
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "http"
@@ -37662,6 +39587,11 @@
                 },
                 "options": {
                  "description": "Additional options for the script execution."
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "script": {
                  "type": "string",
@@ -37746,6 +39676,11 @@
                   }
                  ]
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "sql"
@@ -37790,6 +39725,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "target": {
                  "description": "The thing to open.",
@@ -37845,6 +39785,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "time": {
                  "type": "integer",
@@ -37926,6 +39871,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -37934,6 +39884,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -38328,6 +40288,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -38336,6 +40301,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -38671,6 +40646,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -38679,6 +40659,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -39014,6 +41004,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -39022,6 +41017,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -39362,6 +41367,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -39370,6 +41380,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -39705,6 +41725,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -39713,6 +41738,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -40162,6 +42197,11 @@
                   ]
                  }
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "command"
@@ -40194,6 +42234,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -40218,6 +42263,21 @@
                    "pull"
                   ]
                  }
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -40317,6 +42377,11 @@
                  "type": "string",
                  "description": "The password for basic auth."
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "http"
@@ -40369,6 +42434,11 @@
                 },
                 "options": {
                  "description": "Additional options for the script execution."
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "script": {
                  "type": "string",
@@ -40453,6 +42523,11 @@
                   }
                  ]
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "sql"
@@ -40497,6 +42572,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "target": {
                  "description": "The thing to open.",
@@ -40552,6 +42632,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "time": {
                  "type": "integer",
@@ -40641,6 +42726,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -40649,6 +42739,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -41040,6 +43140,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -41048,6 +43153,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -41383,6 +43498,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -41391,6 +43511,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -41726,6 +43856,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -41734,6 +43869,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -42078,6 +44223,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -42086,6 +44236,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -42421,6 +44581,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -42429,6 +44594,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -42820,6 +44995,11 @@
                   ]
                  }
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "command"
@@ -42852,6 +45032,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -42876,6 +45061,21 @@
                    "pull"
                   ]
                  }
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -42975,6 +45175,11 @@
                  "type": "string",
                  "description": "The password for basic auth."
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "http"
@@ -43027,6 +45232,11 @@
                 },
                 "options": {
                  "description": "Additional options for the script execution."
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "script": {
                  "type": "string",
@@ -43111,6 +45321,11 @@
                   }
                  ]
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "sql"
@@ -43155,6 +45370,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "target": {
                  "description": "The thing to open.",
@@ -43210,6 +45430,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "time": {
                  "type": "integer",
@@ -43291,6 +45516,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -43299,6 +45529,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -43685,6 +45925,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -43693,6 +45938,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -44028,6 +46283,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -44036,6 +46296,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -44371,6 +46641,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -44379,6 +46654,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -44761,6 +47046,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -44769,6 +47059,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -45104,6 +47404,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -45112,6 +47417,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -45554,6 +47869,11 @@
                   ]
                  }
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "command"
@@ -45586,6 +47906,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -45610,6 +47935,21 @@
                    "pull"
                   ]
                  }
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -45709,6 +48049,11 @@
                  "type": "string",
                  "description": "The password for basic auth."
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "http"
@@ -45761,6 +48106,11 @@
                 },
                 "options": {
                  "description": "Additional options for the script execution."
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "script": {
                  "type": "string",
@@ -45845,6 +48195,11 @@
                   }
                  ]
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "sql"
@@ -45889,6 +48244,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "target": {
                  "description": "The thing to open.",
@@ -45944,6 +48304,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "time": {
                  "type": "integer",
@@ -46025,6 +48390,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -46033,6 +48403,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -46412,6 +48792,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -46420,6 +48805,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -46755,6 +49150,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -46763,6 +49163,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -47098,6 +49508,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -47106,6 +49521,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -47441,6 +49866,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -47449,6 +49879,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -47784,6 +50224,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -47792,6 +50237,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -48192,6 +50647,11 @@
                   ]
                  }
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "command"
@@ -48224,6 +50684,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -48248,6 +50713,21 @@
                    "pull"
                   ]
                  }
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -48347,6 +50827,11 @@
                  "type": "string",
                  "description": "The password for basic auth."
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "http"
@@ -48399,6 +50884,11 @@
                 },
                 "options": {
                  "description": "Additional options for the script execution."
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "script": {
                  "type": "string",
@@ -48483,6 +50973,11 @@
                   }
                  ]
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "sql"
@@ -48527,6 +51022,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "target": {
                  "description": "The thing to open.",
@@ -48582,6 +51082,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "time": {
                  "type": "integer",
@@ -48663,6 +51168,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -48671,6 +51181,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -49047,6 +51567,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -49055,6 +51580,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -49390,6 +51925,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -49398,6 +51938,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -49733,6 +52283,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -49741,6 +52296,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -50076,6 +52641,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -50084,6 +52654,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -50419,6 +52999,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -50427,6 +53012,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -50828,6 +53423,11 @@
                   ]
                  }
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "command"
@@ -50860,6 +53460,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -50884,6 +53489,21 @@
                    "pull"
                   ]
                  }
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [
@@ -50983,6 +53603,11 @@
                  "type": "string",
                  "description": "The password for basic auth."
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "http"
@@ -51035,6 +53660,11 @@
                 },
                 "options": {
                  "description": "Additional options for the script execution."
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "script": {
                  "type": "string",
@@ -51119,6 +53749,11 @@
                   }
                  ]
                 },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
+                },
                 "type": {
                  "enum": [
                   "sql"
@@ -51163,6 +53798,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "target": {
                  "description": "The thing to open.",
@@ -51218,6 +53858,11 @@
                    "pull"
                   ]
                  }
+                },
+                "reloadFileList": {
+                 "type": "boolean",
+                 "description": "Reload list of files or not.",
+                 "default": true
                 },
                 "time": {
                  "type": "integer",
@@ -51299,6 +53944,11 @@
                  "type": "boolean",
                  "default": false
                 },
+                "maxBuffer": {
+                 "type": "integer",
+                 "description": "Largest amount of data in bytes allowed on stdout or stderr.",
+                 "minimum": 0
+                },
                 "name": {
                  "description": "The (display) name of that operation.",
                  "type": "string"
@@ -51307,6 +53957,16 @@
                  "type": "string",
                  "description": "Do not use placeholders in 'command' property.",
                  "default": false
+                },
+                "printOutput": {
+                 "type": "boolean",
+                 "description": "Print the result from stdout to output channel or not.",
+                 "default": true
+                },
+                "timeout": {
+                 "type": "integer",
+                 "description": "Execution timeout.",
+                 "minimum": 0
                 },
                 "type": {
                  "enum": [

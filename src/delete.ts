@@ -99,10 +99,12 @@ export async function deleteFileIn(file: string, target: deploy_targets.Target,
  * 
  * @param {string[]} files The files to delete.
  * @param {deploy_targets.Target} target The target to delete in.
+ * @param {deploy_contracts.Reloader<string>} fileListReloader A function that reloads the list of files.
  * @param {boolean} [deleteLocalFiles] Also delete local files or not.
  */
 export async function deleteFilesIn(files: string[],
                                     target: deploy_targets.Target,
+                                    fileListReloader: deploy_contracts.Reloader<string>,
                                     deleteLocalFiles?: boolean) {
     const ME: deploy_workspaces.Workspace = this;
 
@@ -116,19 +118,43 @@ export async function deleteFilesIn(files: string[],
         return;
     }
 
-    files = files.filter(f => !ME.isFileIgnored(f));
+    const NORMALIZE_FILE_LIST = () => {
+        files = files.filter(f => !ME.isFileIgnored(f));
+    };
+
+    if (!fileListReloader) {
+        const INITIAL_LIST = files.map(f => f);
+
+        fileListReloader = () => INITIAL_LIST;
+    }
+
+    NORMALIZE_FILE_LIST();
 
     // preparements
+    let reloadFileList = false;
     const PREPARE_CANCELLED = !deploy_helpers.toBooleanSafe(
         await deploy_targets.executePrepareTargetOperations({
             files: files,
             deployOperation: deploy_contracts.DeployOperation.Delete,
+            onReloadFileList: () => {
+                reloadFileList = true;
+            },
             target: target,
         }),
         true
     );
     if (PREPARE_CANCELLED) {
         return;
+    }
+
+    if (reloadFileList) {
+        files = deploy_helpers.asArray(
+            await Promise.resolve(
+                fileListReloader()
+            )
+        );
+
+        NORMALIZE_FILE_LIST();
     }
 
     if (files.length < 1) {
@@ -462,7 +488,9 @@ export async function deletePackage(pkg: deploy_packages.Package,
         exclude = undefined;
     }
 
-    const FILES_TO_DELETE = await ME.findFilesByFilter(pkg);
+    const RELOADER = async () => await ME.findFilesByFilter(pkg);
+
+    const FILES_TO_DELETE = await RELOADER();
     if (FILES_TO_DELETE.length < 1) {
         ME.showWarningMessage(
             ME.t('noFiles')
@@ -522,6 +550,7 @@ export async function deletePackage(pkg: deploy_packages.Package,
         deleteFilesIn, ME
     )(FILES_TO_DELETE,
       SELECTED_TARGET,
+      RELOADER,
       deleteLocalFiles);
 }
 

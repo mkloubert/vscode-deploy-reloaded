@@ -60,24 +60,31 @@ export async function deployAllOpenFiles(workspaces: deploy_workspaces.Workspace
         return;
     }
 
-    for (const WS of workspaces) {
-        const FILES = DOCUMENTS.map(doc => {
-            if (!deploy_helpers.isEmptyString(doc.fileName)) {
-                if (WS.isPathOf(doc.fileName)) {
-                    return doc;
+    const CREATE_FILE_LIST_RELOADER = (ws: deploy_workspaces.Workspace): () => string[] => {
+        return () => {
+            return DOCUMENTS.map(doc => {
+                if (!deploy_helpers.isEmptyString(doc.fileName)) {
+                    if (ws.isPathOf(doc.fileName)) {
+                        return doc;
+                    }
                 }
-            }
 
-            return false;
-        }).filter(e => {
-            return false !== e;
-        }).map((doc: vscode.TextDocument) => {
-            return Path.resolve(doc.fileName);
-        }).filter(f => {
-            return FS.existsSync(f) &&
-                   FS.lstatSync(f).isFile();
-        });
+                return false;
+            }).filter(e => {
+                return false !== e;
+            }).map((doc: vscode.TextDocument) => {
+                return Path.resolve(doc.fileName);
+            }).filter(f => {
+                return FS.existsSync(f) &&
+                       FS.lstatSync(f).isFile();
+            });
+        };
+    };
 
+    for (const WS of workspaces) {
+        const RELOADER = CREATE_FILE_LIST_RELOADER(WS);
+
+        const FILES = RELOADER();
         if (FILES.length < 1) {
             continue;
         }
@@ -100,7 +107,8 @@ export async function deployAllOpenFiles(workspaces: deploy_workspaces.Workspace
             await deploy_helpers.applyFuncFor(
                 deployFilesTo,
                 WS
-            )(FILES, TARGET);
+            )(FILES, TARGET,
+              RELOADER);
         }
         catch (e) {
             WS.showErrorMessage(
@@ -116,9 +124,11 @@ export async function deployAllOpenFiles(workspaces: deploy_workspaces.Workspace
  * 
  * @param {string[]} files The files to deploy.
  * @param {deploy_targets.Target} target The target to deploy to.
+ * @param {deploy_contracts.Reloader<string>} fileListReloader A function that reloads the list of files.
  */
 export async function deployFilesTo(files: string[],
-                                    target: deploy_targets.Target) {
+                                    target: deploy_targets.Target,
+                                    fileListReloader: deploy_contracts.Reloader<string>) {
     const ME: deploy_workspaces.Workspace = this;
 
     target = ME.prepareTarget(target);
@@ -131,19 +141,43 @@ export async function deployFilesTo(files: string[],
         return;
     }
 
-    files = files.filter(f => !ME.isFileIgnored(f));
+    const NORMALIZE_FILE_LIST = () => {
+        files = files.filter(f => !ME.isFileIgnored(f));
+    };
+
+    if (!fileListReloader) {
+        const INITIAL_LIST = files.map(f => f);
+
+        fileListReloader = () => INITIAL_LIST;
+    }
+
+    NORMALIZE_FILE_LIST();
 
     // preparements
+    let reloadFileList = false;
     const PREPARE_CANCELLED = !deploy_helpers.toBooleanSafe(
         await deploy_targets.executePrepareTargetOperations({
             files: files,
             deployOperation: deploy_contracts.DeployOperation.Deploy,
+            onReloadFileList: () => {
+                reloadFileList = true;
+            },
             target: target,
         }),
         true
     );
     if (PREPARE_CANCELLED) {
         return;
+    }
+
+    if (reloadFileList) {
+        files = deploy_helpers.asArray(
+            await Promise.resolve(
+                fileListReloader()
+            )
+        );
+
+        NORMALIZE_FILE_LIST();
     }
 
     if (files.length < 1) {
@@ -513,7 +547,9 @@ export async function deployPackage(pkg: deploy_packages.Package) {
                                  deploy_packages.getPackageName(pkg), ME.name));
         }
 
-        const FILES_TO_DEPLOY = await ME.findFilesByFilter(pkg);
+        const RELOADER = async () => await ME.findFilesByFilter(pkg);
+
+        const FILES_TO_DEPLOY = await RELOADER();
         if (FILES_TO_DEPLOY.length < 1) {
             ME.showWarningMessage(
                 ME.t('noFiles')
@@ -541,7 +577,8 @@ export async function deployPackage(pkg: deploy_packages.Package) {
         await deploy_helpers.applyFuncFor(
             deployFilesTo, ME
         )(FILES_TO_DEPLOY,
-          SELECTED_TARGET);
+          SELECTED_TARGET,
+          RELOADER);
     }
     finally {
         if (PACKAGE_BTN) {
@@ -647,7 +684,9 @@ export async function deployScmCommit(client: deploy_scm.SourceControlClient,
         await deploy_helpers.applyFuncFor(
             deploy_delete.deleteFilesIn,
             ME,
-        )(FILES_TO_DELETE, target, false);
+        )(FILES_TO_DELETE, target,
+          null,
+          false);
     }
 
     // then upload files
@@ -655,6 +694,7 @@ export async function deployScmCommit(client: deploy_scm.SourceControlClient,
         await deploy_helpers.applyFuncFor(
             deployFilesTo,
             ME,
-        )(FILES_TO_UPLOAD, target);
+        )(FILES_TO_UPLOAD, target,
+          null);
     }
 }

@@ -404,6 +404,13 @@ export interface PlatformItem {
 }
 
 /**
+ * A function that reloads data.
+ * 
+ * @return {TValue|TValue[]|PromiseLike<TValue|TValue[]>} The result with the reloaded data.
+ */
+export type Reloader<TValue> = () => TValue | TValue[] | PromiseLike<TValue | TValue[]>;
+
+/**
  * Settings for a required extension.
  */
 export interface RequiredExtensionSettings extends ConditionalItem,
