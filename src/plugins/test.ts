@@ -124,6 +124,9 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
         const RESULT: deploy_plugins.ListDirectoryResult<TestTarget> = {
             dirs: [],
             files: [],
+            info: deploy_files.createDefaultDirectoryInfo(context.dir, {
+                exportPath: targetDir,
+            }),
             others: [],
             target: context.target,
         };
@@ -152,6 +155,9 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
 
             if (STATS.isDirectory()) {
                 const DI: deploy_files.DirectoryInfo = {
+                    exportPath: Path.resolve(
+                        Path.join(targetDir, F)
+                    ),
                     name: F,
                     path: relativePath,
                     size: SIZE,
@@ -166,6 +172,9 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
                     download: async () => {
                         return deploy_helpers.readFile(fullPath);
                     },
+                    exportPath: Path.resolve(
+                        Path.join(targetDir, F)
+                    ),
                     name: F,
                     path: relativePath,
                     size: SIZE,
@@ -177,6 +186,9 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
             }
             else {
                 const FSI: deploy_files.FileSystemInfo = {
+                    exportPath: Path.resolve(
+                        Path.join(targetDir, F)
+                    ),
                     name: F,
                     path: relativePath,
                     size: SIZE,

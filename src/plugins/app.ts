@@ -434,6 +434,9 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
         const RESULT: deploy_plugins.ListDirectoryResult<AppTarget> = {
             dirs: [],
             files: [],
+            info: deploy_files.createDefaultDirectoryInfo(context.dir, {
+                exportPath: targetDir,
+            }),
             others: [],
             target: context.target,
         };
@@ -462,6 +465,9 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
 
             if (STATS.isDirectory()) {
                 const DI: deploy_files.DirectoryInfo = {
+                    exportPath: Path.resolve(
+                        Path.join(OUT_DIR, F)
+                    ),
                     name: F,
                     path: relativePath,
                     size: SIZE,
@@ -476,6 +482,9 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
                     download: async () => {
                         return deploy_helpers.readFile(fullPath);
                     },
+                    exportPath: Path.resolve(
+                        Path.join(OUT_DIR, F)
+                    ),
                     name: F,
                     path: relativePath,
                     size: SIZE,
@@ -487,6 +496,9 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
             }
             else {
                 const FSI: deploy_files.FileSystemInfo = {
+                    exportPath: Path.resolve(
+                        Path.join(OUT_DIR, F)
+                    ),
                     name: F,
                     path: relativePath,
                     size: SIZE,

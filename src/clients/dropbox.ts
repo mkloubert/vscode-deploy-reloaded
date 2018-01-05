@@ -115,6 +115,7 @@ export class DropBoxClient extends deploy_clients.AsyncFileListBase {
                                         )
                                     );
                                 },
+                                //TODO: exportPath: false,
                                 name: ENTRY.name,
                                 path: normalizePath(path),
                                 size: ENTRY.size,
@@ -129,6 +130,7 @@ export class DropBoxClient extends deploy_clients.AsyncFileListBase {
                     case 'folder':
                         {
                             const DI: deploy_files.DirectoryInfo = {
+                                //TODO: exportPath: false,
                                 name: ENTRY.name,
                                 path: normalizePath(path),
                                 type: deploy_files.FileSystemType.Directory,
@@ -141,6 +143,7 @@ export class DropBoxClient extends deploy_clients.AsyncFileListBase {
                     default:
                         {
                             const FSI: deploy_files.FileSystemInfo = {
+                                //TODO: exportPath: false,
                                 name: ENTRY.name,
                                 path: normalizePath(path),
                             };

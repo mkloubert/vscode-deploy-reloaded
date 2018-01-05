@@ -15,8 +15,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as deploy_helpers from './helpers';
+import * as Path from 'path';
 import * as Moment from 'moment';
 
+
+/**
+ * Additional options for 'createDefaultDirectoryInfo()' function.
+ */
+export interface CreateDefaultDirectoryInfoOptions {
+    /**
+     * The custom export path.
+     */
+    readonly exportPath?: string;
+}
 
 /**
  * Information about a directory.
@@ -52,6 +64,11 @@ export interface FileSystemInfo {
      * An optional method to compare that object with another.
      */
     readonly compareTo?: (other: FileSystemInfo) => number;
+    /**
+     * A value that can be used to export the path
+     * to clipboard, e.g.
+     */
+    readonly exportPath?: string;
     /**
      * A custom icon to use.
      */
@@ -94,4 +111,50 @@ export enum FileSystemType {
      * File
      */
     File = 2,
+}
+
+
+/**
+ * Creates a default directory info object from a path.
+ * 
+ * @param {string} dir The path of the directory.
+ * @param {CreateDefaultDirectoryInfoOptions} [opts] Additional options.
+ * 
+ * @return {DirectoryInfo} The created object.
+ */
+export function createDefaultDirectoryInfo(dir: string, opts?: CreateDefaultDirectoryInfoOptions): DirectoryInfo {
+    dir = deploy_helpers.normalizePath(dir);
+
+    if (!opts) {
+        opts = <any>{};
+    }
+
+    let name: string;
+    let path: string;
+    let exportPath = deploy_helpers.toStringSafe(opts.exportPath);
+    if (!deploy_helpers.isEmptyString(dir)) {
+        path = Path.dirname(dir);
+        if ('.' === path) {
+            path = '';            
+        }
+
+        name = Path.basename(dir);
+    }
+
+    if (deploy_helpers.isEmptyString(name)) {
+        name = '';
+    }
+    if (deploy_helpers.isEmptyString(path)) {
+        path = '';
+    }
+    if (deploy_helpers.isEmptyString(exportPath)) {
+        exportPath = '/';
+    }
+
+    return {
+        exportPath: exportPath,
+        name: name,
+        path: path,
+        type: FileSystemType.Directory,
+    };
 }

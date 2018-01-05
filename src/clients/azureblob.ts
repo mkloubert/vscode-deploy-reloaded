@@ -205,6 +205,7 @@ export class AzureBlobClient extends deploy_clients.AsyncFileListBase {
                         let existingDir = DIRS_ALREADY_ADDED[DIR];
                         if (!existingDir) {
                             const DI: deploy_files.DirectoryInfo = {
+                                //TODO: exportPath: false,
                                 name: DIR,
                                 path: path,
                                 type: deploy_files.FileSystemType.Directory,
@@ -223,6 +224,7 @@ export class AzureBlobClient extends deploy_clients.AsyncFileListBase {
                                     path + '/' + NAME_WITHOUT_PATH
                                 );
                             },
+                            //TODO: exportPath: false,
                             name: NAME_WITHOUT_PATH,
                             path: path,
                             size: parseInt( deploy_helpers.toStringSafe(R.contentLength).trim() ),

@@ -179,6 +179,13 @@ export interface Translation {
         file?: string;
     };
     listDirectory?: {
+        copyPathToClipboard?: {
+            description?: string;
+            errors?: {
+                failed?: string;
+            };
+            label?: string;
+        };
         currentDirectory?: string;
         directoryIsEmpty?: string;
         errors?: {

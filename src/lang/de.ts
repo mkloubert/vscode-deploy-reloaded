@@ -36,7 +36,7 @@ export const translation: Translation = {
             label: "Aktuelle Datei ...",
         },
         errors: {
-            operationFailed: "Konnte Vergleich nicht durchführen (s. Debugkonsole 'STRG + SHIFT + Y')!",
+            operationFailed: "Konnte Vergleich nicht durchführen (s. Debugkonsole 'STRG/CMD + SHIFT + Y')!",
         },
         title: "Vergleich{0:trim,surround,leading_space}",
     },
@@ -67,7 +67,7 @@ export const translation: Translation = {
         errors: {
             invalidWorkspace: "Die Datei{0:trim,surround,leading_space} is nicht Teil des Arbeitsbereiches{1:trim,surround,leading_space}!",
             invalidWorkspaceForPackage: "Das Paket{0:trim,surround,leading_space} ist nicht Teil des Arbeitsbereiches{1:trim,surround,leading_space}!",
-            operationFailed: "Konnte das Löschen nicht durchführen (s. Debugkonsole 'STRG + SHIFT + Y')!",
+            operationFailed: "Konnte das Löschen nicht durchführen (s. Debugkonsole 'STRG/CMD + SHIFT + Y')!",
         },
         finishedOperation: "Das Löschen der Dateien in{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",
         finishedOperationWithErrors: "[FEHLER] Konnte Dateien nicht in{0:trim,surround,leading_space} löschen:{1:trim,surround,leading_space}",
@@ -106,7 +106,7 @@ export const translation: Translation = {
         errors: {
             invalidWorkspace: "Die Datei{0:trim,surround,leading_space} kann nicht über den Arbeitsbereich{1:trim,surround,leading_space} bereitgestellt werden!",
             invalidWorkspaceForPackage: "Das Paket{0:trim,surround,leading_space} kann nicht über den Arbeitsbereich{1:trim,surround,leading_space} bereitgestellt werden!",
-            operationFailed: "Konnte das Bereitstellen nicht durchführen (s. Debugkonsole 'STRG + SHIFT + Y')!",
+            operationFailed: "Konnte das Bereitstellen nicht durchführen (s. Debugkonsole 'STRG/CMD + SHIFT + Y')!",
             operationToTargetFailed: "Das Bereitstellen der Datei(en) ins Ziel{0:trim,surround,leading_space} schlug fehl:{1:trim,surround,leading_space}",
         },
         finishedOperation: "Das Bereitstellen der Dateien in{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",
@@ -172,10 +172,17 @@ export const translation: Translation = {
         file: "{0:trim,surround,ending_space}ist keine Datei!",
     },
     listDirectory: {
+        copyPathToClipboard: {
+            description: "Kopiert den aktuellen Pfad in die Zwischenablage",
+            errors: {
+                failed: "Konnte Pfad nicht in Zwischenablage speichern (s. Debugkonsole 'STRG/CMD + SHIFT + Y'): {0}",
+            },
+            label: "Pfad kopieren ...",
+        },
         currentDirectory: "Aktuelles Verzeichnis:{0:trim,surround,leading_space} ({1:trim,surround})",
         directoryIsEmpty: "(Verzeichnis ist leer)",
         errors: {
-            operationFailed: "Konnte das Auflisten eines Verzeichnisses nicht durchführen (s. Debugkonsole 'STRG + SHIFT + Y')!",
+            operationFailed: "Konnte das Auflisten eines Verzeichnisses nicht durchführen (s. Debugkonsole 'STRG/CMD + SHIFT + Y')!",
         },
         lastModified: "Letzte Änderung:{0:trim,leading_space}",
         loading: "Lade Verzeichnis{0:trim,surround,leading_space} ({1:trim} / {2:trim})...",
@@ -221,8 +228,8 @@ export const translation: Translation = {
             invalidDirectory: "{0:trim,surround,ending_space}ist ein ungültiges Verzeichnis!",
         },
         errors: {
-            initializationFailed: "Die Initialisierung des Plugins{0:trim,surround,leading_space} ist fehlgeschlagen (s. Debugkonsole 'STRG + SHIFT + Y')!",
-            loadingFailed: "Fehler beim Laden von{0:trim,surround,leading_space} (s. Debugkonsole 'STRG + SHIFT + Y')!",
+            initializationFailed: "Die Initialisierung des Plugins{0:trim,surround,leading_space} ist fehlgeschlagen (s. Debugkonsole 'STRG/CMD + SHIFT + Y')!",
+            loadingFailed: "Fehler beim Laden von{0:trim,surround,leading_space} (s. Debugkonsole 'STRG/CMD + SHIFT + Y')!",
             noFactoryFunction: "Das Plugin-Modul{0:trim,surround,leading_space} beinhaltet keine Factory-Funktion!",
             noModule: "Das Plugin{0:trim,surround,leading_space} enthält kein Modul!",
             noneFoundIn: "Es wurden keine Plugins in{0:trim,surround,leading_space} gefunden!",
@@ -304,7 +311,7 @@ export const translation: Translation = {
         errors: {
             invalidWorkspace: "Die Datei{0:trim,surround,leading_space} kann nicht in den Arbeitsbereich{1:trim,surround,leading_space} geladen werden!",
             invalidWorkspaceForPackage: "Das Paket{0:trim,surround,leading_space} kann nicht in den Arbeitsbereich{1:trim,surround,leading_space} geladen werden!",
-            operationFailed: "Konnte das Laden nicht durchführen (s. Debugkonsole 'STRG + SHIFT + Y')!",
+            operationFailed: "Konnte das Laden nicht durchführen (s. Debugkonsole 'STRG/CMD + SHIFT + Y')!",
             operationForSourceFailed: "Das Laden der Datei(en) aus der Quelle{0:trim,surround,leading_space} schlug fehl:{1:trim,surround,leading_space}",
         },
         finishedOperation: "Das Laden der Dateien von{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",
@@ -356,7 +363,7 @@ export const translation: Translation = {
     },
     switches: {
         errors: {
-            operationFailed: "Schalter-Operation ist fehlgeschlagen (s. Debugkonsole 'STRG + SHIFT + Y')!",
+            operationFailed: "Schalter-Operation ist fehlgeschlagen (s. Debugkonsole 'STRG/CMD + SHIFT + Y')!",
         },
     },
     sync: {
@@ -453,7 +460,7 @@ export const translation: Translation = {
             selectTarget: "Wählen Sie ein Ziel ...",
         },
         errors: {
-            operationFailed: "Konnte Funktion nicht ausführen (s. Debugkonsole 'STRG + SHIFT + Y')!",
+            operationFailed: "Konnte Funktion nicht ausführen (s. Debugkonsole 'STRG/CMD + SHIFT + Y')!",
         },
         npm: {
             description: "Werkzeuge für das einfache Arbeiten mit 'npm'",
@@ -543,7 +550,7 @@ export const translation: Translation = {
     workspaces: {
         active: {
             errors: {
-                selectWorkspaceFailed: "Das Selektieren des aktiven Arbeitsbereiches ist fehlgeschlagen (s. Debugkonsole 'STRG + SHIFT + Y')!",
+                selectWorkspaceFailed: "Das Selektieren des aktiven Arbeitsbereiches ist fehlgeschlagen (s. Debugkonsole 'STRG/CMD + SHIFT + Y')!",
             },
             noneFound: "Keine aktiven Arbeitsbereiche gefunden!",
             selectWorkspace: "Wählen Sie den aktiven Arbeitsbereich aus ...",

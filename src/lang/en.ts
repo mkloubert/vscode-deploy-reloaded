@@ -36,7 +36,7 @@ export const translation: Translation = {
             label: "Current file ...",
         },
         errors: {
-            operationFailed: "Compare operation failed (s. debug output 'CTRL + SHIFT + Y')!",
+            operationFailed: "Compare operation failed (s. debug console 'CTRL/CMD + SHIFT + Y')!",
         },
         title: "Diff{0:trim,surround,leading_space}",
     },
@@ -67,7 +67,7 @@ export const translation: Translation = {
         errors: {
             invalidWorkspace: "File{0:trim,surround,leading_space} is not part of workspace{1:trim,surround,leading_space}!",
             invalidWorkspaceForPackage: "Package{0:trim,surround,leading_space} is not part of workspace{1:trim,surround,leading_space}!",
-            operationFailed: "Delete operation failed (s. debug output 'CTRL + SHIFT + Y')!",
+            operationFailed: "Delete operation failed (s. debug console 'CTRL/CMD + SHIFT + Y')!",
         },
         finishedOperation: "Deleting files in{0:trim,surround,leading_space} has been finished.",
         finishedOperationWithErrors: "[ERROR] Could not delete files in{0:trim,surround,leading_space}:{1:trim,surround,leading_space}",
@@ -108,7 +108,7 @@ export const translation: Translation = {
         errors: {
             invalidWorkspace: "Cannot deploy file{0:trim,surround,leading_space} from workspace{1:trim,surround,leading_space}!",
             invalidWorkspaceForPackage: "Cannot deploy package{0:trim,surround,leading_space} from workspace{1:trim,surround,leading_space}!",
-            operationFailed: "Deploy operation failed (s. debug output 'CTRL + SHIFT + Y')!",
+            operationFailed: "Deploy operation failed (s. debug console 'CTRL/CMD + SHIFT + Y')!",
             operationToTargetFailed: "Deploying to target{0:trim,surround,leading_space} failed:{1:trim,surround,leading_space}",
         },
         gitCommit: {
@@ -172,10 +172,17 @@ export const translation: Translation = {
         file: "{0:trim,surround,ending_space}is no file!",
     },
     listDirectory: {
+        copyPathToClipboard: {
+            description: "Copies the current path to clipboard",
+            errors: {
+                failed: "Could not save path to clipboard (s. debug console 'CTRL/CMD + SHIFT + Y'): {0}",
+            },
+            label: "Copy path ...",
+        },
         currentDirectory: "Current directory:{0:trim,surround,leading_space} ({1:trim,surround})",
         directoryIsEmpty: "(directory is empty)",
         errors: {
-            operationFailed: "List directory operation failed (s. Debugkonsole 'STRG + SHIFT + Y')!",
+            operationFailed: "List directory operation failed (s. debug console 'CTRL/CMD + SHIFT + Y')!",
         },
         lastModified: "Last modified:{0:trim,leading_space}",
         loading: "Loading directory{0:trim,surround,leading_space} ({1:trim} / {2:trim})...",
@@ -222,8 +229,8 @@ export const translation: Translation = {
             invalidDirectory: "{0:trim,surround,ending_space}is an invalid directory!",
         },
         errors: {
-            initializationFailed: "Initialization of plugin{0:trim,surround,leading_space} failed (s. debug output 'CTRL + SHIFT + Y')!",
-            loadingFailed: "Error while loading{0:trim,surround,leading_space} (s. debug output 'CTRL + SHIFT + Y')!",
+            initializationFailed: "Initialization of plugin{0:trim,surround,leading_space} failed (s. debug console 'CTRL/CMD + SHIFT + Y')!",
+            loadingFailed: "Error while loading{0:trim,surround,leading_space} (s. debug console 'CTRL/CMD + SHIFT + Y')!",
             noFactoryFunction: "Plugin module{0:trim,surround,leading_space} contains no factory function!",
             noModule: "Plugin{0:trim,surround,leading_space} contains no module!",
             noneFoundIn: "No plugins found in{0:trim,surround,leading_space}!",
@@ -305,7 +312,7 @@ export const translation: Translation = {
         errors: {
             invalidWorkspace: "Cannot pull file{0:trim,surround,leading_space} to workspace{1:trim,surround,leading_space}!",
             invalidWorkspaceForPackage: "Cannot pull package{0:trim,surround,leading_space} to workspace{1:trim,surround,leading_space}!",
-            operationFailed: "Pull operation failed (s. debug output 'CTRL + SHIFT + Y')!",
+            operationFailed: "Pull operation failed (s. debug console 'CTRL/CMD + SHIFT + Y')!",
             operationForSourceFailed: "Pulling file(s) from source{0:trim,surround,leading_space} failed:{1:trim,surround,leading_space}",
         },
         finishedOperation: "Pulling files from{0:trim,surround,leading_space} has been finished.",
@@ -357,7 +364,7 @@ export const translation: Translation = {
     },
     switches: {
         errors: {
-            operationFailed: "Switch operation failed (s. debug output 'CTRL + SHIFT + Y')!",
+            operationFailed: "Switch operation failed (s. debug console 'CTRL/CMD + SHIFT + Y')!",
         },
     },
     sync: {
@@ -454,7 +461,7 @@ export const translation: Translation = {
             selectTarget: "Select a target ...",
         },
         errors: {
-            operationFailed: "Tool operation failed (s. debug output 'CTRL + SHIFT + Y')!",
+            operationFailed: "Tool operation failed (s. debug console 'CTRL/CMD + SHIFT + Y')!",
         },
         npm: {
             description: "Tools for simple use of 'npm'",
@@ -544,7 +551,7 @@ export const translation: Translation = {
     workspaces: {
         active: {
             errors: {
-                selectWorkspaceFailed: "Selecting active workspace failed (s. debug output 'CTRL + SHIFT + Y')!",
+                selectWorkspaceFailed: "Selecting active workspace failed (s. debug console 'CTRL/CMD + SHIFT + Y')!",
             },
             noneFound: "No active workspaces found!",
             selectWorkspace: "Select the active workspace ...",

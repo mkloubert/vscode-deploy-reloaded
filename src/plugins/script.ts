@@ -254,6 +254,7 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
             dirs: [],
             files: [],
             others: [],
+            info: deploy_files.createDefaultDirectoryInfo(context.dir),
             target: context.target,
         };
 

@@ -418,10 +418,11 @@ class FtpClient extends FTPClientBase {
                                                     }
                                                 }
                                             },
-                                            time: time,
+                                            //TODO: exportPath: false,
                                             name: ITEM.name,
                                             path: dir,
                                             size: size,
+                                            time: time,
                                             type: deploy_files.FileSystemType.File,
                                         };
 
@@ -433,9 +434,10 @@ class FtpClient extends FTPClientBase {
                                     // folder
                                     {
                                         const DI: deploy_files.DirectoryInfo = {
-                                            time: time,
+                                            //TODO: exportPath: false,
                                             name: ITEM.name,
                                             path: dir,
+                                            time: time,
                                             type: deploy_files.FileSystemType.Directory,
                                         };
                                             
@@ -447,6 +449,7 @@ class FtpClient extends FTPClientBase {
                                     // unknown
                                     {
                                         const FSI: deploy_files.FileSystemInfo = {
+                                            //TODO: exportPath: false,
                                             time: time,
                                             name: ITEM.name,
                                             path: dir,
@@ -777,10 +780,11 @@ class JsFTPClient extends FTPClientBase {
                                                             }
                                                         }
                                                     },
-                                                    time: time,
+                                                    //TODO: exportPath: false,
                                                     name: ITEM.name,
                                                     path: dir,
                                                     size: size,
+                                                    time: time,
                                                     type: deploy_files.FileSystemType.File,
                                                 };
 
@@ -792,9 +796,10 @@ class JsFTPClient extends FTPClientBase {
                                             // folder
                                             {
                                                 const DI: deploy_files.DirectoryInfo = {
-                                                    time: time,
+                                                    //TODO: exportPath: false,
                                                     name: ITEM.name,
                                                     path: dir,
+                                                    time: time,
                                                     type: deploy_files.FileSystemType.Directory,
                                                 };
                                                     
@@ -806,9 +811,10 @@ class JsFTPClient extends FTPClientBase {
                                             // unknown
                                             {
                                                 const FSI: deploy_files.FileSystemInfo = {
-                                                    time: time,
+                                                    //TODO: exportPath: false,
                                                     name: ITEM.name,
                                                     path: dir,
+                                                    time: time,
                                                 };
                                                     
                                                 newFSIItem = FSI;

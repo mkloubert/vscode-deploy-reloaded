@@ -29,6 +29,7 @@ import * as deploy_values from './values';
 import * as deploy_workspaces from './workspaces';
 import * as Events from 'events';
 import * as i18 from './i18';
+import * as Path from 'path';
 import * as Stream from 'stream';
 import * as vscode from 'vscode';
 
@@ -195,6 +196,10 @@ export interface ListDirectoryResult<TTarget extends deploy_targets.Target = dep
      * The files.
      */
     readonly files: deploy_files.FileInfo[];
+    /**
+     * Information about the underlying directory itself.
+     */
+    readonly info: deploy_files.DirectoryInfo;
     /**
      * The other / unknown elements.
      */
@@ -778,6 +783,14 @@ export interface AsyncFileClientPluginContext<TTarget extends deploy_targets.Tar
      */
     readonly getDir: (subDir: string) => string;
     /**
+     * Returns the "real" path of a sub directory, which can be exported.
+     * 
+     * @param {string} subDir The sub directory.
+     * 
+     * @return {string} The "export" path.
+     */
+    readonly getExportPath?: (subDir: string) => string;
+    /**
      * The underlying target.
      */
     readonly target: TTarget;
@@ -888,14 +901,31 @@ export abstract class AsyncFileClientPluginBase<TTarget extends deploy_targets.T
         const ME = this;
 
         return await ME.invokeForConnection(context.target, async (conn) => {
+            const DIR = conn.getDir(context.dir);
+
+            let exportPath: string;
+            if (conn.getExportPath) {
+                exportPath = conn.getExportPath(context.dir);
+            }
+            if (deploy_helpers.isEmptyString(exportPath)) {
+                exportPath = DIR;
+            }
+            exportPath = deploy_helpers.toStringSafe(exportPath);
+            if (!exportPath.trim().startsWith('/')) {
+                exportPath = '/' + exportPath;
+            }
+
             const RESULT: ListDirectoryResult<TTarget> = {
                 dirs: [],
                 files: [],
+                info: deploy_files.createDefaultDirectoryInfo(context.dir, {
+                    exportPath: exportPath,
+                }),
                 others: [],
                 target: context.target,
             };
 
-            const LIST = await conn.client.listDirectory(conn.getDir(context.dir));
+            const LIST = await conn.client.listDirectory(DIR);
             if (LIST) {
                 for (const FSI of LIST) {
                     if (!FSI) {
@@ -1402,6 +1432,7 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
             result = {
                 dirs: deploy_helpers.asArray(firstResult.dirs),
                 files: deploy_helpers.asArray(firstResult.files),
+                info: deploy_files.createDefaultDirectoryInfo(context.dir),
                 others: deploy_helpers.asArray(firstResult.others),
                 target: context.target,
             };

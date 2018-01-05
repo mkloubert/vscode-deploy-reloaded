@@ -644,6 +644,9 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         NEW_SESSION_STATE['commands'] = {};
         NEW_SESSION_STATE['commands']['events'] = new Events.EventEmitter();
 
+        NEW_SESSION_STATE['list'] = {};
+        NEW_SESSION_STATE['list']['lastDirectories'] = {};
+
         NEW_SESSION_STATE['pull'] = {};
         NEW_SESSION_STATE['pull']['events'] = new Events.EventEmitter();
         NEW_SESSION_STATE['pull']['states'] = {};

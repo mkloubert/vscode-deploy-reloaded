@@ -253,19 +253,22 @@ class ZipPlugin extends deploy_plugins.PluginBase<ZipTarget> {
         const ME = this;
         const WORKSPACE = context.workspace;
 
-        const RESULT: deploy_plugins.ListDirectoryResult<ZipTarget> = {
-            dirs: [],
-            files: [],
-            others: [],
-            target: context.target,
-        };
-
         if (context.isCancelling) {
             return;
         }
 
         const DIR = deploy_helpers.normalizePath(context.dir);
         const TARGET_DIR = await ME.getTargetDirectory(context.target, false);
+
+        const RESULT: deploy_plugins.ListDirectoryResult<ZipTarget> = {
+            dirs: [],
+            files: [],
+            others: [],
+            info: deploy_files.createDefaultDirectoryInfo(context.dir, {
+                exportPath: TARGET_DIR,
+            }),
+            target: context.target,
+        };
 
         if (deploy_helpers.isEmptyString(DIR)) {
             const ZIP_FILES = await ME.getZipFiles(context.target);
@@ -279,6 +282,7 @@ class ZipPlugin extends deploy_plugins.PluginBase<ZipTarget> {
                 const CREATION_TIME = Moment.utc(`${MATCH[4]} ${MATCH[6]}`,
                                                  'YYYYMMDD HHmmss');
                 const DI: deploy_files.DirectoryInfo = {
+                    exportPath: ZF,
                     internal_name: FILE_NAME,
                     name: deploy_helpers.asLocalTime(CREATION_TIME)
                                         .format( ME.t(context.target, 'time.dateTimeWithSeconds') ),  
@@ -354,6 +358,7 @@ class ZipPlugin extends deploy_plugins.PluginBase<ZipTarget> {
                     }
 
                     const FI: deploy_files.FileInfo = {
+                        exportPath: ZIP_FILE_PATH + '::' + FILENAME,
                         name: FILENAME,
                         path: ZIP_FILE_NAME,
                         type: deploy_files.FileSystemType.File,

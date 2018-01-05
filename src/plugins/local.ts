@@ -190,6 +190,9 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
         const RESULT: deploy_plugins.ListDirectoryResult<LocalTarget> = {
             dirs: [],
             files: [],
+            info: deploy_files.createDefaultDirectoryInfo(context.dir, {
+                exportPath: targetDir,
+            }),
             others: [],
             target: context.target,
         };
@@ -218,6 +221,9 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
 
             if (STATS.isDirectory()) {
                 const DI: deploy_files.DirectoryInfo = {
+                    exportPath: Path.resolve(
+                        Path.join(targetDir, F)
+                    ),
                     name: F,
                     path: relativePath,
                     size: SIZE,
@@ -232,6 +238,9 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
                     download: async () => {
                         return deploy_helpers.readFile(fullPath);
                     },
+                    exportPath: Path.resolve(
+                        Path.join(targetDir, F)
+                    ),
                     name: F,
                     path: relativePath,
                     size: SIZE,
@@ -243,6 +252,9 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
             }
             else {
                 const FSI: deploy_files.FileSystemInfo = {
+                    exportPath: Path.resolve(
+                        Path.join(targetDir, F)
+                    ),
                     name: F,
                     path: relativePath,
                     size: SIZE,

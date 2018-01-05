@@ -85,6 +85,7 @@ export class SlackClient extends deploy_clients.AsyncFileListBase {
 
                 return await deploy_http.readBody(RESPONSE);
             },
+            //TODO: exportPath: false,
             internal_name: obj.id,
             name: obj.name,
             path: path,
@@ -237,6 +238,7 @@ export class SlackClient extends deploy_clients.AsyncFileListBase {
                                     }
 
                                     const DI: deploy_files.DirectoryInfo = {
+                                        //TODO: exportPath: false,
                                         icon: 'book',
                                         internal_name: CHANNEL.id,
                                         name: CHANNEL.name,

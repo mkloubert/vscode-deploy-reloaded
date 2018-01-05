@@ -227,6 +227,7 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
             if ('d' === FI.type) {
                 RESULT.push(
                     {
+                        //TODO: exportPath: false,
                         name: FI.name,
                         path: normalizePath(path),
                         size: FI.size,
@@ -256,6 +257,7 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
                             }
                         }
                     },
+                    //TODO: exportPath: false,
                     name: FI.name,
                     path: normalizePath(path),
                     size: FI.size,
@@ -268,6 +270,7 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
             else {
                 RESULT.push(
                     {
+                        //TODO: exportPath: false,
                         name: FI.name,
                         path: normalizePath(path),
                         size: FI.size,

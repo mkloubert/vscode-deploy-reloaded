@@ -3,6 +3,25 @@
 [![Share via Facebook](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/share/Facebook.png)](https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded&quote=vscode-deploy-reloaded) [![Share via Twitter](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/share/Twitter.png)](https://twitter.com/intent/tweet?source=https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded&text=vscode-deploy-reloaded:%20https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded&via=mjkloubert) [![Share via Google+](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/share/Google+.png)](https://plus.google.com/share?url=https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded) [![Share via Pinterest](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/share/Pinterest.png)](https://pinterest.com/pin/create/button/?url=https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded&media=https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo1.gif&description=Recoded%20version%20of%20Visual%20Studio%20Code%20extension%20%27vs-deploy%27%2C%20which%20provides%20commands%20to%20deploy%20files%20to%20one%20or%20more%20destinations.) [![Share via Reddit](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/share/Reddit.png)](https://www.reddit.com/submit?url=https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded&title=vscode-deploy-reloaded) [![Share via LinkedIn](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/share/LinkedIn.png)](https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded&title=vscode-deploy-reloaded&summary=Recoded%20version%20of%20Visual%20Studio%20Code%20extension%20%27vs-deploy%27%2C%20which%20provides%20commands%20to%20deploy%20files%20to%20one%20or%20more%20destinations.&source=https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded) [![Share via Wordpress](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/share/Wordpress.png)](https://wordpress.com/press-this.php?u=https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded&quote=vscode-deploy-reloaded&s=Recoded%20version%20of%20Visual%20Studio%20Code%20extension%20%27vs-deploy%27%2C%20which%20provides%20commands%20to%20deploy%20files%20to%20one%20or%20more%20destinations.&i=https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo1.gif) [![Share via Email](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/share/Email.png)](mailto:?subject=vscode-deploy-reloaded&body=Recoded%20version%20of%20Visual%20Studio%20Code%20extension%20'vs-deploy'%2C%20which%20provides%20commands%20to%20deploy%20files%20to%20one%20or%20more%20destinations.:%20https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded)
 
 
+## 0.21.0 (January 5th, 2018; copy remote directory to clipboard)
+
+* can copy directory path to clipboard, when [list of remote directory](https://github.com/mkloubert/vscode-deploy-reloaded#list-remote-files-), now, s. [issue #10](https://github.com/mkloubert/vscode-deploy-reloaded/issues/10)
+
+![Demo Copy remote directory path to clipboard](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo14.gif)
+
+* last remote directory is cached now
+* updated [npm packages](https://www.npmjs.com):
+  * [@slack/client](https://www.npmjs.com/package/@slack/client) to `^3.15.0`
+  * [aws-sdk](https://www.npmjs.com/package/aws-sdk) to `^2.176.0`
+  * [azure-storage](https://www.npmjs.com/package/azure-storage) to `^2.7.0`
+  * [coffeescript](https://www.npmjs.com/package/coffeescript) to `"^2.1.1`
+  * [dropbox](https://www.npmjs.com/package/dropbox) to `"^2.5.13`
+  * [fs-extra](https://www.npmjs.com/package/fs-extra) to `^4.0.3`
+  * [i18next](https://www.npmjs.com/package/i18next) to `^10.2.2`
+  * [marked](https://www.npmjs.com/package/marked) to `"^0.3.9`
+  * [moment](https://www.npmjs.com/package/moment) to `"^2.20.1`
+  * [uglify-js](https://www.npmjs.com/package/uglify-js) to `^3.3.4`
+
 ## 0.20.0 (January 4th, 2018; 'prepare' target operations)
 
 * [exec target operation](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_operations#exec-) now displays output in output channel by default, s. [issue #6](https://github.com/mkloubert/vscode-deploy-reloaded/issues/6)

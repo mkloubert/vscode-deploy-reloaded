@@ -74,6 +74,7 @@ class SlackPlugin extends deploy_plugins.PluginBase<SlackTarget> {
             const RESULT: deploy_plugins.ListDirectoryResult<SlackTarget> = {
                 dirs: [],
                 files: [],
+                info: deploy_files.createDefaultDirectoryInfo(context.dir),
                 others: [],
                 target: t,
             };
