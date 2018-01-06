@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.21.0",
+ "version": "0.22.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -54564,7 +54564,7 @@
   "@types/ssh2-sftp-client": "^2.0.0",
   "@types/tmp": "0.0.33",
   "@types/uuid": "^3.4.3",
-  "typescript": "^2.6.1",
+  "typescript": "^2.6.2",
   "vscode": "^1.1.10"
  },
  "icon": "icon.png",
@@ -54614,7 +54614,7 @@
   "moment-timezone": "^0.5.14",
   "mssql": "^4.1.0",
   "mysql": "^2.15.0",
-  "node-enumerable": "^3.8.0",
+  "node-enumerable": "^3.9.0",
   "node-simple-socket": "^2.8.1",
   "node-zip": "^1.1.1",
   "nodemailer": "^4.4.1",

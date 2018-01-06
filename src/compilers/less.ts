@@ -92,15 +92,15 @@ export async function compile(compileOpts: CompileOptions) {
         try {
             const LESS_CODE = (await deploy_helpers.readFile(FTC)).toString(enc);
 
-            let outDir = deploy_compilers.getOutputDirectory(compileOpts);
-            if (false === outDir) {
-                outDir = Path.dirname(FTC);
-            }
+            const OUTPUT_FILE_PATH = deploy_compilers.getFullOutputPathForSourceFile(FTC, compileOpts);
+            const OUT_DIR = Path.dirname(OUTPUT_FILE_PATH);
 
-            const EXT = Path.extname(FTC);
-            const FILENAME = Path.basename(FTC, EXT);
+            await deploy_helpers.createDirectoryIfNeeded(OUT_DIR);
 
-            const OUTPUT_FILE = Path.join(outDir,
+            const EXT = Path.extname(OUTPUT_FILE_PATH);
+            const FILENAME = Path.basename(OUTPUT_FILE_PATH, EXT);
+
+            const OUTPUT_FILE = Path.join(OUT_DIR,
                                           FILENAME + '.' + outExt);
 
             const LESS_OUTPUT = await LESS.render(LESS_CODE, OPTS);

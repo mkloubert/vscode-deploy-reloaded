@@ -93,15 +93,15 @@ export async function compile(compileOpts: CompileOptions) {
             const PUG_OPTS = deploy_helpers.cloneObject(OPTS);
             PUG_OPTS.filename = FTC;
 
-            let outDir = deploy_compilers.getOutputDirectory(compileOpts);
-            if (false === outDir) {
-                outDir = Path.dirname(FTC);
-            }
+            const OUTPUT_FILE_PATH = deploy_compilers.getFullOutputPathForSourceFile(FTC, compileOpts);
+            const OUT_DIR = Path.dirname(OUTPUT_FILE_PATH);
 
-            const EXT = Path.extname(FTC);
-            const FILENAME = Path.basename(FTC, EXT);
+            await deploy_helpers.createDirectoryIfNeeded(OUT_DIR);
 
-            const OUTPUT_FILE = Path.join(outDir,
+            const EXT = Path.extname(OUTPUT_FILE_PATH);
+            const FILENAME = Path.basename(OUTPUT_FILE_PATH, EXT);
+
+            const OUTPUT_FILE = Path.join(OUT_DIR,
                                           FILENAME + '.' + outExt);
 
             const HTML = Pug.render((await deploy_helpers.readFile(FTC)).toString(enc),

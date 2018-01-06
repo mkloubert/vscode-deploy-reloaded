@@ -60,6 +60,10 @@ export enum Compiler {
  */
 export interface CompileOptions<TOptions = any> extends deploy_contracts.FileFilter {
     /**
+     * The custom base directory.
+     */
+    readonly baseDirectory?: string;
+    /**
      * Special options directly for the underlying compiler.
      */
     readonly options?: TOptions;
@@ -198,6 +202,72 @@ export async function compile(compiler: Compiler, opts: CompileOptions): Promise
 }
 
 /**
+ * Returns the base directory from compiler options.
+ * 
+ * @param {CompileOptions} opts The options.
+ * 
+ * @return {string} The full path of the base directory.
+ */
+export function getBaseDirectory(opts: CompileOptions) {
+    if (!opts) {
+        opts = <any>{};
+    }
+
+    const WORKSPACE = opts.workspace;
+
+    let baseDirectory = WORKSPACE.replaceWithValues(opts.baseDirectory);
+    if (deploy_helpers.isEmptyString(baseDirectory)) {
+        baseDirectory = WORKSPACE.rootPath;
+    }
+    if (!Path.isAbsolute(baseDirectory)) {
+        baseDirectory = Path.join(WORKSPACE.rootPath, baseDirectory);
+    }
+
+    return Path.resolve(baseDirectory);
+}
+
+/**
+ * Returns the full output path for a file.
+ * 
+ * @param {string} file The input file path.
+ * @param {CompileOptions} opts The options.
+ * 
+ * @return {string} The output file path.
+ */
+export function getFullOutputPathForSourceFile(file: string, opts: CompileOptions) {
+    file = deploy_helpers.toStringSafe(file);
+
+    if (!opts) {
+        opts = <any>{};
+    }
+
+    const WORKSPACE = opts.workspace;
+
+    const BASE_DIR = getBaseDirectory(opts);
+    
+    if (!Path.isAbsolute(file)) {
+        file = Path.join(BASE_DIR, file);
+    }
+
+    let outputDir = getOutputDirectory(opts);
+    if (false === outputDir) {
+        outputDir = Path.dirname(file);
+    }
+    outputDir = Path.resolve(outputDir);
+
+    if (file.startsWith(BASE_DIR)) {
+        // re-map
+
+        file = Path.join(
+            outputDir,
+            file.substr(BASE_DIR.length),  // relative path of 'file'
+        );
+    }
+
+    return Path.resolve(file);
+}
+
+/**
  * Returns the output directory from compiler options.
  * 
  * @param {CompileOptions} opts The options.
@@ -211,11 +281,13 @@ export function getOutputDirectory(opts: CompileOptions): string | false {
 
     const WORKSPACE = opts.workspace;
 
-    let customOutDir: string | false = WORKSPACE.replaceWithValues(opts.outDirectory);
+    const BASE_DIR = getBaseDirectory(opts);
+
+    let customOutDir = WORKSPACE.replaceWithValues(opts.outDirectory);
     if (!deploy_helpers.isEmptyString(customOutDir)) {
         if (!Path.isAbsolute(customOutDir)) {
             customOutDir = Path.join(
-                WORKSPACE.rootPath,
+                BASE_DIR,
                 customOutDir
             );
         }

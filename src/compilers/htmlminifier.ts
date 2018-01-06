@@ -99,20 +99,20 @@ export async function compile(compileOpts: CompileOptions) {
         let msg: CompileResultMessage;
 
         try {
-            let outDir = deploy_compilers.getOutputDirectory(compileOpts);
-            if (false === outDir) {
-                outDir = Path.dirname(FTC);
-            }
+            const OUTPUT_FILE_PATH = deploy_compilers.getFullOutputPathForSourceFile(FTC, compileOpts);
+            const OUT_DIR = Path.dirname(OUTPUT_FILE_PATH);
 
-            const EXT = Path.extname(FTC);
-            const FILENAME = Path.basename(FTC, EXT);
+            await deploy_helpers.createDirectoryIfNeeded(OUT_DIR);
+
+            const EXT = Path.extname(OUTPUT_FILE_PATH);
+            const FILENAME = Path.basename(OUTPUT_FILE_PATH, EXT);
 
             let outputFile: string;
             if ('' === outExt) {
-                outputFile = FTC;
+                outputFile = OUTPUT_FILE_PATH;
             }
             else {
-                outputFile = Path.join(outDir,
+                outputFile = Path.join(OUT_DIR,
                                        FILENAME + '.' + outExt);
             }
             outputFile = Path.resolve(outputFile);
