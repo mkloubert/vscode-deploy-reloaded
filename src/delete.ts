@@ -267,10 +267,10 @@ export async function deleteFilesIn(files: string[],
             const PI = PLUGINS.shift();
 
             try {
-                ME.context.outputChannel.appendLine('');
+                ME.output.appendLine('');
 
                 if (files.length > 1) {
-                    ME.context.outputChannel.appendLine(
+                    ME.output.appendLine(
                         ME.t('DELETE.startOperation',
                              TARGET_NAME)
                     );
@@ -290,7 +290,7 @@ export async function deleteFilesIn(files: string[],
                         }
                         destination = `${deploy_helpers.toStringSafe(destination)} (${TARGET_NAME})`;
 
-                        ME.context.outputChannel.append(
+                        ME.output.append(
                             ME.t('DELETE.deletingFile',
                                  f, destination) + ' '
                         );
@@ -298,12 +298,12 @@ export async function deleteFilesIn(files: string[],
                         await WAIT_WHILE_CANCELLING();
 
                         if (CANCELLATION_SOURCE.token.isCancellationRequested) {
-                            ME.context.outputChannel.appendLine(`[${ME.t('canceled')}]`);
+                            ME.output.appendLine(`[${ME.t('canceled')}]`);
                         }
                     };
                     SF.onDeleteCompleted = async (err?: any, deleteLocal?: boolean) => {
                         if (err) {
-                            ME.context.outputChannel.appendLine(`[${ME.t('error', err)}]`);
+                            ME.output.appendLine(`[${ME.t('error', err)}]`);
                         }
                         else {
                             try {
@@ -318,10 +318,10 @@ export async function deleteFilesIn(files: string[],
                                     }
                                 }
 
-                                ME.context.outputChannel.appendLine(`[${ME.t('ok')}]`);
+                                ME.output.appendLine(`[${ME.t('ok')}]`);
                             }
                             catch (e) {
-                                ME.context.outputChannel.appendLine(`[${ME.t('warning')}: ${deploy_helpers.toStringSafe(e)}]`);
+                                ME.output.appendLine(`[${ME.t('warning')}: ${deploy_helpers.toStringSafe(e)}]`);
                             }
                         }
                     };
@@ -346,7 +346,7 @@ export async function deleteFilesIn(files: string[],
                 });
 
                 const SHOW_CANCELED_BY_OPERATIONS_MESSAGE = () => {
-                    ME.context.outputChannel.appendLine(
+                    ME.output.appendLine(
                         ME.t('DELETE.canceledByOperation',
                              TARGET_NAME)
                     );
@@ -370,7 +370,7 @@ export async function deleteFilesIn(files: string[],
 
                 // beforeDelete
                 operationIndex = -1;
-                ME.context.outputChannel.appendLine('');
+                ME.output.appendLine('');
                 const BEFORE_DELETE_ABORTED = !deploy_helpers.toBooleanSafe(
                     await deploy_targets.executeTargetOperations({
                         files: FILES_TO_DELETE.map(ftu => {
@@ -379,17 +379,17 @@ export async function deleteFilesIn(files: string[],
                         onBeforeExecute: async (operation) => {
                             ++operationIndex;
 
-                            ME.context.outputChannel.append(
+                            ME.output.append(
                                 ME.t('targets.operations.runningBeforeDelete',
                                      GET_OPERATION_NAME(operation))
                             );
                         },
                         onExecutionCompleted: async (operation, err, doesContinue) => {
                             if (err) {
-                                ME.context.outputChannel.appendLine(`[${ME.t('error', err)}]`);
+                                ME.output.appendLine(`[${ME.t('error', err)}]`);
                             }
                             else {
-                                ME.context.outputChannel.appendLine(`[${ME.t('ok')}]`);
+                                ME.output.appendLine(`[${ME.t('ok')}]`);
                             }
                         },
                         operation: deploy_targets.TargetOperationEvent.BeforeDelete,
@@ -415,17 +415,17 @@ export async function deleteFilesIn(files: string[],
                         onBeforeExecute: async (operation) => {
                             ++operationIndex;
 
-                            ME.context.outputChannel.append(
+                            ME.output.append(
                                 ME.t('targets.operations.runningAfterDeleted',
                                      GET_OPERATION_NAME(operation))
                             );
                         },
                         onExecutionCompleted: async (operation, err, doesContinue) => {
                             if (err) {
-                                ME.context.outputChannel.appendLine(`[${ME.t('error', err)}]`);
+                                ME.output.appendLine(`[${ME.t('error', err)}]`);
                             }
                             else {
-                                ME.context.outputChannel.appendLine(`[${ME.t('ok')}]`);
+                                ME.output.appendLine(`[${ME.t('ok')}]`);
                             }
                         },
                         operation: deploy_targets.TargetOperationEvent.AfterDeleted,
@@ -438,14 +438,14 @@ export async function deleteFilesIn(files: string[],
                 }
 
                 if (files.length > 1) {
-                    ME.context.outputChannel.appendLine(
+                    ME.output.appendLine(
                         ME.t('DELETE.finishedOperation',
                              TARGET_NAME)
                     );
                 }
             }
             catch (e) {
-                ME.context.outputChannel.appendLine(
+                ME.output.appendLine(
                     ME.t('DELETE.finishedOperationWithErrors',
                          TARGET_NAME, e)
                 );

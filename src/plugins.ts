@@ -492,7 +492,7 @@ export abstract class FileToUploadBase implements FileToUpload {
     /**
      * Initializes a new instance of that class.
      * 
-     * @param {deploy_workspaces.Workspace} workspace the underlying workspace.
+     * @param {deploy_workspaces.Workspace} workspace The underlying workspace.
      * @param {string} file The path to the local file. 
      * @param {deploy_contracts.WithNameAndPath} _NAME_AND_PATH Name and relative path information.
      */
@@ -521,7 +521,7 @@ export abstract class FileToUploadBase implements FileToUpload {
 
     /** @inheritdoc */
     public readonly read = async function() {
-        const ME = this;
+        const ME: FileToUploadBase = this;
 
         let data = await ME.onRead();
 
@@ -540,15 +540,18 @@ export abstract class FileToUploadBase implements FileToUpload {
             );
 
             const CONTEXT: deploy_transformers.DataTransformerContext = {
+                context: ME.transformerSubContext,
                 events: ME.workspace.workspaceSessionState['upload']['events'],
                 extension: ME.workspace.context.extension,
                 folder: ME.workspace.folder,
                 globalEvents: deploy_events.EVENTS,
                 globals: ME.workspace.globals,
                 globalState: ME.workspace.workspaceSessionState['upload']['states']['global'],
-                logger: deploy_log.CONSOLE,
+                homeDir: deploy_helpers.getExtensionDirInHome(),
+                logger: ME.workspace.createLogger(),
                 mode: deploy_transformers.DataTransformerMode.Transform,
                 options: ME.transformerOptions,
+                output: ME.workspace.output,
                 replaceWithValues: (val) => {
                     return ME.workspace
                              .replaceWithValues(val);
@@ -557,7 +560,9 @@ export abstract class FileToUploadBase implements FileToUpload {
                     return deploy_helpers.requireFromExtension(id);
                 },
                 sessionState: deploy_session.SESSION_STATE,
+                settingFolder: ME.workspace.settingFolder,
                 state: undefined,
+                workspaceRoot: ME.workspace.rootPath,
             };
 
             // CONTEXT.state
@@ -599,6 +604,11 @@ export abstract class FileToUploadBase implements FileToUpload {
      * The options for the data transformer.
      */
     public transformerOptions: any;
+
+    /**
+     * An sub context object for the transformer context.
+     */
+    public transformerSubContext: any;
 
     /**
      * A function that provides a key for the state value

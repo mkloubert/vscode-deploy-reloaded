@@ -101,12 +101,12 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
         const OUTPUT = deploy_helpers.toStringSafe(RESULT.stdOut);
 
         if ('' !== OUTPUT) {
-            WORKSPACE.context.outputChannel.appendLine('');
-            WORKSPACE.context.outputChannel.appendLine('');
+            WORKSPACE.output.appendLine('');
+            WORKSPACE.output.appendLine('');
 
-            WORKSPACE.context.outputChannel.appendLine(OUTPUT); 
+            WORKSPACE.output.appendLine(OUTPUT); 
             
-            WORKSPACE.context.outputChannel.appendLine('');
+            WORKSPACE.output.appendLine('');
         }
     }
 

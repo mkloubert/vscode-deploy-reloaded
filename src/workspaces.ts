@@ -638,6 +638,15 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         return false;
     }
 
+    /**
+     * Creates a (new) logger based of that workspace.
+     * 
+     * @return {deploy_log.Logger} The (new) workspace logger.
+     */
+    public createLogger(): deploy_log.Logger {
+        return this.logger;
+    }
+
     private createWorkspaceSessionState(newCfg: WorkspaceSettings) {
         const NEW_SESSION_STATE: deploy_contracts.KeyValuePairs = {};
         
@@ -885,8 +894,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
             const IGNORE_IF_FAIL = deploy_helpers.toBooleanSafe(sc.ignoreIfFail);
 
-            ME.context.outputChannel.appendLine('');
-            ME.context.outputChannel.append(
+            ME.output.appendLine('');
+            ME.output.append(
                 ME.t('shell.executing',
                      name) + ' '
             );
@@ -895,12 +904,12 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                     cwd: cwd,
                 });
 
-                ME.context.outputChannel.appendLine(
+                ME.output.appendLine(
                     `[${ME.t('ok')}]`
                 );
             }
             catch (e) {
-                ME.context.outputChannel.appendLine(
+                ME.output.appendLine(
                     `[${ME.t('error', e)}]`
                 );
                 
@@ -1402,9 +1411,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      */
     public getSettingScopes(): string[] {
         return [
-            Path.resolve(
-                Path.join(OS.homedir(), deploy_contracts.HOMEDIR_SUBFOLDER)
-            ),
+            deploy_helpers.getExtensionDirInHome(),
             this.settingFolder,
         ];
     }
@@ -1742,20 +1749,20 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 return;  // 'vendor' already exist
             }
 
-            ME.context.outputChannel.appendLine('');
-            ME.context.outputChannel.append(
+            ME.output.appendLine('');
+            ME.output.append(
                 ME.t('workspaces.composer.install.running',
                      ME.rootPath) + ' '
             );
             try {
                 await ME.exec('composer install');
 
-                ME.context.outputChannel.appendLine(
+                ME.output.appendLine(
                     `[${ME.t('ok')}]`
                 );
             }
             catch (e) {
-                ME.context.outputChannel.appendLine(
+                ME.output.appendLine(
                     `[${ME.t('error', e)}]`
                 );
             }
@@ -1951,20 +1958,20 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 return;  // 'node_modules' already exist
             }
 
-            ME.context.outputChannel.appendLine('');
-            ME.context.outputChannel.append(
+            ME.output.appendLine('');
+            ME.output.append(
                 ME.t('workspaces.npm.install.running',
                      ME.rootPath) + ' '
             );
             try {
                 await ME.exec('npm install');
 
-                ME.context.outputChannel.appendLine(
+                ME.output.appendLine(
                     `[${ME.t('ok')}]`
                 );
             }
             catch (e) {
-                ME.context.outputChannel.appendLine(
+                ME.output.appendLine(
                     `[${ME.t('error', e)}]`
                 );
             }
@@ -2174,6 +2181,13 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     }
 
     /**
+     * Gets the logger of that workspace.
+     */
+    public get logger(): deploy_log.Logger {
+        return deploy_log.CONSOLE;
+    }
+
+    /**
      * Is invoked when the active text editor changed.
      * 
      * @param {vscode.TextEditor} editor The new editor.
@@ -2290,6 +2304,13 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      */
     public get name(): string {
         return Path.basename(this.rootPath);
+    }
+
+    /**
+     * Gets the output channel of that workspace.
+     */
+    public get output(): vscode.OutputChannel {
+        return this.context.outputChannel;
     }
 
     /**
@@ -2568,10 +2589,10 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             }
 
             if (deploy_helpers.toBooleanSafe(loadedCfg.clearOutputOnStartup)) {
-                ME.context.outputChannel.clear();
+                ME.output.clear();
             }
             if (deploy_helpers.toBooleanSafe(loadedCfg.openOutputOnStartup, true)) {
-                ME.context.outputChannel.show();
+                ME.output.show();
             }
 
             finalizer = async () => {
@@ -2600,8 +2621,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
                         ME._isDeployOnChangeFreezed = true;
 
-                        ME.context.outputChannel.appendLine('');
-                        ME.context.outputChannel.appendLine(
+                        ME.output.appendLine('');
+                        ME.output.appendLine(
                             ME.t('deploy.onChange.waitingBeforeActivate',
                                  Math.round(TIME_TO_WAIT_BEFORE_ACTIVATE_DEPLOY_ON_CHANGE / 1000.0),
                                  ME.rootPath)
@@ -2611,8 +2632,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                             setTimeout(() => {
                                 ME._isDeployOnChangeFreezed = false;
 
-                                ME.context.outputChannel.appendLine('');
-                                ME.context.outputChannel.appendLine(
+                                ME.output.appendLine('');
+                                ME.output.appendLine(
                                     ME.t('deploy.onChange.activated',
                                          ME.rootPath)
                                 );
@@ -2638,8 +2659,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
                         ME._isRemoveOnChangeFreezed = true;
 
-                        ME.context.outputChannel.appendLine('');
-                        ME.context.outputChannel.appendLine(
+                        ME.output.appendLine('');
+                        ME.output.appendLine(
                             ME.t('DELETE.onChange.waitingBeforeActivate',
                                  Math.round(TIME_TO_WAIT_BEFORE_ACTIVATE_REMOVE_ON_CHANGE / 1000.0),
                                  ME.rootPath)
@@ -2649,8 +2670,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                             setTimeout(() => {
                                 ME._isRemoveOnChangeFreezed = false;
 
-                                ME.context.outputChannel.appendLine('');
-                                ME.context.outputChannel.appendLine(
+                                ME.output.appendLine('');
+                                ME.output.appendLine(
                                     ME.t('DELETE.onChange.activated',
                                          ME.rootPath)
                                 );

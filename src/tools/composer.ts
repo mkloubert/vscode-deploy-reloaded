@@ -138,19 +138,19 @@ async function runComposerRemove(ws: deploy_workspaces.Workspace) {
 
     const CMD = `composer remove ${COMPOSER_PACKAGE}`;
 
-    ws.context.outputChannel.appendLine('');
-    ws.context.outputChannel.append(
+    ws.output.appendLine('');
+    ws.output.append(
         ws.t('tools.composer.executing', CMD) + ' '
     );
     try {
         await ws.exec(CMD);
 
-        ws.context.outputChannel.appendLine(
+        ws.output.appendLine(
             `[${ws.t('ok')}]`
         );
     }
     catch (e) {
-        ws.context.outputChannel.appendLine(
+        ws.output.appendLine(
             `[${ws.t('error', e)}]`
         );
     }
@@ -183,19 +183,19 @@ async function runComposerRequire(ws: deploy_workspaces.Workspace) {
 
     const CMD = `composer require ${COMPOSER_PACKAGE}`;
 
-    ws.context.outputChannel.appendLine('');
-    ws.context.outputChannel.append(
+    ws.output.appendLine('');
+    ws.output.append(
         ws.t('tools.composer.executing', CMD) + ' '
     );
     try {
         await ws.exec(CMD);
 
-        ws.context.outputChannel.appendLine(
+        ws.output.appendLine(
             `[${ws.t('ok')}]`
         );
     }
     catch (e) {
-        ws.context.outputChannel.appendLine(
+        ws.output.appendLine(
             `[${ws.t('error', e)}]`
         );
     }

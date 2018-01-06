@@ -76,19 +76,19 @@ async function runNPMInstall(ws: deploy_workspaces.Workspace) {
 
     const CMD = `npm install --save ${NPM_MODULE}`;
 
-    ws.context.outputChannel.appendLine('');
-    ws.context.outputChannel.append(
+    ws.output.appendLine('');
+    ws.output.append(
         ws.t('tools.npm.executing', CMD) + ' '
     );
     try {
         await ws.exec(CMD);
 
-        ws.context.outputChannel.appendLine(
+        ws.output.appendLine(
             `[${ws.t('ok')}]`
         );
     }
     catch (e) {
-        ws.context.outputChannel.appendLine(
+        ws.output.appendLine(
             `[${ws.t('error', e)}]`
         );
     }
@@ -121,19 +121,19 @@ async function runNPMLink(ws: deploy_workspaces.Workspace) {
 
     const CMD = `npm link ${NPM_MODULE}`;
 
-    ws.context.outputChannel.appendLine('');
-    ws.context.outputChannel.append(
+    ws.output.appendLine('');
+    ws.output.append(
         ws.t('tools.npm.executing', CMD) + ' '
     );
     try {
         await ws.exec(CMD);
 
-        ws.context.outputChannel.appendLine(
+        ws.output.appendLine(
             `[${ws.t('ok')}]`
         );
     }
     catch (e) {
-        ws.context.outputChannel.appendLine(
+        ws.output.appendLine(
             `[${ws.t('error', e)}]`
         );
     }
@@ -229,19 +229,19 @@ async function runNPMUnInstall(ws: deploy_workspaces.Workspace) {
 
     const CMD = `npm uninstall --save ${NPM_MODULE}`;
 
-    ws.context.outputChannel.appendLine('');
-    ws.context.outputChannel.append(
+    ws.output.appendLine('');
+    ws.output.append(
         ws.t('tools.npm.executing', CMD) + ' '
     );
     try {
         await ws.exec(CMD);
 
-        ws.context.outputChannel.appendLine(
+        ws.output.appendLine(
             `[${ws.t('ok')}]`
         );
     }
     catch (e) {
-        ws.context.outputChannel.appendLine(
+        ws.output.appendLine(
             `[${ws.t('error', e)}]`
         );
     }

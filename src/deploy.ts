@@ -304,10 +304,10 @@ export async function deployFilesTo(files: string[],
             const PI = PLUGINS.shift();
 
             try {
-                ME.context.outputChannel.appendLine('');
+                ME.output.appendLine('');
 
                 if (files.length > 1) {
-                    ME.context.outputChannel.appendLine(
+                    ME.output.appendLine(
                         ME.t('deploy.startOperation',
                              TARGET_NAME)
                     );
@@ -328,7 +328,7 @@ export async function deployFilesTo(files: string[],
                         }
                         destination = `${deploy_helpers.toStringSafe(destination)} (${TARGET_NAME})`;
 
-                        ME.context.outputChannel.append(
+                        ME.output.append(
                             ME.t('deploy.deployingFile',
                                  F, destination) + ' '
                         );
@@ -336,12 +336,12 @@ export async function deployFilesTo(files: string[],
                         await WAIT_WHILE_CANCELLING();
 
                         if (CANCELLATION_SOURCE.token.isCancellationRequested) {
-                            ME.context.outputChannel.appendLine(`[${ME.t('canceled')}]`);
+                            ME.output.appendLine(`[${ME.t('canceled')}]`);
                         }
                     };
                     LF.onUploadCompleted = async (err?: any) => {
                         if (err) {
-                            ME.context.outputChannel.appendLine(`[${ME.t('error', err)}]`);
+                            ME.output.appendLine(`[${ME.t('error', err)}]`);
                         }
                         else {
                             const SYNC_WHEN_OPEN_ID = ME.getSyncWhenOpenKey(target);
@@ -350,11 +350,19 @@ export async function deployFilesTo(files: string[],
                                 delete SYNC_WHEN_STATES[SYNC_WHEN_OPEN_ID];
                             }
 
-                            ME.context.outputChannel.appendLine(`[${ME.t('ok')}]`);
+                            ME.output.appendLine(`[${ME.t('ok')}]`);
                         }
                     };
 
                     LF.transformer = transformer;
+                    LF.transformerSubContext = {
+                        deployOperation: deploy_contracts.DeployOperation.Deploy,
+                        file: LF.file,
+                        remoteFile: deploy_helpers.normalizePath(
+                            NAME_AND_PATH.path + '/' + NAME_AND_PATH.name,
+                        ),
+                        target: target,
+                    };
                     LF.transformerOptions = TRANSFORMER_OPTIONS;
                     LF.transformerStateKeyProvider = () => {
                         return STATE_KEY;
@@ -380,7 +388,7 @@ export async function deployFilesTo(files: string[],
                 });
 
                 const SHOW_CANCELED_BY_OPERATIONS_MESSAGE = () => {
-                    ME.context.outputChannel.appendLine(
+                    ME.output.appendLine(
                         ME.t('deploy.canceledByOperation',
                              TARGET_NAME)
                     );
@@ -404,7 +412,7 @@ export async function deployFilesTo(files: string[],
 
                 // beforeDeploy
                 operationIndex = -1;
-                ME.context.outputChannel.appendLine('');
+                ME.output.appendLine('');
                 const BEFORE_DEPLOY_ABORTED = !deploy_helpers.toBooleanSafe(
                     await deploy_targets.executeTargetOperations({
                         files: FILES_TO_UPLOAD.map(ftu => {
@@ -413,17 +421,17 @@ export async function deployFilesTo(files: string[],
                         onBeforeExecute: async (operation) => {
                             ++operationIndex;
 
-                            ME.context.outputChannel.append(
+                            ME.output.append(
                                 ME.t('targets.operations.runningBeforeDeploy',
                                      GET_OPERATION_NAME(operation))
                             );
                         },
                         onExecutionCompleted: async (operation, err, doesContinue) => {
                             if (err) {
-                                ME.context.outputChannel.appendLine(`[${ME.t('error', err)}]`);
+                                ME.output.appendLine(`[${ME.t('error', err)}]`);
                             }
                             else {
-                                ME.context.outputChannel.appendLine(`[${ME.t('ok')}]`);
+                                ME.output.appendLine(`[${ME.t('ok')}]`);
                             }
                         },
                         operation: deploy_targets.TargetOperationEvent.BeforeDeploy,
@@ -449,17 +457,17 @@ export async function deployFilesTo(files: string[],
                         onBeforeExecute: async (operation) => {
                             ++operationIndex;
 
-                            ME.context.outputChannel.append(
+                            ME.output.append(
                                 ME.t('targets.operations.runningAfterDeployed',
                                      GET_OPERATION_NAME(operation))
                             );
                         },
                         onExecutionCompleted: async (operation, err, doesContinue) => {
                             if (err) {
-                                ME.context.outputChannel.appendLine(`[${ME.t('error', err)}]`);
+                                ME.output.appendLine(`[${ME.t('error', err)}]`);
                             }
                             else {
-                                ME.context.outputChannel.appendLine(`[${ME.t('ok')}]`);
+                                ME.output.appendLine(`[${ME.t('ok')}]`);
                             }
                         },
                         operation: deploy_targets.TargetOperationEvent.AfterDeployed,
@@ -472,14 +480,14 @@ export async function deployFilesTo(files: string[],
                 }
 
                 if (files.length > 1) {
-                    ME.context.outputChannel.appendLine(
+                    ME.output.appendLine(
                         ME.t('deploy.finishedOperation',
                              TARGET_NAME)
                     );
                 }
             }
             catch (e) {
-                ME.context.outputChannel.appendLine(
+                ME.output.appendLine(
                     ME.t('deploy.finishedOperationWithErrors',
                          TARGET_NAME, e)
                 );

@@ -348,7 +348,7 @@ export class FileValue extends ValueBase<FileValueItem> {
 
         if (listOfScopes.length < 1) {
             listOfScopes.push(
-                Path.join(OS.homedir(), deploy_contracts.HOMEDIR_SUBFOLDER)
+                deploy_helpers.getExtensionDirInHome()
             );
 
             listOfScopes.push( process.cwd() );
@@ -613,6 +613,11 @@ export function getPredefinedValues(): Value[] {
     PREDEFINED_VALUES.push(new FunctionValue(() => {
         return OS.EOL;
     }, 'EOL'));
+
+    // ${extensionDir}
+    PREDEFINED_VALUES.push(new FunctionValue(() => {
+        return deploy_helpers.getExtensionDirInHome();
+    }, 'extensionDir'));
 
     // ${homeDir}
     PREDEFINED_VALUES.push(new FunctionValue(() => {

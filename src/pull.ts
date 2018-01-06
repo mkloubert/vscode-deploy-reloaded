@@ -335,10 +335,10 @@ export async function pullFilesFrom(files: string[],
             try {
                 await deploy_helpers.waitWhile(() => isCancelling);
 
-                ME.context.outputChannel.appendLine('');
+                ME.output.appendLine('');
 
                 if (files.length > 1) {
-                    ME.context.outputChannel.appendLine(
+                    ME.output.appendLine(
                         ME.t('pull.startOperation',
                              TARGET_NAME)
                     );
@@ -358,7 +358,7 @@ export async function pullFilesFrom(files: string[],
                         }
                         source = `${deploy_helpers.toStringSafe(source)} (${TARGET_NAME})`;
 
-                        ME.context.outputChannel.append(
+                        ME.output.append(
                             ME.t('pull.pullingFile',
                                  f, source) + ' '
                         );
@@ -366,7 +366,7 @@ export async function pullFilesFrom(files: string[],
                         await WAIT_WHILE_CANCELLING();
 
                         if (CANCELLATION_SOURCE.token.isCancellationRequested) {
-                            ME.context.outputChannel.appendLine(`[${ME.t('canceled')}]`);
+                            ME.output.appendLine(`[${ME.t('canceled')}]`);
                         }
                     };
                     SF.onDownloadCompleted = async (err?, downloadedFile?) => {
@@ -402,15 +402,25 @@ export async function pullFilesFrom(files: string[],
                                     );
 
                                     const CONTEXT: deploy_transformers.DataTransformerContext = {
+                                        context: {
+                                            deployOperation: deploy_contracts.DeployOperation.Pull,
+                                            file: f,
+                                            remoteFile: deploy_helpers.normalizePath(
+                                                NAME_AND_PATH.path + '/' + NAME_AND_PATH.name,
+                                            ),
+                                            target: target,
+                                        },
                                         events: ME.workspaceSessionState['pull']['events'],
                                         extension: ME.context.extension,
                                         folder: ME.folder,
                                         globalEvents: deploy_events.EVENTS,
                                         globals: ME.globals,
                                         globalState: ME.workspaceSessionState['pull']['states']['global'],
-                                        logger: deploy_log.CONSOLE,
+                                        homeDir: deploy_helpers.getExtensionDirInHome(),
+                                        logger: ME.createLogger(),
                                         mode: deploy_transformers.DataTransformerMode.Restore,
                                         options: TRANSFORMER_OPTIONS,
+                                        output: ME.output,
                                         replaceWithValues: (val) => {
                                             return ME.replaceWithValues(val);
                                         },
@@ -418,7 +428,9 @@ export async function pullFilesFrom(files: string[],
                                             return deploy_helpers.requireFromExtension(id);
                                         },
                                         sessionState: deploy_session.SESSION_STATE,
+                                        settingFolder: ME.settingFolder,
                                         state: undefined,
+                                        workspaceRoot: ME.rootPath,
                                     };
 
                                     // CONTEXT.state
@@ -445,11 +457,11 @@ export async function pullFilesFrom(files: string[],
                                     );
                                 }
 
-                                ME.context.outputChannel.appendLine(`[${ME.t('ok')}]`);
+                                ME.output.appendLine(`[${ME.t('ok')}]`);
                             }
                         }
                         catch (e) {
-                            ME.context.outputChannel.appendLine(`[${ME.t('error', e)}]`);
+                            ME.output.appendLine(`[${ME.t('error', e)}]`);
                         }
                         finally {
                             if (disposeDownloadedFile) {
@@ -478,7 +490,7 @@ export async function pullFilesFrom(files: string[],
                 });
 
                 const SHOW_CANCELED_BY_OPERATIONS_MESSAGE = () => {
-                    ME.context.outputChannel.appendLine(
+                    ME.output.appendLine(
                         ME.t('pull.canceledByOperation',
                              TARGET_NAME)
                     );
@@ -502,7 +514,7 @@ export async function pullFilesFrom(files: string[],
 
                 // beforePull
                 operationIndex = -1;
-                ME.context.outputChannel.appendLine('');
+                ME.output.appendLine('');
                 const BEFORE_PULL_ABORTED = !deploy_helpers.toBooleanSafe(
                     await deploy_targets.executeTargetOperations({
                         files: FILES_TO_PULL.map(ftu => {
@@ -511,17 +523,17 @@ export async function pullFilesFrom(files: string[],
                         onBeforeExecute: async (operation) => {
                             ++operationIndex;
 
-                            ME.context.outputChannel.append(
+                            ME.output.append(
                                 ME.t('targets.operations.runningBeforePull',
                                      GET_OPERATION_NAME(operation))
                             );
                         },
                         onExecutionCompleted: async (operation, err, doesContinue) => {
                             if (err) {
-                                ME.context.outputChannel.appendLine(`[${ME.t('error', err)}]`);
+                                ME.output.appendLine(`[${ME.t('error', err)}]`);
                             }
                             else {
-                                ME.context.outputChannel.appendLine(`[${ME.t('ok')}]`);
+                                ME.output.appendLine(`[${ME.t('ok')}]`);
                             }
                         },
                         operation: deploy_targets.TargetOperationEvent.BeforePull,
@@ -547,17 +559,17 @@ export async function pullFilesFrom(files: string[],
                         onBeforeExecute: async (operation) => {
                             ++operationIndex;
 
-                            ME.context.outputChannel.append(
+                            ME.output.append(
                                 ME.t('targets.operations.runningAfterPulled',
                                      GET_OPERATION_NAME(operation))
                             );
                         },
                         onExecutionCompleted: async (operation, err, doesContinue) => {
                             if (err) {
-                                ME.context.outputChannel.appendLine(`[${ME.t('error', err)}]`);
+                                ME.output.appendLine(`[${ME.t('error', err)}]`);
                             }
                             else {
-                                ME.context.outputChannel.appendLine(`[${ME.t('ok')}]`);
+                                ME.output.appendLine(`[${ME.t('ok')}]`);
                             }
                         },
                         operation: deploy_targets.TargetOperationEvent.AfterPulled,
@@ -570,14 +582,14 @@ export async function pullFilesFrom(files: string[],
                 }
 
                 if (files.length > 1) {
-                    ME.context.outputChannel.appendLine(
+                    ME.output.appendLine(
                         ME.t('pull.finishedOperation',
                              TARGET_NAME)
                     );
                 }
             }
             catch (e) {
-                ME.context.outputChannel.appendLine(
+                ME.output.appendLine(
                     ME.t('pull.finishedOperationWithErrors',
                          TARGET_NAME, e)
                 );

@@ -108,8 +108,10 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
                 globalEvents: deploy_events.EVENTS,
                 globals: WORKSPACE.globals,
                 globalState: WORKSPACE.workspaceSessionState['target_operations']['script']['global'],
-                logger: deploy_log.CONSOLE,
+                homeDir: deploy_helpers.getExtensionDirInHome(),
+                logger: WORKSPACE.createLogger(),
                 options: deploy_helpers.cloneObject(OPERATION.options),
+                output: WORKSPACE.output,
                 replaceWithValues: (val) => {
                     return WORKSPACE.replaceWithValues(val);
                 },
@@ -117,7 +119,9 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
                     return deploy_helpers.requireFromExtension(id);
                 },
                 sessionState: deploy_session.SESSION_STATE,
+                settingFolder: WORKSPACE.settingFolder,
                 state: undefined,
+                workspaceRoot: WORKSPACE.rootPath,
             };
 
             // ARGS.state

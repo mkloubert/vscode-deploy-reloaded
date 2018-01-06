@@ -644,7 +644,8 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
                                     globalEvents: deploy_events.EVENTS,
                                     globals: WORKSPACE.globals,
                                     globalState: ME._GLOBAL_STATE,
-                                    logger: deploy_log.CONSOLE,
+                                    homeDir: deploy_helpers.getExtensionDirInHome(),
+                                    logger: WORKSPACE.createLogger(),
                                     operation: operation,
                                     options: deploy_helpers.cloneObject(target.argumentScriptOptions),
                                     outDirectory: OUT_DIRECTORY,
@@ -655,10 +656,31 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
                                         return deploy_helpers.requireFromExtension(id);
                                     },
                                     sessionState: deploy_session.SESSION_STATE,
+                                    settingFolder: undefined,
                                     state: undefined,
                                     target: target,
+                                    output: undefined,
                                     workspace: undefined,
+                                    workspaceRoot: undefined,
                                 };
+
+                                // ARGS.output
+                                Object.defineProperty(ARGS, 'output', {
+                                    enumerable: true,
+
+                                    get: function () {
+                                        return this.workspace.output;
+                                    }
+                                });
+
+                                // ARGS.settingFolder
+                                Object.defineProperty(ARGS, 'settingFolder', {
+                                    enumerable: true,
+
+                                    get: function () {
+                                        return this.workspace.settingFolder;
+                                    }
+                                });
 
                                 // ARGS.state
                                 Object.defineProperty(ARGS, 'state', {
@@ -679,6 +701,15 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
 
                                     get: function () {
                                         return this.target.__workspace;
+                                    }
+                                });
+
+                                // ARGS.workspaceRoot
+                                Object.defineProperty(ARGS, 'workspaceRoot', {
+                                    enumerable: true,
+
+                                    get: function () {
+                                        return this.workspace.rootPath;
                                     }
                                 });
 
@@ -793,10 +824,12 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
                                     globalEvents: deploy_events.EVENTS,
                                     globals: WORKSPACE.globals,
                                     globalState: ME._GLOBAL_STATE,
-                                    logger: deploy_log.CONSOLE,
+                                    homeDir: deploy_helpers.getExtensionDirInHome(),
+                                    logger: WORKSPACE.createLogger(),
                                     operation: operation,
                                     options: deploy_helpers.cloneObject(target.inputScriptOptions),
                                     outDirectory: OUT_DIRECTORY,
+                                    output: undefined,
                                     replaceWithValues: (val) => {
                                         return REPLACE_WITH_VALUES(val);
                                     },
@@ -804,10 +837,30 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
                                         return deploy_helpers.requireFromExtension(id);
                                     },
                                     sessionState: deploy_session.SESSION_STATE,
+                                    settingFolder: undefined,
                                     state: undefined,
                                     target: target,
                                     workspace: undefined,
+                                    workspaceRoot: undefined,
                                 };
+
+                                // ARGS.output
+                                Object.defineProperty(ARGS, 'output', {
+                                    enumerable: true,
+
+                                    get: function () {
+                                        return this.workspace.output;
+                                    }
+                                });
+
+                                // ARGS.settingFolder
+                                Object.defineProperty(ARGS, 'settingFolder', {
+                                    enumerable: true,
+
+                                    get: function () {
+                                        return this.workspace.settingFolder;
+                                    }
+                                });
 
                                 // ARGS.state
                                 Object.defineProperty(ARGS, 'state', {
@@ -828,6 +881,15 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
 
                                     get: function () {
                                         return this.target.__workspace;
+                                    }
+                                });
+
+                                // ARGS.workspaceRoot
+                                Object.defineProperty(ARGS, 'workspaceRoot', {
+                                    enumerable: true,
+
+                                    get: function () {
+                                        return this.workspace.rootPath;
                                     }
                                 });
 

@@ -420,17 +420,17 @@ export async function executePrepareTargetOperations(opts: ExecutePrepareTargetO
         onBeforeExecute: async (operation: PrepareTargetOperation) => {
             ++operationIndex;
 
-            WORKSPACE.context.outputChannel.append(
+            WORKSPACE.output.append(
                 WORKSPACE.t('targets.operations.runningPrepare',
                             GET_OPERATION_NAME(operation))
             );
         },
         onExecutionCompleted: async (operation: PrepareTargetOperation, err, doesContinue) => {
             if (err) {
-                WORKSPACE.context.outputChannel.appendLine(`[${WORKSPACE.t('error', err)}]`);
+                WORKSPACE.output.appendLine(`[${WORKSPACE.t('error', err)}]`);
             }
             else {
-                WORKSPACE.context.outputChannel.appendLine(`[${WORKSPACE.t('ok')}]`);
+                WORKSPACE.output.appendLine(`[${WORKSPACE.t('ok')}]`);
 
                 if (deploy_helpers.toBooleanSafe(operation.reloadFileList, true)) {
                     await Promise.resolve(

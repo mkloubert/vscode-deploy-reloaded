@@ -195,8 +195,10 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
                         globalEvents: deploy_events.EVENTS,
                         globals: ME.globals,
                         globalState: GLOBAL_STATE,
-                        logger: deploy_log.CONSOLE,
+                        homeDir: deploy_helpers.getExtensionDirInHome(),
+                        logger: ME.createLogger(),
                         options: deploy_helpers.cloneObject(sc.options),
+                        output: ME.output,
                         replaceWithValues: (val) => {
                             return ME.replaceWithValues(val);
                         },
@@ -204,7 +206,9 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
                             return deploy_helpers.requireFromExtension(moduleId);
                         },
                         sessionState: deploy_session.SESSION_STATE,
+                        settingFolder: ME.settingFolder,
                         state: undefined,
+                        workspaceRoot: ME.rootPath,
                     };
 
                     // CTX.state

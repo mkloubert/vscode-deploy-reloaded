@@ -681,6 +681,19 @@ async function activateExtension(context: vscode.ExtensionContext) {
         });
     });
 
+    // extension's home folder
+    WF.next(async () => {
+        try {
+            await deploy_helpers.createDirectoryIfNeeded(
+                deploy_helpers.getExtensionDirInHome(),
+            );
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'extension.activate(extensions home folder)');
+        }
+    });
+
     // package file
     WF.next(async () => {
         try {

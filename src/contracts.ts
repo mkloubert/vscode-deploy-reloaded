@@ -451,9 +451,17 @@ export interface ScriptArguments {
      */
     readonly globalState: KeyValuePairs;
     /**
+     * The path to the extension's subfolder inside the user's home directory.
+     */
+    readonly homeDir: string;
+    /**
      * Options for the script.
      */
     readonly options?: any;
+    /**
+     * The output channel.
+     */
+    readonly output: vscode.OutputChannel;
     /**
      * The logger.
      */
@@ -476,9 +484,17 @@ export interface ScriptArguments {
      */
     readonly sessionState: KeyValuePairs;
     /**
+     * The path to the (.vscode) setting folder.
+     */
+    readonly settingFolder: string;
+    /**
      * Gets or sets a state value for the underlying script.
      */
     state: any;
+    /**
+     * The root path of the workspace from where settings have been loaded.
+     */
+    readonly workspaceRoot: string;
 }
 
 /**

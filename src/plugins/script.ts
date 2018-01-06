@@ -129,10 +129,12 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
             globalEvents: deploy_events.EVENTS,
             globals: context.target.__workspace.globals,
             globalState: ME._GLOBAL_STATE,
+            homeDir: deploy_helpers.getExtensionDirInHome(),
             isCancelling: undefined,
-            logger: deploy_log.CONSOLE,
+            logger: context.target.__workspace.createLogger(),
             operation: operation,
             options: deploy_helpers.cloneObject(context.target.options),
+            output: undefined,
             replaceWithValues: function (val) {
                 return this.workspace
                            .replaceWithValues(val);
@@ -141,9 +143,11 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
                 return deploy_helpers.requireFromExtension(id);
             },
             sessionState: deploy_session.SESSION_STATE,
+            settingFolder: undefined,
             state: undefined,
             target: context.target,
             workspace: undefined,
+            workspaceRoot: undefined,
         };
 
         // ARGS.cancellationToken
@@ -161,6 +165,24 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
 
             get: () => {
                 return context.isCancelling;
+            }
+        });
+
+        // ARGS.output
+        Object.defineProperty(ARGS, 'output', {
+            enumerable: true,
+
+            get: function () {
+                return this.workspace.output;
+            }
+        });
+
+        // ARGS.settingFolder
+        Object.defineProperty(ARGS, 'settingFolder', {
+            enumerable: true,
+
+            get: function () {
+                return this.workspace.settingFolder;
             }
         });
 
@@ -183,6 +205,15 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
 
             get: function () {
                 return this.target.__workspace;
+            }
+        });
+
+        // ARGS.workspaceRoot
+        Object.defineProperty(ARGS, 'workspaceRoot', {
+            enumerable: true,
+
+            get: function () {
+                return this.workspace.rootPath;
             }
         });
 

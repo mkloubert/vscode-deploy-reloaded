@@ -33,6 +33,7 @@ const MergeDeep = require('merge-deep');
 import * as MimeTypes from 'mime-types';
 import * as Minimatch from 'minimatch';
 import * as Moment from 'moment';
+import * as OS from 'os';
 import * as Path from 'path';
 import * as Stream from "stream";
 import * as TMP from 'tmp';
@@ -1000,6 +1001,18 @@ export function formatArray(formatStr: any, args: any[]): string {
 
         return toStringSafe(resultValue);        
     });
+}
+
+/**
+ * Returns the (possible path) of the extension's sub folder inside the home directory.
+ * 
+ * @return {string} The path of the extension's sub folder inside the home directory.
+ */
+export function getExtensionDirInHome() {
+    return Path.resolve(
+        Path.join(OS.homedir(),
+                  deploy_contracts.HOMEDIR_SUBFOLDER)
+    );
 }
 
 /**
