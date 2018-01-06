@@ -406,6 +406,7 @@ export const translation: Translation = {
             typeNotSupported: "Eine Operation vom Typ{0:trim,surround,leading_space} wird nicht unterstützt!",
         },
         selectTarget: "Wählen Sie ein Ziel aus ...",
+        waitingForOther: "Warte auf{0:trim,surround,leading_space} ...",
     },
     time: {
         dateTimeWithSeconds: "DD.MM.YYYY HH:mm:ss",
@@ -546,6 +547,7 @@ export const translation: Translation = {
         currentlyActive: "Die 'vs-deploy' Erweiterung ist derzeit aktiv. Es wird empfohlen diese zu DEAKTIVIEREN, bevor Sie forfahren und die neue Erweiterung nutzen!",
     },
     warning: "WARNUNG",
+    waiting: "Warte ...",
     workspace: "Arbeitsbereich",
     workspaces: {
         active: {

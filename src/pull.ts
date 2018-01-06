@@ -254,6 +254,7 @@ export async function pullFilesFrom(files: string[],
     const ALL_DIRS = await ME.getAllDirectories();
 
     const CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
+    let targetSession: symbol | false = false;
     try {
         // cancel button
         let isCancelling = false;
@@ -309,9 +310,13 @@ export async function pullFilesFrom(files: string[],
             });
             
             cancelBtn.command = CANCEL_BTN_COMMAND_ID;
-            RESTORE_CANCEL_BTN_TEXT();
 
             cancelBtn.show();
+
+            targetSession = await deploy_targets.waitForOtherTargets(
+                target, cancelBtn,
+            );
+            RESTORE_CANCEL_BTN_TEXT();
         }
 
         const WAIT_WHILE_CANCELLING = async () => {
@@ -583,6 +588,10 @@ export async function pullFilesFrom(files: string[],
         DISPOSE_CANCEL_BTN();
         
         deploy_helpers.tryDispose(CANCELLATION_SOURCE);
+
+        deploy_targets.unmarkTargetAsInProgress(
+            target, targetSession
+        );
     }
 }
 

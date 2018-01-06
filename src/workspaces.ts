@@ -673,6 +673,12 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         NEW_SESSION_STATE['target_operations']['script']['global'] = {};
         NEW_SESSION_STATE['target_operations']['script']['scripts'] = {};
 
+        // targets
+        NEW_SESSION_STATE[ deploy_targets.KEY_TARGETS_STATE_STORAGE ] = {};
+        NEW_SESSION_STATE[ deploy_targets.KEY_TARGETS_STATE_STORAGE ][
+            deploy_targets.KEY_TARGETS_IN_PROGRESS
+        ] = {};
+
         return NEW_SESSION_STATE;
     }
 

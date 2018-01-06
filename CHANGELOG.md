@@ -5,6 +5,7 @@
 
 ## 0.22.0 (January 6th, 2018; [compiler](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_compiler) target)
 
+* better handling of concurrent tasks for a [target](https://github.com/mkloubert/vscode-deploy-reloaded/wiki#targets-)
 * fixed generating output files in [compiler target](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_compiler)
 * updated [npm packages](https://www.npmjs.com):
   * [node-eumerable](https://www.npmjs.com/package/node-eumerable) to `^3.9.0`

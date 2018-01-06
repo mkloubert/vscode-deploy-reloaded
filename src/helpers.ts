@@ -165,6 +165,20 @@ export type ProgressTask<TResult = any> = (context: ProgressContext) => Progress
  */
 export type SimpleCompletedAction<TResult> = (err: any, result?: TResult) => void;
 
+/**
+ * Additional options for 'waitWhile()' function.
+ */
+export interface WaitWhileOptions {
+    /**
+     * A timeout, in milliseconds.
+     */
+    readonly timeout?: number;
+    /**
+     * The optional time, in , to wait until next check.
+     */
+    readonly timeUntilNextCheck?: number;
+}
+
 
 /**
  * Applies a function for a specific object / value.
@@ -2354,21 +2368,61 @@ export function uriParamsToObject(uri: URL.Url | vscode.Uri): deploy_contracts.K
 /**
  * Waits while a predicate matches.
  * 
- * @param {Function} predicate The predicate. 
+ * @param {Function} predicate The predicate.
+ * @param {WaitWhileOptions} {opts} Additional options.
+ * 
+ * @return {Promise<boolean>} The promise that indicates if timeout reached (false) or not (true).
  */
-export async function waitWhile(predicate: () => boolean | PromiseLike<boolean>) {
+export async function waitWhile(predicate: () => boolean | PromiseLike<boolean>,
+                                opts?: WaitWhileOptions) {
+    if (!opts) {
+        opts = <any>{};
+    }
+
+    const TIME_UNTIL_NEXT_CHECK = parseInt(
+        toStringSafe(opts.timeUntilNextCheck).trim()
+    );
+
+    const TIMEOUT = parseInt(
+        toStringSafe(opts.timeout).trim()
+    );
+    
     if (!predicate) {
         return;
+    }
+
+    let runUntil: Moment.Moment | false = false;
+    if (!isNaN(TIMEOUT)) {
+        runUntil = Moment.utc()
+                         .add(TIMEOUT, 'ms');
     }
 
     let wait: boolean;
     do
     {
-        wait = await Promise.resolve(
-            predicate()
+        const NOW = Moment.utc();
+        
+        if (false !== runUntil) {
+            if (runUntil.isAfter(NOW)) {
+                return false;
+            }
+        }
+
+        wait = toBooleanSafe(
+            await Promise.resolve(
+                predicate()
+            )
         );
+
+        if (wait) {
+            if (!isNaN(TIME_UNTIL_NEXT_CHECK)) {
+                await sleep(TIME_UNTIL_NEXT_CHECK);  // wait before next check
+            }
+        }
     }
-    while ( toBooleanSafe(wait) )
+    while (wait);
+
+    return true;
 }
 
 /**

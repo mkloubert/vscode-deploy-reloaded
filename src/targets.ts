@@ -38,6 +38,7 @@ import * as Minimatch from 'minimatch';
 import * as Moment from 'moment';
 import * as Path from 'path';
 import * as SanitizeFilename from 'sanitize-filename';
+import * as UUID from 'uuid';
 import * as vscode from 'vscode';
 
 
@@ -320,18 +321,47 @@ export interface TargetProvider {
 }
 
 
-const KEY_TARGET_USAGE = 'vscdrLastExecutedTargetActions';
-
 /**
  * The default type or a target operation.
  */
 export const DEFAULT_OPERATION_TYPE = 'open';
+
+const KEY_TARGET_USAGE = 'vscdrLastExecutedTargetActions';
+
+/**
+ * Storage key for targets' state object.
+ */
+export const KEY_TARGETS_STATE_STORAGE = 'targets';
+
+/**
+ * A storage key where to store data of targets in progress.
+ */
+export const KEY_TARGETS_IN_PROGRESS = 'targets_in_progress';
 
 /**
  * The regular expression for testing a ZIP filename for a target.
  */
 export const REGEX_ZIP_FILENAME = /^(vscode\-ws)(.*)(_)([0-9]{8})(\-)([0-9]{6})(\.zip)$/i;
 
+
+/**
+ * Creates a unique session value for a target.
+ * 
+ * @param {Target} target The target.
+ * 
+ * @return {symbol} The session value.
+ */
+export function createTargetSessionValue(target: Target): symbol {
+    if (!target) {
+        return <any>target;
+    }
+
+    return Symbol(
+        `${Moment.utc().unix()}::` + 
+        `${getTargetIdHash(target)}::` + 
+        `${UUID.v4()}`,
+    );
+}
 
 /**
  * Executes 'prepare' operations for a target.
@@ -623,6 +653,23 @@ export function getMappedTargetFilePath(target: Target,
 }
 
 /**
+ * Returns the hash of a target's ID.
+ * 
+ * @param {Target} target The target.
+ * 
+ * @return {string} The hash of its ID. 
+ */
+export function getTargetIdHash(target: Target): string {
+    if (!target) {
+        return <any>target;
+    }
+
+    return Crypto.createHash('sha256')
+                 .update( new Buffer(deploy_helpers.toStringSafe(target.__id), 'utf8') )
+                 .digest('hex');
+}
+
+/**
  * Returns the name for a target.
  * 
  * @param {Target} target The target.
@@ -753,6 +800,40 @@ export function getZipFileName(target: Target, time?: Moment.Moment): string {
 }
 
 /**
+ * Checks if a target is marked as 'in progress'.
+ * 
+ * @param {Target} target The target to check.
+ * 
+ * @return {boolean} Is in progress or not.
+ */
+export function isTargetInProgress(target: Target): boolean {
+    if (!target) {
+        return;
+    }
+
+    const WORKSPACE = target.__workspace;
+    if (!WORKSPACE) {
+        return;
+    }
+
+    const STORAGE = WORKSPACE.workspaceSessionState[ KEY_TARGETS_STATE_STORAGE ];
+    if (!STORAGE) {
+        return;
+    }
+
+    const TARGET_STORAGE = STORAGE[ KEY_TARGETS_IN_PROGRESS ];
+    if (!TARGET_STORAGE) {
+        return;
+    }
+
+    const TARGET_KEY = getTargetIdHash(target);
+
+    return !deploy_helpers.isNullOrUndefined(
+        TARGET_STORAGE[ TARGET_KEY ]
+    );
+}
+
+/**
  * Checks if a target is visible for a package.
  * 
  * @param {Target} target The target.
@@ -849,6 +930,44 @@ export async function mapFilesForTarget<TFile extends deploy_contracts.WithNameA
 }
 
 /**
+ * Mark a target as 'in progress'.
+ * 
+ * @param {Target} target The target to mark.
+ * @param {any} [valueToSave] The custom value to save in storage.
+ * 
+ * @return {boolean} Has been marked or not.
+ */
+export function markTargetAsInProgress(target: Target, valueToSave?: any): boolean {
+    if (arguments.length < 3) {
+        valueToSave = target;
+    }
+
+    if (!target) {
+        return;
+    }
+
+    const WORKSPACE = target.__workspace;
+    if (!WORKSPACE) {
+        return;
+    }
+
+    const STORAGE = WORKSPACE.workspaceSessionState[ KEY_TARGETS_STATE_STORAGE ];
+    if (!STORAGE) {
+        return;
+    }
+
+    const TARGET_STORAGE = STORAGE[ KEY_TARGETS_IN_PROGRESS ];
+    if (!TARGET_STORAGE) {
+        return;
+    }
+
+    const TARGET_KEY = getTargetIdHash(target);
+    TARGET_STORAGE[ TARGET_KEY ] = valueToSave;
+
+    return true;
+}
+
+/**
  * Normalizes the type of a target.
  * 
  * @param {Target} target The target.
@@ -902,9 +1021,7 @@ export async function showTargetQuickPick(context: vscode.ExtensionContext,
             label: '$(telescope)  ' + getTargetName(t),
             description: deploy_helpers.toStringSafe(t.description),
             detail: WORKSPACE.rootPath,
-            state: Crypto.createHash('sha256')
-                         .update( new Buffer(deploy_helpers.toStringSafe(t.__id), 'utf8') )
-                         .digest('hex'),
+            state: getTargetIdHash(t),
         };
     });
 
@@ -967,6 +1084,81 @@ export function throwOnRecurrence(parentTarget: Target, childTargets: Target | T
                                         getTargetName(CT)));
         }
     }
+}
+
+/**
+ * Un-Mark a target as 'in progress'.
+ * 
+ * @param {Target} target The target to un-mark.
+ * 
+ * @return {boolean} Has been un-marked or not.
+ */
+export function unmarkTargetAsInProgress(target: Target, valueToCheck?: any): boolean {
+    if (arguments.length < 3) {
+        valueToCheck = target;
+    }
+    
+    if (!target) {
+        return;
+    }
+
+    const WORKSPACE = target.__workspace;
+    if (!WORKSPACE) {
+        return;
+    }
+
+    const STORAGE = WORKSPACE.workspaceSessionState[ KEY_TARGETS_STATE_STORAGE ];
+    if (!STORAGE) {
+        return;
+    }
+
+    const TARGET_STORAGE = STORAGE[ KEY_TARGETS_IN_PROGRESS ];
+    if (!TARGET_STORAGE) {
+        return;
+    }
+
+    const TARGET_KEY = getTargetIdHash(target);
+    if (valueToCheck === TARGET_STORAGE[ TARGET_KEY ]) {
+        delete TARGET_STORAGE[ TARGET_KEY ];
+
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Waits until other tasks of a target have been finished.
+ * 
+ * @param {Target} target The target.
+ * @param {vscode.StatusBarItem} [btn] The optional (cancel) button.
+ * 
+ * @return {Promise<symbol>} The promise with the target session value.
+ */
+export async function waitForOtherTargets(target: Target, btn?: vscode.StatusBarItem): Promise<symbol> {
+    if (!target) {
+        return <any>target;
+    }
+
+    const WORKSPACE = target.__workspace;
+    const TARGET_NAME = getTargetName(target);
+
+    if (btn) {
+        btn.text = WORKSPACE.t('targets.waitingForOther',
+                               TARGET_NAME);
+    }
+
+    await deploy_helpers.waitWhile(() => {
+        return isTargetInProgress(target);
+    }, {
+        timeUntilNextCheck: 500,
+        timeout: 60000,
+    });
+
+    const TARGET_SESSION = createTargetSessionValue(target);
+    markTargetAsInProgress(target, TARGET_SESSION);
+
+    return TARGET_SESSION;
 }
 
 /**

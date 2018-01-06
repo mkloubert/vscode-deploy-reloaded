@@ -412,6 +412,7 @@ export interface Translation {
             typeNotSupported?: string;
         };
         selectTarget?: string;
+        waitingForOther?: string;
     };
     time?: {
         dateTimeWithSeconds?: string;
@@ -552,6 +553,7 @@ export interface Translation {
         currentlyActive?: string;
     };
     warning?: string;
+    waiting?: string;
     workspace?: string;
     workspaces?: {
         active?: {
