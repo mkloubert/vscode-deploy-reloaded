@@ -1641,8 +1641,10 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         // process's environment variables
         try {
             let importEnvVars = true;
-            if (CFG.env) {
-                importEnvVars = deploy_helpers.toBooleanSafe(CFG.env.importVarsAsPlaceholders, true);
+            if (CFG) {
+                if (CFG.env) {
+                    importEnvVars = deploy_helpers.toBooleanSafe(CFG.env.importVarsAsPlaceholders, true);
+                }
             }
 
             if (importEnvVars) {
@@ -2364,6 +2366,17 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                         return deploy_helpers.asArray(ct.pulled);
                     }).toArray();  // in reverse target order
                     const MY_PULLED = deploy_helpers.asArray(target.pulled);
+
+                    // collect 'prepare' operations
+                    const PREPARE_OF_CHILDREN = Enumerable.from( deploy_helpers.asArray(CHILD_TARGETS) ).selectMany(ct => {
+                        return deploy_helpers.asArray(ct.prepare);
+                    }).toArray();
+                    const MY_PREPARE = deploy_helpers.asArray(target.prepare);
+
+                    // prepare
+                    (<any>target).prepare = MY_PREPARE.concat(
+                        PREPARE_OF_CHILDREN
+                    );
 
                     // before
                     (<any>target).beforeDelete = MY_BEFORE_DELETE.concat(

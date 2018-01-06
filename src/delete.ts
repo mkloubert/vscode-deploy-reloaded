@@ -42,8 +42,6 @@ export async function deleteFileIn(file: string, target: deploy_targets.Target,
                                    askForDeleteLocalFile = true) {
     const ME: deploy_workspaces.Workspace = this;
 
-    target = ME.prepareTarget(target);
-
     if (ME.isInFinalizeState) {
         return;
     }
@@ -88,10 +86,12 @@ export async function deleteFileIn(file: string, target: deploy_targets.Target,
         deleteLocalFile = 2 === PRESSED_BTN.value;
     }
 
-    await deleteFilesIn.apply(
-        ME,
-        [ [ file ], target, target.__index + 1, deleteLocalFile ]
-    );
+    await deploy_helpers.applyFuncFor(
+        deleteFilesIn,
+        ME
+    )([ file ], target,
+      null,
+      deleteLocalFile);
 }
 
 /**

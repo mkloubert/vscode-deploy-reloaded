@@ -130,8 +130,6 @@ export async function pullAllOpenFiles(workspaces: deploy_workspaces.Workspace |
 export async function pullFileFrom(file: string, target: deploy_targets.Target) {
     const ME: deploy_workspaces.Workspace = this;
 
-    target = ME.prepareTarget(target);
-
     if (ME.isInFinalizeState) {
         return;
     }
@@ -145,10 +143,11 @@ export async function pullFileFrom(file: string, target: deploy_targets.Target) 
                              file, ME.name));
     }
 
-    await pullFilesFrom.apply(
-        ME,
-        [ [ file ], target, target.__index + 1 ]
-    );
+    await deploy_helpers.applyFuncFor(
+        pullFilesFrom,
+        ME
+    )([ file ], target,
+      null);
 }
 
 /**

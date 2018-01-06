@@ -514,8 +514,6 @@ export async function deployFilesTo(files: string[],
 export async function deployFileTo(file: string, target: deploy_targets.Target) {
     const ME: deploy_workspaces.Workspace = this;
 
-    target = ME.prepareTarget(target);    
-
     if (ME.isInFinalizeState) {
         return;
     }
@@ -531,10 +529,11 @@ export async function deployFileTo(file: string, target: deploy_targets.Target) 
 
     file = Path.resolve(file);
 
-    await deployFilesTo.apply(
-        ME,
-        [ [ file ], target, target.__index + 1 ]
-    );
+    await deploy_helpers.applyFuncFor(
+        deployFilesTo,
+        ME
+    )([ file ], target,
+      null);
 }
 
 /**
