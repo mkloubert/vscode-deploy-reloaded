@@ -250,7 +250,7 @@ export async function pullFilesFrom(files: string[],
         deploy_helpers.tryDispose(cancelBtnCommand);
     };
 
-    const ALL_DIRS = await ME.getAllDirectories();
+    const MAPPING_SCOPE_DIRS = await deploy_targets.getScopeDirectoriesForTargetFolderMappings(target);
 
     const CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
     let targetSession: symbol | false = false;
@@ -344,8 +344,8 @@ export async function pullFilesFrom(files: string[],
                 }
 
                 const FILES_TO_PULL = files.map(f => {
-                    const NAME_AND_PATH = ME.getNameAndPathForFileDeployment(target, f,
-                                                                             ALL_DIRS);
+                    const NAME_AND_PATH = deploy_targets.getNameAndPathForFileDeployment(target, f,
+                                                                                         MAPPING_SCOPE_DIRS);
                     if (false === NAME_AND_PATH) {
                         return null;
                     }

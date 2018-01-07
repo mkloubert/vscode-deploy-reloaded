@@ -609,47 +609,149 @@ export async function executeTargetOperations(opts: ExecuteTargetOperationOption
 }
 
 /**
- * Returns the mapped file path by a target.
+ * Returns the name and path for a file deployment.
  * 
+ * @param {string} file The file.
  * @param {Target} target The target.
- * @param {string} dir The path / directory of the file.
- * @param {string} fileName The name of the underlying file.
- * @param {Minimatch.IOptions} [opts] Custom options.
+ * @param {string[]} dirs One or more scope directories.
  * 
- * @return {string} The mapped (directory) path.
+ * @return {deploy_contracts.WithNameAndPath|false} The object or (false) if not possible.
  */
-export function getMappedTargetFilePath(target: Target,
-                                        dir: string, fileName: string,
-                                        opts?: Minimatch.IOptions) {
-    const REMOVE_SURROUNDING_SEPS = (str: string) => {
-        str = deploy_helpers.replaceAllStrings(str, Path.sep, '/').trim();
-        while (str.startsWith('/')) {
-            str = str.substr(1).trim();
-        }
-        while (str.endsWith('/')) {
-            str = str.substr(0, str.length - 1).trim();
+export function getNameAndPathForFileDeployment(target: Target,
+                                                file: string,
+                                                dirs?: string[]): deploy_contracts.WithNameAndPath | false {
+    if (!target) {
+        return false;
+    }
+
+    const WORKSPACE = target.__workspace;
+
+    if (WORKSPACE.isFileIgnored(file)) {
+        return false;
+    }
+
+    let relPath = WORKSPACE.toRelativePath(file);
+    if (false === relPath) {
+        return false;
+    }
+
+    const TO_MINIMATCH = (str: string) => {
+        str = deploy_helpers.toStringSafe(str);
+        if (!str.startsWith('/')) {
+            str = '/' + str;
         }
 
         return str;
     };
 
-    dir = '/' + REMOVE_SURROUNDING_SEPS(dir);
-    fileName = REMOVE_SURROUNDING_SEPS(fileName);
+    let name = Path.basename(relPath);
+    let path = Path.dirname(relPath);
+    let pathSuffix = '';
+    
+    const MAPPINGS = target.mappings;
+    if (MAPPINGS) {
+        for (const P in MAPPINGS) {
+            let settings = MAPPINGS[P];
+            if (deploy_helpers.isNullOrUndefined(settings)) {
+                continue;
+            }
 
-    let mappings: deploy_mappings.FolderMappings;
-    if (target) {
-        mappings = target.mappings;
+            if (!deploy_helpers.isObject<deploy_mappings.FolderMappingSettings>(settings)) {
+                settings = {
+                    to: deploy_helpers.toStringSafe(settings),
+                };
+            }
+
+            const PATTERN = TO_MINIMATCH(P);
+            const PATH_TO_CHECK = TO_MINIMATCH(relPath);
+            
+            if (deploy_helpers.doesMatch(PATH_TO_CHECK, PATTERN)) {
+                const DIR_NAME = Path.dirname(<string>relPath);
+
+                const MATCHING_DIRS = <string[]>dirs.map(d => {
+                    return WORKSPACE.toRelativePath(d);
+                }).filter(d => false !== d).filter((d: string) => {
+                    return d === DIR_NAME || 
+                           DIR_NAME.startsWith(d + '/');
+                }).sort((x, y) => {
+                    return deploy_helpers.compareValuesBy(x, y,
+                                                          (d: string) => d.length);
+                });
+
+                if (MATCHING_DIRS.length > 0) {
+                    pathSuffix = DIR_NAME.substr(
+                        MATCHING_DIRS[0].length
+                    );
+                }
+
+                path = deploy_helpers.normalizeString(settings.to);
+                break;
+            }
+        }
+    }                                   
+
+    return {
+        name: name,
+        path: deploy_helpers.normalizePath(
+            Path.join(
+                '/' +
+                deploy_helpers.normalizePath(path) + 
+                '/' + 
+                deploy_helpers.normalizePath(pathSuffix)
+            )
+        ),
+    };
+}
+
+/**
+ * Returns the scope directories for target folder mappings.
+ * 
+ * @param {Target} target The target.
+ * 
+ * @return {Promise<string[]>} The promise with the directories.
+ */
+export async function getScopeDirectoriesForTargetFolderMappings(target: Target): Promise<string[]> {
+    if (!target) {
+        return;
     }
 
-    let mappedPath = deploy_helpers.getMappedPath(mappings,
-                                                  '/' + REMOVE_SURROUNDING_SEPS(dir + '/' + fileName));
-    if (false === mappedPath) {
-        mappedPath = dir;
+    const WORKSPACE = target.__workspace;
+
+    const PATTERNS: string[] = [];
+    
+    const MAPPINGS = target.mappings;
+    if (deploy_helpers.isObject(MAPPINGS)) {
+        for (const P in MAPPINGS) {
+            if (!deploy_helpers.isEmptyString(P)) {
+                PATTERNS.push(P);
+            }
+        }
     }
 
-    return REMOVE_SURROUNDING_SEPS(
-        REMOVE_SURROUNDING_SEPS(mappedPath + '/' + fileName)
-    );
+    const DIRS: string[] = [];
+
+    if (PATTERNS.length > 0) {
+        (await WORKSPACE.findFilesByFilter({
+            files: Enumerable.from(PATTERNS)
+                             .distinct()
+                             .toArray()
+        }, {
+            dot: true,
+            nocase: true,
+            nodir: true,
+            nosort: true,
+        })).forEach(f => {
+            const D = Path.resolve(
+                Path.dirname(f)
+            );
+            
+            if (DIRS.indexOf(D) < 0) {
+                DIRS.push(D);
+            }
+        });
+    }
+
+    return DIRS;
 }
 
 /**
@@ -890,7 +992,7 @@ export async function mapFilesForTarget<TFile extends deploy_contracts.WithNameA
 ) {
     const WORKSPACE = target.__workspace;
 
-    const ALL_DIRS = await WORKSPACE.getAllDirectories();
+    const MAPPING_SCOPE_DIRS = await getScopeDirectoriesForTargetFolderMappings(target);
 
     files = deploy_helpers.asArray(files);
 
@@ -910,9 +1012,9 @@ export async function mapFilesForTarget<TFile extends deploy_contracts.WithNameA
             continue;
         }
 
-        const NEW_MAPPING = await WORKSPACE.getNameAndPathForFileDeployment(
+        const NEW_MAPPING = await getNameAndPathForFileDeployment(
             target, FULL_PATH,
-            ALL_DIRS
+            MAPPING_SCOPE_DIRS
         );
         if (false === NEW_MAPPING) {
             continue;

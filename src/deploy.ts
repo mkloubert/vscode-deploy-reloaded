@@ -222,7 +222,7 @@ export async function deployFilesTo(files: string[],
         deploy_helpers.tryDispose(cancelBtnCommand);
     };
 
-    const ALL_DIRS = await ME.getAllDirectories();
+    const MAPPING_SCOPE_DIRS = await deploy_targets.getScopeDirectoriesForTargetFolderMappings(target);
 
     const CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
     let targetSession: symbol | false = false;
@@ -315,8 +315,8 @@ export async function deployFilesTo(files: string[],
 
                 const FILES_TO_UPLOAD: deploy_plugins.LocalFileToUpload[] = [];
                 for (const F of files) {
-                    const NAME_AND_PATH = ME.getNameAndPathForFileDeployment(target, F,
-                                                                             ALL_DIRS);
+                    const NAME_AND_PATH = deploy_targets.getNameAndPathForFileDeployment(target, F,
+                                                                                         MAPPING_SCOPE_DIRS);
                     if (false === NAME_AND_PATH) {
                         continue;
                     }
