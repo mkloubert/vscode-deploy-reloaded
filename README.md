@@ -181,23 +181,20 @@ Add the subsection `targets` and add one or more entry:
                 "type": "sftp",
                 "name": "My SFTP folder",
                 "description": "A SFTP folder",
+
                 "dir": "/my_package_files",
                 "host": "localhost", "port": 22,
                 "user": "tester", "password": "password",
 
-                "checkBeforeDeploy": true,
-
-                "mappings": [
-                    {
-                        "source": "dir/of/files/that/should/be/mapped",
-                        "target": "dir/on/target"
-                    }
-                ]
+                "mappings": {
+                    "/dir/of/files/that/should/be/mapped/**/*": "dir/on/target"
+                }
             },
             {
                 "type": "ftp",
                 "name": "My FTP folder",
                 "description": "A FTP folder",
+
                 "dir": "/my_package_files",
                 "host": "localhost", "port": 21,
                 "user": "anonymous", "password": "",
@@ -221,24 +218,28 @@ Add the subsection `targets` and add one or more entry:
                 "type": "local",
                 "name": "My local folder",
                 "description": "A local folder",
+
                 "dir": "E:/test/my_package_files"
             },
             {
                 "type": "local",
                 "name": "My network folder",
                 "description": "A SMB shared network folder",
+
                 "dir": "\\\\MyServer\\my_package_files"
             },
             {
                 "type": "zip",
                 "name": "My ZIP file",
                 "description": "Create a ZIP file in a target directory",
+
                 "target": "E:/test"
             },
             {
                 "type": "mail",
                 "name": "My mail server",
                 "description": "An email deployer",
+
                 "host": "smtp.example.com", "port": 465,
                 "secure": true, "requireTLS": true,
                 "user": "mkloubert@example.com", "password": "P@assword123!",
@@ -249,6 +250,7 @@ Add the subsection `targets` and add one or more entry:
                 "type": "script",
                 "name": "My script",
                 "description": "A deploy script",
+
                 "script": "E:/test/deploy.js",
                 "options": {
                     "TM": 5979,
@@ -259,12 +261,14 @@ Add the subsection `targets` and add one or more entry:
                 "type": "batch",
                 "name": "My Batch",
                 "description": "A batch operation",
+
                 "targets": ["My mail server", "My ZIP file"]
             },
             {
                 "type": "azureblob",
                 "name": "My Azure blob storage",
                 "description": "An container in an Azure blob storage",
+
                 "container": "my-container",
                 "account": "my-storage-account",
                 "accessKey": "<ACCESS-KEY-FROM-AZURE-PORTAL>"
@@ -273,6 +277,7 @@ Add the subsection `targets` and add one or more entry:
                 "type": "s3bucket",
                 "name": "My Amazon Bucket",
                 "description": "An Amazon AWS S3 bucket",
+
                 "bucket": "my-bucket"
             },
             {
