@@ -7,7 +7,7 @@
         "out": true // set this to false to include "out" folder in search results
     },
 
-    "deploy": {
+    "deploy.reloaded": {
         "packages": [
             {
                 "name": "Embedded CSS",
@@ -40,21 +40,21 @@
                 "name": "Embedded_CSS",
     
                 "type": "script",
-                "script": "./_res/embedded_resources.js",
+                "script": "./.deploy/embedded_resources.js",
                 "options": "css"
             },
             {
                 "name": "Embedded_HTML",
     
                 "type": "script",
-                "script": "./_res/embedded_resources.js",
+                "script": "./.deploy/embedded_resources.js",
                 "options": "html"
             },
             {
                 "name": "Embedded_JS",
     
                 "type": "script",
-                "script": "./_res/embedded_resources.js",
+                "script": "./.deploy/embedded_resources.js",
                 "options": "js"
             }
         ]
