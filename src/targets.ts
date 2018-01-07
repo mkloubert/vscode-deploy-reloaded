@@ -731,24 +731,38 @@ export async function getScopeDirectoriesForTargetFolderMappings(target: Target)
     const DIRS: string[] = [];
 
     if (PATTERNS.length > 0) {
-        (await WORKSPACE.findFilesByFilter({
+        const FILES_AND_FOLDERS = await WORKSPACE.findFilesByFilter({
             files: Enumerable.from(PATTERNS)
                              .distinct()
                              .toArray()
         }, {
+            absolute: true,
             dot: true,
             nocase: true,
-            nodir: true,
+            nodir: false,
             nosort: true,
-        })).forEach(f => {
-            const D = Path.resolve(
-                Path.dirname(f)
-            );
-            
-            if (DIRS.indexOf(D) < 0) {
-                DIRS.push(D);
-            }
         });
+
+        for (const FF of FILES_AND_FOLDERS) {
+            let dirToAdd: string;
+
+            const STATS = await deploy_helpers.lstat(FF);
+            if (STATS.isDirectory()) {
+                dirToAdd = FF;
+            }
+            else {
+                dirToAdd = Path.dirname(FF);
+            }
+
+            if (deploy_helpers.isEmptyString(dirToAdd)) {
+                continue;
+            }
+
+            dirToAdd = Path.resolve(dirToAdd);
+            if (DIRS.indexOf(dirToAdd) < 0) {
+                DIRS.push(dirToAdd);
+            }
+        }
     }
 
     return DIRS;
