@@ -684,7 +684,7 @@ export function getNameAndPathForFileDeployment(target: Target,
                     );
                 }
 
-                path = deploy_helpers.normalizeString(settings.to);
+                path = deploy_helpers.normalizePath(settings.to);
                 break;
             }
         }
