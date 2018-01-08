@@ -492,7 +492,7 @@ export const translation: Translation = {
         quickExecution: {
             description: "Executes JavaScript code",
             errors: {
-                failed: "Execution code failed:{0:trim,surround,leading_space}",
+                failed: "Execution of code failed:{0:trim,surround,leading_space}",
             },
             help: {
                 title: "'Quick execution' help",

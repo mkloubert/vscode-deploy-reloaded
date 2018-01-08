@@ -157,8 +157,7 @@ Add the subsection `packages` and add one or more entry:
                 ],
                 "exclude": [
                     "tests/**"
-                ],
-                "deployOnSave": true
+                ]
             }
         ]
     }

@@ -337,6 +337,12 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         return await GET_IP(OPTS);
     };
 
+    const $lower = async (val: any) => {
+        return $h.toStringSafe(
+            await $unwrap(val)   
+        ).toLowerCase();
+    };
+
     const $md5 = async (val: any, asBinary?: boolean) => {
         return await $hash('md5',
                            val, asBinary);
@@ -420,6 +426,18 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
                            val, asBinary);
     };
 
+    const $trim = async (val: any) => {
+        return $h.toStringSafe(
+            await $unwrap(val)   
+        ).trim();
+    };
+
+    const $upper = async (val: any) => {
+        return $h.toStringSafe(
+            await $unwrap(val)   
+        ).toUpperCase();
+    };
+
     const $utc = async () => {
         return require('moment').utc();
     };
@@ -447,7 +465,8 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
     // writeFile()
     const $wf = async (file: string, data: any, enc?: string) => {
         data = await $h.asBuffer(
-            await $unwrap(data), enc
+            await $unwrap(data),
+            await $unwrap(enc),
         );
 
         await $h.writeFile(
@@ -638,6 +657,13 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "$ip(false, 2000)  // IPv4 and 2000ms timeout\n";
     help += "```\n";
     help += "\n";
+    // $lower
+    help += "### $lower\n";
+    help += "Handles a value as string and converts all characters to lower case.\n";
+    help += "```javascript\n";
+    help += "$lower\n";
+    help += "```\n";
+    help += "\n";
     // $md5
     help += "### $md5\n";
     help += "Hashes data with MD5.\n";
@@ -715,6 +741,20 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "```javascript\n";
     help += "$sha256('abc')\n";
     help += "$sha256('abc', true)\n";
+    help += "```\n";
+    help += "\n";
+    // $trim
+    help += "### $trim\n";
+    help += "Handles a value as string and removes whitespaces from the beginning and the end.\n";
+    help += "```javascript\n";
+    help += "$trim\n";
+    help += "```\n";
+    help += "\n";
+    // $upper
+    help += "### $upper\n";
+    help += "Handles a value as string and converts all characters to upper case.\n";
+    help += "```javascript\n";
+    help += "$upper\n";
     help += "```\n";
     help += "\n";
     // $utc
