@@ -34,6 +34,10 @@ export interface ZipTarget extends deploy_targets.Target {
      */
     readonly dir?: string;
     /**
+     * 	The custom filename to use.
+     */
+    readonly fileName?: string;
+    /**
      * Open ZIP after it has been created or not.
      */
     readonly open?: boolean;
@@ -219,14 +223,37 @@ class ZipPlugin extends deploy_plugins.PluginBase<ZipTarget> {
         return zipFile.name;
     }
 
+    private getZipFileNameWithDetails(target: ZipTarget) {
+        let name: string;
+        let isCustom = false;
+
+        name = target.__workspace.replaceWithValues(
+            target.fileName
+        );
+
+        if (deploy_helpers.isEmptyString(name)) {
+            name = deploy_targets.getZipFileName(target);
+        }
+        else {
+            isCustom = true;
+        }
+        
+        return {
+            isCustom: isCustom,
+            name: name,
+        };
+    }
+
     private async getZipFiles(target: ZipTarget) {
         let result: string[];
 
         const ZIP_TARGET_DIR = await this.getTargetDirectory(target, false);
+        const ZIP_FILENAME = this.getZipFileNameWithDetails(target);
+        const SEARCH_PATTERN = ZIP_FILENAME.isCustom ? '/*.zip' : '/vscode-ws*_*.zip';
 
         if (await deploy_helpers.exists(ZIP_TARGET_DIR)) {
             if ((await deploy_helpers.lstat(ZIP_TARGET_DIR)).isDirectory()) {
-                result = (await deploy_helpers.glob('/vscode-ws*_*.zip', {
+                result = (await deploy_helpers.glob(SEARCH_PATTERN, {
                     cwd: ZIP_TARGET_DIR,
                     dot: false,
                     nocase: true,
@@ -375,8 +402,10 @@ class ZipPlugin extends deploy_plugins.PluginBase<ZipTarget> {
     public async uploadFiles(context: deploy_plugins.UploadContext<ZipTarget>) {
         const WORKSPACE = context.target.__workspace;
 
+        const ZIP_FILENAME = this.getZipFileNameWithDetails(context.target);
+
         const ZIP_FILE_PATH = Path.join(await this.getTargetDirectory(context.target, true),
-                                        deploy_targets.getZipFileName(context.target));
+                                        ZIP_FILENAME.name);
 
         let ZIPFile = new Zip();
 
@@ -405,7 +434,12 @@ class ZipPlugin extends deploy_plugins.PluginBase<ZipTarget> {
         }), 'binary');
 
         if (await deploy_helpers.exists(ZIP_FILE_PATH)) {
-            throw new Error(WORKSPACE.t('plugins.zip.errors.fileAlreadyExists', ZIP_FILE_PATH));
+            if (ZIP_FILENAME.isCustom) {
+                await deploy_helpers.unlink(ZIP_FILE_PATH);
+            }
+            else {
+                throw new Error(WORKSPACE.t('plugins.zip.errors.fileAlreadyExists', ZIP_FILE_PATH));
+            }
         }
 
         await deploy_helpers.writeFile(ZIP_FILE_PATH, ZIPPED_DATA);

@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.26.0",
+ "version": "0.27.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -53312,6 +53312,10 @@
            "encryptWith": {
             "description": "An optional password for data encryption to use.",
             "type": "string"
+           },
+           "fileName": {
+            "type": "string",
+            "description": "The custom filename to use. Otherwise an automatic filename is generated."
            },
            "hideIf": {
             "description": "Defines a list of one or more package names, which will hide this target from GUI, if one of them is selected.",
