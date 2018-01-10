@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.27.0",
+ "version": "0.28.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -632,6 +632,35 @@
           "items": {
            "type": "string"
           }
+         },
+         "git": {
+          "oneOf": [
+           {
+            "type": "string",
+            "description": "Short settings for importing files from git. Format: 'BRANCH:FROM_HASH:TO_HASH'"
+           },
+           {
+            "type": "object",
+            "description": "Settings for importing files from git.",
+            "properties": {
+             "branch": {
+              "type": "string",
+              "description": "The custom branch to use.",
+              "default": "master"
+             },
+             "from": {
+              "type": "string",
+              "description": "The hash from where to start (youngest).",
+              "pattern": "([a-f|A-F|0-9]{7})([a-f|A-F|0-9]{33})?"
+             },
+             "to": {
+              "type": "string",
+              "description": "The hash where to stop (oldest).",
+              "pattern": "([a-f|A-F|0-9]{7})([a-f|A-F|0-9]{33})?"
+             }
+            }
+           }
+          ]
          },
          "if": {
           "description": "(JavaScript) Code, which indicates, if entry is available or not.",

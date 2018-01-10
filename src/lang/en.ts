@@ -567,8 +567,11 @@ export const translation: Translation = {
             }
         },
         errors: {
+            cannotDetectGitClient: "Could not find git client for{0:trim,surround,leading_space}!",
             cannotDetectMappedPathInfoForFile: "Cannot detect mapped path information for file{0:trim,surround,leading_space}!",
             cannotDetectPathInfoForFile: "Cannot detect path information for file{0:trim,surround,leading_space}!",
+            cannotFindBranch: "Cannot find branch{0:trim,surround,leading_space} in{1:trim,surround,leading_space}!",
+            cannotFindScmHash: "Cannot find hash{0:trim,surround,leading_space} in{1:trim,surround,leading_space}!",
             cannotUseTargetForFile: "Cannot use target{0:trim,surround,leading_space} for file{1:trim,surround,leading_space}!",
             initNodeModulesFailed: "Execution of 'npm install' failed:{0:trim,surround,leading_space}",
             notInitialized: "Workspace{0:trim,surround,leading_space} has not been initialized!",

@@ -572,8 +572,11 @@ export interface Translation {
             }
         };
         errors?: {
+            cannotDetectGitClient?: string;
             cannotDetectMappedPathInfoForFile?: string;
             cannotDetectPathInfoForFile?: string;
+            cannotFindBranch?: string;
+            cannotFindScmHash?: string;
             cannotUseTargetForFile?: string;
             initNodeModulesFailed?: string;
             notInitialized?: string;

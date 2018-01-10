@@ -627,7 +627,17 @@ export async function pullPackage(pkg: deploy_packages.Package) {
                              deploy_packages.getPackageName(pkg), ME.name));
     }
 
-    const RELOADER = async () => await ME.findFilesByFilter(pkg);
+    const RELOADER = async () => {
+        const FILES_FROM_FILTER = await ME.findFilesByFilter(pkg);
+        
+        await deploy_packages.importPackageFilesFromGit(
+            pkg,
+            deploy_contracts.DeployOperation.Pull,
+            FILES_FROM_FILTER,
+        );
+
+        return FILES_FROM_FILTER;
+    };
 
     const FILES_TO_PULL = await RELOADER();
     if (FILES_TO_PULL.length < 1) {

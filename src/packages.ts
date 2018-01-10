@@ -17,9 +17,11 @@
 
 import * as Crypto from 'crypto';
 import * as deploy_contracts from './contracts';
+import * as deploy_git from './git';
 import * as deploy_gui from './gui';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
+import * as deploy_scm from './scm';
 import * as deploy_targets from './targets';
 import * as deploy_values from './values';
 import * as deploy_workspaces from './workspaces';
@@ -65,6 +67,10 @@ export interface Package extends deploy_values.Applyable,
      * A description.
      */
     readonly description?: string;
+    /**
+     * Settings for importing files via git.
+     */
+    readonly git?: PackageDeploySettingValue;
     /**
      * Deletes a file of this package, if it has been deleted from a workspace.
      */
@@ -119,6 +125,29 @@ type PackageFileListResolver = (filter: deploy_contracts.FileFilter, file: strin
  * Possible results of a package file list resolver.
  */
 export type PackageFileListResolverResult = string | string[];
+
+/**
+ * git settings for a package.
+ */
+export interface PackageGitSettings {
+    /**
+     * The custom branch.
+     */
+    branch?: string;
+    /**
+     * The first (youngest) commit.
+     */
+    from?: string;
+    /**
+     * The first (oldest) commit.
+     */
+    to?: string;
+}
+
+/**
+ * Possible git setting values for a package.
+ */
+export type PackageDeploySettingValue = string | PackageGitSettings;
 
 /**
  * Stores settings for 'sync when open' feature.
@@ -448,6 +477,370 @@ export function getTargetsOfPackage(pkg: Package): deploy_targets.Target[] | fal
     return targets;
 }
 
+/**
+ * Import files from git to a package.
+ * 
+ * @param {Package} pkg The package.
+ * @param {deploy_contracts.DeployOperation} operation The operation.
+ * @param {string[]} files The file storage.
+ * 
+ * @return {Promise<string[]>} The promise with the new list.
+ */
+export async function importPackageFilesFromGit(pkg: Package, operation: deploy_contracts.DeployOperation, files: string[]): Promise<string[]> {
+    if (!files) {
+        files = [];
+    }
+    
+    if (!pkg) {
+        return;
+    }
+
+    if (deploy_helpers.isNullOrUndefined(pkg.git)) {
+        return;
+    }
+
+    let gitSettings = pkg.git;
+    if (!deploy_helpers.isObject<PackageGitSettings>(gitSettings)) {
+        gitSettings = deploy_helpers.normalizeString(gitSettings);
+
+        let branch: string;
+        let from: string;
+        let to: string;
+
+        const PARTS = gitSettings.split(':');
+        if (PARTS.length > 2) {
+            // [BRANCH]:[FROM]:[TO]
+
+            branch = PARTS[0];
+            from = PARTS[1];
+            to = Enumerable.from(PARTS).skip(2)
+                                       .joinToString(':');
+        }
+        else if (PARTS.length > 1) {
+            // [BRANCH]:[FROM] --or--
+            // [FROM]:[TO]
+
+            if (deploy_helpers.isHex(PARTS[0])) {
+                from = PARTS[0];
+                to = PARTS[1];
+            }
+            else {
+                branch = PARTS[0];
+                from = PARTS[1];
+            }
+        }
+        else {
+            // [BRANCH] --or--
+            // [FROM]
+
+            if (deploy_helpers.isHex(PARTS[0])) {
+                from = PARTS[0];
+            }
+            else {
+                branch = PARTS[0];
+            }
+        }
+
+        if (deploy_helpers.isEmptyString(branch)) {
+            branch = undefined;
+        }
+        if (deploy_helpers.isEmptyString(from)) {
+            from = undefined;
+        }
+        if (deploy_helpers.isEmptyString(to)) {
+            to = undefined;
+        }
+        
+        gitSettings = {
+            branch: branch,
+            from: from,
+            to: to,
+        };
+    }
+
+    const WORKSPACE = pkg.__workspace;
+
+    const NORMALIZED_INPUT_FILES = deploy_helpers.asArray(files).map(f => {
+        return deploy_helpers.toStringSafe(f);
+    }).filter(f => {
+        return !deploy_helpers.isEmptyString(f);
+    }).map(f => {
+        if (!Path.isAbsolute(f)) {
+            f = Path.join(WORKSPACE.rootPath, f);
+        }
+
+        return Path.resolve(f);
+    });
+
+    const CLIENT = await WORKSPACE.createGitClient();
+    if (false === CLIENT) {
+        throw new Error(
+            WORKSPACE.t('workspaces.errors.cannotDetectGitClient',
+                        WORKSPACE.name)
+        );
+    }
+
+    let branchName = deploy_helpers.normalizeString(gitSettings.branch);
+    if ('' === branchName) {
+        branchName = 'master';
+    }
+
+    const FROM_HASH = deploy_git.normalizeGitHash(gitSettings.from);
+    const TO_HASH = deploy_git.normalizeGitHash(gitSettings.to);
+
+    const BRANCH = Enumerable.from(
+        await CLIENT.branches()
+    ).singleOrDefault(b => {
+        return branchName === deploy_helpers.normalizeString(b.id);
+    });
+
+    if (deploy_helpers.isSymbol(BRANCH)) {
+        throw new Error(
+            WORKSPACE.t('workspaces.errors.cannotFindBranch',
+                        branchName, WORKSPACE.name)
+        );
+    }
+
+    const FIND_COMMIT = async (hash: string): Promise<deploy_scm.Commit | false> => {
+        hash = deploy_git.normalizeGitHash(hash);
+
+        // take first hash
+        let page = 0;
+        do
+        {
+            ++page;
+            const COMMITS = await (<deploy_scm.Branch>BRANCH).commits(page);
+            if (COMMITS.length < 1) {
+                break;
+            }
+
+            for (const C of COMMITS) {
+                if (hash === deploy_git.normalizeGitHash(C.id)) {
+                    return C;  // found
+                }
+            }
+        }
+        while (true);
+
+        return false;
+    };
+
+    let firstCommit: deploy_scm.Commit | false = false;
+    if (null === FROM_HASH) {
+        // latest
+        const COMMITS = await (<deploy_scm.Branch>BRANCH).commits();
+        if (COMMITS.length > 0) {
+            firstCommit = COMMITS[0];
+        }
+    }
+    else {
+        firstCommit = await FIND_COMMIT(FROM_HASH);
+    }
+
+    if (!firstCommit) {
+        throw new Error(
+            WORKSPACE.t('workspaces.errors.cannotFindScmHash',
+                        FROM_HASH, WORKSPACE.name)
+        );
+    }
+
+    let lastCommit: deploy_scm.Commit | false = firstCommit;
+    if (null !== TO_HASH) {
+        lastCommit = await FIND_COMMIT(TO_HASH);
+    }
+
+    if (!lastCommit) {
+        throw new Error(
+            WORKSPACE.t('workspaces.errors.cannotFindScmHash',
+                        TO_HASH, WORKSPACE.name)
+        );
+    }
+
+    // load all commits between first and last commit
+    let commitWindow: deploy_scm.Commit[] = [];
+    {
+        // find and add first commit
+        let page = 0;
+        let run = true;
+        do
+        {
+            ++page;
+            const COMMITS = await (<deploy_scm.Branch>BRANCH).commits(page);
+            if (COMMITS.length < 1) {
+                break;
+            }
+
+            for (const C of COMMITS) {
+                if (deploy_git.normalizeGitHash(firstCommit.id) === deploy_git.normalizeGitHash(C.id)) {
+                    commitWindow.push(C);
+
+                    run = false;
+                    break;
+                }
+            }
+        }
+        while (run);
+
+        // add all after first and until last commit
+        if (commitWindow.length > 0) {
+            if (lastCommit.id !== firstCommit.id) {
+                let page = 0;
+                let run = true;
+                let startAdd = false;
+                do
+                {
+                    ++page;
+                    const COMMITS = await (<deploy_scm.Branch>BRANCH).commits(page);
+                    if (COMMITS.length < 1) {
+                        break;
+                    }
+
+                    for (const C of COMMITS) {
+                        if (startAdd) {
+                            commitWindow.push(C);
+                        }
+
+                        if (deploy_git.normalizeGitHash(lastCommit.id) === deploy_git.normalizeGitHash(C.id)) {
+                            run = false;  // last commit
+                            break;
+                        }
+                        else if (deploy_git.normalizeGitHash(firstCommit.id) === deploy_git.normalizeGitHash(C.id)) {
+                            startAdd = true;  // now start adding commits between first and last
+                        }
+                    }
+                }
+                while (run);
+            }
+        }
+    }
+
+    // sort ascending
+    commitWindow = commitWindow.sort((x, y) => {
+        return deploy_helpers.compareValuesBy(x, y, c => {
+            const UTC_DATE = deploy_helpers.asUTC(c.date);
+            if (UTC_DATE) {
+                return UTC_DATE.unix();
+            }
+
+            return Number.MIN_VALUE;
+        });
+    });
+
+    let filesFromGit: string[] = [];
+    const ADD_FILE = (f: string) => {
+        if (filesFromGit.indexOf(f) < 0) {
+            filesFromGit.push(f);
+        }
+    };
+    const REMOVE_FILE = (f: string) => {
+        filesFromGit = filesFromGit.filter(ffg => {
+            return ffg !== f;
+        });
+    };
+
+    const TO_MINIMATCH = (str: string) => {
+        str = deploy_helpers.toStringSafe(str);
+        if (!str.startsWith('/')) {
+            str = '/' + str;
+        }
+
+        return str;
+    };
+
+    const TO_MINIMATCH_PATTERNS = (patterns: string | string[]) => {
+        return deploy_helpers.asArray(
+            patterns
+        ).map(p => {
+            return deploy_helpers.toStringSafe(p);
+        }).filter(p => {
+            return !deploy_helpers.isEmptyString(p);
+        }).map(p => TO_MINIMATCH(p));
+    };
+
+    const DOES_FILE_MATCH = (f: string): boolean => {
+        const REL_PATH = WORKSPACE.toRelativePath(f);
+        if (false === REL_PATH) {
+            return false;
+        }
+
+        let filePatterns = TO_MINIMATCH_PATTERNS(pkg.files);
+        if (filePatterns.length < 1) {
+            filePatterns = [ '/**' ];
+        }
+
+        let exludePatterns = TO_MINIMATCH_PATTERNS(pkg.exclude);
+        if (exludePatterns.length < 1) {
+            exludePatterns = undefined;
+        }
+
+        return deploy_helpers.checkIfDoesMatchByFileFilter(
+            TO_MINIMATCH(REL_PATH),
+            {
+                files: filePatterns,
+                exclude: exludePatterns,
+            }
+        );
+    };
+
+    // collect files
+    for (const C of commitWindow) {
+        const CHANGES = await C.changes();
+
+        for (const CHG of CHANGES) {
+            let f = CHG.file;
+            if (!Path.isAbsolute(f)) {
+                f = Path.join(WORKSPACE.rootPath, f);
+            }
+            f = Path.resolve(f);
+
+            if (!DOES_FILE_MATCH(f)) {
+                continue;
+            }
+
+            if (WORKSPACE.isFileIgnored(f)) {
+                continue;  // ignored
+            }
+
+            switch (operation) {
+                case deploy_contracts.DeployOperation.Delete:
+                    switch (CHG.type) {
+                        case deploy_scm.FileChangeType.Added:
+                        case deploy_scm.FileChangeType.Modified:
+                            REMOVE_FILE(f);
+                            break;
+
+                        case deploy_scm.FileChangeType.Deleted:
+                            ADD_FILE(f);
+                            break;
+                    }
+                    break;
+
+                case deploy_contracts.DeployOperation.Deploy:
+                case deploy_contracts.DeployOperation.Pull:
+                    switch (CHG.type) {
+                        case deploy_scm.FileChangeType.Added:
+                        case deploy_scm.FileChangeType.Modified:
+                            ADD_FILE(f);
+                            break;
+
+                        case deploy_scm.FileChangeType.Deleted:
+                            REMOVE_FILE(f);
+                            break;
+                    }
+                    break;
+            }
+        }
+    }
+
+    // write to storage
+    for (const F of filesFromGit) {
+        if (NORMALIZED_INPUT_FILES.indexOf(F) < 0) {
+            files.push(F);  // only if not in list yet
+        }
+    }
+
+    return files;
+}
 
 /**
  * Resets the package usage statistics.

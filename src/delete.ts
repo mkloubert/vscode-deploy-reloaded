@@ -497,7 +497,17 @@ export async function deletePackage(pkg: deploy_packages.Package,
         exclude = undefined;
     }
 
-    const RELOADER = async () => await ME.findFilesByFilter(pkg);
+    const RELOADER = async () => {
+        const FILES_FROM_FILTER = await ME.findFilesByFilter(pkg);
+        
+        await deploy_packages.importPackageFilesFromGit(
+            pkg,
+            deploy_contracts.DeployOperation.Delete,
+            FILES_FROM_FILTER,
+        );
+
+        return FILES_FROM_FILTER;
+    };
 
     const FILES_TO_DELETE = await RELOADER();
     if (FILES_TO_DELETE.length < 1) {

@@ -1337,6 +1337,19 @@ export function isFunc<TFunc extends Function = Function>(val: any): val is TFun
 }
 
 /**
+ * Checks if a value represents a hex string.
+ * 
+ * @param {any} val The value to check.
+ * 
+ * @return {boolean} Represents a hex string or not.
+ */
+export function isHex(val: any) {
+    return (/^([a-f|0-9]+)$/i).test(
+        normalizeString(val)
+    );
+}
+
+/**
  * Checks if a value is (null) or (undefined).
  * 
  * @param {any} val The value to check.

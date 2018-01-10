@@ -566,8 +566,11 @@ export const translation: Translation = {
             }
         },
         errors: {
+            cannotDetectGitClient: "git-Client konnte nicht für{0:trim,surround,leading_space} gefunden werden!",
             cannotDetectMappedPathInfoForFile: "Gemappte Pfad-Informationen konnten für die Datei{0:trim,surround,leading_space} nicht ermittelt werden!",
             cannotDetectPathInfoForFile: "Pfad-Informationen konnten für die Datei{0:trim,surround,leading_space} nicht ermittelt werden!",
+            cannotFindBranch: "Konnte Branch{0:trim,surround,leading_space} in{1:trim,surround,leading_space} nicht finden!",
+            cannotFindScmHash: "Konnte Hash{0:trim,surround,leading_space} in{1:trim,surround,leading_space} nicht finden!",
             cannotUseTargetForFile: "Kann das Ziel{0:trim,surround,leading_space} nicht für die Datei{1:trim,surround,leading_space} verwenden!",
             initNodeModulesFailed: "Der Aufruf von 'npm install' ist fehlgeschlagen:{0:trim,surround,leading_space}",
             notInitialized: "Der Arbeitsbereich{0:trim,surround,leading_space} wurde nicht initialisiert!",

@@ -404,6 +404,28 @@ function parseVersion(raw: string): string {
     return raw.replace(/^git version /, '');
 }
 
+/**
+ * Normalizes a git hash.
+ * 
+ * @param {string} hash The input value.
+ * @param {TDefault} [defaultValue] The custom default value.
+ * 
+ * @return {string|TDefault} The normalized hash or the default value.
+ */
+export function normalizeGitHash<TDefault = null>(hash: string, defaultValue?: TDefault): string | TDefault {
+    hash = deploy_helpers.normalizeString(hash);
+    
+    if (hash.length > 7) {
+        hash = hash.substr(0, 7).trim();
+    }
+    
+    if (hash.length < 1) {
+        return defaultValue;
+    }
+
+    return hash;
+}
+
 async function runCommand(command: string, args: any[]) {
     return (await deploy_helpers.execFile(command, args)).stdOut;
 }
