@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.28.0",
+ "version": "0.28.1",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -648,10 +648,29 @@
               "description": "The custom branch to use.",
               "default": "master"
              },
+             "exclude": {
+              "description": "A custom list of one or more (glob) patterns of files for git files to EXCLUDE. If not defined, the (exclude) pattern list from the package is used.",
+              "type": "array",
+              "items": {
+               "type": "string"
+              }
+             },
+             "files": {
+              "description": "A custom list of one or more (glob) patterns of files for git files to INCLUDE. If not defined, the (include) pattern list from the package is used.",
+              "type": "array",
+              "items": {
+               "type": "string"
+              }
+             },
              "from": {
               "type": "string",
               "description": "The hash from where to start (youngest).",
               "pattern": "([a-f|A-F|0-9]{7})([a-f|A-F|0-9]{33})?"
+             },
+             "gitFilesOnly": {
+              "description": "Use only the file list from git or not.",
+              "type": "boolean",
+              "default": true
              },
              "to": {
               "type": "string",

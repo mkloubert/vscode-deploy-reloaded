@@ -129,19 +129,23 @@ export type PackageFileListResolverResult = string | string[];
 /**
  * git settings for a package.
  */
-export interface PackageGitSettings {
+export interface PackageGitSettings extends deploy_contracts.FileFilter {
     /**
      * The custom branch.
      */
-    branch?: string;
+    readonly branch?: string;
     /**
      * The first (youngest) commit.
      */
-    from?: string;
+    readonly from?: string;
+    /**
+     * Only use files from git or not.
+     */
+    readonly gitFilesOnly?: boolean;
     /**
      * The first (oldest) commit.
      */
-    to?: string;
+    readonly to?: string;
 }
 
 /**
@@ -558,6 +562,12 @@ export async function importPackageFilesFromGit(pkg: Package, operation: deploy_
         };
     }
 
+    if (deploy_helpers.toBooleanSafe(gitSettings.gitFilesOnly, true)) {
+        while (files.length > 0) {
+            files.pop();
+        }
+    }
+
     const WORKSPACE = pkg.__workspace;
 
     const NORMALIZED_INPUT_FILES = deploy_helpers.asArray(files).map(f => {
@@ -763,12 +773,22 @@ export async function importPackageFilesFromGit(pkg: Package, operation: deploy_
             return false;
         }
 
-        let filePatterns = TO_MINIMATCH_PATTERNS(pkg.files);
+        const FILE_FILTER: deploy_contracts.FileFilter = deploy_helpers.cloneObject(<PackageGitSettings>gitSettings) || <any>{};
+        
+        if (deploy_helpers.isNullOrUndefined(FILE_FILTER.files)) {
+            (<any>FILE_FILTER).files = pkg.files;
+        }
+
+        if (deploy_helpers.isNullOrUndefined(FILE_FILTER.exclude)) {
+            (<any>FILE_FILTER).exclude = pkg.exclude;
+        }
+
+        let filePatterns = TO_MINIMATCH_PATTERNS(FILE_FILTER.files);
         if (filePatterns.length < 1) {
             filePatterns = [ '/**' ];
         }
 
-        let exludePatterns = TO_MINIMATCH_PATTERNS(pkg.exclude);
+        let exludePatterns = TO_MINIMATCH_PATTERNS(FILE_FILTER.exclude);
         if (exludePatterns.length < 1) {
             exludePatterns = undefined;
         }
