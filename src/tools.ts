@@ -794,20 +794,13 @@ export async function showPackageFiles(context: vscode.ExtensionContext,
     const PACKAGE_NAME = deploy_packages.getPackageName(PACKAGE);
     const WORKSPACE = PACKAGE.__workspace;
 
-    const FILES = Enumerable.from( await WORKSPACE.findFilesByFilter(PACKAGE) ).select(f => {
+    const PACKAGE_FILES = Enumerable.from( await WORKSPACE.findFilesByFilter(PACKAGE) ).select(f => {
         let realtivePath = WORKSPACE.toRelativePath(f);
         if (false === realtivePath) {
             realtivePath = f;
         }
 
         return realtivePath;
-    }).distinct()
-      .orderBy(f => {
-        return Path.dirname(f).length;
-    }).thenBy(f => {
-        return deploy_helpers.normalizeString( Path.dirname(f) );
-    }).thenBy(f => {
-        return deploy_helpers.normalizeString( Path.basename(f) );
     }).toArray();
 
     let md = "# " + HTML_ENCODER.encode( WORKSPACE.t('workspace') ) + "\n";
@@ -815,11 +808,32 @@ export async function showPackageFiles(context: vscode.ExtensionContext,
 
     md += "## " + WORKSPACE.t('files') + "\n";
 
-    if (FILES.length > 0) {
+    let files = PACKAGE_FILES.map(f => f);
+
+    // import files from git
+    await deploy_packages.importPackageFilesFromGit(PACKAGE,
+                                                    deploy_contracts.DeployOperation.Deploy,
+                                                    files);
+    await deploy_packages.importPackageFilesFromGit(PACKAGE,
+                                                    deploy_contracts.DeployOperation.Pull,
+                                                    files);
+    await deploy_packages.importPackageFilesFromGit(PACKAGE,
+                                                    deploy_contracts.DeployOperation.Delete,
+                                                    files);
+
+    files = Enumerable.from(files).distinct().orderBy(f => {
+        return Path.dirname(f).length;
+    }).thenBy(f => {
+        return deploy_helpers.normalizeString( Path.dirname(f) );
+    }).thenBy(f => {
+        return deploy_helpers.normalizeString( Path.basename(f) );
+    }).toArray();
+
+    if (files.length > 0) {
         md += "| " + WORKSPACE.t('file') + " | D-O-S<sup>1</sup> | D-O-C<sup>2</sup> | S-W-O<sup>3</sup> | R-O-C<sup>4</sup> \n";
         md += "| ---- |\n";
 
-        for (const F of FILES) {
+        for (const F of files) {
             const FULL_PATH = Path.join(
                 WORKSPACE.rootPath, F
             );
