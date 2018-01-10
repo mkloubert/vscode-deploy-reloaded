@@ -567,6 +567,7 @@ export const translation: Translation = {
         },
         errors: {
             cannotDetectGitClient: "git-Client konnte nicht für{0:trim,surround,leading_space} gefunden werden!",
+            cannotDetectGitFolder: "'.git'-Verzeichnis für{0:trim,surround,leading_space} wurde nicht gefunden!",
             cannotDetectMappedPathInfoForFile: "Gemappte Pfad-Informationen konnten für die Datei{0:trim,surround,leading_space} nicht ermittelt werden!",
             cannotDetectPathInfoForFile: "Pfad-Informationen konnten für die Datei{0:trim,surround,leading_space} nicht ermittelt werden!",
             cannotFindBranch: "Konnte Branch{0:trim,surround,leading_space} in{1:trim,surround,leading_space} nicht finden!",

@@ -573,6 +573,7 @@ export interface Translation {
         };
         errors?: {
             cannotDetectGitClient?: string;
+            cannotDetectGitFolder?: string;
             cannotDetectMappedPathInfoForFile?: string;
             cannotDetectPathInfoForFile?: string;
             cannotFindBranch?: string;

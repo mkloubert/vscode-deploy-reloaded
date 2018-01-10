@@ -590,6 +590,14 @@ export async function importPackageFilesFromGit(pkg: Package, operation: deploy_
         );
     }
 
+    const GIT_FOLDER = WORKSPACE.gitFolder;
+    if (false === GIT_FOLDER) {
+        throw new Error(
+            WORKSPACE.t('workspaces.errors.cannotDetectGitFolder',
+                        WORKSPACE.name)
+        );
+    }
+
     let branchName = deploy_helpers.normalizeString(gitSettings.branch);
     if ('' === branchName) {
         branchName = 'master';
@@ -809,7 +817,7 @@ export async function importPackageFilesFromGit(pkg: Package, operation: deploy_
         for (const CHG of CHANGES) {
             let f = CHG.file;
             if (!Path.isAbsolute(f)) {
-                f = Path.join(WORKSPACE.rootPath, f);
+                f = Path.join(<string>GIT_FOLDER, f);
             }
             f = Path.resolve(f);
 
