@@ -412,7 +412,7 @@ function parseVersion(raw: string): string {
  * 
  * @return {string|TDefault} The normalized hash or the default value.
  */
-export function normalizeGitHash<TDefault = null>(hash: string, defaultValue?: TDefault): string | TDefault {
+export function normalizeGitHash<TDefault = null>(hash: string, defaultValue: TDefault = <any>null): string | TDefault {
     hash = deploy_helpers.normalizeString(hash);
     
     if (hash.length > 7) {
