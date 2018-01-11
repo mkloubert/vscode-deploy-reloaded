@@ -138,6 +138,7 @@ export const translation: Translation = {
             defaultName: "HTML Dokument #{0:trim}",
         },
     },
+    done: "Fertig",
     editors: {
         active: {
             noOpen: "Es ist derzeit kein aktiver Texteditor geöffnet!",
@@ -182,12 +183,29 @@ export const translation: Translation = {
         currentDirectory: "Aktuelles Verzeichnis:{0:trim,surround,leading_space} ({1:trim,surround})",
         directoryIsEmpty: "(Verzeichnis ist leer)",
         errors: {
+            failed: "Konnte das Auflisten des Verzeichnisses{0:trim,surround,leading_space} ({1:trim,surround,leading_space}) nicht durchführen: {2:trim,surround,leading_space}",
             operationFailed: "Konnte das Auflisten eines Verzeichnisses nicht durchführen (s. Debugkonsole 'STRG/CMD + SHIFT + Y')!",
         },
         lastModified: "Letzte Änderung:{0:trim,leading_space}",
         loading: "Lade Verzeichnis{0:trim,surround,leading_space} ({1:trim} / {2:trim})...",
         noName: "<KEIN NAME>",
         parentDirectory: "(übergeordnetes Verzeichnis)",
+        pull: {
+            enterLocalFolder: "Geben Sie das lokale Verzeichnis in das die Dateien speichert werden sollen ...",
+            errors: {
+                maxPathDepthReached: "Maxmimal Tiefe von{0:trim,leading_space} erreicht!",
+            },
+            folder: {
+                description: "Lädt die Dateien dieses Ordners in ein lokales Verzeichnis",
+                label: "Dateien laden ...",
+            },
+            folderWithSubfolders: {
+                description: "Lädt die Dateien dieses Ordners (inkl. Unterordnern) in ein lokales Verzeichnis",
+                label: "Dateien inkl. Unterverzeichnissen laden ...",
+            },
+            pullingFile: "Lade Datei{0:trim,surround,leading_space} ...",
+            pullingFrom: "Lade Dateien von{0:trim,surround,leading_space} nach{1:trim,surround,leading_space} ...",
+        },
         selectSource: "Wählen Sie eine Quelle ...",
         size: "Grösse:{0:trim,leading_space}",
     },

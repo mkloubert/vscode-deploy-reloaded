@@ -259,7 +259,7 @@ export async function deployFilesTo(files: string[],
                     ];
 
                     const PRESSED_BTN = await ME.showWarningMessage.apply(
-                        null,
+                        ME,
                         [ <any>ME.t('deploy.askForCancelOperation', TARGET_NAME) ].concat(
                             POPUP_BTNS
                         )
@@ -273,6 +273,8 @@ export async function deployFilesTo(files: string[],
                 }
                 finally {
                     if (!CANCELLATION_SOURCE.token.isCancellationRequested) {
+                        cancelBtn.command = CANCEL_BTN_COMMAND_ID;
+
                         RESTORE_CANCEL_BTN_TEXT();
                     }
 

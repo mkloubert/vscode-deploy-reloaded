@@ -138,6 +138,7 @@ export const translation: Translation = {
             defaultName: "HTML document #{0:trim}",
         },
     },
+    done: "Done",
     editors: {
         active: {
             noOpen: "No active text editor found!",
@@ -182,12 +183,29 @@ export const translation: Translation = {
         currentDirectory: "Current directory:{0:trim,surround,leading_space} ({1:trim,surround})",
         directoryIsEmpty: "(directory is empty)",
         errors: {
+            failed: "Could not list directory{0:trim,surround,leading_space} ({1:trim,surround,leading_space}): {2:trim,surround,leading_space}",
             operationFailed: "List directory operation failed (s. debug console 'CTRL/CMD + SHIFT + Y')!",
         },
         lastModified: "Last modified:{0:trim,leading_space}",
         loading: "Loading directory{0:trim,surround,leading_space} ({1:trim} / {2:trim})...",
         noName: "<NO NAME>",
         parentDirectory: "(parent)",
+        pull: {
+            enterLocalFolder: "Enter the local folder, where the remote files should be saved ...",
+            errors: {
+                maxPathDepthReached: "Maximum path depth of{0:trim,leading_space} reached!",
+            },
+            folder: {
+                description: "Pull the files of that folder to a local directory",
+                label: "Pull files ...",
+            },
+            folderWithSubfolders: {
+                description: "Pull the files (and sub folders) of that folder to a local directory",
+                label: "Pull files with sub folders ...",
+            },
+            pullingFile: "Pulling file{0:trim,surround,leading_space} ...",
+            pullingFrom: "Pulling files from{0:trim,surround,leading_space} to{1:trim,surround,leading_space} ...",
+        },
         selectSource: "Select the source from where to start listening ...",
         size: "Size:{0:trim,leading_space}",
     },

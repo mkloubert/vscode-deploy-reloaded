@@ -16,21 +16,109 @@
  */
 
 import * as CopyPaste from 'copy-paste';
-import * as Crypto from 'crypto';
 import * as deploy_contracts from './contracts';
+import * as deploy_events from './events';
 import * as deploy_files from './files';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
 import * as deploy_plugins from './plugins';
+import * as deploy_session from './session';
 import * as deploy_targets from './targets';
+import * as deploy_transformers from './transformers';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
 import * as FileSize from 'filesize';
+import * as IsStream from 'is-stream';
 import * as Path from 'path';
 import * as vscode from 'vscode';
 
 
-function createSelectFileAction(file: deploy_files.FileInfo) {
+interface PullAllFilesFromDirCallbacks {
+    getCancelButtonText?: () => string;
+    readonly onRestoreButtonText: () => void;
+    readonly waitForCancelling: () => PromiseLike<void>;
+}
+
+
+let nextPullCancelBtnCommandId = Number.MIN_SAFE_INTEGER;
+
+async function createPullDataTransformer(target: deploy_targets.Target): Promise<deploy_transformers.DataTransformer> {
+    const WORKSPACE = target.__workspace;
+
+    const TARGET_NAME = deploy_targets.getTargetName(target);
+
+    const TRANSFORMER = await WORKSPACE.loadDataTransformer(target);
+    if (false === TRANSFORMER) {
+        throw new Error(WORKSPACE.t('targets.errors.couldNotLoadDataTransformer',
+                                    TARGET_NAME));
+    }
+
+    return deploy_transformers.toDataTransformerSafe(
+        deploy_transformers.toPasswordTransformer(TRANSFORMER, target)
+    );
+}
+
+function createPullDataTransformerContext(file: deploy_contracts.WithNameAndPath,
+                                          target: deploy_targets.Target)
+    : deploy_transformers.DataTransformerContext
+{
+    const STATE_KEY = deploy_helpers.toStringSafe(target.__id);
+    const WORKSPACE = target.__workspace;
+
+    const TRANSFORMER_OPTIONS = deploy_helpers.cloneObject(target.transformerOptions);
+
+    const CTX: deploy_transformers.DataTransformerContext = {
+        context: {
+            deployOperation: deploy_contracts.DeployOperation.Pull,
+            remoteFile: deploy_helpers.normalizePath(
+                deploy_helpers.normalizePath(file.path) + 
+                '/' + 
+                deploy_helpers.normalizePath(file.name)
+            ),
+            target: target,
+        },
+        events: WORKSPACE.workspaceSessionState['pull']['events'],
+        extension: WORKSPACE.context.extension,
+        folder: WORKSPACE.folder,
+        globalEvents: deploy_events.EVENTS,
+        globals: WORKSPACE.globals,
+        globalState: WORKSPACE.workspaceSessionState['pull']['states']['global'],
+        homeDir: deploy_helpers.getExtensionDirInHome(),
+        logger: WORKSPACE.createLogger(),
+        mode: deploy_transformers.DataTransformerMode.Restore,
+        options: TRANSFORMER_OPTIONS,
+        output: WORKSPACE.output,
+        replaceWithValues: (val) => {
+            return WORKSPACE.replaceWithValues(val);
+        },
+        require: (id) => {
+            return deploy_helpers.requireFromExtension(id);
+        },
+        sessionState: deploy_session.SESSION_STATE,
+        settingFolder: WORKSPACE.settingFolder,
+        state: undefined,
+        workspaceRoot: WORKSPACE.rootPath,
+    };
+
+    // CTX.state
+    Object.defineProperty(CTX, 'state', {
+        enumerable: true,
+
+        get: () => {
+            return WORKSPACE.workspaceSessionState['pull']['states']['data_transformers'][STATE_KEY];
+        },
+
+        set: (newValue) => {
+            WORKSPACE.workspaceSessionState['pull']['states']['data_transformers'][STATE_KEY] = newValue;
+        }
+    });
+
+    return CTX;
+}
+
+function createSelectFileAction(file: deploy_files.FileInfo,
+                                target: deploy_targets.Target,
+                                transformer: deploy_transformers.DataTransformer) {
     if (!file) {
         return;
     }
@@ -41,11 +129,31 @@ function createSelectFileAction(file: deploy_files.FileInfo) {
 
             await deploy_helpers.invokeForTempFile(
                 async (tempFile) => {
+                    let downloadedData: any = await Promise.resolve(
+                        file.download()
+                    );
+
+                    // keep sure to have a buffer here
+                    downloadedData = await deploy_helpers.asBuffer(
+                        downloadedData,
+                    );
+
+                    if (downloadedData) {
+                        if (transformer) {
+                            const CTX = createPullDataTransformerContext(
+                                file,
+                                target
+                            );
+
+                            downloadedData = await Promise.resolve(
+                                transformer(downloadedData, CTX)
+                            );    
+                        }
+                    }
+
                     await deploy_helpers.writeFile(
                         tempFile,
-                        await Promise.resolve(
-                            file.download()
-                        ),
+                        downloadedData,
                     );
 
                     const EDITOR = await vscode.workspace.openTextDocument(tempFile);
@@ -81,9 +189,9 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
     const LAST_DIR_CACHE = ME.workspaceSessionState['list']['lastDirectories'];
 
     const TARGET_NAME = deploy_targets.getTargetName(target);
-    const TARGET_CACHE_KEY = target.__index + '::' + Crypto.createHash('sha256')
-                                                           .update( new Buffer(deploy_helpers.toStringSafe(target.__id), 'utf8') )
-                                                           .digest('hex');
+    const TARGET_CACHE_KEY = target.__index + '::' + deploy_targets.getTargetIdHash(target);
+
+    const PULL_TRANSFORMER = await createPullDataTransformer(target);
 
     if (arguments.length < 2) {
         // try to get last directory
@@ -188,6 +296,25 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
 
         const QUICK_PICK_ITEMS: deploy_contracts.ActionQuickPick[] = [];
 
+        const SHOW_QUICK_PICKS = async () => {
+            let placeHolder = dir.trim();
+            if (!placeHolder.startsWith('/')) {
+                placeHolder = '/' + placeHolder;
+            }
+
+            const SELECTED_ITEM = await vscode.window.showQuickPick(QUICK_PICK_ITEMS, {
+                placeHolder: ME.t('listDirectory.currentDirectory',
+                                  placeHolder, TARGET_NAME),
+            });
+            if (SELECTED_ITEM) {
+                if (SELECTED_ITEM.action) {
+                    await Promise.resolve(
+                        SELECTED_ITEM.action()
+                    );
+                }
+            }
+        };
+
         const LIST_DIRECTORY = async (d: string) => {
             listDirectory.apply(
                 ME,
@@ -195,6 +322,8 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
             );
         };
 
+        let numberOfDirs = 0;
+        let numberOfFiles = 0;
         FILES_AND_FOLDERS.sort((x, y) => {
             // first by type:
             // 
@@ -265,6 +394,8 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
                         dir + '/' + pathPart,
                     );
                 };
+
+                ++numberOfDirs;
             }
             else if (deploy_files.FileSystemType.File == f.type) {
                 // file
@@ -272,8 +403,12 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
                 label = GET_ICON_SAFE('file-binary') + label;
                 
                 action = createSelectFileAction(
-                    <deploy_files.FileInfo>f
+                    <deploy_files.FileInfo>f,
+                    target,
+                    PULL_TRANSFORMER,
                 );
+
+                ++numberOfFiles;
             }
             else {
                 label = GET_ICON_SAFE('question') + label;
@@ -330,6 +465,20 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
             });
         }
 
+        const HAS_FUNCTIONS = deploy_helpers.isObject(selfInfo) ||
+                              numberOfDirs > 0 ||
+                              numberOfFiles > 0;
+        if (HAS_FUNCTIONS) {
+            QUICK_PICK_ITEMS.push({
+                action: () => {
+                    SHOW_QUICK_PICKS();
+                },
+
+                label: '-',
+                description: '',
+            });
+        }
+
         // functions
         {
             if (deploy_helpers.isObject(selfInfo)) {
@@ -363,24 +512,183 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
                     });
                 }
             }
-        }
 
-        let placeHolder = dir.trim();
-        if (!placeHolder.startsWith('/')) {
-            placeHolder = '/' + placeHolder;
-        }
+            if (numberOfDirs > 0 || numberOfFiles > 0) {
+                // pull files
+                {
+                    const SELECT_TARGET_DIR = async (label: string) => {
+                        let relPathOfDir = dir;
+                        if (deploy_helpers.isEmptyString(relPathOfDir)) {
+                            relPathOfDir = './';
+                        }
 
-        const SELECTED_ITEM = await vscode.window.showQuickPick(QUICK_PICK_ITEMS, {
-            placeHolder: ME.t('listDirectory.currentDirectory',
-                              placeHolder, TARGET_NAME),
-        });
-        if (SELECTED_ITEM) {
-            if (SELECTED_ITEM.action) {
-                await Promise.resolve(
-                    SELECTED_ITEM.action()
-                );
+                        const LOCAL_DIR = Path.resolve(
+                            Path.join(ME.rootPath, relPathOfDir)
+                        );
+
+                        return await vscode.window.showInputBox({
+                            placeHolder: label,
+                            prompt: ME.t('listDirectory.pull.enterLocalFolder'),
+                            value: LOCAL_DIR,
+                        });
+                    };
+
+                    const PULL_THE_FILES = async (recursive: boolean, label: string) => {
+                        const TARGET_DIR = await SELECT_TARGET_DIR(label);
+                        if (deploy_helpers.isEmptyString(TARGET_DIR)) {
+                            return;
+                        }
+
+                        const PULL_CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
+
+                        let cancelBtn: vscode.StatusBarItem;
+                        let cancelBtnCommand: vscode.Disposable;
+                        const DISPOSE_CANCEL_BTN = () => {
+                            deploy_helpers.tryDispose(cancelBtn);
+                            deploy_helpers.tryDispose(cancelBtnCommand);
+                        };
+
+                        let callbacks: PullAllFilesFromDirCallbacks;
+                        const RESTORE_CANCEL_BTN_TEXT = () => {
+                            const CBTN = cancelBtn;
+                            if (!CBTN) {
+                                return;
+                            }
+
+                            let setDefaultText = true;
+                            try {
+                                const CB = callbacks;
+                                if (!CB) {
+                                    return;
+                                }
+                                
+                                const GET_TEXT = CB.getCancelButtonText;
+                                if (GET_TEXT) {
+                                    CBTN.text = deploy_helpers.toStringSafe(
+                                        deploy_helpers.applyFuncFor(
+                                            GET_TEXT,
+                                            CB
+                                        )(),
+                                    ).trim();
+
+                                    setDefaultText = false;
+                                }
+                            }
+                            finally {
+                                if (setDefaultText) {
+                                    CBTN.text = ME.t('pull.buttons.cancel.text',
+                                                     TARGET_NAME);
+                                }
+                            }
+                        };
+
+                        let isCancelling = false;
+                        {
+                            cancelBtn = vscode.window.createStatusBarItem();
+                            cancelBtn.tooltip = ME.t('pull.buttons.cancel.tooltip');
+
+                            RESTORE_CANCEL_BTN_TEXT();
+
+                            const CANCEL_BTN_COMMAND_ID = `extension.deploy.reloaded.buttons.cancelListPullFilesFrom${nextPullCancelBtnCommandId++}`;
+            
+                            cancelBtnCommand = vscode.commands.registerCommand(CANCEL_BTN_COMMAND_ID, async () => {
+                                try {
+                                    isCancelling = true;
+
+                                    cancelBtn.command = undefined;
+                                    cancelBtn.text = ME.t('pull.cancelling');
+
+                                    const POPUP_BTNS: deploy_contracts.MessageItemWithValue[] = [
+                                        {
+                                            isCloseAffordance: true,
+                                            title: ME.t('no'),
+                                            value: 0,
+                                        },
+                                        {
+                                            title: ME.t('yes'),
+                                            value: 1,
+                                        }
+                                    ];
+
+                                    const PRESSED_BTN = await ME.showWarningMessage.apply(
+                                        ME,
+                                        [ <any>ME.t('pull.askForCancelOperation', TARGET_NAME) ].concat(
+                                            POPUP_BTNS
+                                        )
+                                    );
+
+                                    if (PRESSED_BTN) {
+                                        if (1 === PRESSED_BTN) {
+                                            PULL_CANCELLATION_SOURCE.cancel();
+                                        }
+                                    }
+                                }
+                                finally {
+                                    if (!PULL_CANCELLATION_SOURCE.token.isCancellationRequested) {
+                                        cancelBtn.command = CANCEL_BTN_COMMAND_ID;
+
+                                        RESTORE_CANCEL_BTN_TEXT();
+                                    }
+
+                                    isCancelling = false;
+                                }
+                            });
+
+                            cancelBtn.command = CANCEL_BTN_COMMAND_ID;
+
+                            cancelBtn.show();
+                        }
+
+                        callbacks = {
+                            onRestoreButtonText: () => {
+                                RESTORE_CANCEL_BTN_TEXT();
+                            },
+                            waitForCancelling: async () => {
+                                await deploy_helpers.waitWhile(() => isCancelling);
+                            },
+                        };
+
+                        try {
+                            await deploy_helpers.withProgress(async (progress) => {
+                                await pullAllFilesFromDir(target,
+                                                          dir, TARGET_DIR,
+                                                          PULL_TRANSFORMER,
+                                                          cancelBtn, PULL_CANCELLATION_SOURCE,
+                                                          callbacks,
+                                                          recursive);
+                            });
+                        }
+                        finally {
+                            DISPOSE_CANCEL_BTN();
+
+                            deploy_helpers.tryDispose(PULL_CANCELLATION_SOURCE);
+                        }
+                    };
+
+                    // pull files
+                    QUICK_PICK_ITEMS.push({
+                        action: async function() {
+                            await PULL_THE_FILES(false, this.label);
+                        },
+
+                        label: '$(cloud-download)  ' + ME.t('listDirectory.pull.folder.label'),
+                        description: ME.t('listDirectory.pull.folder.description'),
+                    });
+
+                    // pull files with sub folders
+                    QUICK_PICK_ITEMS.push({
+                        action: async function () {
+                            await PULL_THE_FILES(true, this.label);
+                        },
+
+                        label: '$(cloud-download)  ' + ME.t('listDirectory.pull.folderWithSubfolders.label'),
+                        description: ME.t('listDirectory.pull.folderWithSubfolders.description'),
+                    });
+                }
             }
         }
+
+        await SHOW_QUICK_PICKS();
     }
     catch (e) {
         wholeOperationHasFailed = true;
@@ -393,13 +701,279 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
             await listDirectory.apply(this, arguments);
         }
         else {
-            throw e;
+            ME.showErrorMessage(
+                ME.t('listDirectory.errors.failed',
+                     deploy_helpers.toDisplayablePath(dir), TARGET_NAME)
+            );
         }
     }
     finally {
         if (!wholeOperationHasFailed) {
             // cache
             LAST_DIR_CACHE[TARGET_CACHE_KEY] = dir;
+        }
+    }
+}
+
+async function pullAllFilesFromDir(target: deploy_targets.Target,
+                                   sourceDir: string, targetDir: string,
+                                   transformer: deploy_transformers.DataTransformer,
+                                   cancelBtn: vscode.StatusBarItem, cancelTokenSrc: vscode.CancellationTokenSource,
+                                   callbacks: PullAllFilesFromDirCallbacks,
+                                   recursive: boolean,
+                                   depth?: number, maxDepth?: number) {
+    const TARGET_NAME = deploy_targets.getTargetName(target);
+    const WORKSPACE = target.__workspace;
+
+    sourceDir = deploy_helpers.toStringSafe(sourceDir);
+
+    targetDir = deploy_helpers.toStringSafe(targetDir);
+    if (!Path.isAbsolute(targetDir)) {
+        targetDir = Path.join(WORKSPACE.rootPath, targetDir);
+    }
+    targetDir = Path.resolve(targetDir);
+
+    recursive = deploy_helpers.toBooleanSafe(recursive);
+
+    if (isNaN(maxDepth)) {
+        maxDepth = 64;
+    }
+
+    if (isNaN(depth)) {
+        depth = 0;
+    }
+
+    if (depth >= maxDepth) {
+        throw new Error(WORKSPACE.t('listDirectory.pull.errors.maxPathDepthReached',
+                                    maxDepth));
+    }
+
+    if (cancelTokenSrc.token.isCancellationRequested) {
+        return;
+    }
+
+    let cancelButtonText = WORKSPACE.t('listDirectory.pull.pullingFrom',
+                                       deploy_helpers.toDisplayablePath(sourceDir), targetDir);
+
+    callbacks.getCancelButtonText = () => {
+        return cancelButtonText;
+    };
+    callbacks.onRestoreButtonText();
+
+    WORKSPACE.output.appendLine('');
+    WORKSPACE.output.appendLine(WORKSPACE.t('listDirectory.pull.pullingFrom',
+                                            sourceDir, targetDir));
+
+    try {
+        if (!(await deploy_helpers.exists(targetDir))) {
+            await deploy_helpers.mkdirs(targetDir);
+        }
+
+        const PLUGINS = WORKSPACE.getListPlugins(target);
+        while (PLUGINS.length > 0) {
+            await callbacks.waitForCancelling();
+
+            if (cancelTokenSrc.token.isCancellationRequested) {
+                return;
+            }
+            
+            const P = PLUGINS.shift();
+
+            const CTX: deploy_plugins.ListDirectoryContext = {
+                cancellationToken: cancelTokenSrc.token,
+                dir: sourceDir,
+                isCancelling: undefined,
+                target: target,
+                workspace: WORKSPACE,
+            };
+
+            // CTX.isCancelling
+            Object.defineProperty(CTX, 'isCancelling', {
+                enumerable: true,
+
+                get: () => {
+                    return CTX.cancellationToken.isCancellationRequested;
+                }
+            });
+
+            const FILES_AND_FOLDERS = await P.listDirectory(CTX);
+            if (!FILES_AND_FOLDERS) {
+                continue;
+            }
+
+            const FILES = deploy_helpers.asArray(FILES_AND_FOLDERS.files).filter(f => {
+                return deploy_helpers.isFunc(f.download);
+            });
+
+            if (FILES.length > 0) {
+                const FILES_TO_DOWNLOAD: deploy_plugins.FileToDownload[] = [];
+                FILES.forEach(f => {
+                    const NAME_AND_PATH: deploy_contracts.WithNameAndPath = {
+                        path: deploy_helpers.normalizePath(f.path),
+                        name: deploy_helpers.normalizePath(f.name),
+                    };
+
+                    const LOCAL_FILE = Path.resolve(
+                        Path.join(targetDir, f.name)
+                    );
+
+                    const SF = new deploy_plugins.SimpleFileToDownload(
+                        WORKSPACE,
+                        LOCAL_FILE,
+                        NAME_AND_PATH
+                    );
+
+                    SF.onBeforeDownload = async function(source?) {
+                        if (arguments.length < 1) {
+                            source = NAME_AND_PATH.path;
+                        }
+                        source = `${deploy_helpers.toStringSafe(source)} (${TARGET_NAME})`;
+
+                        const PULL_TEXT = WORKSPACE.t('listDirectory.pull.pullingFile',
+                                                      deploy_helpers.toDisplayablePath(
+                                                          deploy_helpers.normalizePath(NAME_AND_PATH.path + '/' + NAME_AND_PATH.name)
+                                                      ));
+
+                        cancelButtonText = PULL_TEXT;
+                        callbacks.onRestoreButtonText();
+
+                        WORKSPACE.output.append(
+                            `\t` + PULL_TEXT + ' '
+                        );
+
+                        await callbacks.waitForCancelling();
+
+                        if (cancelTokenSrc.token.isCancellationRequested) {
+                            WORKSPACE.output.appendLine(`[${WORKSPACE.t('canceled')}]`);
+                        }
+                    };
+
+                    SF.onDownloadCompleted = async function(err, downloadedFile?) {
+                        let disposeDownloadedFile = false;
+                        try {
+                            if (err) {
+                                throw err;
+                            }
+
+                            let dataToWrite: any;
+
+                            if (downloadedFile) {
+                                if (Buffer.isBuffer(downloadedFile)) {
+                                    dataToWrite = downloadedFile;
+                                }
+                                else if (IsStream(downloadedFile)) {
+                                    dataToWrite = downloadedFile;
+                                }
+                                else if (deploy_helpers.isObject<deploy_plugins.DownloadedFile>(downloadedFile)) {
+                                    disposeDownloadedFile = true;
+
+                                    dataToWrite = await Promise.resolve(
+                                        downloadedFile.read()
+                                    );
+                                }
+                                else {
+                                    dataToWrite = downloadedFile;
+                                }
+
+                                // keep sure we have a buffer here
+                                dataToWrite = await deploy_helpers.asBuffer(
+                                    dataToWrite
+                                );
+
+                                const CONTEXT = createPullDataTransformerContext(
+                                    NAME_AND_PATH,
+                                    target
+                                );
+
+                                if (transformer) {
+                                    dataToWrite = await (<deploy_transformers.DataTransformer>transformer)(
+                                        dataToWrite, CONTEXT
+                                    );
+                                }
+                            }
+
+                            if (dataToWrite) {
+                                await deploy_helpers.writeFile(
+                                    LOCAL_FILE, dataToWrite
+                                );
+                            }
+
+                            WORKSPACE.output
+                                     .append(`[${WORKSPACE.t('ok')}]`);
+                        }
+                        catch (e) {
+                            WORKSPACE.output
+                                     .append(`[${WORKSPACE.t('error', e)}]`);
+                        }
+                        finally {
+                            if (disposeDownloadedFile) {
+                                deploy_helpers.tryDispose(<vscode.Disposable>downloadedFile);
+                            }
+
+                            WORKSPACE.output
+                                     .appendLine('');
+                        }
+                    };
+
+                    FILES_TO_DOWNLOAD.push(SF);
+                });
+                
+                const DL_CTX: deploy_plugins.DownloadContext = {
+                    cancellationToken: cancelTokenSrc.token,
+                    files: FILES_TO_DOWNLOAD,
+                    isCancelling: undefined,
+                    target: target,
+                };
+
+                // DL_CTX.isCancelling
+                Object.defineProperty(DL_CTX, 'isCancelling', {
+                    enumerable: true,
+
+                    get: () => {
+                        return DL_CTX.cancellationToken.isCancellationRequested;
+                    }
+                });
+
+                await P.downloadFiles(DL_CTX);
+            }
+
+            WORKSPACE.output.appendLine(`[${WORKSPACE.t('done')}]`);
+
+            if (recursive) {
+                // sub folders
+
+                for (const D of deploy_helpers.asArray(FILES_AND_FOLDERS.dirs)) {
+                    const NEW_SOURCE_DIR = deploy_helpers.normalizePath(
+                        deploy_helpers.normalizePath(D.path) + 
+                        '/' + 
+                        deploy_helpers.normalizePath(D.name)
+                    );
+
+                    const NEW_TARGET_DIR = Path.join(
+                        targetDir, deploy_helpers.toStringSafe(D.name),
+                    );
+
+                    await pullAllFilesFromDir(
+                        target,
+                        NEW_SOURCE_DIR, NEW_TARGET_DIR,
+                        transformer,
+                        cancelBtn, cancelTokenSrc,
+                        callbacks,
+                        recursive,
+                        depth + 1,
+                    );
+                }
+            }
+        }
+    }
+    catch (e) {
+        WORKSPACE.output.appendLine(`[${WORKSPACE.t('error', e)}]`);
+    }
+    finally {
+        callbacks.getCancelButtonText = null;
+
+        if (cancelTokenSrc.token.isCancellationRequested) {
+            WORKSPACE.output.appendLine(`[${WORKSPACE.t('canceled')}]`);
         }
     }
 }

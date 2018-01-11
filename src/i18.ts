@@ -145,6 +145,7 @@ export interface Translation {
             defaultName?: string;
         };
     };
+    done?: string;
     editors?: {
         active?: {
             noOpen?: string;
@@ -189,12 +190,29 @@ export interface Translation {
         currentDirectory?: string;
         directoryIsEmpty?: string;
         errors?: {
+            failed?: string;
             operationFailed?: string;
         };
         lastModified?: string;
         loading?: string;
         noName?: string;
         parentDirectory?: string;
+        pull?: {
+            enterLocalFolder?: string;
+            errors?: {
+                maxPathDepthReached?: string;
+            };
+            folder?: {
+                description?: string;
+                label?: string;
+            };
+            folderWithSubfolders?: {
+                description?: string;
+                label?: string;
+            };
+            pullingFile: string;
+            pullingFrom: string;
+        };
         selectSource?: string;
         size?: string;
     };
