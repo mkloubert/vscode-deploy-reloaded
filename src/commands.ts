@@ -16,13 +16,20 @@
  */
 
 import * as deploy_contracts from './contracts';
+import * as deploy_delete from './delete';
+import * as deploy_deploy from './deploy';
 import * as deploy_events from './events';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
+import * as deploy_pull from './pull';
 import * as deploy_session from './session';
+import * as deploy_targets from './targets';
 import * as deploy_values from './values';
 import * as deploy_workspaces from './workspaces';
+import * as Enumerable from 'node-enumerable';
 import * as Events from 'events';
+import * as i18 from './i18';
+import * as Path from 'path';
 import * as vscode from 'vscode';
 
 
@@ -365,5 +372,199 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
 
             throw e;
         }
+    }
+}
+
+/**
+ * Handles a current file or folder.
+ * 
+ * @param {vscode.ExtensionContext} context The extension context.
+ * @param {vscode.Uri} u The URI of the current file / folder.
+ */
+export async function handleCurrentFileOrFolder(context: vscode.ExtensionContext, u: vscode.Uri) {
+    let fileOrFolder: string;
+    if (deploy_helpers.isNullOrUndefined(u)) {
+        // try get active editor document
+
+        const ACTIVE_EDITOR = vscode.window.activeTextEditor;
+        if (ACTIVE_EDITOR) {
+            const DOC = ACTIVE_EDITOR.document;
+            if (DOC) {
+                fileOrFolder = DOC.fileName;
+            }
+        }
+    }
+    else {
+        fileOrFolder = u.fsPath;
+    }
+
+    if (deploy_helpers.isEmptyString(fileOrFolder)) {
+        deploy_helpers.showWarningMessage(
+            i18.t('currentFileOrFolder.noneSelected')
+        );
+
+        return;
+    }
+
+    const ACTIVE_WORKSPACES = deploy_workspaces.getActiveWorkspaces();
+    const ACTIVE_TARGETS = Enumerable.from(ACTIVE_WORKSPACES).selectMany(aws => {
+        return aws.getTargets();
+    }).toArray();
+    if (ACTIVE_TARGETS.length < 1) {
+        vscode.window.showWarningMessage(
+            i18.t('workspaces.active.noneFound')
+        );
+
+        return;
+    }
+
+    try {
+        const STATS = await deploy_helpers.lstat(fileOrFolder);
+        
+        const URI_TYPE: 'file' | 'folder' = STATS.isDirectory() ? 'folder' : 'file';
+
+        const INVOKE_TARGET_ACTION = async (action: (target: deploy_targets.Target, files: string[]) => any,
+                                            promptId: string) => {
+            const SELECTED_TARGET = await deploy_targets.showTargetQuickPick(
+                context,
+                ACTIVE_TARGETS,
+                {
+                    placeHolder: i18.t(promptId)
+                }
+            );
+            if (!SELECTED_TARGET) {
+                return;
+            }
+
+            const WORKSPACE = SELECTED_TARGET.__workspace;
+
+            let filesToHandle: string[] = [];
+            if ('file' === URI_TYPE) {
+                filesToHandle.push(u.fsPath);
+            }
+            else {
+                Enumerable.from(await deploy_helpers.glob('**', {
+                    cwd: fileOrFolder,
+                    dot: true,
+                    nosort: true,
+                    nounique: false,
+                    root: fileOrFolder,                    
+                })).pushTo(filesToHandle);
+            }
+
+            filesToHandle = Enumerable.from(filesToHandle).distinct().where(f => {
+                return WORKSPACE.isPathOf(f) &&
+                       !WORKSPACE.isFileIgnored(f);
+            }).orderBy(f => {
+                return Path.dirname(f).length;
+            }).thenBy(f => {
+                return deploy_helpers.normalizeString(Path.dirname(f));
+            }).thenBy(f => {
+                return Path.basename(f).length;
+            }).thenBy(f => {
+                return deploy_helpers.normalizeString(Path.basename(f));
+            }).distinct()
+              .toArray();
+            
+            if (filesToHandle.length > 0) {
+                await Promise.resolve(
+                    action(SELECTED_TARGET, filesToHandle)
+                );
+            }
+        };
+
+        const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = [
+            {
+                action: async () => {
+                    await INVOKE_TARGET_ACTION(async (target, files) => {
+                        await deploy_helpers.applyFuncFor(
+                            deploy_deploy.deployFilesTo,
+                            target.__workspace
+                        )(files,
+                          target,
+                          () => files);
+                    }, 'deploy.selectTarget');
+                },
+                label: '$(rocket)  ' + i18.t(`deploy.currentFileOrFolder.${URI_TYPE}.label`),
+                description: i18.t(`deploy.currentFileOrFolder.${URI_TYPE}.description`),
+            },
+            {
+                action: async () => {
+                    await INVOKE_TARGET_ACTION(async (target, files) => {
+                        await deploy_helpers.applyFuncFor(
+                            deploy_pull.pullFilesFrom,
+                            target.__workspace
+                        )(files,
+                          target,
+                          () => files);
+                    }, 'pull.selectSource');
+                },
+                label: '$(cloud-download)  ' + i18.t(`pull.currentFileOrFolder.${URI_TYPE}.label`),
+                description: i18.t(`pull.currentFileOrFolder.${URI_TYPE}.description`),
+            },
+            {
+                action: async () => {
+                    await INVOKE_TARGET_ACTION(async (target, files) => {
+                        const WS = target.__workspace;
+
+                        const BUTTONS: deploy_contracts.MessageItemWithValue[] = [
+                            {
+                                title: WS.t('no'),
+                                value: 1,
+                            },
+                            {
+                                title: WS.t('yes'),
+                                value: 2,
+                            },
+                            {
+                                isCloseAffordance: true,
+                                title: WS.t('cancel'),
+                                value: 0,
+                            }
+                        ];
+
+                        let deleteLocalFiles = false;
+                        {
+                            const PRESSED_BTN: deploy_contracts.MessageItemWithValue = await vscode.window.showWarningMessage.apply(
+                                null,
+                                [ <any>WS.t('DELETE.askIfDeleteLocalFiles'), {} ].concat(BUTTONS),
+                            );
+
+                            if (!PRESSED_BTN || 0 == PRESSED_BTN.value) {
+                                return;
+                            }
+
+                            deleteLocalFiles = 2 === PRESSED_BTN.value;
+                        }
+
+                        await deploy_helpers.applyFuncFor(
+                            deploy_delete.deleteFilesIn,
+                            WS
+                        )(files,
+                          target,
+                          () => files,
+                          deleteLocalFiles);
+                    }, 'DELETE.selectTarget');
+                },
+                label: '$(trashcan)  ' + i18.t(`DELETE.currentFileOrFolder.${URI_TYPE}.label`),
+                description: i18.t(`DELETE.currentFileOrFolder.${URI_TYPE}.description`),
+            },
+        ];
+
+        const SELECTED_ITEM = await vscode.window.showQuickPick(
+            QUICK_PICKS,
+            {
+                ignoreFocusOut: true
+            }
+        );
+        if (SELECTED_ITEM) {
+            await Promise.resolve(
+                SELECTED_ITEM.action()
+            ); 
+        }
+    }
+    catch (e) {
+        deploy_log.CONSOLE
+                  .trace(e, 'extension.deploy.reloaded.currentFileOrFolder');
     }
 }

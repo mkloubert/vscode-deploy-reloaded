@@ -54,6 +54,9 @@ export interface Translation {
         notSupported?: string;
     };
     'continue'?: string;
+    currentFileOrFolder?: {
+        noneSelected?: string;
+    };
     DELETE?: {
         askForCancelOperation?: string;
         askIfDeleteLocalFile?: string;
@@ -69,6 +72,16 @@ export interface Translation {
         currentFile?: {
             description?: string;
             label?: string;
+        };
+        currentFileOrFolder?: {
+            file?: {
+                description?: string;
+                label?: string;
+            },
+            folder?: {
+                description?: string;
+                label?: string;
+            }
         };
         deletingFile?: string;
         errors?: {
@@ -108,6 +121,16 @@ export interface Translation {
         currentFile?: {
             description?: string;
             label?: string;
+        };
+        currentFileOrFolder?: {
+            file?: {
+                description?: string;
+                label?: string;
+            },
+            folder?: {
+                description?: string;
+                label?: string;
+            }
         };
         deployingFile?: string;
         errors?: {
@@ -331,6 +354,16 @@ export interface Translation {
         currentFile?: {
             description?: string;
             label?: string;
+        };
+        currentFileOrFolder?: {
+            file?: {
+                description?: string;
+                label?: string;
+            },
+            folder?: {
+                description?: string;
+                label?: string;
+            }
         };
         errors?: {
             invalidWorkspace?: string;

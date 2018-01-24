@@ -24,6 +24,7 @@ import * as deploy_contracts from './contracts';
 import * as deploy_delete from './delete';
 import * as deploy_deploy from './deploy';
 import * as deploy_download from './download';
+import * as deploy_files from './files';
 import * as deploy_git from './git';
 import * as deploy_gui from './gui';
 import * as deploy_helpers from './helpers';
@@ -41,6 +42,7 @@ import * as deploy_tasks from './tasks';
 import * as deploy_values from './values';
 import * as Enumerable from 'node-enumerable';
 import * as Events from 'events';
+import * as FS from 'fs';
 import * as Glob from 'glob';
 import * as i18 from './i18';
 import * as i18next from 'i18next';
@@ -203,6 +205,24 @@ export interface WorkspaceItemFromSettings {
      * Gets the underlying workspace.
      */
     readonly __workspace: Workspace;
+}
+
+/**
+ * A 'list directory' result of a workspace.
+ */
+export interface WorkspaceListDirectoryResult extends deploy_files.WithDirectoriesAndFiles {
+    /**
+     * Information about the underlying directory itself.
+     */
+    readonly info: deploy_files.DirectoryInfo;
+    /**
+     * The other / unknown elements.
+     */
+    readonly others: deploy_files.FileSystemInfo[];
+    /**
+     * The underlying workspace.
+     */
+    readonly workspace: Workspace;
 }
 
 /**
@@ -1157,7 +1177,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * 
      * @param {string} path The path.
      * 
-     * @return {string|boolean} The existing, full normalized path or (false) if path does not exist.
+     * @return {Promise<string|boolean>} The promise with the existing, full normalized path or (false) if path does not exist.
      */
     public async getExistingSettingPath(path: string): Promise<string | false> {
         const ME = this;
@@ -2042,6 +2062,129 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     public async listDirectory<TTarget extends deploy_targets.Target = deploy_targets.Target>(target: TTarget): Promise<deploy_plugins.ListDirectoryResult<TTarget>> {
         return await deploy_list.listDirectory
                                 .apply(this, [ target ]);
+    }
+
+    /**
+     * Lists the files and folders inside that workspace.
+     * 
+     * @param {string} [dir] The directory inside that workspace.
+     * 
+     * @return {WorkspaceListDirectoryResult|false} The result or (false) if directory is invalid.
+     */
+    public async listWorkspaceDirectory(dir = ''): Promise<WorkspaceListDirectoryResult | false> {
+        dir = deploy_helpers.toStringSafe(dir);
+        if (deploy_helpers.isEmptyString(dir)) {
+            dir = './';
+        }
+
+        if (!Path.isAbsolute(dir)) {
+            dir = Path.join(this.rootPath, dir);
+        }
+        dir = Path.resolve(dir);
+
+        const REL_PATH = this.toRelativePath(dir);
+        if (false === REL_PATH) {
+            return false;
+        }
+
+        const GET_TYPE = (stats: FS.Stats) => {
+            let type: deploy_files.FileSystemType;
+            if (stats) {
+                if (stats.isDirectory()) {
+                    type = deploy_files.FileSystemType.Directory;
+                }
+                else if (stats.isFile()) {
+                    type = deploy_files.FileSystemType.File;
+                }
+            }
+
+            return type;
+        };
+
+        const MY_STATS = await deploy_helpers.lstat(dir);
+
+        const RESULT: WorkspaceListDirectoryResult = {
+            dirs: [],
+            files: [],
+            info: {
+                exportPath: dir,
+                name: Path.basename(dir),
+                path: deploy_helpers.normalizePath(REL_PATH),
+                size: GET_TYPE(MY_STATS) === deploy_files.FileSystemType.File ? MY_STATS.size : undefined,
+                time: Moment(MY_STATS.mtime),
+                type: GET_TYPE(MY_STATS),
+            },
+            others: [],
+            workspace: this,
+        };
+
+        const CREATE_DOWNLOAD_METHOD = (f: string) => {
+            return async () => {
+                return deploy_helpers.readFile(f);
+            };
+        };
+
+        const FILES_AND_FOLDERS = Enumerable.from(
+            await deploy_helpers.readDir(dir)
+        ).orderBy(f => {
+            return deploy_helpers.normalizeString(f);
+        });
+
+        for (const F of FILES_AND_FOLDERS) {
+            const FULL_PATH = Path.resolve(
+                Path.join(dir, F)
+            );
+
+            const ITEM_PATH = deploy_helpers.normalizePath(
+                deploy_helpers.normalizePath(REL_PATH) +
+                '/' + 
+                RESULT.info.name,
+            );
+
+            const FILE_STATS = await deploy_helpers.lstat(FULL_PATH);
+
+            const TIME = Moment(FILE_STATS.mtime);
+
+            if (FILE_STATS.isDirectory()) {
+                const DI: deploy_files.DirectoryInfo = {
+                    exportPath: FULL_PATH,
+                    name: F,
+                    path: ITEM_PATH,
+                    size: undefined,
+                    time: TIME,
+                    type: deploy_files.FileSystemType.Directory,
+                };
+
+                RESULT.dirs.push(DI);
+            }
+            else if (FILE_STATS.isFile()) {
+                const FI: deploy_files.FileInfo = {
+                    download: CREATE_DOWNLOAD_METHOD(FULL_PATH),
+                    exportPath: FULL_PATH,
+                    name: F,
+                    path: ITEM_PATH,
+                    size: FILE_STATS.size,
+                    time: TIME,
+                    type: deploy_files.FileSystemType.File,
+                };
+
+                RESULT.files.push(FI);
+            }
+            else {
+                const FSI: deploy_files.FileSystemInfo = {
+                    exportPath: FULL_PATH,
+                    name: F,
+                    path: ITEM_PATH,
+                    size: undefined,
+                    time: TIME,
+                    type: undefined,
+                };
+
+                RESULT.others.push(FSI);
+            }
+        }
+
+        return RESULT;
     }
 
     /**

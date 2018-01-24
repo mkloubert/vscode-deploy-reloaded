@@ -47,6 +47,9 @@ export const translation: Translation = {
         notSupported: "Compiler{0:trim,surround,leading_space} wird nicht unterstützt!",
     },
     'continue': "Fortfahren",
+    currentFileOrFolder: {
+        noneSelected: "Es ist weder eine aktive Datei, noch ein aktives Verzeichnis ausgewählt!",
+    },
     DELETE: {
         askForCancelOperation: "Sind Sie sicher, dass Sie das Löschen der Datei(en) in{0:trim,surround,leading_space} abbrechen wollen?",
         askIfDeleteLocalFile: "Auch die lokale Datei löschen?",
@@ -62,6 +65,16 @@ export const translation: Translation = {
         currentFile: {
             description: "Löscht die aktuelle Datei",
             label: "Aktuelle Datei ...",
+        },
+        currentFileOrFolder: {
+            file: {
+                description: "Löscht die aktuell, ausgewählte Datei",
+                label: "Ausgewählte Datei löschen",
+            },
+            folder: {
+                description: "Löscht das aktuell ausgewählte Verzeichnis",
+                label: "Ausgewähltes Verzeichnis löschen",
+            }
         },
         deletingFile: "Lösche Datei{0:trim,surround,leading_space} in{1:trim,surround,leading_space} ...",
         errors: {
@@ -101,6 +114,16 @@ export const translation: Translation = {
         currentFile: {
             description: "Stellt die aktuelle Datei bereit",
             label: "Aktuelle Datei ...",
+        },
+        currentFileOrFolder: {
+            file: {
+                description: "Stellt die aktuell, ausgewählte Datei bereit",
+                label: "Ausgewählte Datei bereitstellen",
+            },
+            folder: {
+                description: "Stellt alle Dateien des aktuell ausgewählte Verzeichnis bereit",
+                label: "Ausgewähltes Verzeichnis bereitstellen",
+            }
         },
         deployingFile: "Stelle Datei{0:trim,surround,leading_space} in{1:trim,surround,leading_space} bereit ...",
         errors: {
@@ -325,6 +348,16 @@ export const translation: Translation = {
         currentFile: {
             description: "Lädt die aktuelle Datei",
             label: "Aktuelle Datei ...",
+        },
+        currentFileOrFolder: {
+            file: {
+                description: "Lädt die aktuell, ausgewählte Datei",
+                label: "Ausgewählte Datei laden",
+            },
+            folder: {
+                description: "Lädt alle Dateien des aktuell ausgewählte Verzeichnis",
+                label: "Ausgewähltes Verzeichnis laden",
+            }
         },
         errors: {
             invalidWorkspace: "Die Datei{0:trim,surround,leading_space} kann nicht in den Arbeitsbereich{1:trim,surround,leading_space} geladen werden!",

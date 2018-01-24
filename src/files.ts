@@ -113,6 +113,20 @@ export enum FileSystemType {
     File = 2,
 }
 
+/**
+ * An object with directory and file info objects.
+ */
+export interface WithDirectoriesAndFiles {
+    /**
+     * The directories.
+     */
+    readonly dirs: DirectoryInfo[];
+    /**
+     * The files.
+     */
+    readonly files: FileInfo[];
+}
+
 
 /**
  * Creates a default directory info object from a path.

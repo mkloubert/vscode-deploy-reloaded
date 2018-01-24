@@ -47,6 +47,9 @@ export const translation: Translation = {
         notSupported: "Compiler{0:trim,surround,leading_space} is not supported!",
     },
     'continue': "Continue",
+    currentFileOrFolder: {
+        noneSelected: "There is current no active file or folder selected!",
+    },
     DELETE: {
         askForCancelOperation: "You are about to cancel the delete operation in{0:trim,surround,leading_space}. Are you sure?",
         askIfDeleteLocalFile: "Also delete local file?",
@@ -62,6 +65,16 @@ export const translation: Translation = {
         currentFile: {
             description: "Deletes the current file",
             label: "Current file ...",
+        },
+        currentFileOrFolder: {
+            file: {
+                description: "Deletes the current selected file",
+                label: "Delete selected file",
+            },
+            folder: {
+                description: "Deletes all files of the selected folder",
+                label: "Delete selected folder",
+            }
         },
         deletingFile: "Deleting file{0:trim,surround,leading_space} in{1:trim,surround,leading_space} ...",
         errors: {
@@ -101,6 +114,16 @@ export const translation: Translation = {
         currentFile: {
             description: "Deploys the current file",
             label: "Current file ...",
+        },
+        currentFileOrFolder: {
+            file: {
+                description: "Deploys the current selected file",
+                label: "Deploy selected file",
+            },
+            folder: {
+                description: "Deploys all files of the selected folder",
+                label: "Deploy selected folder",
+            }
         },
         deployingFile: "Deploying file{0:trim,surround,leading_space} to{1:trim,surround,leading_space} ...",
         finishedOperation: "Deploying files to{0:trim,surround,leading_space} has been finished.",
@@ -326,6 +349,16 @@ export const translation: Translation = {
         currentFile: {
             description: "Pull the current file",
             label: "Current file ...",
+        },
+        currentFileOrFolder: {
+            file: {
+                description: "Pulls the current selected file",
+                label: "Pull selected file",
+            },
+            folder: {
+                description: "Pulls all files of the selected folder",
+                label: "Pull selected folder",
+            }
         },
         errors: {
             invalidWorkspace: "Cannot pull file{0:trim,surround,leading_space} to workspace{1:trim,surround,leading_space}!",

@@ -187,15 +187,9 @@ export interface ListDirectoryContext<TTarget extends deploy_targets.Target = de
 /**
  * A 'list directory' result.
  */
-export interface ListDirectoryResult<TTarget extends deploy_targets.Target = deploy_targets.Target> {
-    /**
-     * The directories.
-     */
-    readonly dirs: deploy_files.DirectoryInfo[];
-    /**
-     * The files.
-     */
-    readonly files: deploy_files.FileInfo[];
+export interface ListDirectoryResult<TTarget extends deploy_targets.Target = deploy_targets.Target>
+    extends deploy_files.WithDirectoriesAndFiles
+{
     /**
      * Information about the underlying directory itself.
      */
@@ -699,18 +693,35 @@ export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_
      * @param {deploy_targets.Target} target The underlying target.
      * @param {string} path The path.
      * 
-     * @return {string|boolean} The existing, full normalized path or (false) if path does not exist.
+     * @return {Promise<string|boolean>} The promise with the existing, full normalized path or (false) if path does not exist.
      */
-    public async getExistingSettingPath(target: deploy_targets.Target,
-                                        path: string)
+    protected async getExistingSettingPath(target: deploy_targets.Target, path: string)
         : Promise<false | string>
     {
-        if (!target) {
-            return <any>target;
+        const WORKSPACE = this.getWorkspaceOfTarget(target);
+        if (WORKSPACE) {
+            return await WORKSPACE.getExistingSettingPath(path);
         }
 
-        return await target.__workspace
-                           .getExistingSettingPath(path);
+        return false;
+    }
+
+    /**
+     * Returns the workspace of a target.
+     * 
+     * @param {deploy_targets.Target} target The target.
+     * @param {TDefault} defaultValue The default value if workspace is not available.
+     * 
+     * @return {deploy_workspaces.Workspace|TDefault} The workspace or the default value.
+     */
+    protected getWorkspaceOfTarget<TDefault = undefined>(target: deploy_targets.Target, defaultValue?: TDefault)
+        : deploy_workspaces.Workspace | TDefault
+    {
+        if (target) {
+            return target.__workspace;
+        }
+
+        return defaultValue;
     }
 
     /** @inheritdoc */
@@ -735,13 +746,9 @@ export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_
                                 val: any, additionalValues?: deploy_values.Value | deploy_values.Value[]) {
         additionalValues = deploy_helpers.asArray(additionalValues);
 
-        let workspace: deploy_workspaces.Workspace;
-        if (target) {
-            workspace = target.__workspace;
-        }
-
-        if (workspace) {
-            return workspace.replaceWithValues(val, additionalValues);
+        const WORKSPACE = this.getWorkspaceOfTarget(target);
+        if (WORKSPACE) {
+            return WORKSPACE.replaceWithValues(val, additionalValues);
         }
         else {
             return deploy_values.replaceWithValues(additionalValues, val);
@@ -757,11 +764,12 @@ export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_
      * 
      * @return {string} The "translated" string.
      */
-    public t(target: deploy_targets.Target, key: string, ...args: any[]): string {
-        if (target) {
-            return target.__workspace.t
-                                     .apply(target.__workspace,
-                                            [ <any>key ].concat(args));
+    protected t(target: deploy_targets.Target, key: string, ...args: any[]): string {
+        const WORKSPACE = this.getWorkspaceOfTarget(target);
+        if (WORKSPACE) {
+            return WORKSPACE.t
+                            .apply(WORKSPACE,
+                                   [ <any>key ].concat(args));
         }
         else {
             return i18.t
@@ -1244,18 +1252,17 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
      * 
      * @param {TTarget} target The parent target.
      * @param {deploy_contracts.DeployOperation} operation The underlying operation.
-     * @param {throwIfNonFound} [throwIfNonFound] Throw error if non was found or not.
+     * @param {boolean} [throwIfNonFound] Throw error if non was found or not.
      * 
      * @return {deploy_targets.Target[]|false}
      */
     protected async getTargets(target: TTarget, operation: deploy_contracts.DeployOperation, throwIfNonFound = false)
         : Promise<deploy_targets.Target[] | false>
     {
-        if (!target) {
-            return;
+        const WORKSPACE = this.getWorkspaceOfTarget(target);
+        if (!WORKSPACE) {
+            return false;
         }
-
-        const WORKSPACE = target.__workspace;
 
         const TARGETS = deploy_targets.getTargetsByName(target.targets, target.__workspace.getTargets());
         if (false === TARGETS) {

@@ -39,6 +39,32 @@ interface PullAllFilesFromDirCallbacks {
     readonly waitForCancelling: () => PromiseLike<void>;
 }
 
+type SyncFoldersAction = (
+    target: deploy_targets.Target,
+    sourceDir: string, targetDir: string,
+    transformer: deploy_transformers.DataTransformer,
+    cancelBtn: vscode.StatusBarItem, cancelTokenSrc: vscode.CancellationTokenSource,
+    callbacks: PullAllFilesFromDirCallbacks,
+    recursive: boolean,
+    depth?: number, maxDepth?: number
+) => void | PromiseLike<void>;
+
+interface SyncFoldersActionOptions {
+    readonly action: SyncFoldersAction;
+    readonly cancel: {
+        readonly button: {
+            readonly askForCancellation: string;
+            readonly cancelling: string;
+            readonly commandIdPrefix: string;
+            readonly commandIdSuffixProvider: () => any;
+            readonly defaultText: string;
+            readonly defaultTooltip: string;
+        };
+    };
+    readonly label: string;
+    readonly recursive: boolean;
+}
+
 
 let nextPullCancelBtnCommandId = Number.MIN_SAFE_INTEGER;
 
@@ -295,6 +321,7 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
         }
 
         const QUICK_PICK_ITEMS: deploy_contracts.ActionQuickPick[] = [];
+        const FUNC_QUICK_PICK_ITEMS: deploy_contracts.ActionQuickPick[] = [];
 
         const SHOW_QUICK_PICKS = async () => {
             let placeHolder = dir.trim();
@@ -302,10 +329,32 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
                 placeHolder = '/' + placeHolder;
             }
 
-            const SELECTED_ITEM = await vscode.window.showQuickPick(QUICK_PICK_ITEMS, {
-                placeHolder: ME.t('listDirectory.currentDirectory',
-                                  placeHolder, TARGET_NAME),
-            });
+            let quickPicksToShow: deploy_contracts.ActionQuickPick[] = QUICK_PICK_ITEMS.map(qp => qp);
+            if (FUNC_QUICK_PICK_ITEMS.length > 0) {
+                // functions
+
+                // separator
+                quickPicksToShow.push({
+                    action: () => {
+                        SHOW_QUICK_PICKS();
+                    },
+    
+                    label: '-',
+                    description: '',
+                });
+
+                quickPicksToShow = quickPicksToShow.concat(
+                    FUNC_QUICK_PICK_ITEMS
+                );
+            }
+
+            const SELECTED_ITEM = await vscode.window.showQuickPick(
+                quickPicksToShow,
+                {
+                    placeHolder: ME.t('listDirectory.currentDirectory',
+                                      placeHolder, TARGET_NAME),
+                }
+            );
             if (SELECTED_ITEM) {
                 if (SELECTED_ITEM.action) {
                     await Promise.resolve(
@@ -313,14 +362,170 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
                     );
                 }
             }
-        };
+        };  // SHOW_QUICK_PICKS()
 
         const LIST_DIRECTORY = async (d: string) => {
             listDirectory.apply(
                 ME,
                 [ target, d ]
             );
-        };
+        };  // LIST_DIRECTORY()
+
+        const SELECT_TARGET_DIR_FOR_SYNC_FOLDERS = async (label: string) => {
+            let relPathOfDir = dir;
+            if (deploy_helpers.isEmptyString(relPathOfDir)) {
+                relPathOfDir = './';
+            }
+
+            const LOCAL_DIR = Path.resolve(
+                Path.join(ME.rootPath, relPathOfDir)
+            );
+
+            return await vscode.window.showInputBox({
+                placeHolder: label,
+                prompt: ME.t('listDirectory.pull.enterLocalFolder'),
+                value: LOCAL_DIR,
+            });
+        };  // SELECT_TARGET_DIR_FOR_SYNC_FOLDERS()
+
+        const EXECUTE_SYNC_FOLDERS_ACTION = async (opts: SyncFoldersActionOptions) => {
+            const TARGET_DIR = await SELECT_TARGET_DIR_FOR_SYNC_FOLDERS(opts.label);
+            if (deploy_helpers.isEmptyString(TARGET_DIR)) {
+                return;
+            }
+
+            const PULL_CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
+
+            let cancelBtn: vscode.StatusBarItem;
+            let cancelBtnCommand: vscode.Disposable;
+            const DISPOSE_CANCEL_BTN = () => {
+                deploy_helpers.tryDispose(cancelBtn);
+                deploy_helpers.tryDispose(cancelBtnCommand);
+            };
+
+            let callbacks: PullAllFilesFromDirCallbacks;
+            const RESTORE_CANCEL_BTN_TEXT = () => {
+                const CBTN = cancelBtn;
+                if (!CBTN) {
+                    return;
+                }
+
+                let setDefaultText = true;
+                try {
+                    const CB = callbacks;
+                    if (!CB) {
+                        return;
+                    }
+                    
+                    const GET_TEXT = CB.getCancelButtonText;
+                    if (GET_TEXT) {
+                        CBTN.text = deploy_helpers.toStringSafe(
+                            deploy_helpers.applyFuncFor(
+                                GET_TEXT,
+                                CB
+                            )(),
+                        ).trim();
+
+                        setDefaultText = false;
+                    }
+                }
+                finally {
+                    if (setDefaultText) {
+                        CBTN.text = opts.cancel.button.defaultText;
+                    }
+                }
+            };
+
+            let isCancelling = false;
+            {
+                cancelBtn = vscode.window.createStatusBarItem();
+                cancelBtn.tooltip = opts.cancel.button.defaultTooltip;
+
+                RESTORE_CANCEL_BTN_TEXT();
+
+                const CANCEL_BTN_COMMAND_ID = `${opts.cancel.button.commandIdPrefix}${opts.cancel.button.commandIdSuffixProvider()}`;
+
+                cancelBtnCommand = vscode.commands.registerCommand(CANCEL_BTN_COMMAND_ID, async () => {
+                    try {
+                        isCancelling = true;
+
+                        cancelBtn.command = undefined;
+                        cancelBtn.text = opts.cancel.button.cancelling;
+
+                        const POPUP_BTNS: deploy_contracts.MessageItemWithValue[] = [
+                            {
+                                isCloseAffordance: true,
+                                title: ME.t('no'),
+                                value: 0,
+                            },
+                            {
+                                title: ME.t('yes'),
+                                value: 1,
+                            }
+                        ];
+
+                        const PRESSED_BTN = await ME.showWarningMessage.apply(
+                            ME,
+                            [ <any>opts.cancel.button.askForCancellation ].concat(
+                                POPUP_BTNS
+                            )
+                        );
+
+                        if (PRESSED_BTN) {
+                            if (1 === PRESSED_BTN) {
+                                PULL_CANCELLATION_SOURCE.cancel();
+                            }
+                        }
+                    }
+                    finally {
+                        if (!PULL_CANCELLATION_SOURCE.token.isCancellationRequested) {
+                            cancelBtn.command = CANCEL_BTN_COMMAND_ID;
+
+                            RESTORE_CANCEL_BTN_TEXT();
+                        }
+
+                        isCancelling = false;
+                    }
+                });
+
+                cancelBtn.command = CANCEL_BTN_COMMAND_ID;
+
+                cancelBtn.show();
+            }
+
+            callbacks = {
+                onRestoreButtonText: () => {
+                    RESTORE_CANCEL_BTN_TEXT();
+                },
+                waitForCancelling: async () => {
+                    await deploy_helpers.waitWhile(() => isCancelling);
+                },
+            };
+
+            try {
+                await deploy_helpers.withProgress(async (progress) => {
+                    if (!opts.action) {
+                        return;
+                    }
+
+                    await Promise.resolve(
+                        opts.action(
+                            target,
+                            dir, TARGET_DIR,
+                            PULL_TRANSFORMER,
+                            cancelBtn, PULL_CANCELLATION_SOURCE,
+                            callbacks,
+                            opts.recursive
+                        )
+                    );
+                });
+            }
+            finally {
+                DISPOSE_CANCEL_BTN();
+
+                deploy_helpers.tryDispose(PULL_CANCELLATION_SOURCE);
+            }
+        };  // EXECUTE_SYNC_FOLDERS_ACTION()
 
         let numberOfDirs = 0;
         let numberOfFiles = 0;
@@ -465,20 +670,6 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
             });
         }
 
-        const HAS_FUNCTIONS = deploy_helpers.isObject(selfInfo) ||
-                              numberOfDirs > 0 ||
-                              numberOfFiles > 0;
-        if (HAS_FUNCTIONS) {
-            QUICK_PICK_ITEMS.push({
-                action: () => {
-                    SHOW_QUICK_PICKS();
-                },
-
-                label: '-',
-                description: '',
-            });
-        }
-
         // functions
         {
             if (deploy_helpers.isObject(selfInfo)) {
@@ -489,7 +680,7 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
 
                 if (!deploy_helpers.isEmptyString(exportPath)) {
                     // copy path to clipboard
-                    QUICK_PICK_ITEMS.push({
+                    FUNC_QUICK_PICK_ITEMS.push({
                         action: async () => {
                             try {
                                 await Promise.resolve(
@@ -516,159 +707,30 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
             if (numberOfDirs > 0 || numberOfFiles > 0) {
                 // pull files
                 {
-                    const SELECT_TARGET_DIR = async (label: string) => {
-                        let relPathOfDir = dir;
-                        if (deploy_helpers.isEmptyString(relPathOfDir)) {
-                            relPathOfDir = './';
-                        }
-
-                        const LOCAL_DIR = Path.resolve(
-                            Path.join(ME.rootPath, relPathOfDir)
-                        );
-
-                        return await vscode.window.showInputBox({
-                            placeHolder: label,
-                            prompt: ME.t('listDirectory.pull.enterLocalFolder'),
-                            value: LOCAL_DIR,
-                        });
-                    };
-
-                    const PULL_THE_FILES = async (recursive: boolean, label: string) => {
-                        const TARGET_DIR = await SELECT_TARGET_DIR(label);
-                        if (deploy_helpers.isEmptyString(TARGET_DIR)) {
-                            return;
-                        }
-
-                        const PULL_CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
-
-                        let cancelBtn: vscode.StatusBarItem;
-                        let cancelBtnCommand: vscode.Disposable;
-                        const DISPOSE_CANCEL_BTN = () => {
-                            deploy_helpers.tryDispose(cancelBtn);
-                            deploy_helpers.tryDispose(cancelBtnCommand);
-                        };
-
-                        let callbacks: PullAllFilesFromDirCallbacks;
-                        const RESTORE_CANCEL_BTN_TEXT = () => {
-                            const CBTN = cancelBtn;
-                            if (!CBTN) {
-                                return;
-                            }
-
-                            let setDefaultText = true;
-                            try {
-                                const CB = callbacks;
-                                if (!CB) {
-                                    return;
-                                }
-                                
-                                const GET_TEXT = CB.getCancelButtonText;
-                                if (GET_TEXT) {
-                                    CBTN.text = deploy_helpers.toStringSafe(
-                                        deploy_helpers.applyFuncFor(
-                                            GET_TEXT,
-                                            CB
-                                        )(),
-                                    ).trim();
-
-                                    setDefaultText = false;
-                                }
-                            }
-                            finally {
-                                if (setDefaultText) {
-                                    CBTN.text = ME.t('pull.buttons.cancel.text',
-                                                     TARGET_NAME);
-                                }
-                            }
-                        };
-
-                        let isCancelling = false;
-                        {
-                            cancelBtn = vscode.window.createStatusBarItem();
-                            cancelBtn.tooltip = ME.t('pull.buttons.cancel.tooltip');
-
-                            RESTORE_CANCEL_BTN_TEXT();
-
-                            const CANCEL_BTN_COMMAND_ID = `extension.deploy.reloaded.buttons.cancelListPullFilesFrom${nextPullCancelBtnCommandId++}`;
-            
-                            cancelBtnCommand = vscode.commands.registerCommand(CANCEL_BTN_COMMAND_ID, async () => {
-                                try {
-                                    isCancelling = true;
-
-                                    cancelBtn.command = undefined;
-                                    cancelBtn.text = ME.t('pull.cancelling');
-
-                                    const POPUP_BTNS: deploy_contracts.MessageItemWithValue[] = [
-                                        {
-                                            isCloseAffordance: true,
-                                            title: ME.t('no'),
-                                            value: 0,
-                                        },
-                                        {
-                                            title: ME.t('yes'),
-                                            value: 1,
-                                        }
-                                    ];
-
-                                    const PRESSED_BTN = await ME.showWarningMessage.apply(
-                                        ME,
-                                        [ <any>ME.t('pull.askForCancelOperation', TARGET_NAME) ].concat(
-                                            POPUP_BTNS
-                                        )
-                                    );
-
-                                    if (PRESSED_BTN) {
-                                        if (1 === PRESSED_BTN) {
-                                            PULL_CANCELLATION_SOURCE.cancel();
-                                        }
-                                    }
-                                }
-                                finally {
-                                    if (!PULL_CANCELLATION_SOURCE.token.isCancellationRequested) {
-                                        cancelBtn.command = CANCEL_BTN_COMMAND_ID;
-
-                                        RESTORE_CANCEL_BTN_TEXT();
-                                    }
-
-                                    isCancelling = false;
-                                }
-                            });
-
-                            cancelBtn.command = CANCEL_BTN_COMMAND_ID;
-
-                            cancelBtn.show();
-                        }
-
-                        callbacks = {
-                            onRestoreButtonText: () => {
-                                RESTORE_CANCEL_BTN_TEXT();
+                    const CANCEL_OPTS = {
+                        button: {
+                            askForCancellation: ME.t('pull.askForCancelOperation',
+                                                     TARGET_NAME),
+                            cancelling: ME.t('pull.cancelling'),
+                            commandIdPrefix: "extension.deploy.reloaded.buttons.cancelListPullFilesFrom",
+                            commandIdSuffixProvider: () => {
+                                return nextPullCancelBtnCommandId++;
                             },
-                            waitForCancelling: async () => {
-                                await deploy_helpers.waitWhile(() => isCancelling);
-                            },
-                        };
-
-                        try {
-                            await deploy_helpers.withProgress(async (progress) => {
-                                await pullAllFilesFromDir(target,
-                                                          dir, TARGET_DIR,
-                                                          PULL_TRANSFORMER,
-                                                          cancelBtn, PULL_CANCELLATION_SOURCE,
-                                                          callbacks,
-                                                          recursive);
-                            });
-                        }
-                        finally {
-                            DISPOSE_CANCEL_BTN();
-
-                            deploy_helpers.tryDispose(PULL_CANCELLATION_SOURCE);
-                        }
+                            defaultText: ME.t('pull.buttons.cancel.text',
+                                              TARGET_NAME),
+                            defaultTooltip: ME.t('pull.buttons.cancel.tooltip'),
+                        },
                     };
 
                     // pull files
-                    QUICK_PICK_ITEMS.push({
+                    FUNC_QUICK_PICK_ITEMS.push({
                         action: async function() {
-                            await PULL_THE_FILES(false, this.label);
+                            await EXECUTE_SYNC_FOLDERS_ACTION({
+                                action: pullAllFilesFromDir,
+                                cancel: CANCEL_OPTS,
+                                label: this.label,
+                                recursive: false,
+                            });
                         },
 
                         label: '$(cloud-download)  ' + ME.t('listDirectory.pull.folder.label'),
@@ -676,9 +738,14 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
                     });
 
                     // pull files with sub folders
-                    QUICK_PICK_ITEMS.push({
+                    FUNC_QUICK_PICK_ITEMS.push({
                         action: async function () {
-                            await PULL_THE_FILES(true, this.label);
+                            await EXECUTE_SYNC_FOLDERS_ACTION({
+                                action: pullAllFilesFromDir,
+                                cancel: CANCEL_OPTS,
+                                label: this.label,
+                                recursive: true,
+                            });
                         },
 
                         label: '$(cloud-download)  ' + ME.t('listDirectory.pull.folderWithSubfolders.label'),
@@ -715,13 +782,16 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
     }
 }
 
-async function pullAllFilesFromDir(target: deploy_targets.Target,
-                                   sourceDir: string, targetDir: string,
-                                   transformer: deploy_transformers.DataTransformer,
-                                   cancelBtn: vscode.StatusBarItem, cancelTokenSrc: vscode.CancellationTokenSource,
-                                   callbacks: PullAllFilesFromDirCallbacks,
-                                   recursive: boolean,
-                                   depth?: number, maxDepth?: number) {
+async function pullAllFilesFromDir(
+    target: deploy_targets.Target,
+    sourceDir: string, targetDir: string,
+    transformer: deploy_transformers.DataTransformer,
+    cancelBtn: vscode.StatusBarItem, cancelTokenSrc: vscode.CancellationTokenSource,
+    callbacks: PullAllFilesFromDirCallbacks,
+    recursive: boolean,
+    depth?: number, maxDepth?: number
+)
+{
     const TARGET_NAME = deploy_targets.getTargetName(target);
     const WORKSPACE = target.__workspace;
 

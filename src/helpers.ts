@@ -2323,32 +2323,6 @@ export async function tryFindLanguageIdByFilename(file: string) {
 /**
  * Promise version of 'FS.unlink()' function.
  * 
- * @param {string} filename The file to write to.
- * @param {any} data The data to write.
- */
-export function writeFile(filename: string, data: any) {
-    return new Promise<void>((resolve, reject) => {
-        const COMPLETED = createCompletedAction(resolve, reject);
-
-        try {
-            FS.writeFile(filename, data, (err) => {
-                if (err) {
-                    COMPLETED(err);
-                }
-                else {
-                    COMPLETED(null);
-                }
-            });
-        }
-        catch (e) {
-            COMPLETED(e);
-        }
-    });
-}
-
-/**
- * Promise version of 'FS.unlink()' function.
- * 
  * @param {string|Buffer} path The path.
  */
 export function unlink(path: string | Buffer) {
@@ -2501,6 +2475,32 @@ export async function withProgress<TResult = any>(task: ProgressTask<TResult>,
             return await Promise.resolve(
                 task(CTX)
             );
+        }
+    });
+}
+
+/**
+ * Promise version of 'FS.unlink()' function.
+ * 
+ * @param {string} filename The file to write to.
+ * @param {any} data The data to write.
+ */
+export function writeFile(filename: string, data: any) {
+    return new Promise<void>((resolve, reject) => {
+        const COMPLETED = createCompletedAction(resolve, reject);
+
+        try {
+            FS.writeFile(filename, data, (err) => {
+                if (err) {
+                    COMPLETED(err);
+                }
+                else {
+                    COMPLETED(null);
+                }
+            });
+        }
+        catch (e) {
+            COMPLETED(e);
         }
     });
 }

@@ -304,6 +304,7 @@ Press `F1` and enter one of the following commands:
 | `Deploy Reloaded: Deploy ...` | List of commands for deploying files. |
 | `Deploy Reloaded: List directory ...` | Lists a (remote) directory. |
 | `Deploy Reloaded: Pull ...` | Pull or download files from remote. |
+| `Deploy Reloaded: Select deploy operation ...` | Lets the user select an operation for the active document. |
 | `Deploy Reloaded: Switches ...` | Handle [switch targets](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_switch). |
 | `Deploy Reloaded: Tools ...` | A set of helpful tools. |
 

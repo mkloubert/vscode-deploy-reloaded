@@ -764,6 +764,11 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 }
             }),
 
+            // handle current file or folder
+            vscode.commands.registerCommand('extension.deploy.reloaded.currentFileOrFolder', async (u?: vscode.Uri) => {
+                await deploy_commands.handleCurrentFileOrFolder(context, u);
+            }),
+
             // deploy
             vscode.commands.registerCommand('extension.deploy.reloaded.deploy', async () => {
                 try {
