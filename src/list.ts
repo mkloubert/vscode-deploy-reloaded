@@ -879,7 +879,7 @@ async function pullAllFilesFromDir(
                 const FILES_TO_DOWNLOAD: deploy_plugins.FileToDownload[] = [];
                 FILES.forEach(f => {
                     const NAME_AND_PATH: deploy_contracts.WithNameAndPath = {
-                        path: deploy_helpers.normalizePath(f.path),
+                        path: deploy_helpers.normalizePath(sourceDir),
                         name: deploy_helpers.normalizePath(f.name),
                     };
 
