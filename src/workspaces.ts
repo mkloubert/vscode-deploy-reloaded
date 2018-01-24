@@ -1642,6 +1642,64 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         return deploy_helpers.cloneObject(this.config.globals);
     }
 
+    private async initBower(cfg: WorkspaceSettings) {
+        if (!cfg) {
+            return;
+        }
+
+        if (!deploy_helpers.toBooleanSafe(cfg.initBower)) {
+            return;
+        }
+
+        const ME = this;
+
+        try {
+            const BOWER_JSON = Path.resolve(
+                Path.join(
+                    ME.rootPath, 'bower.json',
+                )
+            );
+
+            const BOWER_COMPONENTS = Path.resolve(
+                Path.join(
+                    ME.rootPath, 'bower_components',
+                )
+            );
+
+            if (!(await deploy_helpers.exists(BOWER_JSON))) {
+                return;  // no 'bower.json'
+            }
+
+            if (await deploy_helpers.exists(BOWER_COMPONENTS)) {
+                return;  // 'bower_components' already exist
+            }
+
+            ME.output.appendLine('');
+            ME.output.append(
+                ME.t('workspaces.bower.install.running',
+                     ME.rootPath) + ' '
+            );
+            try {
+                await ME.exec('bower install');
+
+                ME.output.appendLine(
+                    `[${ME.t('ok')}]`
+                );
+            }
+            catch (e) {
+                ME.output.appendLine(
+                    `[${ME.t('error', e)}]`
+                );
+            }
+        }
+        catch (e) {
+            ME.showErrorMessage(
+                ME.t('workspaces.bower.install.errors.failed',
+                     e)
+            );
+        }
+    }
+
     private async initComposer(cfg: WorkspaceSettings) {
         if (!cfg) {
             return;
@@ -2657,6 +2715,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             finalizer = async () => {
                 await ME.executeOnStartup(loadedCfg);
                 await ME.initNodeModules(loadedCfg);
+                await ME.initBower(loadedCfg);
                 await ME.initComposer(loadedCfg);
 
                 // runBuildTaskOnStartup

@@ -33,6 +33,7 @@ import * as deploy_pull from './pull';
 import * as deploy_switch from './switch';
 import * as deploy_targets from './targets';
 import * as deploy_tools from './tools';
+import * as deploy_tools_bower from './tools/bower';
 import * as deploy_tools_composer from './tools/composer';
 import * as deploy_tools_npm from './tools/npm';
 import * as deploy_tools_quick_execution from './tools/quickexecution';
@@ -1282,6 +1283,15 @@ async function activateExtension(context: vscode.ExtensionContext) {
                             label: '$(package)  ' + i18.t('tools.composer.label'),
                             description: i18.t('tools.composer.description'),
                             state: 6,
+                        },
+
+                        {
+                            action: async () => {
+                                await deploy_tools_bower.showBowerTools(context);
+                            },
+                            label: '$(package)  ' + i18.t('tools.bower.label'),
+                            description: i18.t('tools.bower.description'),
+                            state: 7,
                         }
                     ];
 
@@ -1432,6 +1442,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
             }),
 
             vscode.workspace.onDidChangeConfiguration((e) => {
+                deploy_tools_bower.resetBowerToolsUsage(context);
                 deploy_tools_composer.resetComposerToolsUsage(context);
                 deploy_tools_npm.resetNPMToolsUsage(context);
                 deploy_packages.resetPackageUsage(context);

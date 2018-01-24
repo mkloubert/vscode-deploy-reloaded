@@ -464,6 +464,26 @@ export const translation: Translation = {
         dateTimeWithSeconds: "YYYY-MM-DD HH:mm:ss",
     },
     tools: {
+        bower: {
+            description: "Tools for simple use of 'bower'",
+            executing: "Running{0:trim,surround,leading_space} ...",
+            label: "Bower Package Manager (bower)",
+            packageExample: "'moment' e.g.",
+            runInstall: {
+                description: "Runs 'bower install' inside the current workspace",
+                enterPackageName: "Enter the name of the Bower package ...",
+                label: "Run 'bower install' ...",                
+            },
+            runUninstall: {
+                bowerFileContainsNoPackages: "{0:trim,surround,ending_space}contains no packages!",
+                bowerFileNotFound: "No 'bower.json' file found in{0:trim,surround,leading_space}!",
+                description: "Runs 'bower uninstall' inside the current workspace",
+                errors: {
+                    loadingBowerFileFailed: "Loading{0:trim,surround,leading_space} failed:{1:trim,surround,leading_space}",
+                },
+                label: "Run 'bower uninstall' ...",                
+            },
+        },
         composer: {
             description: "Tools for simple use of 'composer'",
             executing: "Running{0:trim,surround,leading_space} ...",
@@ -480,6 +500,7 @@ export const translation: Translation = {
             },
             runRequire: {
                 description: "Runs 'composer require' inside the current workspace",
+                enterPackageName: "Enter the name of the Composer package ...",
                 label: "Run 'composer require' ...",
             },
         },
@@ -608,6 +629,14 @@ export const translation: Translation = {
             },
             noneFound: "No active workspaces found!",
             selectWorkspace: "Select the active workspace ...",
+        },
+        bower: {
+            install: {
+                errors: {
+                    failed: "'bower install' failed:{0:trim,surround,leading_space}",
+                },
+                running: "Running 'bower install' in{0:trim,surround,leading_space} ...",
+            }
         },
         composer: {
             install: {

@@ -469,6 +469,26 @@ export interface Translation {
         dateTimeWithSeconds?: string;
     };
     tools?: {
+        bower?: {
+            description?: string;
+            executing?: string;
+            label?: string;
+            packageExample?: string;
+            runInstall?: {
+                description?: string;
+                enterPackageName?: string;
+                label?: string;
+            };
+            runUninstall?: {
+                bowerFileContainsNoPackages?: string;
+                bowerFileNotFound?: string;                
+                description?: string;
+                errors?: {
+                    loadingBowerFileFailed?: string;
+                };
+                label?: string;
+            };
+        };
         composer?: {
             description?: string;
             executing?: string;
@@ -485,6 +505,7 @@ export interface Translation {
             };
             runRequire?: {
                 description?: string;
+                enterPackageName?: string;
                 label?: string;
             };
         };
@@ -613,6 +634,14 @@ export interface Translation {
             };
             noneFound?: string;
             selectWorkspace?: string;
+        };
+        bower?: {
+            install?: {
+                errors?: {
+                    failed?: string;
+                };
+                running?: string;
+            }
         };
         composer?: {
             install?: {

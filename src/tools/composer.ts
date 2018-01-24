@@ -162,8 +162,8 @@ async function runComposerRequire(ws: deploy_workspaces.Workspace) {
     const COMPOSER_PACKAGE = deploy_helpers.normalizeString(
         await vscode.window.showInputBox(
             {
-                placeHolder: i18.t('tools.composer.packageExample'),
-                prompt: i18.t('tools.composer.runRequire.enterPackageName'),
+                placeHolder: ws.t('tools.composer.packageExample'),
+                prompt: ws.t('tools.composer.runRequire.enterPackageName'),
                 value: deploy_helpers.normalizeString(
                     EXTENSION.globalState.get(KEY_LAST_RUN_COMPOSER_REQUIRE_PACKAGE)
                 )

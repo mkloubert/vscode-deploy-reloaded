@@ -55,8 +55,8 @@ async function runNPMInstall(ws: deploy_workspaces.Workspace) {
     const NPM_MODULE = deploy_helpers.normalizeString(
         await vscode.window.showInputBox(
             {
-                placeHolder: i18.t('tools.npm.moduleExample'),
-                prompt: i18.t('tools.npm.runInstall.enterModuleName'),
+                placeHolder: ws.t('tools.npm.moduleExample'),
+                prompt: ws.t('tools.npm.runInstall.enterModuleName'),
                 value: deploy_helpers.normalizeString(
                     EXTENSION.globalState.get(KEY_LAST_RUN_NPM_INSTALL_MODULE)
                 )
@@ -100,8 +100,8 @@ async function runNPMLink(ws: deploy_workspaces.Workspace) {
     const NPM_MODULE = deploy_helpers.normalizeString(
         await vscode.window.showInputBox(
             {
-                placeHolder: i18.t('tools.npm.moduleExample'),
-                prompt: i18.t('tools.npm.runLink.enterModuleName'),
+                placeHolder: ws.t('tools.npm.moduleExample'),
+                prompt: ws.t('tools.npm.runLink.enterModuleName'),
                 value: deploy_helpers.normalizeString(
                     EXTENSION.globalState.get(KEY_LAST_RUN_NPM_LINK_MODULE)
                 )

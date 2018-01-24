@@ -192,6 +192,10 @@ export interface Configuration extends deploy_packages.WithFastFileCheckSettings
      */
     readonly imports?: ImportType | ImportType[];
     /**
+     * Runs 'bower install' inside the workspace folder on startup, if a 'bower.json' file exists and NO 'bower_components' folder has been found.
+     */
+    readonly initBower?: boolean;
+    /**
      * Runs 'composer install' inside the workspace folder on startup, if a 'composer.json' file exists and NO 'vendor' folder has been found.
      */
     readonly initComposer?: boolean;

@@ -463,6 +463,26 @@ export const translation: Translation = {
         dateTimeWithSeconds: "DD.MM.YYYY HH:mm:ss",
     },
     tools: {
+        bower: {
+            description: "Werkzeuge für das einfache Arbeiten mit 'bower'",
+            executing: "Führe{0:trim,surround,leading_space} aus ...",
+            label: "Bower Paket Manager (bower)",
+            packageExample: "z.B. 'moment'",
+            runInstall: {
+                description: "Führt den Befehl 'bower install' im aktuellen Arbeitsbereich aus",
+                enterPackageName: "Geben Sie den Namen des Bower-Paketes an ...",
+                label: "'bower install' ausführen ...",                
+            },
+            runUninstall: {
+                bowerFileContainsNoPackages: "{0:trim,surround,ending_space}beinhaltet keine Pakete!",
+                bowerFileNotFound: "Es wurde keine 'bower.json'-Datei in{0:trim,surround,leading_space} gefunden!",
+                description: "Führt den Befehl 'bower uninstall' im aktuellen Arbeitsbereich aus",
+                errors: {
+                    loadingBowerFileFailed: "Das Laden von{0:trim,surround,leading_space} ist fehlgeschlagen:{1:trim,surround,leading_space}",
+                },
+                label: "'bower uninstall' ausführen ...",                
+            },
+        },
         composer: {
             description: "Werkzeuge für das einfache Arbeiten mit 'composer'",
             executing: "Führe{0:trim,surround,leading_space} aus ...",
@@ -471,14 +491,15 @@ export const translation: Translation = {
             runRemove: {
                 composerFileContainsNoPackages: "{0:trim,surround,ending_space}beinhaltet keine Pakete!",
                 composerFileNotFound: "Es wurde keine 'composer.json'-Datei in{0:trim,surround,leading_space} gefunden!",
+                description: "Führt den Befehl 'composer remove' im aktuellen Arbeitsbereich aus",
                 errors: {
                     loadingComposerFileFailed: "Das Laden von{0:trim,surround,leading_space} ist fehlgeschlagen:{1:trim,surround,leading_space}",
                 },
-                description: "Führt den Befehl 'composer remove' im aktuellen Arbeitsbereich aus",
                 label: "'composer remove' ausführen ...",
             },
             runRequire: {
                 description: "Führt den Befehl 'composer require' im aktuellen Arbeitsbereich aus",
+                enterPackageName: "Geben Sie den Namen des Composer-Paketes an ...",
                 label: "'composer require' ausführen ...",
             },
         },
@@ -607,6 +628,14 @@ export const translation: Translation = {
             },
             noneFound: "Keine aktiven Arbeitsbereiche gefunden!",
             selectWorkspace: "Wählen Sie den aktiven Arbeitsbereich aus ...",
+        },
+        bower: {
+            install: {
+                errors: {
+                    failed: "'bower install' konnte nicht ausgeführt werden:{0:trim,surround,leading_space}",
+                },
+                running: "Führe 'bower install' in{0:trim,surround,leading_space} aus ...",
+            }
         },
         composer: {
             install: {

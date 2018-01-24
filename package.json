@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.30.3",
+ "version": "0.31.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -438,6 +438,11 @@
          }
         }
        ]
+      },
+      "initBower": {
+       "description": "Runs 'bower install' inside the workspace folder on startup, if a 'bower.json' file exists and NO 'bower_components' folder has been found.",
+       "type": "boolean",
+       "default": false
       },
       "initComposer": {
        "description": "Runs 'composer install' inside the workspace folder on startup, if a 'composer.json' file exists and NO 'vendor' folder has been found.",
