@@ -3141,8 +3141,10 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
         if (!deploy_helpers.isEmptyString(file)) {
             if (!this.isFileIgnored(file)) {
-                await deploy_delete.removeOnChange
-                                   .apply(this, arguments);
+                await deploy_helpers.applyFuncFor(
+                    deploy_packages.removeOnChange,
+                    this
+                )(file);
             }
         }
     }

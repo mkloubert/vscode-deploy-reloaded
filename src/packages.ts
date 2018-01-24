@@ -181,7 +181,7 @@ export interface WithFastFileCheckSettings {
     readonly fastFileCheck?: boolean;
 }
 
-
+const AUTO_DEPLOY_STATES: deploy_contracts.KeyValuePairs<deploy_targets.Target> = {};
 const KEY_PACKAGE_USAGE = 'vscdrLastExecutedPackageActions';
 
 /**
@@ -209,17 +209,19 @@ export async function autoDeployFile(file: string,
         }
 
         for (const T of Enumerable.from(TARGETS).distinct(true)) {
-            const TARGET_NAME = deploy_targets.getTargetName(T);
-
-            try {
-                await ME.deployFileTo(file, T);
-            }
-            catch (e) {
-                ME.showErrorMessage(
-                    ME.t(errorMsgTemplate,
-                         file, TARGET_NAME, e)
-                );
-            }
+            await invokeForAutoTargetOperation(T, async (target) => {
+                const TARGET_NAME = deploy_targets.getTargetName(target);
+                
+                try {
+                    await ME.deployFileTo(file, target);
+                }
+                catch (e) {
+                    ME.showErrorMessage(
+                        ME.t(errorMsgTemplate,
+                             file, TARGET_NAME, e)
+                    );
+                }
+            });
         }
     }
     catch (e) {
@@ -479,6 +481,27 @@ export function getTargetsOfPackage(pkg: Package): deploy_targets.Target[] | fal
     }
 
     return targets;
+}
+
+async function invokeForAutoTargetOperation(target: deploy_targets.Target, action: (t: deploy_targets.Target) => any) {
+    if (!target) {
+        return;
+    }
+
+    await waitForOtherAutoTargetOperations(target);
+
+    try {
+        AUTO_DEPLOY_STATES[ target.__id ] = target;
+
+        if (action) {
+            await Promise.resolve(
+                action(target)
+            );
+        }
+    }
+    finally {
+        delete AUTO_DEPLOY_STATES[ target.__id ];
+    }
 }
 
 /**
@@ -878,6 +901,51 @@ export async function importPackageFilesFromGit(pkg: Package, operation: deploy_
 }
 
 /**
+ * Handles a file for "remove on change" feature.
+ * 
+ * @param {string} file The file to check.
+ */
+export async function removeOnChange(file: string) {
+    const ME: deploy_workspaces.Workspace = this;
+
+    if (ME.isInFinalizeState) {
+        return;
+    }
+
+    try {
+        const TARGETS = await deploy_helpers.applyFuncFor(
+            findTargetsForFileOfPackage, ME
+        )(file,
+          (pkg) => pkg.removeOnChange,
+          (pkg) => true);
+
+        if (false === TARGETS) {
+            return;
+        }
+
+        for (const T of Enumerable.from(TARGETS).distinct(true)) {
+            await invokeForAutoTargetOperation(T, async (target) => {
+                const TARGET_NAME = deploy_targets.getTargetName(target);
+
+                try {
+                    await ME.deleteFileIn(file, target, false);
+                }
+                catch (e) {
+                    ME.showErrorMessage(
+                        ME.t('DELETE.onChange.failed',
+                             file, TARGET_NAME, e)
+                    );
+                }
+            });
+        }
+    }
+    catch (e) {
+        deploy_log.CONSOLE
+                  .trace(e, 'delete.removeOnChange()');
+    }
+}
+
+/**
  * Resets the package usage statistics.
  * 
  * @param {vscode.ExtensionContext} context The extension context.
@@ -949,4 +1017,19 @@ export async function showPackageQuickPick(context: vscode.ExtensionContext,
     if (selectedItem) {
         return selectedItem.action();
     }
+}
+
+async function waitForOtherAutoTargetOperations(target: deploy_targets.Target) {
+    if (!target) {
+        return;
+    }
+
+    await deploy_helpers.waitWhile(() => {
+        return !deploy_helpers.isNullOrUndefined(
+            AUTO_DEPLOY_STATES[ target.__id ]
+        );
+    }, {
+        timeout: 60000,
+        timeUntilNextCheck: 250,
+    });
 }
