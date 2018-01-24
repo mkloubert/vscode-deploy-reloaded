@@ -1014,7 +1014,7 @@ async function pullAllFilesFromDir(
 
                 for (const D of deploy_helpers.asArray(FILES_AND_FOLDERS.dirs)) {
                     const NEW_SOURCE_DIR = deploy_helpers.normalizePath(
-                        deploy_helpers.normalizePath(D.path) + 
+                        deploy_helpers.normalizePath(sourceDir) + 
                         '/' + 
                         deploy_helpers.normalizePath(D.name)
                     );
