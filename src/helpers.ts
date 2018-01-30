@@ -1310,7 +1310,8 @@ export function isBinaryContent(data: Buffer): Promise<boolean> {
  * @return {boolean} Is boolean or not. 
  */
 export function isBool(val: any): val is boolean {
-    return 'boolean' === typeof val;
+    return !isNullOrUndefined(val) &&
+           'boolean' === typeof val;
 }
 
 /**
@@ -1333,7 +1334,8 @@ export function isEmptyString(val: any) {
  * @return {boolean} Is function or not. 
  */
 export function isFunc<TFunc extends Function = Function>(val: any): val is TFunc {
-    return 'function' === typeof val;
+    return !isNullOrUndefined(val) &&
+           'function' === typeof val;
 }
 
 /**
@@ -1382,7 +1384,8 @@ export function isObject<TObj = Object>(val: any): val is TObj {
  * @return {boolean} Is string or not. 
  */
 export function isString(val: any): val is string {
-    return 'string' === typeof val;
+    return !isNullOrUndefined(val) &&
+           'string' === typeof val;
 }
 
 /**
@@ -1393,7 +1396,8 @@ export function isString(val: any): val is string {
  * @return {boolean} Is symbol or not. 
  */
 export function isSymbol(val: any): val is symbol {
-    return 'symbol' === typeof val;
+    return !isNullOrUndefined(val) &&
+           'symbol' === typeof val;
 }
 
 /**
@@ -2103,12 +2107,12 @@ export function toArray<T>(arr: ArrayLike<T>, normalize = true): T[] {
  * @return {boolean} The converted value.
  */
 export function toBooleanSafe(val: any, defaultValue: any = false): boolean {
-    if ('boolean' === typeof val) {
+    if (isBool(val)) {
         return val;
     }
 
     if (isNullOrUndefined(val)) {
-        return defaultValue;
+        return !!defaultValue;
     }
 
     return !!val;
@@ -2176,32 +2180,32 @@ export function toMinimatchFileFilter<TFilter extends deploy_contracts.FileFilte
 /**
  * Converts a value to a string that is NOT (null) or (undefined).
  * 
- * @param {any} str The input value.
+ * @param {any} val The input value.
  * @param {any} defValue The default value.
  * 
  * @return {string} The output value.
  */
-export function toStringSafe(str: any, defValue: any = ''): string {
-    if ('string' === typeof str) {
-        return str;
-    }
-
-    if (isNullOrUndefined(str)) {
-        return defValue;
+export function toStringSafe(val: any, defValue: any = ''): string {
+    if (isString(val)) {
+        return val;
     }
 
     try {
-        if (str instanceof Error) {
-            return str.message;
+        if (isNullOrUndefined(val)) {
+            return '' + defValue;
+        }
+
+        if (val instanceof Error) {
+            return '' + val.message;
         }
     
-        if (isFunc(str['toString'])) {
-            return '' + str.toString();
+        if (isFunc(val['toString'])) {
+            return '' + val.toString();
         }
 
         try {
-            if (Array.isArray(str) || isObject(str)) {
-                return JSON.stringify(str);
+            if (Array.isArray(val) || isObject(val)) {
+                return JSON.stringify(val);
             }
         }
         catch (e) {
@@ -2209,13 +2213,13 @@ export function toStringSafe(str: any, defValue: any = ''): string {
                       .trace(e, 'helpers.toStringSafe(2)');
         }
 
-        return '' + str;
+        return '' + val;
     }
     catch (e) {
         deploy_log.CONSOLE
                   .trace(e, 'helpers.toStringSafe(1)');
 
-        return typeof str;
+        return typeof val;
     }
 }
 

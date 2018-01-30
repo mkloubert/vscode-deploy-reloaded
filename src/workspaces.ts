@@ -240,6 +240,7 @@ export interface WorkspaceSettings extends deploy_contracts.Configuration {
 
 
 let activeWorkspaceProvider: WorkspaceProvider;
+let allWorkspacesProvider: WorkspaceProvider;
 const FILES_CHANGES: { [path: string]: deploy_contracts.FileChangeType } = {};
 const KEY_WORKSPACE_USAGE = 'vscdrLastExecutedWorkspaceActions';
 let nextPackageButtonId = Number.MIN_SAFE_INTEGER;
@@ -1210,6 +1211,73 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         }
         
         return false;
+    }
+
+    /**
+     * Returns the list of files of that workspace for deployment from an active document.
+     * 
+     * @return {Promise<string[]|false>} The promise with the file list or (false) if not possible.
+     */
+    public async getFileListFromActiveDocumentForDeployment(): Promise<string[] | false> {
+        const ME = this;
+        
+        let activeDocument: vscode.TextDocument;
+        
+        const ACTIVE_EDITOR = vscode.window.activeTextEditor;
+        if (ACTIVE_EDITOR) {
+            activeDocument = ACTIVE_EDITOR.document;
+        }
+
+        if (!activeDocument) {
+            ME.showWarningMessage(
+                ME.t('editors.active.noOpen')
+            );
+
+            return false;
+        }
+
+        const LINES = deploy_helpers.toStringSafe( activeDocument.getText() ).split("\n").map(l => {
+            return l.trim();
+        }).filter(l => {
+            return '' !== l;
+        });
+
+        const FILES: string[] = [];
+        for (const L of LINES) {
+            const FILE_OR_FOLDER = Path.resolve(
+                Path.join(ME.rootPath, L)
+            );
+
+            if (!(await deploy_helpers.exists(FILE_OR_FOLDER))) {
+                continue;
+            }
+            if (!ME.isPathOf(FILE_OR_FOLDER)) {
+                continue;
+            }
+
+            const STATS = await deploy_helpers.lstat(FILE_OR_FOLDER);
+            if (STATS.isDirectory()) {
+                Enumerable.from(
+                    await deploy_helpers.glob('**', {
+                        cwd: FILE_OR_FOLDER,
+                        root: FILE_OR_FOLDER,                    
+                    })
+                ).pushTo(FILES);
+            }
+            else if (STATS.isFile()) {
+                FILES.push(FILE_OR_FOLDER);
+            }
+        }
+
+        return Enumerable.from(FILES)
+                         .where(f => !ME.isFileIgnored(f))
+                         .select(f => Path.resolve(f))
+                         .distinct()
+                         .orderBy(f => Path.dirname(f).length )
+                         .thenBy(f => deploy_helpers.normalizeString( Path.dirname(f) ))
+                         .thenBy(f => Path.basename(f).length )
+                         .thenBy(f => deploy_helpers.normalizeString( Path.basename(f) ))
+                         .toArray();
     }
 
     /**
@@ -3360,6 +3428,43 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     }
 
     /**
+     * Starts a deployment of files from the file list of an active document.
+     * 
+     * @param {Function} deployAction The deploy action.
+     * 
+     * @return {Promise<boolean>} The promise that indicates if action has been invoked or not.
+     */
+    public async startDeploymentOfFilesFromActiveDocument(
+        deployAction: (target: deploy_targets.Target, files: string[]) => any,
+    ): Promise<boolean> {
+        const ME = this;
+
+        const FILES_TO_DEPLOY = await ME.getFileListFromActiveDocumentForDeployment();
+        if (!FILES_TO_DEPLOY) {
+            return false;
+        }
+
+        const TARGET = await deploy_targets.showTargetQuickPick(
+            ME.context.extension,
+            ME.getTargets(),
+            {
+                placeHolder: ME.t('targets.selectTarget'),
+            }
+        );
+        if (!TARGET) {
+            return false;
+        }
+
+        if (deployAction) {
+            await Promise.resolve(
+                deployAction(TARGET, FILES_TO_DEPLOY)
+            );
+        }
+
+        return true;
+    }
+
+    /**
      * Gets the start time.
      */
     public get startTime(): Moment.Moment {
@@ -3616,6 +3721,18 @@ export function getActiveWorkspaces(): Workspace[] {
 }
 
 /**
+ * Returns a list of all workspaces.
+ * 
+ * @return {Workspace[]} The list of all workspaces.
+ */
+export function getAllWorkspaces(): Workspace[] {
+    const PROVIDER = allWorkspacesProvider;
+    if (PROVIDER) {
+        return deploy_helpers.asArray( PROVIDER() );
+    }
+}
+
+/**
  * Checks if a target is a switch or not.
  * 
  * @param {deploy_targets.Target} target The target to check.
@@ -3652,6 +3769,15 @@ export function resetWorkspaceUsage(context: vscode.ExtensionContext) {
  */
 export function setActiveWorkspaceProvider(newProvider: WorkspaceProvider) {
     activeWorkspaceProvider = newProvider;
+}
+
+/**
+ * Sets the global function for providing the list of all workspaces.
+ * 
+ * @param {WorkspaceProvider} newProvider The new function.
+ */
+export function setAllWorkspacesProvider(newProvider: WorkspaceProvider) {
+    allWorkspacesProvider = newProvider;
 }
 
 

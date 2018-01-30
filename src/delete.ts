@@ -24,6 +24,7 @@ import * as deploy_plugins from './plugins';
 import * as deploy_targets from './targets';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
+import * as i18 from './i18';
 import * as Path from 'path';
 import * as vscode from 'vscode';
 
@@ -92,6 +93,62 @@ export async function deleteFileIn(file: string, target: deploy_targets.Target,
     )([ file ], target,
       null,
       deleteLocalFile);
+}
+
+/**
+ * Deletes a files from a file list of the active text editor.
+ * 
+ * @param {vscode.ExtensionContext} context The extension context.
+ */
+export async function deleteFileList(context: vscode.ExtensionContext) {
+    const WORKSPACE = await deploy_workspaces.showWorkspaceQuickPick(
+        context,
+        deploy_workspaces.getAllWorkspaces(),
+        {
+            placeHolder: i18.t('workspaces.selectWorkspace'),
+        }
+    );
+    if (!WORKSPACE) {
+        return;
+    }
+
+    const BUTTONS: deploy_contracts.MessageItemWithValue[] = [
+        {
+            title: WORKSPACE.t('no'),
+            value: 1,
+        },
+        {
+            title: WORKSPACE.t('yes'),
+            value: 2,
+        },
+        {
+            isCloseAffordance: true,
+            title: WORKSPACE.t('cancel'),
+            value: 0,
+        }
+    ];
+
+    const PRESSED_BTN: deploy_contracts.MessageItemWithValue = await vscode.window.showWarningMessage.apply(
+        null,
+        [ <any>WORKSPACE.t('DELETE.askIfDeleteLocalFiles'), {} ].concat(BUTTONS),
+    );
+
+    if (!PRESSED_BTN || 0 == PRESSED_BTN.value) {
+        return;
+    }
+
+    const DELETE_LOCAL_FILES = 2 === PRESSED_BTN.value;
+
+    await WORKSPACE.startDeploymentOfFilesFromActiveDocument(
+        async (target, files) => {
+            await deploy_helpers.applyFuncFor(
+                deleteFilesIn,
+                target.__workspace,
+            )(files, target,
+              () => files,
+              DELETE_LOCAL_FILES);
+        }
+    );
 }
 
 /**

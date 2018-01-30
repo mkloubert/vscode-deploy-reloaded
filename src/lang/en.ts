@@ -84,6 +84,10 @@ export const translation: Translation = {
         },
         finishedOperation: "Deleting files in{0:trim,surround,leading_space} has been finished.",
         finishedOperationWithErrors: "[ERROR] Could not delete files in{0:trim,surround,leading_space}:{1:trim,surround,leading_space}",
+        fileList: {
+            description: "Deletes files, which are defined as list in the active text editor",
+            label: "File list",
+        },
         onChange: {
             activated: "Remove on change has been activated for workspace{0:trim,surround,leading_space}.",
             failed: "Remove on change for{0:trim,surround,leading_space} in{1:trim,surround,leading_space} failed:{2:trim,surround,leading_space}",
@@ -126,6 +130,10 @@ export const translation: Translation = {
             }
         },
         deployingFile: "Deploying file{0:trim,surround,leading_space} to{1:trim,surround,leading_space} ...",
+        fileList: {
+            description: "Deploys files, which are defined as list in the active text editor",
+            label: "File list",
+        },
         finishedOperation: "Deploying files to{0:trim,surround,leading_space} has been finished.",
         finishedOperationWithErrors: "[ERROR] Could not deploy files to{0:trim,surround,leading_space}:{1:trim,surround,leading_space}",
         errors: {
@@ -368,6 +376,10 @@ export const translation: Translation = {
         },
         finishedOperation: "Pulling files from{0:trim,surround,leading_space} has been finished.",
         finishedOperationWithErrors: "[ERROR] Could not pull files from{0:trim,surround,leading_space}:{1:trim,surround,leading_space}",
+        fileList: {
+            description: "Pulls files, which are defined as list in the active text editor",
+            label: "File list",
+        },
         pullingFile: "Pulling file{0:trim,surround,leading_space} from {1:trim,surround,leading_space} ...",
         package: {
             description: "Pulls the files of a package",

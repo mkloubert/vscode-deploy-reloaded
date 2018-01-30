@@ -120,6 +120,34 @@ export async function deployAllOpenFiles(workspaces: deploy_workspaces.Workspace
 }
 
 /**
+ * Deploys a files from a file list of the active text editor.
+ * 
+ * @param {vscode.ExtensionContext} context The extension context.
+ */
+export async function deployFileList(context: vscode.ExtensionContext) {
+    const WORKSPACE = await deploy_workspaces.showWorkspaceQuickPick(
+        context,
+        deploy_workspaces.getAllWorkspaces(),
+        {
+            placeHolder: i18.t('workspaces.selectWorkspace'),
+        }
+    );
+    if (!WORKSPACE) {
+        return;
+    }
+
+    await WORKSPACE.startDeploymentOfFilesFromActiveDocument(
+        async (target, files) => {
+            await deploy_helpers.applyFuncFor(
+                deployFilesTo,
+                target.__workspace,
+            )(files, target,
+              () => files);
+        }
+    );
+}
+
+/**
  * Deploys files to a target.
  * 
  * @param {string[]} files The files to deploy.

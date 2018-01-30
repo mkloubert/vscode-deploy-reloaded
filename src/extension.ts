@@ -21,6 +21,7 @@ const CompareVersion = require('compare-versions');
 import * as deploy_commands from './commands';
 import * as deploy_compare from './compare';
 import * as deploy_contracts from './contracts';
+import * as deploy_delete from './delete';
 import * as deploy_deploy from './deploy';
 import * as deploy_events from './events';
 import * as deploy_gui from './gui';
@@ -675,8 +676,12 @@ async function activateExtension(context: vscode.ExtensionContext) {
         );
     });
 
-    // active workspace provider
+    // workspace providers
     WF.next(() => {
+        deploy_workspaces.setAllWorkspacesProvider(() => {
+            return WORKSPACES;
+        });
+
         deploy_workspaces.setActiveWorkspaceProvider(() => {
             return activeWorkspaces;
         });
@@ -801,6 +806,13 @@ async function activateExtension(context: vscode.ExtensionContext) {
                             },
                             label: '$(git-commit)  ' + i18.t('deploy.gitCommit.label'),
                             description: i18.t('deploy.gitCommit.description'),
+                        },
+                        {
+                            action: async () => {
+                                await vscode.commands.executeCommand('extension.deploy.reloaded.deployFileList');
+                            },
+                            label: '$(list-ordered)  ' + i18.t('deploy.fileList.label'),
+                            description: i18.t('deploy.fileList.description'),
                         }
                     ];
 
@@ -815,6 +827,21 @@ async function activateExtension(context: vscode.ExtensionContext) {
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.deploy');
 
+                    deploy_helpers.showErrorMessage(
+                        i18.t('deploy.errors.operationFailed')
+                    );
+                }
+            }),
+
+            // deploy file list
+            vscode.commands.registerCommand('extension.deploy.reloaded.deployFileList', async () => {
+                try {
+                    await deploy_deploy.deployFileList(context);
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'extension.deploy.reloaded.deployFileList');
+                    
                     deploy_helpers.showErrorMessage(
                         i18.t('deploy.errors.operationFailed')
                     );
@@ -943,6 +970,14 @@ async function activateExtension(context: vscode.ExtensionContext) {
                             },
                             label: '$(cloud-download)  ' + i18.t('pull.allOpenFiles.label'),
                             description: i18.t('pull.allOpenFiles.description'),
+                        },
+                        
+                        {
+                            action: async () => {
+                                await vscode.commands.executeCommand('extension.deploy.reloaded.pullFileList');
+                            },
+                            label: '$(list-ordered)  ' + i18.t('pull.fileList.label'),
+                            description: i18.t('pull.fileList.description'),
                         }
                     ];
 
@@ -957,6 +992,21 @@ async function activateExtension(context: vscode.ExtensionContext) {
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.pull');
 
+                    deploy_helpers.showErrorMessage(
+                        i18.t('pull.errors.operationFailed')
+                    );
+                }
+            }),
+
+            // pull file list
+            vscode.commands.registerCommand('extension.deploy.reloaded.pullFileList', async () => {
+                try {
+                    await deploy_pull.pullFileList(context);
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'extension.deploy.reloaded.pullFileList');
+                    
                     deploy_helpers.showErrorMessage(
                         i18.t('pull.errors.operationFailed')
                     );
@@ -1044,6 +1094,13 @@ async function activateExtension(context: vscode.ExtensionContext) {
                             },
                             label: '$(trashcan)  ' + i18.t('DELETE.package.label'),
                             description: i18.t('DELETE.package.description'),
+                        },
+                        {
+                            action: async () => {
+                                await vscode.commands.executeCommand('extension.deploy.reloaded.deleteFileList');
+                            },
+                            label: '$(list-ordered)  ' + i18.t('DELETE.fileList.label'),
+                            description: i18.t('DELETE.fileList.description'),
                         }
                     ];
 
@@ -1058,6 +1115,21 @@ async function activateExtension(context: vscode.ExtensionContext) {
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.delete');
 
+                    deploy_helpers.showErrorMessage(
+                        i18.t('DELETE.errors.operationFailed')
+                    );
+                }
+            }),
+
+            // delete file list
+            vscode.commands.registerCommand('extension.deploy.reloaded.deleteFileList', async () => {
+                try {
+                    await deploy_delete.deleteFileList(context);
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'extension.deploy.reloaded.deleteFileList');
+                    
                     deploy_helpers.showErrorMessage(
                         i18.t('DELETE.errors.operationFailed')
                     );

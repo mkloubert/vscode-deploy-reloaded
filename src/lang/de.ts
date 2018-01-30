@@ -84,6 +84,10 @@ export const translation: Translation = {
         },
         finishedOperation: "Das Löschen der Dateien in{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",
         finishedOperationWithErrors: "[FEHLER] Konnte Dateien nicht in{0:trim,surround,leading_space} löschen:{1:trim,surround,leading_space}",
+        fileList: {
+            description: "Löscht Dateien, die als Liste im aktiven Texteditor definiert sind",
+            label: "Dateiliste",
+        },
         onChange: {
             activated: "Automatisches Löschen wurde für den Arbeitsbereich{0:trim,surround,leading_space} aktiviert.",
             failed: "Das automatische Löschen von{0:trim,surround,leading_space} in{1:trim,surround,leading_space} ist fehlgeschlagen:{2:trim,surround,leading_space}",
@@ -131,6 +135,10 @@ export const translation: Translation = {
             invalidWorkspaceForPackage: "Das Paket{0:trim,surround,leading_space} kann nicht über den Arbeitsbereich{1:trim,surround,leading_space} bereitgestellt werden!",
             operationFailed: "Konnte das Bereitstellen nicht durchführen (s. Debugkonsole 'STRG/CMD + SHIFT + Y')!",
             operationToTargetFailed: "Das Bereitstellen der Datei(en) ins Ziel{0:trim,surround,leading_space} schlug fehl:{1:trim,surround,leading_space}",
+        },
+        fileList: {
+            description: "Stellt Dateien bereit, die als Liste im aktiven Texteditor definiert sind",
+            label: "Dateiliste",
         },
         finishedOperation: "Das Bereitstellen der Dateien in{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",
         finishedOperationWithErrors: "[FEHLER] Konnte Dateien nicht in{0:trim,surround,leading_space} bereitstellen:{1:trim,surround,leading_space}",
@@ -367,6 +375,10 @@ export const translation: Translation = {
         },
         finishedOperation: "Das Laden der Dateien von{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",
         finishedOperationWithErrors: "[FEHLER] Konnte Dateien nicht von{0:trim,surround,leading_space} laden:{1:trim,surround,leading_space}",
+        fileList: {
+            description: "Lädt Dateien, die als Liste im aktiven Texteditor definiert sind",
+            label: "Dateiliste",
+        },
         package: {
             description: "Lädt die Dateien eines Paketes",
             label: "Paket ...",

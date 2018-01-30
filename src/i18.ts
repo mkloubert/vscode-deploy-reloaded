@@ -91,6 +91,10 @@ export interface Translation {
         };
         finishedOperation?: string;
         finishedOperationWithErrors?: string;
+        fileList?: {
+            description?: string;
+            label?: string;
+        };
         onChange?: {
             activated?: string;
             failed?: string;
@@ -141,6 +145,10 @@ export interface Translation {
         };
         finishedOperation?: string;
         finishedOperationWithErrors?: string;
+        fileList?: {
+            description?: string;
+            label?: string;
+        };
         gitCommit?: {
             description?: string;
             label?: string;
@@ -373,6 +381,10 @@ export interface Translation {
         };
         finishedOperation?: string;
         finishedOperationWithErrors?: string;
+        fileList?: {
+            description?: string;
+            label?: string;
+        };
         package?: {
             description?: string;
             label?: string;
