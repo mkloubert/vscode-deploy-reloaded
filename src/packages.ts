@@ -296,10 +296,11 @@ export async function findTargetsForFileOfPackage(
             continue;
         }
 
-        if (!filter) {
-            filter = {
-                files: '**'
-            };
+        if (deploy_helpers.isNullOrUndefined(filter)) {
+            filter = {};
+        }
+        if (deploy_helpers.isNullOrUndefined(filter.files)) {
+            (<any>filter).files = [ '**' ];
         }
 
         const MATCHING_TARGETS = deploy_targets.getTargetsByName(

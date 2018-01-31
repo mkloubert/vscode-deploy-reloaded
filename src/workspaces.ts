@@ -1273,9 +1273,9 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                          .where(f => !ME.isFileIgnored(f))
                          .select(f => Path.resolve(f))
                          .distinct()
-                         .orderBy(f => Path.dirname(f).length )
+                         .orderBy(f => Path.dirname(f).length)
                          .thenBy(f => deploy_helpers.normalizeString( Path.dirname(f) ))
-                         .thenBy(f => Path.basename(f).length )
+                         .thenBy(f => Path.basename(f).length)
                          .thenBy(f => deploy_helpers.normalizeString( Path.basename(f) ))
                          .toArray();
     }
@@ -1300,27 +1300,6 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             return '' === PLUGIN_TYPE || 
                    (TARGET_TYPE === PLUGIN_TYPE && pi.canList && pi.listDirectory);
         });
-    }
-
-    private async getAllDirectoriesInner(dir: string) {
-        const RESULT: string[] = [];
-
-        const FILES_AND_FOLDERS = await deploy_helpers.readDir(dir);
-        for (const FF of FILES_AND_FOLDERS) {
-            const FULL_PATH = Path.resolve(
-                Path.join( dir, FF )
-            );
-            const STATS = await deploy_helpers.lstat(FULL_PATH);
-
-            if (STATS.isDirectory()) {
-                RESULT.push(FULL_PATH);
-
-                RESULT.push
-                      .apply(RESULT, await this.getAllDirectoriesInner(FULL_PATH));
-            }
-        }
-
-        return RESULT;
     }
 
     /**
