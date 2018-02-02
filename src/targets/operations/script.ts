@@ -101,6 +101,7 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
         const EXECUTE = SCRIPT_MODULE.execute;
         if (EXECUTE) {
             const ARGS: ScriptTargetOperationExecutionArguments = {
+                _: require('lodash'),
                 context: context,
                 events: WORKSPACE.workspaceSessionState['target_operations']['script']['events'],
                 extension: WORKSPACE.context.extension,

@@ -203,6 +203,7 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
             if (GET_BODY) {
                 getBodyToSend = async () => {
                     const ARGS: HttpBodyModuleExecutionArguments = {
+                        _: require('lodash'),
                         context: context,
                         events: WORKSPACE.workspaceSessionState['target_operations']['http']['events'],
                         extension: WORKSPACE.context.extension,

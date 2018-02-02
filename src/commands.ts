@@ -194,6 +194,7 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
                 const EXECUTE = SCRIPT_MODULE.execute;
                 if (EXECUTE) {
                     const CTX: ScriptCommandExecutionContext = {
+                        _: require('lodash'),
                         button: btn,
                         command: id,
                         events: ME.workspaceSessionState['commands']['events'],

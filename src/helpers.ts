@@ -15,6 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as _ from 'lodash';
 import * as ChildProcess from 'child_process';
 import * as Crypto from 'crypto';
 import * as deploy_code from './code';
@@ -1334,8 +1335,7 @@ export function isEmptyString(val: any) {
  * @return {boolean} Is function or not. 
  */
 export function isFunc<TFunc extends Function = Function>(val: any): val is TFunc {
-    return !isNullOrUndefined(val) &&
-           'function' === typeof val;
+    return _.isFunction(val);
 }
 
 /**
@@ -1359,8 +1359,7 @@ export function isHex(val: any) {
  * @return {boolean} Is (null)/(undefined) or not.
  */
 export function isNullOrUndefined(val: any): boolean {
-    return null === val ||
-           'undefined' === typeof val;
+    return _.isNil(val);
 }
 
 /**

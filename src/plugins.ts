@@ -534,6 +534,7 @@ export abstract class FileToUploadBase implements FileToUpload {
             );
 
             const CONTEXT: deploy_transformers.DataTransformerContext = {
+                _: require('lodash'),
                 context: ME.transformerSubContext,
                 events: ME.workspace.workspaceSessionState['upload']['events'],
                 extension: ME.workspace.context.extension,

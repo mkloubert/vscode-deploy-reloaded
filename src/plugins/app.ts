@@ -636,6 +636,7 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
                             const GET_ARGUMENTS = SCRIPT_MODULE.getArguments;
                             if (GET_ARGUMENTS) {
                                 const ARGS: AppArgumentsScriptExecutionArguments = {
+                                    _: require('lodash'),
                                     cwd: CWD,
                                     events: ME._ARGS_SCRIPT_EVENTS,
                                     extension: WORKSPACE.context.extension,
@@ -815,6 +816,7 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
                             const GET_INPUT = SCRIPT_MODULE.getInput;
                             if (GET_INPUT) {
                                 const ARGS: AppInputScriptExecutionArguments = {
+                                    _: require('lodash'),
                                     arguments: args,
                                     cwd: CWD,
                                     events: ME._INPUT_SCRIPT_EVENTS,

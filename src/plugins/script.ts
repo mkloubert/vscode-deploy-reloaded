@@ -120,6 +120,7 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
         const SCRIPT_STATE_KEY = deploy_helpers.toStringSafe(context.target.__id);
         
         const ARGS: ScriptArguments = {
+            _: require('lodash'),
             cancellationToken: undefined,
             dir: context['dir'],
             events: ME._EVENTS,

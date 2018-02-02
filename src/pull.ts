@@ -431,6 +431,7 @@ export async function pullFilesFrom(files: string[],
                                     );
 
                                     const CONTEXT: deploy_transformers.DataTransformerContext = {
+                                        _: require('lodash'),
                                         context: {
                                             deployOperation: deploy_contracts.DeployOperation.Pull,
                                             file: f,

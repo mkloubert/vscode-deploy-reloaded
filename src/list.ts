@@ -94,6 +94,7 @@ function createPullDataTransformerContext(file: deploy_contracts.WithNameAndPath
     const TRANSFORMER_OPTIONS = deploy_helpers.cloneObject(target.transformerOptions);
 
     const CTX: deploy_transformers.DataTransformerContext = {
+        _: require('lodash'),
         context: {
             deployOperation: deploy_contracts.DeployOperation.Pull,
             remoteFile: deploy_helpers.normalizePath(

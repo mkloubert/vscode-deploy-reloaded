@@ -430,6 +430,12 @@ export interface RequiredExtensionSettings extends ConditionalItem,
  */
 export interface ScriptArguments {
     /**
+     * lodash module.
+     * 
+     * @see https://lodash.com/
+     */
+    readonly _: any;
+    /**
      * Event emitter for scripts of that kind.
      */
     readonly events: NodeJS.EventEmitter;

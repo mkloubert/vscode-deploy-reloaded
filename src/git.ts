@@ -82,9 +82,8 @@ export class GitClient implements deploy_scm.SourceControlClient {
             await this.exec([ 'branch', '-v' ])
         ).trim();
 
-        const LINES = RESULT.split("\n").map(l => {
-            return l.trim();
-        });
+        // split lines
+        const LINES = RESULT.split("\n");
 
         LINES.forEach(l => {
             const SEP = l.indexOf(' ', 2);
