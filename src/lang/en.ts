@@ -257,6 +257,12 @@ export const translation: Translation = {
         buttons: {
             defaultText: "Deploy package{0:trim,surround,leading_space}",
             defaultTooltip: "Click here to start deployment...",
+            prompts: {
+                askBeforeDelete: "Start delete operation in{0:trim,surround,leading_space}?",
+                askBeforeDeploy: "Start deployment to{0:trim,surround,leading_space}?",
+                askBeforePull: "Start pull operation from{0:trim,surround,leading_space}?",
+            },
+            unknownOperationType: "Unknown deploy operation{0:trim,surround,leading_space}!",
         },
         defaultName: "(Package #{0:trim})",
         deploymentFailed: "Could not deploy package{0:trim,surround,leading_space}:{1:trim,surround,leading_space}",

@@ -264,6 +264,12 @@ export interface Translation {
         buttons?: {
             defaultText?: string;
             defaultTooltip?: string;
+            prompts?: {
+                askBeforeDelete?: string;
+                askBeforeDeploy?: string;
+                askBeforePull?: string;
+            };
+            unknownOperationType?: string;
         };
         defaultName?: string;
         deploymentFailed?: string;

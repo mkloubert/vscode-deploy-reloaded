@@ -557,7 +557,9 @@ export async function deletePackage(pkg: deploy_packages.Package,
     }
 
     const RELOADER = async () => {
-        const FILES_FROM_FILTER = await ME.findFilesByFilter(pkg);
+        const FILES_FROM_FILTER = await ME.findFilesByFilter(
+            deploy_packages.preparePackageForFileFilter(pkg)
+        );
         
         await deploy_packages.importPackageFilesFromGit(
             pkg,

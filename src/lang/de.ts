@@ -256,6 +256,12 @@ export const translation: Translation = {
         buttons: {
             defaultText: "Stelle Paket{0:trim,surround,leading_space} bereit",
             defaultTooltip: "Hier klicken, um das Bereitstellen zu beginnen...",
+            prompts: {
+                askBeforeDelete: "Mit dem Löschen in{0:trim,surround,leading_space} beginnen?",
+                askBeforeDeploy: "Mit dem Bereitstellen nach{0:trim,surround,leading_space} beginnen?",
+                askBeforePull: "Mit dem Laden aus{0:trim,surround,leading_space} beginnen?",
+            },
+            unknownOperationType: "Unbekannte Operation{0:trim,surround,leading_space}!",
         },
         defaultName: "(Paket #{0:trim})",
         deploymentFailed: "Konnte das Paket{0:trim,surround,leading_space} nicht bereitstellen:{1:trim,surround,leading_space}",

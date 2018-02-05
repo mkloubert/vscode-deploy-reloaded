@@ -2984,8 +2984,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             let newBtnCommand: vscode.Disposable;
             try {
                 newBtn = await deploy_helpers.createButton(buttonDesc, async (b, pb) => {
-                    const PACKAGE_TO_DEPLOY = P;
-                    const PACKAGE_NAME = deploy_packages.getPackageName(PACKAGE_TO_DEPLOY);
+                    const PACKAGE_TO_HANDLE = P;
+                    const PACKAGE_NAME = deploy_packages.getPackageName(PACKAGE_TO_HANDLE);
 
                     // additional values
                     const VALUES: deploy_values.Value[] = [
@@ -3008,24 +3008,85 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
                     if ((await vscode.commands.getCommands()).indexOf(newCmdId) < 0) {
                         newBtnCommand = vscode.commands.registerCommand(newCmdId, async () => {
+                            let deployAction: (() => Promise<void>) | false = false;
+
                             try {
-                                await ME.deployPackage(PACKAGE_TO_DEPLOY);
+                                let promptMsg: string;
+                                const DEPLOY_TYPE = deploy_helpers.normalizeString(pb.type);
+                                switch (DEPLOY_TYPE) {
+                                    case "":
+                                    case "deploy":
+                                        deployAction = async () => {
+                                            await ME.deployPackage(PACKAGE_TO_HANDLE);
+                                        };
+                                        promptMsg = 'askBeforeDeploy';
+                                        break;
+
+                                    case "delete":
+                                        deployAction = async () => {
+                                            await ME.deletePackage(PACKAGE_TO_HANDLE);
+                                        };
+                                        promptMsg = 'askBeforeDelete';
+                                        break;
+
+                                    case "pull":
+                                        deployAction = async () => {
+                                            await ME.pullPackage(PACKAGE_TO_HANDLE);
+                                        };
+                                        promptMsg = 'askBeforePull';
+                                        break;
+                                }
+
+                                if (false === deployAction) {
+                                    await ME.showWarningMessage(
+                                        ME.t('packages.buttons.unknownOperationType',
+                                             DEPLOY_TYPE)
+                                    );
+
+                                    return;
+                                }
+
+                                if (deploy_helpers.toBooleanSafe(pb.showPrompt)) {
+                                    const SELECTED_ITEM = await vscode.window.showWarningMessage<deploy_contracts.MessageItemWithValue>(
+                                        ME.t(`packages.buttons.prompts.${promptMsg}`,
+                                             PACKAGE_NAME),
+
+                                        {
+                                            title: ME.t('no'),
+                                            isCloseAffordance: true,
+                                            value: 0,
+                                        },
+                                        {
+                                            title: ME.t('yes'),
+                                            value: 1,
+                                        }
+                                    );
+
+                                    let selectedValue: number;
+                                    if (SELECTED_ITEM) {
+                                        selectedValue = SELECTED_ITEM.value;
+                                    }
+                                    
+                                    if (1 !== selectedValue) {
+                                        return;
+                                    }
+                                }
+
+                                await deployAction();
                             }
                             catch (e) {
                                 await ME.showErrorMessage(
                                     ME.t('packages.deploymentFailed',
-                                         deploy_packages.getPackageName(PACKAGE_TO_DEPLOY))
+                                         deploy_packages.getPackageName(PACKAGE_TO_HANDLE))
                                 );
                             }
                         });
 
-                        //TODO: translate
                         deploy_log.CONSOLE
                                   .info(`Registrated command '${newCmdId}' for button of package '${PACKAGE_NAME}'.`,
                                         'workspaces.Workspace.reloadPackageButtons()');
                     }
                     else {
-                        //TODO: translate
                         deploy_log.CONSOLE
                                   .warn(`Button of package '${PACKAGE_NAME}' will use the existing command '${newCmdId}'.`,
                                         'workspaces.Workspace.reloadPackageButtons()');
@@ -3050,7 +3111,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                     ME._PACKAGE_BUTTONS.push({
                         button: b,
                         command: newBtnCommand,
-                        package: PACKAGE_TO_DEPLOY,
+                        package: PACKAGE_TO_HANDLE,
                     });
 
                     b.show();

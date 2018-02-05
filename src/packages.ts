@@ -15,6 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as _ from 'lodash';
 import * as Crypto from 'crypto';
 import * as deploy_contracts from './contracts';
 import * as deploy_git from './git';
@@ -85,6 +86,14 @@ export interface Package extends deploy_values.Applyable,
  * A package button.
  */
 export interface PackageButton extends deploy_contracts.ButtonWithCustomCommand {
+    /**
+     * Ask before start deploy operation or not.
+     */
+    readonly showPrompt?: boolean;
+    /**
+     * The type of deploy operation.
+     */
+    readonly type?: string;
 }
 
 /**
@@ -899,6 +908,26 @@ export async function importPackageFilesFromGit(pkg: Package, operation: deploy_
     }
 
     return files;
+}
+
+/**
+ * Prepares a package for use as file filter.
+ * 
+ * @param {TPackage} pkg The package to prepare.
+ * 
+ * @return {TPackage} The prepared package.
+ */
+export function preparePackageForFileFilter<TPackage extends Package = Package>(pkg: TPackage): TPackage {
+    if (_.isNil(pkg)) {
+        return pkg;
+    }
+
+    pkg = deploy_helpers.cloneObjectFlat(pkg);
+    if (_.isNil(pkg.files)) {
+        (<any>pkg).files = [ '**' ];
+    }
+
+    return pkg;
 }
 
 /**

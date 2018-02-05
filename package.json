@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.33.0",
+ "version": "0.34.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -517,6 +517,11 @@
               "description": "The priority.",
               "type": "integer"
              },
+             "showPrompt": {
+              "description": "Ask before start deploy operation or not.",
+              "type": "boolean",
+              "default": false
+             },
              "text": {
               "description": "The custom display text.",
               "type": "string"
@@ -524,6 +529,17 @@
              "tooltip": {
               "description": "The custom tooltip.",
               "type": "string"
+             },
+             "type": {
+              "description": "The type of deploy operation.",
+              "enum": [
+               "",
+               "delete",
+               "deploy",
+               "pull"
+              ],
+              "type": "string",
+              "default": "deploy"
              }
             }
            }
