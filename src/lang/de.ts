@@ -145,6 +145,16 @@ export const translation: Translation = {
         gitCommit: {
             description: "Stellt Änderungen eines git-Commits bereit",
             label: "git-Commit ...",
+            patterns: {
+                askForFilesToExclude: {
+                    placeHolder: "(keine)",
+                    prompt: "Geben Sie ggf. Suchmuster von auszuschliessende Dateien an, getrennt durch ;",
+                },
+                askForFilesToInclude: {
+                    placeHolder: "**",
+                    prompt: "Geben Sie ggf. Suchmuster von einzuschliessende Dateien an, getrennt durch ;",
+                }
+            },
         },
         onChange: {
             activated: "Das Bereitstellen nach dem Ändern wurde für den Arbeitsbereich{0:trim,surround,leading_space} aktiviert.",

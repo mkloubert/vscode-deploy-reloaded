@@ -15,9 +15,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as _ from 'lodash';
+import * as Crypto from 'crypto';
 import * as deploy_contracts from './contracts';
 import * as deploy_delete from './delete';
 import * as deploy_helpers from './helpers';
+import * as deploy_log from './log';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
 import * as deploy_scm from './scm';
@@ -31,6 +34,14 @@ import * as Path from 'path';
 import * as vscode from 'vscode';
 
 
+interface ScmFileFilter {
+    exclude?: string[];
+    files?: string[];    
+}
+
+type ScmFileFilterStorage = { [ branch: string ]: ScmFileFilter };
+
+const KEY_SCM_COMMIT_FILE_FILTERS = 'vscdrScmCommitFileFilters';
 let nextCancelBtnCommandId = Number.MIN_SAFE_INTEGER;
 
 /**
@@ -710,49 +721,127 @@ export async function deployScmCommit(client: deploy_scm.SourceControlClient,
 
     const CHANGES = await COMMIT.changes();
 
-    const FILES_TO_DELETE: string[] = [];
-    const FILES_TO_UPLOAD: string[] = [];
-    for (const C of CHANGES) {
-        const FILE = deploy_helpers.toStringSafe(C.file);
-        if (deploy_helpers.isEmptyString(FILE)) {
-            continue;
-        }
+    let branch: string;
+    if (COMMIT.branch) {
+        branch = COMMIT.branch.id;
+    }
+    branch = deploy_helpers.normalizeString(branch);
 
-        const FULL_PATH = Path.resolve(
-            Path.join(
-                ME.rootPath,
-                FILE,
-            )
-        );
+    const STORAGE_KEY = Crypto.createHash('sha256')
+                              .update(branch)
+                              .digest('hex');
 
-        switch (C.type) {
-            case deploy_scm.FileChangeType.Added:
-            case deploy_scm.FileChangeType.Modified:
-                FILES_TO_UPLOAD.push( FULL_PATH );
-                break;
-
-            case deploy_scm.FileChangeType.Deleted:
-                FILES_TO_DELETE.push( FULL_PATH );
-                break;
-        }
+    let filterStorage: ScmFileFilterStorage = ME.state.get<ScmFileFilterStorage>(KEY_SCM_COMMIT_FILE_FILTERS);
+    if (!_.isPlainObject(filterStorage)) {
+        filterStorage = {};
     }
 
-    // first delete files
-    if (FILES_TO_DELETE.length > 0) {
-        await deploy_helpers.applyFuncFor(
-            deploy_delete.deleteFilesIn,
-            ME,
-        )(FILES_TO_DELETE, target,
-          null,
-          false);
+    let fileFilters: ScmFileFilter = filterStorage[STORAGE_KEY];
+    if (!_.isPlainObject(fileFilters)) {
+        fileFilters = {};
+    }
+    fileFilters = {
+        files: deploy_helpers.asArray(fileFilters.files)
+                             .map(f => deploy_helpers.toStringSafe(f))
+                             .filter(f => !deploy_helpers.isEmptyString(f)),
+        exclude: deploy_helpers.asArray(fileFilters.exclude)
+                               .map(e => deploy_helpers.toStringSafe(e))
+                               .filter(e => !deploy_helpers.isEmptyString(e)),
+    };
+
+    // ask for files to include
+    const FILES_TO_INCLUDE = await vscode.window.showInputBox({
+        placeHolder: ME.t('deploy.gitCommit.patterns.askForFilesToInclude.placeHolder'),
+        prompt: ME.t('deploy.gitCommit.patterns.askForFilesToInclude.prompt'),
+        value: fileFilters.files.join(';'),
+    });
+    if (_.isNil(FILES_TO_INCLUDE)) {
+        return;
     }
 
-    // then upload files
-    if (FILES_TO_UPLOAD.length > 0) {
-        await deploy_helpers.applyFuncFor(
-            deployFilesTo,
-            ME,
-        )(FILES_TO_UPLOAD, target,
-          null);
+    let fileToIncludePatterns = FILES_TO_INCLUDE.split(';').filter(p => {
+        return !deploy_helpers.isEmptyString(p);
+    });
+    fileFilters.files = fileToIncludePatterns.map(p => p);
+
+    if (fileToIncludePatterns.length < 1) {
+        fileToIncludePatterns.push('**');
+    }
+
+    // ask for files to exclude
+    const FILES_TO_EXCLUDE = await vscode.window.showInputBox({
+        placeHolder: ME.t('deploy.gitCommit.patterns.askForFilesToExclude.placeHolder'),
+        prompt: ME.t('deploy.gitCommit.patterns.askForFilesToExclude.prompt'),
+        value: fileFilters.exclude.join(';'),
+    });
+    if (_.isNil(FILES_TO_EXCLUDE)) {
+        return;
+    }
+
+    let filesToExcludePatterns = FILES_TO_EXCLUDE.split(';').filter(p => {
+        return !deploy_helpers.isEmptyString(p);
+    });
+    fileFilters.exclude = filesToExcludePatterns.map(p => p);
+
+    try {    
+        const FILES_TO_DELETE: string[] = [];
+        const FILES_TO_UPLOAD: string[] = [];
+        for (const C of CHANGES) {
+            const FILE = deploy_helpers.toStringSafe(C.file);
+            if (deploy_helpers.isEmptyString(FILE)) {
+                continue;
+            }
+
+            if (!deploy_helpers.checkIfDoesMatchByFileFilter('/' + FILE,
+                                                             deploy_helpers.toMinimatchFileFilter(fileFilters))) {
+                continue;  // does not match pattern(s)
+            }
+
+            const FULL_PATH = Path.resolve(
+                Path.join(
+                    ME.rootPath,
+                    FILE,
+                )
+            );
+
+            switch (C.type) {
+                case deploy_scm.FileChangeType.Added:
+                case deploy_scm.FileChangeType.Modified:
+                    FILES_TO_UPLOAD.push( FULL_PATH );
+                    break;
+
+                case deploy_scm.FileChangeType.Deleted:
+                    FILES_TO_DELETE.push( FULL_PATH );
+                    break;
+            }
+        }
+
+        // first delete files
+        if (FILES_TO_DELETE.length > 0) {
+            await deploy_helpers.applyFuncFor(
+                deploy_delete.deleteFilesIn,
+                ME,
+            )(FILES_TO_DELETE, target,
+              null,
+              false);
+        }
+
+        // then upload files
+        if (FILES_TO_UPLOAD.length > 0) {
+            await deploy_helpers.applyFuncFor(
+                deployFilesTo,
+                ME,
+            )(FILES_TO_UPLOAD, target,
+              null);
+        }
+    }
+    finally {
+        filterStorage[STORAGE_KEY] = fileFilters;
+
+        ME.state.update(KEY_SCM_COMMIT_FILE_FILTERS, filterStorage).then(() => {
+        }, (err) => {
+            deploy_log.CONSOLE
+                      .trace(err, 'deploy.deployScmCommit(1)');
+        });
     }
 }

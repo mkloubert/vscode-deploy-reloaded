@@ -152,6 +152,16 @@ export interface Translation {
         gitCommit?: {
             description?: string;
             label?: string;
+            patterns?: {
+                askForFilesToExclude?: {
+                    placeHolder?: string;
+                    prompt?: string;
+                },
+                askForFilesToInclude?: {
+                    placeHolder?: string;
+                    prompt?: string;
+                }
+            };
         };
         onChange?: {
             activated?: string;

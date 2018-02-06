@@ -145,6 +145,16 @@ export const translation: Translation = {
         gitCommit: {
             description: "Deploys the changes of a git commit",
             label: "git commit ...",
+            patterns: {
+                askForFilesToExclude: {
+                    placeHolder: "(none)",
+                    prompt: "Define optional patterns of files to exclude, separated by ;",
+                },
+                askForFilesToInclude: {
+                    placeHolder: "**",
+                    prompt: "Define optional patterns of files to include, separated by ;",
+                }
+            },
         },
         onChange: {
             activated: "Deploy on change has been activated for workspace{0:trim,surround,leading_space}.",
