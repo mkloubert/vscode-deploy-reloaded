@@ -35,7 +35,7 @@
 // inside your home directory
 ```
 
-### Screenshot
+#### Screenshot
 
 {Please write here, if possible}
 
