@@ -33,16 +33,21 @@ export interface Branch {
     readonly client: SourceControlClient;
     /**
      * Returns the number of total commits.
+     * 
+     * @param {number} [skip] Number of items to skip.
+     * 
+     * @return {Branch[]|PromiseLike<Branch[]>} The result with the number of commit.
      */
-    readonly commitCount: () => number | PromiseLike<number>;
+    readonly commitCount: (skip?: number) => number | PromiseLike<number>;
     /**
      * Returns all commits of that branch in descending order.
      * 
      * @param {number} [page] The page.
+     * @param {number} [skip] Number of items to skip.
      * 
      * @return {Branch[]|PromiseLike<Branch[]>} The result with the list of branches.
      */
-    readonly commits: (page?: number) => Commit[] | PromiseLike<Commit[]>;
+    readonly commits: (page?: number, skip?: number) => Commit[] | PromiseLike<Commit[]>;
     /**
      * The ID / name of the branch.
      */
@@ -72,6 +77,8 @@ export interface Commit {
     readonly branch: Branch;
     /**
      * Returns all file changes.
+     * 
+     * @return {FileChange[]|PromiseLike<FileChange[]>} The result with the changes.
      */
     readonly changes: () => FileChange[] | PromiseLike<FileChange[]>;
     /**
@@ -90,6 +97,20 @@ export interface Commit {
      * Short version of commit message.
      */
     readonly subject?: string;
+}
+
+/**
+ * A range of commits.
+ */
+export interface CommitRange {
+    /**
+     * The first commit.
+     */
+    readonly from: Commit;
+    /**
+     * The last commit.
+     */
+    readonly to: Commit;
 }
 
 /**
@@ -212,10 +233,8 @@ export async function showSCMCommitQuickPick(client: SourceControlClient): Promi
             const COMMITS = await SELECTED_BRANCH.commits(page);
 
             const IS_FIRST_PAGE = isNaN(page);
-            const IS_LAST_PAGE = !deploy_helpers.isSymbol(
-                Enumerable.from(COMMITS)
-                          .any(c => 0 == c.index),
-            );
+            const IS_LAST_PAGE = Enumerable.from(COMMITS)
+                                           .any(c => 0 == c.index);
 
             const COMMIT_QUICK_PICKS: deploy_contracts.ActionQuickPick[] = COMMITS.map(c => {
                 let description: string;
@@ -239,13 +258,13 @@ export async function showSCMCommitQuickPick(client: SourceControlClient): Promi
             if (!IS_FIRST_PAGE) {
                 const PREV_PAGE = page - 1;
 
-                COMMIT_QUICK_PICKS.push({
+                COMMIT_QUICK_PICKS.unshift({
                     action: async () => {
                         return await selectCommit(PREV_PAGE);
                     },
 
-                    label: i18.t('pagination.previousPage',
-                                 PREV_PAGE),
+                    label: '$(triangle-left)  ' + i18.t('pagination.previousPage',
+                                                        PREV_PAGE),
                     description: '',
                 });
             }
@@ -258,8 +277,8 @@ export async function showSCMCommitQuickPick(client: SourceControlClient): Promi
                         return await selectCommit(NEXT_PAGE);
                     },
 
-                    label: i18.t('pagination.nextPage',
-                                 NEXT_PAGE),
+                    label: '$(triangle-right)  ' + i18.t('pagination.nextPage',
+                                                         NEXT_PAGE),
                     description: '',
                 });
             }
@@ -299,6 +318,183 @@ export async function showSCMCommitQuickPick(client: SourceControlClient): Promi
     catch (e) {
         deploy_helpers.showErrorMessage(
             i18.t('scm.commits.errors.selectingCommitFailed',
+                  e)
+        );
+    }
+}
+
+/**
+ * Selects a range of commits.
+ * 
+ * @param {SourceControlClient} client The client.
+ * 
+ * @return {Promise<SCMCommitRange|false>} The promise with the range or (false) if failed.
+ */
+export async function showSCMCommitRangeQuickPick(client: SourceControlClient): Promise<CommitRange | false> {
+    if (!client) {
+        return <any>client;
+    }
+
+    try {
+        const BRANCHES = deploy_helpers.asArray(
+            await Promise.resolve(
+                client.branches()
+            )
+        );
+
+        const BRANCH_QUICK_PICKS: deploy_contracts.ActionQuickPick[] = BRANCHES.map(b => {
+            let description: string;
+            let detail: string;
+            if (b.lastCommit) {
+                description = b.lastCommit.id;
+                detail = b.lastCommit.subject;
+            }
+            
+            return {
+                action: () => {
+                    return b;
+                },
+
+                label: '$(git-branch)  ' + deploy_helpers.toStringSafe(b.id).trim(),
+                description: deploy_helpers.toStringSafe(description).trim(),
+                detail: deploy_helpers.toStringSafe(detail).trim(),
+            };
+        });
+
+        if (BRANCH_QUICK_PICKS.length < 1) {
+            deploy_helpers.showWarningMessage(
+                i18.t('scm.branches.noneFound')
+            );
+
+            return false;
+        }
+
+        let selectedBranchItem: deploy_contracts.ActionQuickPick;
+        if (1 === BRANCH_QUICK_PICKS.length) {
+            selectedBranchItem = BRANCH_QUICK_PICKS[0];
+        }
+        else {
+            selectedBranchItem = await vscode.window.showQuickPick(
+                BRANCH_QUICK_PICKS,
+                {
+                    placeHolder: i18.t('scm.branches.selectBranch')
+                },
+            );
+        }
+
+        if (!selectedBranchItem) {
+            return;
+        }
+
+        const SELECTED_BRANCH: Branch = selectedBranchItem.action();
+        
+        const SELECT_COMMIT = async (lang: string, skip = 0, page = 1): Promise<Commit | false> => {
+            if (skip < 0) {
+                skip = 0;
+            }
+            if (page < 1) {
+                page = 1;
+            }
+
+            const COMMITS = await SELECTED_BRANCH.commits(page, skip);
+
+            const IS_FIRST_PAGE = page < 2;
+            const IS_LAST_PAGE = Enumerable.from(COMMITS)
+                                           .any(c => 0 == c.index);
+
+            const COMMIT_QUICK_PICKS: deploy_contracts.ActionQuickPick[] = COMMITS.map(c => {
+                let description: string;
+                if (c.date && c.date.isValid()) {
+                    description = deploy_helpers.asLocalTime(c.date).format(
+                        i18.t('time.dateTimeWithSeconds')
+                    );
+                }
+
+                return {
+                    action: () => {
+                        return c;
+                    },
+    
+                    label: '$(git-commit)  ' + deploy_helpers.toStringSafe(c.subject).trim(),
+                    description: deploy_helpers.toStringSafe(description),
+                    detail: deploy_helpers.toStringSafe(c.id).trim(),
+                };
+            });
+
+            if (!IS_FIRST_PAGE) {
+                const PREV_PAGE = page - 1;
+
+                COMMIT_QUICK_PICKS.unshift({
+                    action: async () => {
+                        return await SELECT_COMMIT(lang, skip, PREV_PAGE);
+                    },
+
+                    label: '$(triangle-left)  ' + i18.t('pagination.previousPage',
+                                                        PREV_PAGE),
+                    description: '',
+                });
+            }
+
+            if (!IS_LAST_PAGE) {
+                const NEXT_PAGE = page + 1;
+
+                COMMIT_QUICK_PICKS.push({
+                    action: async () => {
+                        return await SELECT_COMMIT(lang, skip, NEXT_PAGE);
+                    },
+
+                    label: '$(triangle-right)  ' + i18.t('pagination.nextPage',
+                                                         NEXT_PAGE),
+                    description: '',
+                });
+            }
+
+            if (COMMIT_QUICK_PICKS.length < 1) {
+                deploy_helpers.showWarningMessage(
+                    i18.t('scm.commits.noneFound')
+                );
+    
+                return false;
+            }
+
+            let selectedCommitItem: deploy_contracts.ActionQuickPick;
+            if (1 === COMMIT_QUICK_PICKS.length) {
+                selectedCommitItem = COMMIT_QUICK_PICKS[0];
+            }
+            else {
+                selectedCommitItem = await vscode.window.showQuickPick(
+                    COMMIT_QUICK_PICKS,
+                    {
+                        placeHolder: i18.t('scm.commits.' + lang)
+                    }
+                );
+            }
+
+            if (!selectedCommitItem) {
+                return;
+            }
+
+            return await Promise.resolve(
+                selectedCommitItem.action()
+            );
+        };
+
+        const ALL_COMMITS = await SELECTED_BRANCH.commitCount();
+
+        const FIRST_COMMIT = await SELECT_COMMIT('selectFirstCommit');
+        if (FIRST_COMMIT) {
+            const LAST_COMMIT = await SELECT_COMMIT('selectLastCommit', ALL_COMMITS - FIRST_COMMIT.index - 1);
+            if (LAST_COMMIT) {
+                return {
+                    from: FIRST_COMMIT,
+                    to: LAST_COMMIT,
+                };
+            }
+        }
+    }
+    catch (e) {
+        deploy_helpers.showErrorMessage(
+            i18.t('scm.commits.errors.selectingCommitRangeFailed',
                   e)
         );
     }

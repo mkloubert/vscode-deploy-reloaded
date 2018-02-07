@@ -424,12 +424,21 @@ export const translation: Translation = {
             noneFound: "No branches found!",
             selectBranch: "Select branch ...",
         },
+        changes: {
+            added: "Added",
+            deleted: "Deleted",
+            modified: "Modified",
+            noneFound: "No changes have been found.",
+        },
         commits: {
             errors: {
                 selectingCommitFailed: "Could not select commit:{0:trim,surround,leading_space}",
+                selectingCommitRangeFailed: "Could not select commits:{0:trim,surround,leading_space}",
             },
             noneFound: "No commits found!",
-            selectCommit: "Select commit ..."
+            selectCommit: "Select commit ...",
+            selectFirstCommit: "Select first commit ...",
+            selectLastCommit: "Select last commit ...",
         },
     },
     sftp: {
@@ -563,6 +572,12 @@ export const translation: Translation = {
         },
         errors: {
             operationFailed: "Tool operation failed (s. debug console 'CTRL/CMD + SHIFT + Y')!",
+        },
+        git: {
+            listFileChanges: {
+                description: "Detects changes inside the git repository between 2 commits",
+                label: "Detect git changes",
+            },
         },
         npm: {
             description: "Tools for simple use of 'npm'",

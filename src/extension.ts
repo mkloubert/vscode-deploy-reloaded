@@ -1364,6 +1364,15 @@ async function activateExtension(context: vscode.ExtensionContext) {
                             label: '$(package)  ' + i18.t('tools.bower.label'),
                             description: i18.t('tools.bower.description'),
                             state: 7,
+                        },
+
+                        {
+                            action: async () => {
+                                await deploy_tools.detectGitChanges(context);
+                            },
+                            label: '$(package)  ' + i18.t('tools.git.listFileChanges.label'),
+                            description: i18.t('tools.git.listFileChanges.description'),
+                            state: 8,
                         }
                     ];
 
@@ -1717,7 +1726,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
         outputChannel.appendLine(i18.t('extension.initialized'));
         outputChannel.appendLine('');
     });
-    
+
     if (!isDeactivating) {
         await WF.start();
     }

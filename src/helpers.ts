@@ -1395,8 +1395,7 @@ export function isString(val: any): val is string {
  * @return {boolean} Is symbol or not. 
  */
 export function isSymbol(val: any): val is symbol {
-    return !isNullOrUndefined(val) &&
-           'symbol' === typeof val;
+    return _.isSymbol(val);
 }
 
 /**
@@ -2133,6 +2132,25 @@ export function toDisplayablePath(path: string): string {
     }
 
     return path;
+}
+
+/**
+ * Converts an EOL enum value to a string.
+ * 
+ * @param {vscode.EndOfLine} [eol] The (optional)  enum value.
+ * 
+ * @return string The EOL string.
+ */
+export function toEOL(eol?: vscode.EndOfLine): string {
+    switch (eol) {
+        case vscode.EndOfLine.CRLF:
+            return "\r\n";
+
+        case vscode.EndOfLine.LF:
+            return "\n";
+    }
+
+    return OS.EOL;
 }
 
 /**

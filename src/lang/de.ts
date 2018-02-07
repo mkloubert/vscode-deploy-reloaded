@@ -197,7 +197,7 @@ export const translation: Translation = {
     ftp: {
         couldNotConnect: "Konnte keine Verbindung aufbauen!",
         couldNotConnectWithJSFTP: "Konnte keine Verbindung mittels 'jsftp' aufbauen!",
-    },
+    },    
     http: {
         errors: {
             client: "HTTP Client Fehler{0:trim,leading_space}:{1:trim,surround,leading_space}",
@@ -423,12 +423,21 @@ export const translation: Translation = {
             noneFound: "Es wurden keine Branches gefunden!",
             selectBranch: "Wählen Sie einen Branch ...",
         },
+        changes: {
+            added: "Hinzugefügt",
+            deleted: "Gelöscht",
+            modified: "Geändert",
+            noneFound: "Es wurden keine Änderungen gefunden.",
+        },
         commits: {
             errors: {
                 selectingCommitFailed: "Commit konnte nicht ausgewählt werden:{0:trim,surround,leading_space}",
+                selectingCommitRangeFailed: "Commits konnten nicht ausgewählt werden:{0:trim,surround,leading_space}",
             },
             noneFound: "Es wurden keine Commits gefunden!",
             selectCommit: "Wählen Sie einen Commit ...",
+            selectFirstCommit: "Wählen Sie den ersten Commit ...",
+            selectLastCommit: "Wählen Sie den letzten Commit ...",
         },
     },
     sftp: {
@@ -562,6 +571,12 @@ export const translation: Translation = {
         },
         errors: {
             operationFailed: "Konnte Funktion nicht ausführen (s. Debugkonsole 'STRG/CMD + SHIFT + Y')!",
+        },
+        git: {
+            listFileChanges: {
+                description: "Ermittelt Dateiänderungen in einem git-Repository zwischen 2 Commits",
+                label: "git-Änderungen ermitteln",
+            },
         },
         npm: {
             description: "Werkzeuge für das einfache Arbeiten mit 'npm'",

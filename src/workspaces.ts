@@ -16,6 +16,7 @@
  */
 
  
+import * as _ from 'lodash';
 import * as ChildProcess from 'child_process';
 import * as Crypto from 'crypto';
 import * as deploy_code from './code';
@@ -1236,7 +1237,44 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             return false;
         }
 
-        const LINES = deploy_helpers.toStringSafe( activeDocument.getText() ).split("\n").map(l => {
+        let range: vscode.Range;
+
+        const SELECTION = ACTIVE_EDITOR.selection;
+        if (SELECTION) {
+            range = new vscode.Range(
+                SELECTION.end,
+                SELECTION.start,
+            );
+        }
+
+        if (range) {
+            if (_.isNil(range.start) && _.isNil(range.end)) {
+                range = undefined;
+            }
+        }
+
+        if (range) {
+            if (_.isNil(range.start) && !_.isNil(range.end)) {
+                range = new vscode.Range(
+                    SELECTION.end,
+                    SELECTION.end,
+                );
+            }
+            else if (!_.isNil(range.start) && _.isNil(range.end)) {
+                range = new vscode.Range(
+                    SELECTION.start,
+                    SELECTION.start,
+                );
+            }
+        }
+
+        if (range) {        
+            if (range.start.isEqual(range.end)) {
+                range = undefined;
+            }
+        }
+
+        const LINES = deploy_helpers.toStringSafe( activeDocument.getText(range) ).split("\n").map(l => {
             return l.trim();
         }).filter(l => {
             return '' !== l;

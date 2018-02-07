@@ -429,12 +429,21 @@ export interface Translation {
             noneFound?: string;
             selectBranch?: string;
         };
+        changes?: {
+            added?: string;
+            deleted?: string;
+            modified?: string;
+            noneFound?: string;
+        };
         commits?: {
             errors?: {
                 selectingCommitFailed?: string;
+                selectingCommitRangeFailed?: string;
             };
             noneFound?: string;
             selectCommit?: string;
+            selectFirstCommit?: string;
+            selectLastCommit?: string;
         };
     };
     sftp?: {
@@ -568,6 +577,12 @@ export interface Translation {
         };
         errors?: {
             operationFailed?: string;
+        };
+        git?: {
+            listFileChanges?: {
+                description?: string;
+                label?: string;
+            };
         };
         npm?: {
             description?: string;

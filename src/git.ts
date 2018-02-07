@@ -92,13 +92,21 @@ export class GitClient implements deploy_scm.SourceControlClient {
             BRANCHES.push({
                 client: ME,
                 commitCount: async function(skip?: number) {
+                    skip = parseInt(deploy_helpers.toStringSafe(skip).trim());
+                    if (isNaN(skip)) {
+                        skip = 0;
+                    }
+                    if (skip < 1) {
+                        skip = 0;
+                    }
+
                     return parseInt(
                         deploy_helpers.toStringSafe(
-                            await ME.exec([ "rev-list", "--count", "HEAD" ]),
+                            await ME.exec([ "rev-list", "--count", "--skip=" + skip, "HEAD" ]),
                         )
                     );
                 },
-                commits: async function(page?: number) {
+                commits: async function(page?: number, skip?: number) {
                     page = parseInt(
                         deploy_helpers.toStringSafe(page).trim()
                     );
@@ -109,13 +117,23 @@ export class GitClient implements deploy_scm.SourceControlClient {
                         page = 1;
                     }
 
-                    const ITEMS_TO_SKIP = (page - 1) * COMMITS_PER_PAGE;
+                    skip = parseInt(
+                        deploy_helpers.toStringSafe(skip).trim()
+                    );
+                    if (isNaN(skip)) {
+                        skip = 0;
+                    }
+                    if (skip < 1) {
+                        skip = 0;
+                    }
+
+                    const ITEMS_TO_SKIP = (page - 1) * COMMITS_PER_PAGE + skip;
 
                     const BRANCH: deploy_scm.Branch = this;
 
                     const LOADED_COMMITS: deploy_scm.Commit[] = [];
 
-                    const ALL_COUNT: number = await this.commitCount();
+                    const TOTAL_COUNT: number = await this.commitCount();
 
                     const COMMITS_RESULT = await ME.exec([
                         'log',
@@ -179,7 +197,7 @@ export class GitClient implements deploy_scm.SourceControlClient {
                             },
                             date: deploy_helpers.asUTC( Moment(DATE) ),
                             id: HASH,
-                            index: ALL_COUNT - ITEMS_TO_SKIP - i - 1,
+                            index: TOTAL_COUNT - ITEMS_TO_SKIP - i - 1,
                             subject: SUBJECT,
                         });
                     });
