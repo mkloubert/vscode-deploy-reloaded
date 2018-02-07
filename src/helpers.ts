@@ -1017,6 +1017,18 @@ export function getExtensionDirInHome() {
 }
 
 /**
+ * Returns the (possible path) of the extension's log sub folder inside the home directory.
+ * 
+ * @return {string} The path of the extension's log sub folder inside the home directory.
+ */
+export function getExtensionLogDirInHome() {
+    return Path.resolve(
+        Path.join(getExtensionDirInHome(),
+                  '.logs')
+    );
+}
+
+/**
  * Returns a mapped path (if possible).
  * 
  * @param {deploy_mappings.FolderMappings} mappings The folder mappings.

@@ -25,6 +25,16 @@
 }
 ```
 
+#### Logs
+
+```
+// write log messages here, if possible
+
+// maybe one or more log files are available
+// in sub folder '.vscode-deploy-reloaded/.logs'
+// inside your home directory
+```
+
 ### Screenshot
 
 {Please write here, if possible}

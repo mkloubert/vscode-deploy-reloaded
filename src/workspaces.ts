@@ -281,6 +281,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Stores the last timestamp of configuration update.
      */
     protected _lastConfigUpdate: Moment.Moment;
+    private readonly _LOGGER = new deploy_log.ActionLogger();
     private _OLD_ENV_VARS: deploy_contracts.KeyValuePairs = {};
     private _PACKAGE_BUTTONS: PackageWithButton[] = [];
     private _packages: deploy_packages.Package[];
@@ -427,6 +428,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     }
 
     private async checkForRequiredExtensions(loadedCfg: WorkspaceSettings) {
+        const ME = this;
+
         if (!loadedCfg) {
             return true;
         }
@@ -448,8 +451,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             const OPEN_IN_MARKETPLACE = () => {
                 deploy_helpers.open(`https://marketplace.visualstudio.com/items?itemName=${encodeURIComponent(EXTENSION_ID)}`).then(() => {
                 }, (err) => {
-                    deploy_log.CONSOLE
-                              .trace(err, 'workspaces.Workspace.checkForRequiredExtensions().OPEN_IN_MARKETPLACE()');
+                    ME.logger
+                      .trace(err, 'workspaces.Workspace.checkForRequiredExtensions().OPEN_IN_MARKETPLACE()');
                 });
             };
 
@@ -475,7 +478,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             if (deploy_helpers.toBooleanSafe(settings.isMustHave)) {
                 // must be installed
 
-                const SELECTED_ITEM = await this.showErrorMessage<deploy_contracts.MessageItemWithValue>(
+                const SELECTED_ITEM = await ME.showErrorMessage<deploy_contracts.MessageItemWithValue>(
                     i18.t('requirements.extensions.mustBeInstalled',
                           EXTENSION_ID),
                     {
@@ -494,7 +497,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 return false;
             }
 
-            const SELECTED_ITEM = await this.showWarningMessage<deploy_contracts.MessageItemWithValue>(
+            const SELECTED_ITEM = await ME.showWarningMessage<deploy_contracts.MessageItemWithValue>(
                 i18.t('requirements.extensions.shouldBeInstalled',
                       EXTENSION_ID),
                 {
@@ -653,8 +656,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             }
         }
         catch (e) {
-            deploy_log.CONSOLE
-                      .trace(e, 'workspaces.Workspace.createGitClient()');
+            this.logger
+                .trace(e, 'workspaces.Workspace.createGitClient()');
         }
 
         return false;
@@ -981,8 +984,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             }
         }
         catch (e) {
-            deploy_log.CONSOLE
-                      .trace(e, 'workspaces.Workspace.executeStartupCommands()');
+            this.logger
+                .trace(e, 'workspaces.Workspace.executeStartupCommands()');
         }
     }
 
@@ -1023,8 +1026,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                     }
                 }
                 catch (e) {
-                    deploy_log.CONSOLE
-                              .trace(e, 'workspaces.Workspace.filterConditionalItems()');
+                    this.logger
+                        .trace(e, 'workspaces.Workspace.filterConditionalItems()');
 
                     if (throwOnError) {
                         throw e;
@@ -1660,8 +1663,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             }
         }
         catch (e) {
-            deploy_log.CONSOLE
-                      .trace(e, 'workspaces.Workspace.getValues(1)');
+            ME.logger
+              .trace(e, 'workspaces.Workspace.getValues(1)');
         }
 
         const WORKSPACE_VALUES = values.map(v => v);
@@ -1691,8 +1694,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                         });
                     }
                     catch (e) {
-                        deploy_log.CONSOLE
-                                  .trace('workspaces.Workspace.getValues(2)');
+                        ME.logger
+                          .trace('workspaces.Workspace.getValues(2)');
     
                         doesMatch = false;
                     }
@@ -1855,6 +1858,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             return false;
         }
 
+        ME.setupLogger();
+
         ME._rootPath = false;
 
         // settings file
@@ -1916,8 +1921,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                     }
                 }
                 catch (e) {
-                    deploy_log.CONSOLE
-                              .trace(e, 'workspaces.Workspace.initialize(1)');
+                    ME.logger
+                      .trace(e, 'workspaces.Workspace.initialize(1)');
                 }
 
                 return false;
@@ -1974,8 +1979,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                     }
                 }
                 catch (e) {
-                    deploy_log.CONSOLE
-                              .trace(e, 'workspaces.Workspace.initialize(2)');
+                    ME.logger
+                      .trace(e, 'workspaces.Workspace.initialize(2)');
                 }
 
                 return false;
@@ -2375,7 +2380,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Gets the logger of that workspace.
      */
     public get logger(): deploy_log.Logger {
-        return deploy_log.CONSOLE;
+        return this._LOGGER;
     }
 
     /**
@@ -2405,8 +2410,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                         }
                     }
                     catch (e) {
-                        deploy_log.CONSOLE
-                                .trace(e, 'workspaces.Workspace.onDidChangeActiveTextEditor(1)');
+                        this.logger
+                            .trace(e, 'workspaces.Workspace.onDidChangeActiveTextEditor(1)');
                     }
                 }
             }
@@ -2488,6 +2493,19 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         }
         
         await this.deployOnSave(e.fileName);
+    }
+
+    /** @inheritdoc */
+    protected onDispose() {
+        // and last but not least:
+        // dispose logger
+        try {
+            this._LOGGER.clear();
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'workspaces.Workspace.onDispose(1)');
+        }
     }
 
     /**
@@ -2777,8 +2795,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                         ME, loadedCfg, OLD_CFG);
             }
             catch (e) {
-                deploy_log.CONSOLE
-                          .trace(e, 'workspaces.reloadConfiguration(1)');
+                ME.logger
+                  .trace(e, 'workspaces.reloadConfiguration(1)');
             }
 
             ME._translator = null;
@@ -2786,8 +2804,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 ME._translator = await deploy_helpers.applyFuncFor(i18.initForWorkspace, ME)();
             }
             catch (e) {
-                deploy_log.CONSOLE
-                          .trace(e, 'workspaces.reloadConfiguration(2)');
+                ME.logger
+                  .trace(e, 'workspaces.reloadConfiguration(2)');
             }
 
             if (deploy_helpers.toBooleanSafe(loadedCfg.clearOutputOnStartup)) {
@@ -2809,8 +2827,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                                       .apply(ME, []);
                 }
                 catch (e) {
-                    deploy_log.CONSOLE
-                              .trace(e, 'workspaces.reloadConfiguration(7)');
+                    ME.logger
+                      .trace(e, 'workspaces.reloadConfiguration(7)');
                 }
 
                 // timeToWaitBeforeActivateDeployOnChange
@@ -2845,8 +2863,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                     }
                 }
                 catch (e) {
-                    deploy_log.CONSOLE
-                              .trace(e, 'workspaces.reloadConfiguration(5)');
+                    ME.logger
+                      .trace(e, 'workspaces.reloadConfiguration(5)');
 
                     ME._isDeployOnChangeFreezed = false;
                 }
@@ -2883,8 +2901,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                     }
                 }
                 catch (e) {
-                    deploy_log.CONSOLE
-                              .trace(e, 'workspaces.reloadConfiguration(6)');
+                    ME.logger
+                      .trace(e, 'workspaces.reloadConfiguration(6)');
 
                     ME._isRemoveOnChangeFreezed = false;
                 }
@@ -2896,8 +2914,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             };
         }
         catch (e) {
-            deploy_log.CONSOLE
-                      .trace(e, 'workspaces.reloadConfiguration(3)');
+            ME.logger
+              .trace(e, 'workspaces.reloadConfiguration(3)');
 
             finalizer = async () => {
                 // DO NOT TRANSLATE
@@ -2937,8 +2955,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                     );
                 }
                 catch (e) {
-                    deploy_log.CONSOLE
-                              .trace(e, 'workspaces.reloadConfiguration(4)');
+                    ME.logger
+                      .trace(e, 'workspaces.reloadConfiguration(4)');
                 }
             }
 
@@ -2979,8 +2997,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             }
         }
         catch (e) {
-            deploy_log.CONSOLE
-                      .trace(e, 'workspaces.Workspace.reloadEnvVars()');
+            this.logger
+                .trace(e, 'workspaces.Workspace.reloadEnvVars()');
         }
     }
 
@@ -3120,14 +3138,14 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                             }
                         });
 
-                        deploy_log.CONSOLE
-                                  .info(`Registrated command '${newCmdId}' for button of package '${PACKAGE_NAME}'.`,
-                                        'workspaces.Workspace.reloadPackageButtons()');
+                        ME.logger
+                          .info(`Registrated command '${newCmdId}' for button of package '${PACKAGE_NAME}'.`,
+                                'workspaces.Workspace.reloadPackageButtons()');
                     }
                     else {
-                        deploy_log.CONSOLE
-                                  .warn(`Button of package '${PACKAGE_NAME}' will use the existing command '${newCmdId}'.`,
-                                        'workspaces.Workspace.reloadPackageButtons()');
+                        ME.logger
+                          .warn(`Button of package '${PACKAGE_NAME}' will use the existing command '${newCmdId}'.`,
+                                'workspaces.Workspace.reloadPackageButtons()');
                     }
 
                     if (deploy_helpers.isEmptyString(b.text)) {
@@ -3156,8 +3174,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 });
             }
             catch (e) {
-                deploy_log.CONSOLE
-                          .trace(e, 'workspaces.Workspace.reloadPackageButtons()');
+                ME.logger
+                  .trace(e, 'workspaces.Workspace.reloadPackageButtons()');
 
                 deploy_helpers.tryDispose(newBtn);
                 deploy_helpers.tryDispose(newBtnCommand);
@@ -3230,8 +3248,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                             await ME.changeSwitchButtonOption(newSwitchBtn.target);
                         }
                         catch (e) {
-                            deploy_log.CONSOLE
-                                      .trace(e, 'workspaces.Workspace.reloadSwitches().CREATE_AND_ADD_BUTTON()');
+                            ME.logger
+                              .trace(e, 'workspaces.Workspace.reloadSwitches().CREATE_AND_ADD_BUTTON()');
                         }
                     });
 
@@ -3288,8 +3306,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             }
         }
         catch (e) {
-            deploy_log.CONSOLE
-                      .trace(e, 'workspaces.Workspace.reloadSwitches()');
+            ME.logger
+              .trace(e, 'workspaces.Workspace.reloadSwitches()');
         }
         finally {
             await ME.updateSwitchButtons();
@@ -3421,6 +3439,14 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         );
     }
 
+    private setupLogger() {
+        // console
+        this._LOGGER.addAction((ctx) => {
+            deploy_log.CONSOLE
+                      .log(ctx.type, ctx.message, ctx.tag);
+        });
+    }
+
     /**
      * Promise (and safe) version of 'vscode.window.showErrorMessage()' function.
      * 
@@ -3437,8 +3463,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                                       .apply(null, [ <any>`[vscode-deploy-reloaded]::[${this.name}] ${msg}`.trim() ].concat(items));
         }
         catch (e) {
-            deploy_log.CONSOLE
-                      .trace(e, 'workspaces.Workspace.showErrorMessage()');
+            this.logger
+                .trace(e, 'workspaces.Workspace.showErrorMessage()');
         }
     }
 
@@ -3458,8 +3484,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                                       .apply(null, [ <any>`[vscode-deploy-reloaded]::[${this.name}] ${msg}`.trim() ].concat(items));
         }
         catch (e) {
-            deploy_log.CONSOLE
-                      .trace(e, 'workspaces.Workspace.showInformationMessage()');
+            this.logger
+                .trace(e, 'workspaces.Workspace.showInformationMessage()');
         }
     }
 
@@ -3500,8 +3526,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                                       .apply(null, [ <any>`[vscode-deploy-reloaded]::[${this.name}] ${msg}`.trim() ].concat(items));
         }
         catch (e) {
-            deploy_log.CONSOLE
-                      .trace(e, 'workspaces.Workspace.showWarningMessage()');
+            this.logger
+                .trace(e, 'workspaces.Workspace.showWarningMessage()');
         }
     }
 
@@ -3738,8 +3764,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             }
         }
         catch (e) {
-            deploy_log.CONSOLE
-                      .trace(e, 'workspaces.Workspace.updateSwitchButtons()');
+            ME.logger
+              .trace(e, 'workspaces.Workspace.updateSwitchButtons()');
         }
     }
 

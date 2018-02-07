@@ -700,6 +700,14 @@ async function activateExtension(context: vscode.ExtensionContext) {
         }
     });
 
+    // cleanup log files in home directory
+    WF.next(async () => {
+        try {
+            await deploy_log.cleanupLogFilesInHomeDirectory();
+        }
+        catch (e) { /* ignore */ }
+    });    
+
     // package file
     WF.next(async () => {
         try {
