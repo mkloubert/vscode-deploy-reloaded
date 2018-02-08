@@ -199,10 +199,6 @@ ${CSS}
     );
     
     html += await deploy_res_html.getStringContent("footer.html");
-
-    delete (<any>opts).css;
-    delete (<any>opts).documentId;
-    delete (<any>opts).documentTitle;
     
     return await openHtmlDocument(
         html,

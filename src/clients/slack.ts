@@ -15,7 +15,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Slack = require('@slack/client');
 import * as deploy_clients from '../clients';
 import * as deploy_download from '../download';
 import * as deploy_files from '../files';
@@ -25,6 +24,7 @@ import * as Enumerable from 'node-enumerable';
 import * as FS from 'fs';
 import * as Moment from 'moment';
 import * as Path from 'path';
+const Slack = require('@slack/client');
 import * as Stream from 'stream';
 
 

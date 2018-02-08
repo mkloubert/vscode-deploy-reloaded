@@ -27,6 +27,7 @@ import * as deploy_targets_operations_exec from './targets/operations/exec';
 import * as deploy_targets_operations_http from './targets/operations/http';
 import * as deploy_targets_operations_open from './targets/operations/open';
 import * as deploy_targets_operations_script from './targets/operations/script';
+import * as deploy_targets_operations_slack from './targets/operations/slack';
 import * as deploy_targets_operations_sql from './targets/operations/sql';
 import * as deploy_targets_operations_wait from './targets/operations/wait';
 import * as deploy_transformers from './transformers';
@@ -540,6 +541,10 @@ export async function executeTargetOperations(opts: ExecuteTargetOperationOption
 
             case 'script':
                 executor = deploy_targets_operations_script.execute;
+                break;
+
+            case 'slack':
+                executor = deploy_targets_operations_slack.execute;
                 break;
 
             case 'sql':
