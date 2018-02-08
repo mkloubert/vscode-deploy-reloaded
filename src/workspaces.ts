@@ -3023,20 +3023,31 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                                           deploy_packages.getPackageName(P));
             const DEFAULT_BTN_TOOLTIP = ME.t('packages.buttons.defaultTooltip');
             
-            if (!deploy_helpers.isNullOrUndefined(P.button)) {
+            if (!_.isNil(P.button)) {
                 if (deploy_helpers.isObject<deploy_packages.PackageButton>(P.button)) {
                     buttonDesc = P.button;
                 }
-                else {
-                    if (deploy_helpers.toBooleanSafe(P.button, true)) {
+                else if (_.isBoolean(P.button)) {
+                    if (true === P.button) {
                         buttonDesc = {
                             text: DEFAULT_BTN_TEXT,
                             tooltip: DEFAULT_BTN_TOOLTIP,
                         };
                     }
                 }
-            }
+                else {
+                    let btnText = deploy_helpers.toStringSafe(P.button);
+                    if (deploy_helpers.isEmptyString(btnText)) {
+                        btnText = DEFAULT_BTN_TEXT;
+                    }
 
+                    buttonDesc = {
+                        text: btnText,
+                        tooltip: DEFAULT_BTN_TOOLTIP,
+                    };
+                }
+            }
+            
             if (!buttonDesc) {
                 continue;
             }

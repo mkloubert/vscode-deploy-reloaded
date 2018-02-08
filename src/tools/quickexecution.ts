@@ -29,17 +29,30 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
     activeWorkspaces: any | any[],
 ) {
     // vscode
-    const $vs = require('vscode');
+    const $vs = require('vscode');    
 
     // i18
     const $i18 = require('../i18');
 
+    // lodash
+    const _ = require('lodash');
+
     // helpers
     const $dl = require('../download');
+    // FS-Extra
+    const $fs = require('fs-extra');
+    // glob
+    const $g = require('glob');
     // helpers
     const $h = require('../helpers');
+    // HTML
+    const $html = require('../html');
     // logger
     const $l = require('../log').CONSOLE;
+    // s. https://github.com/mkloubert/node-enumerable
+    const $linq = require('node-enumerable');
+    // Node.js path module
+    const $p = require('path');
 
     // all workspaces
     const $w: any[] = $h.asArray(allWorkspaces).map(ws => {
@@ -199,6 +212,61 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
             $vs.commands.executeCommand
                         .apply(null, [ <any>id ].concat( ARGS ))
         );
+    };
+
+    const $cleanup = async (dir: string) => {
+        dir = await $unwrap(dir);
+        if ($h.isEmptyString(dir)) {
+            throw new Error('No directory defined!');
+        }
+
+        dir = await $fp(dir);
+
+        for (const F of <string[]>(await $h.readDir(dir))) {
+            $fs.remove(
+                $p.resolve(
+                    $p.join(dir, F)
+                )
+            );
+        }
+    };
+
+    // list commands
+    const $commands = async (alsoInternalCommands?: boolean) => {
+        alsoInternalCommands = $h.toBooleanSafe(
+            await $unwrap(alsoInternalCommands)
+        );
+
+        const VSCODE_COMMANDS: string[] = (await $vs.commands.getCommands(
+            !alsoInternalCommands
+        )).filter(c => {
+            return !$h.isEmptyString(c);
+        });
+
+        const COMMAND_GROUPS = [
+            [ 'Commands', VSCODE_COMMANDS.filter(c => !c.startsWith('_')) ],
+            [ 'Internal commands', VSCODE_COMMANDS.filter(c => c.startsWith('_')) ],
+        ];
+
+        let md = '';
+        for (const GRP of COMMAND_GROUPS) {
+            const HEADER = <string>GRP[0];
+            const COMMANDS: string[] = $linq.from(GRP[1]).orderBy(c => {
+                return $h.normalizeString(c);
+            }).toArray();
+            if (COMMANDS.length < 1) {
+                continue;
+            }
+
+            md += `\n# ${HEADER}`;
+            for (let i = 0; i < COMMANDS.length; i++) {
+                md += "\n" + (i + 1) + ". `" + COMMANDS[i] + "`";
+            }
+            md += "\n";
+        }
+
+        await $html.openMarkdownDocument(md.trim(),
+                                         '[vscode-deploy-reloaded] Visual Studio Code commands');
     };
 
     // showErrorMessage
@@ -511,7 +579,26 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
     let resultToDisplay = RESULT;
 
     let displayer: () => any;
-    if ('undefined' !== typeof RESULT) {
+    if (!_.isUndefined(RESULT)) {
+        const HtmlEntities = require('html-entities');
+        const HTML_ENC = new HtmlEntities.AllHtmlEntities();
+
+        const GET_TYPE_OF = (val: any) => {
+            let type: string;
+            
+            if (!_.isNil(val)) {
+                if (!_.isNil(val.constructor)) {
+                    type = $h.toStringSafe(val.constructor['name']);
+                }
+            }
+
+            if ($h.isEmptyString(type)) {
+                type = typeof val;
+            }
+
+            return type;
+        };
+
         displayer = () => {
             $vs.window.showInformationMessage(
                 $h.toStringSafe( resultToDisplay )
@@ -522,7 +609,6 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
 
         if (Buffer.isBuffer(resultToDisplay)) {
             const Hexy = require('hexy');
-            const HtmlEntities = require('html-entities');
 
             let html = '';
 
@@ -534,7 +620,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
             html += '</head>';
             html += '<body>';
             html += '<pre>';
-            html += (new HtmlEntities.AllHtmlEntities()).encode( Hexy.hexy(resultToDisplay) );
+            html += HTML_ENC.encode( Hexy.hexy(resultToDisplay) );
             html += '</pre>';
             html += '</body>';
             html += '</html>';
@@ -543,6 +629,57 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
                 require('../html').openHtmlDocument(
                     html,
                     '[vscode-deploy-reloaded] ' + $i18.t('tools.quickExecution.result.title'),
+                );
+            };
+        }
+        else if (_.isArray(resultToDisplay) || (resultToDisplay[Symbol.iterator] === 'function')) {
+            const ITEMS: any[] = $linq.from(resultToDisplay).toArray();
+            
+            let md = '# ' + HTML_ENC.encode( GET_TYPE_OF(resultToDisplay) );
+
+            if (ITEMS.length > 0) {
+                md += "\n\n";
+                md += "| Index | Value | Type |\n";
+                md += "|------:| ----- |:----:|";
+
+                let index = -1;
+                for (const I of ITEMS) {
+                    ++index;
+
+                    let valueString;
+                    if (_.isNull(I)) {
+                        valueString = '*(null)*';
+                    }
+                    else if (_.isUndefined(I)) {
+                        valueString = '*(undefined)*';                        
+                    }
+                    else if (_.isBoolean(I)) {
+                        valueString = '*(' + (I ? 'true' : 'false') + ')*';                        
+                    }
+                    else if (_.isArray(I) || _.isPlainObject(I)) {
+                        valueString = '`' + JSON.stringify(I) + '`';
+                    }
+                    else {
+                        valueString = $h.toStringSafe(I);
+                        if ('' !== valueString) {
+                            valueString = "`" + valueString + "`";
+                        }
+                    }
+                    
+                    md += "\n| " + index +
+                          " | " + valueString
+                          + " | `" + HTML_ENC.encode(GET_TYPE_OF(I)) + "` |";
+                }    
+            }
+
+            md = md.trim();
+
+            displayer = () => {
+                require('../html').openMarkdownDocument(
+                    md,
+                    {
+                        documentTitle: '[vscode-deploy-reloaded] ' + $i18.t('tools.quickExecution.result.title'),
+                    },
                 );
             };
         }
@@ -594,6 +731,22 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "Executes a Visual Studio Code command.\n";
     help += "```javascript\n";
     help += "$c('editor.action.selectAll')\n";
+    help += "```\n";
+    help += "\n";
+    // $cleanup
+    help += "### $cleanup\n";
+    help += "Removes all items inside a directory, but not the directory itself.\n";
+    help += "```javascript\n";
+    help += "$cleanup('./path/to/a/folder/inside/active/workspace')\n";
+    help += "$cleanup('/full/path/to/a/folder')\n";
+    help += "```\n";
+    help += "\n";
+    // $commands
+    help += "### $commands\n";
+    help += "Opens a document with a sorted list of all available [Visual Studio Code commands](https://code.visualstudio.com/docs/extensionAPI/vscode-api#_commands).\n";
+    help += "```javascript\n";
+    help += "$commands()\n";
+    help += "$commands(true)  // also internal commands\n";
     help += "```\n";
     help += "\n";
     // $e
@@ -791,23 +944,66 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
 
 
     help += "## Modules\n";
+    // _
+    help += "### _\n";
+    help += "[lodash](https://lodash.com)\n";
+    help += "```javascript\n";
+    help += "_.partition([1, 2, 3, 4], n => n % 2).map(x => x.join(',')).join('; ')\n";
+    help += "```\n";
+    help += "\n";
     // $dl
     help += "### $dl\n";
-    help += "Download [helpers](https://mkloubert.github.io/vscode-deploy-reloaded/modules/_download_.html).\n";
+    help += "[Download helpers](https://mkloubert.github.io/vscode-deploy-reloaded/modules/_download_.html)\n";
     help += "```javascript\n";
     help += "$dl.download('http://localhost/')\n";
     help += "```\n";
     help += "\n";
+    // $fs
+    help += "### $fs\n";
+    help += "[fs-extra](https://github.com/jprichardson/node-fs-extra)\n";
+    help += "```javascript\n";
+    help += "$fs.existsSync($w[0].rootPath + '/test.txt')\n";
+    help += "```\n";
+    help += "\n";
+    // $g
+    help += "### $g\n";
+    help += "[node-glob](https://github.com/isaacs/node-glob)\n";
+    help += "```javascript\n";
+    help += "$g.sync('/*.txt', { cwd: $w[0].rootPath, root: $w[0].rootPath }).join('; ')\n";
+    help += "```\n";
+    help += "\n";
     // $h
     help += "### $h\n";
-    help += "Extension [helpers](https://mkloubert.github.io/vscode-deploy-reloaded/modules/_helpers_.html).\n";
+    help += "[Extension helpers](https://mkloubert.github.io/vscode-deploy-reloaded/modules/_helpers_.html)\n";
     help += "```javascript\n";
     help += "$h.normalizeString('Abcd Efgh  ')\n";
     help += "```\n";
     help += "\n";
+    // $html
+    help += "### $html\n";
+    help += "[HTML helpers](https://mkloubert.github.io/vscode-deploy-reloaded/modules/_html_.html)\n";
+    help += "```javascript\n";
+    help += "$html.openHtmlDocument('<html>Hello, HTML!</html>', 'My HTML document')\n";
+    help += "$html.openMarkdownDocument('# Hello ...\\n... Markdown!', 'My Markdown document')\n";
+    help += "```\n";
+    help += "\n";
+    // $linq
+    help += "### $linq\n";
+    help += "[node-enumerable](https://github.com/mkloubert/node-enumerable)\n";
+    help += "```javascript\n";
+    help += "$linq.from([1, 2, 3]).reverse().joinToString('; ')\n";
+    help += "```\n";
+    help += "\n";
+    // $p
+    help += "### $p\n";
+    help += "[Node.js path module](https://nodejs.org/api/path.html)\n";
+    help += "```javascript\n";
+    help += "$p.join('/path/to/something', '../')\n";
+    help += "```\n";
+    help += "\n";
     // $vs
     help += "### $vs\n";
-    help += "Visual Studio Code [namespace](https://code.visualstudio.com/docs/extensionAPI/vscode-api).\n";
+    help += "[Visual Studio Code API](https://code.visualstudio.com/docs/extensionAPI/vscode-api)\n";
     help += "```javascript\n";
     help += "$vs.window.showWarningMessage('Test')\n";
     help += "```\n";

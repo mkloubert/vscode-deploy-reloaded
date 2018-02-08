@@ -769,6 +769,9 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
             await listDirectory.apply(this, arguments);
         }
         else {
+            ME.logger
+              .trace(e, 'list.listDirectory(2)');
+
             ME.showErrorMessage(
                 ME.t('listDirectory.errors.failed',
                      deploy_helpers.toDisplayablePath(dir), TARGET_NAME)

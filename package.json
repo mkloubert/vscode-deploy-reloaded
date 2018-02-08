@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.39.1",
+ "version": "0.40.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.19.0"
@@ -489,6 +489,10 @@
             "description": "Indicates if a button should be created for that package in the status bar or not.",
             "type": "boolean",
             "default": false
+           },
+           {
+            "description": "The (display) text for the button.",
+            "type": "string"
            },
            {
             "description": "Defines a button for the status bar.",

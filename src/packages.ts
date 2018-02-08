@@ -55,7 +55,7 @@ export interface Package extends deploy_values.Applyable,
     /**
      * Deines a package button for the status bar.
      */
-    readonly button?: PackageButton | boolean;
+    readonly button?: PackageButton | boolean | string;
     /**
      * Settings for 'deploy on change' feature.
      */
