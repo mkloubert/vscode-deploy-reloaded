@@ -112,6 +112,15 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
                              .thenBy(f => deploy_helpers.normalizeString(f))
                              .joinToString("\n");
 
+    if (msg.length > 4000) {
+        msg = msg.substr(0, 4000);  // too big => cut
+    }
+
+    msg = msg.trim();
+    if ('' === msg) {
+        return;
+    }
+
     for (const C of CHANNELS) {
         const CLIENT = new Slack.WebClient(TOKEN);
 
