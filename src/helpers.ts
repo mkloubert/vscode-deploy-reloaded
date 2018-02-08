@@ -1323,8 +1323,7 @@ export function isBinaryContent(data: Buffer): Promise<boolean> {
  * @return {boolean} Is boolean or not. 
  */
 export function isBool(val: any): val is boolean {
-    return !isNullOrUndefined(val) &&
-           'boolean' === typeof val;
+    return _.isBoolean(val);
 }
 
 /**

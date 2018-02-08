@@ -33,6 +33,7 @@ import * as deploy_list from './list';
 import * as deploy_log from './log';
 import * as deploy_mappings from './mappings';
 import * as deploy_objects from './objects';
+import * as deploy_output from './output';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
 import * as deploy_pull from './pull';
@@ -282,8 +283,9 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      */
     protected _lastConfigUpdate: Moment.Moment;
     private readonly _LOGGER = new deploy_log.ActionLogger();
-    private _OLD_ENV_VARS: deploy_contracts.KeyValuePairs = {};
-    private _PACKAGE_BUTTONS: PackageWithButton[] = [];
+    private readonly _OLD_ENV_VARS: deploy_contracts.KeyValuePairs = {};
+    private readonly _OUTPUT_CHANNEL: deploy_output.OutputChannelWrapper;
+    private readonly _PACKAGE_BUTTONS: PackageWithButton[] = [];
     private _packages: deploy_packages.Package[];
     private _rootPath: string | false;
     private _selectedSwitches: deploy_contracts.KeyValuePairs;
@@ -311,6 +313,9 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 public readonly context: WorkspaceContext) {
         super();
 
+        this._OUTPUT_CHANNEL = new deploy_output.OutputChannelWrapper(
+            context.outputChannel
+        );
         this.state = new WorkspaceMemento(this,
                                           context.extension.workspaceState);
     }
@@ -1859,6 +1864,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         }
 
         ME.setupLogger();
+        ME.setupOutputChannel();
 
         ME._rootPath = false;
 
@@ -2497,6 +2503,9 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
     /** @inheritdoc */
     protected onDispose() {
+        // dispose output channel
+        this._OUTPUT_CHANNEL.dispose();
+
         // and last but not least:
         // dispose logger
         try {
@@ -2519,7 +2528,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Gets the output channel of that workspace.
      */
     public get output(): vscode.OutputChannel {
-        return this.context.outputChannel;
+        return this._OUTPUT_CHANNEL;
     }
 
     /**
@@ -3445,6 +3454,12 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             deploy_log.CONSOLE
                       .log(ctx.type, ctx.message, ctx.tag);
         });
+
+        //TODO: add actions from config
+    }
+
+    private setupOutputChannel() {
+        //TODO: add writers from config
     }
 
     /**

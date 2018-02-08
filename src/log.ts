@@ -447,8 +447,10 @@ NEW_CONSOLE_LOGGER.addAction((ctx) => {
     }
     time = deploy_helpers.asUTC(time);
 
-    if (ctx.type > LogType.Info) {
-        return;
+    if (LogType.Trace !== ctx.type) {
+        if (ctx.type > LogType.Info) {
+            return;
+        }    
     }
 
     let msg = `${LogType[logType].toUpperCase().trim()}`;
@@ -464,12 +466,21 @@ NEW_CONSOLE_LOGGER.addAction((ctx) => {
         msg += ' ' + TAG;
     }
 
+    let logMsg = deploy_helpers.toStringSafe(ctx.message);
+    if (LogType.Trace === ctx.type) {
+        const STACK = deploy_helpers.toStringSafe(
+            (new Error()).stack
+        ).split("\n").filter(l => {
+            return l.toLowerCase()
+                    .trim()
+                    .startsWith('at ');
+        }).join("\n");
+
+        logMsg += `\n\nStack:\n${STACK}`;
+    }
+
     msg += ` - [${time.format('DD/MMM/YYYY:HH:mm:ss')} +0000] "${
-        _.replace(
-            deploy_helpers.toStringSafe(ctx.message),
-            /"/ig,
-            '\\"'
-        )
+        _.replace(logMsg, /"/ig, '\\"')
     }"${OS.EOL}`;
     
     const LOG_FILE = Path.resolve(
