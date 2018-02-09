@@ -16,7 +16,7 @@
  */
 
 
-/**
+ /**
  * Quick execution of JavaScript code.
  * 
  * @param {any} extension The extension context.
@@ -189,6 +189,24 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         return Path.resolve(p);
     };
 
+    const $asc = async (str) => {
+        str = await $unwrap(str);
+        
+        if (_.isNil(str)) {
+            return str;
+        }
+
+        str = $h.toStringSafe(str);
+        
+        const CODES: number[] = [];
+        for (let i = 0; i < str.length; i++) {
+            CODES.push(str.charCodeAt(i));
+        }
+
+        return 1 === CODES.length ? CODES[0]
+                                  : CODES;
+    };
+
     // executeCommand()
     const $c = async (id: string, ...cmdArgs: any[]) => {
         id = $h.toStringSafe(
@@ -267,6 +285,30 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
 
         await $html.openMarkdownDocument(md.trim(),
                                          '[vscode-deploy-reloaded] Visual Studio Code commands');
+    };
+
+    const $emoji = async (key: string) => {
+        key = $h.toStringSafe(
+            await $unwrap(key)
+        );
+
+        return require('node-emoji').get(key);
+    };
+
+    const $emoji_list = () => {
+        return $linq.from( require('node-emoji').search('') ).orderBy(e => {
+            return $h.normalizeString(e.key);
+        }).select(e => {
+            return `'${e.key}': ${e.emoji}`;
+        }).toArray();
+    };
+
+    const $emoji_name = async (e: string) => {
+        e = $h.toStringSafe(
+            await $unwrap(e)
+        );
+
+        return require('node-emoji').which(e);
     };
 
     // showErrorMessage
@@ -726,6 +768,14 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
 
 
     help += "## Functions\n";
+    // $asc
+    help += "### $asc\n";
+    help += "Returns the character codes of a string.\n";
+    help += "```javascript\n";
+    help += "$asc('a')  // 97\n";
+    help += "$asc('ab')  // [ 97, 98 ]\n";
+    help += "```\n";
+    help += "\n";
     // $c
     help += "### $c\n";
     help += "Executes a Visual Studio Code command.\n";
@@ -754,6 +804,27 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "Executes code.\n";
     help += "```javascript\n";
     help += "$e(\"require('vscode').window.showWarningMessage('Test')\")\n";
+    help += "```\n";
+    help += "\n";
+    // $emoji
+    help += "### $emoji\n";
+    help += "Returns the emoji by a key (s. [node-emoji](https://github.com/omnidan/node-emoji)).\n";
+    help += "```javascript\n";
+    help += "$emoji('coffee')  // ☕️\n";
+    help += "```\n";
+    help += "\n";
+    // $emoji_list
+    help += "### $emoji_list\n";
+    help += "Opens a new tab with a list of all known emojis.\n";
+    help += "```javascript\n";
+    help += "$emoji_list\n";
+    help += "```\n";
+    help += "\n";
+    // $emoji_name
+    help += "### $emoji_name\n";
+    help += "Returns the name of an emoji.\n";
+    help += "```javascript\n";
+    help += "$emoji_name('☕️')  // coffee\n";
     help += "```\n";
     help += "\n";
     // $err

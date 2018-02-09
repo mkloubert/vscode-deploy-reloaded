@@ -2095,8 +2095,16 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             return true;  // not from settings folder
         }
 
-        if (this.isInGitFolder(file)) {
-            return true;  // not from Git folder
+        if (deploy_helpers.toBooleanSafe(this.config.ignoreGitFolder, true)) {
+            if (this.isInGitFolder(file)) {
+                return true;  // not from Git folder
+            }
+        }
+
+        if (deploy_helpers.toBooleanSafe(this.config.ignoreSvnFolder, true)) {
+            if (this.isInSvnFolder(file)) {
+                return true;  // not from SVN folder
+            }
         }
 
         const RELATIVE_PATH = this.toRelativePath(file);
@@ -2172,6 +2180,30 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         path = Path.resolve(path);
 
         return path.startsWith(SETTINGS_DIR);
+    }
+
+    /**
+     * Checks if a path is inside the Git folder.
+     * 
+     * @param {string} path The path to check.
+     * 
+     * @return {boolean} Is in Git folder or not.
+     */
+    public isInSvnFolder(path: string) {
+        const SVN_DIR = Path.resolve(
+            Path.join(
+                this.rootPath,
+                '.svn'
+            )
+        );
+
+        path = deploy_helpers.toStringSafe(path);
+        if (!Path.isAbsolute(path)) {
+            return true;
+        }
+        path = Path.resolve(path);
+
+        return path.startsWith(SVN_DIR);
     }
 
     /**

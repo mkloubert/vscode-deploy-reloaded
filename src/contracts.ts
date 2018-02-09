@@ -188,6 +188,14 @@ export interface Configuration extends deploy_packages.WithFastFileCheckSettings
      */
     readonly ignore?: string | string[];
     /**
+     * Ignore '.git' folder by default or not.
+     */
+    readonly ignoreGitFolder?: boolean;
+    /**
+     * Ignore '.svn' folder by default or not.
+     */
+    readonly ignoreSvnFolder?: boolean;
+    /**
      * A list of imports.
      */
     readonly imports?: ImportType | ImportType[];
