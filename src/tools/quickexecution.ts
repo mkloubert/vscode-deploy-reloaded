@@ -51,8 +51,12 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
     const $l = require('../log').CONSOLE;
     // s. https://github.com/mkloubert/node-enumerable
     const $linq = require('node-enumerable');
+    // s. https://momentjs.com/
+    const $m = require('moment');
     // Node.js path module
     const $p = require('path');
+    // s. https://momentjs.com/timezone/
+    const $tz = require('moment-timezone');
 
     // all workspaces
     const $w: any[] = $h.asArray(allWorkspaces).map(ws => {
@@ -143,7 +147,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
 
         let lastResult: any = val;
 
-        for (const F of $h.asArray(funcs)) {
+        for (const F of funcs) {
             let result: any;
             if (F) {
                 result = await Promise.resolve(
@@ -152,6 +156,22 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
             }
 
             lastResult = await $unwrap(result);
+        }
+        
+        return lastResult;
+    };
+    const $exec = async function(...funcs: ((v: any) => any)[]) {
+        let lastResult: any;
+
+        for (const F of funcs) {
+            let result: any;
+            if (F) {
+                result = await Promise.resolve(
+                    F(lastResult)
+                );
+            }
+
+            lastResult = result;
         }
         
         return lastResult;
@@ -325,7 +345,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         return await $vs.window
                         .showErrorMessage
                         .apply(null, [ msg ].concat(moreParams));
-    };
+    };    
 
     const $guid = async (ver?: string, ...guidArgs: any[]) => {
         const UUID = require('uuid');
@@ -458,13 +478,56 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
                            val, asBinary);
     };
 
-    const $now = async (timeZone?: string) => {
-        const Moment = require('moment');
-        const MomentTimezone = require('moment-timezone');  // keep sure to have
-                                                            // 'tz()' method available in
-                                                            // Moment instances
+    const $new_script = async () => {
+        const EXAMPLE_CODE = `
+// _     => https://lodash.com
+// $fs   => https://github.com/jprichardson/node-fs-extra
+// $g    => https://github.com/isaacs/node-glob
+// $h    => https://mkloubert.github.io/vscode-deploy-reloaded/modules/_helpers_.html
+// $l    => https://mkloubert.github.io/vscode-deploy-reloaded/interfaces/_log_.logger.html
+// $linq => https://github.com/mkloubert/node-enumerable
+// $m    => https://momentjs.com
+// $vs   => https://code.visualstudio.com/docs/extensionAPI/vscode-api
 
-        const NOW = Moment();
+
+// replace this with your code
+// or execute it to show a help page
+// 
+// you can return the result
+// of your script directly
+// or as Promise, if your code runs async
+// BUT WITHOUT 'return' STATEMENT!
+$exec(() => {
+    // Action_1 (sync)
+
+    return 5979;
+}, (result_from_Action_1) => {
+    // Action_2 (async)
+
+    return new Promise((resolve, reject) => {
+        resolve(result_from_Action_1 + 23979);
+    });
+}, (result_from_Action_2) => {
+    // Action3 (sync)
+    
+    $vs.window.showInformationMessage('result_from_Action_2: ' + result_from_Action_2);
+
+    $help();  // shows all available
+              // constants, functions and modules
+});
+
+
+// execute this script with '$run' ...
+`;
+
+        await $h.openAndShowTextDocument({
+            content: EXAMPLE_CODE,
+            language: 'javascript',
+        });
+    };
+
+    const $now = async (timeZone?: string) => {
+        const NOW = $m();
         
         timeZone = $h.toStringSafe(
             await $unwrap(timeZone)
@@ -526,6 +589,25 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         );
     };
 
+    const $run = function() {
+        let activeDocument;
+        
+        const ACTIVE_EDITOR = $vs.window.activeTextEditor;
+        if (ACTIVE_EDITOR) {
+            activeDocument = ACTIVE_EDITOR.document;
+        }
+
+        if (!activeDocument) {
+            throw new Error(
+                $i18.t('editors.active.noOpen')
+            );
+        }
+
+        return $e(
+            activeDocument.getText()
+        );
+    };
+
     const $sha1 = async (val: any, asBinary?: boolean) => {
         return await $hash('sha1',
                            val, asBinary);
@@ -536,10 +618,20 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
                            val, asBinary);
     };
 
+    const $ltrim = async (val: any) => {
+        return $h.toStringSafe(
+            await $unwrap(val)   
+        ).replace(/^\s+/, '');
+    };
     const $trim = async (val: any) => {
         return $h.toStringSafe(
             await $unwrap(val)   
         ).trim();
+    };
+    const $rtrim = async (val: any) => {
+        return $h.toStringSafe(
+            await $unwrap(val)   
+        ).replace(/\s+$/, '');
     };
 
     const $upper = async (val: any) => {
@@ -549,7 +641,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
     };
 
     const $utc = async () => {
-        return require('moment').utc();
+        return $m.utc();
     };
 
     const $uuid = async function (ver?: string, ...args: any[]) {
@@ -674,44 +766,42 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
                 );
             };
         }
-        else if (_.isArray(resultToDisplay) || (resultToDisplay[Symbol.iterator] === 'function')) {
+        else if (_.isArray(resultToDisplay) || (resultToDisplay[Symbol.iterator] === 'function') || $linq.isEnumerable(resultToDisplay)) {
             const ITEMS: any[] = $linq.from(resultToDisplay).toArray();
             
             let md = '# ' + HTML_ENC.encode( GET_TYPE_OF(resultToDisplay) );
 
-            if (ITEMS.length > 0) {
-                md += "\n\n";
-                md += "| Index | Value | Type |\n";
-                md += "|------:| ----- |:----:|";
+            md += "\n\n";
+            md += "| Index | Value | Type |\n";
+            md += "|------:| ----- |:----:|";
 
-                let index = -1;
-                for (const I of ITEMS) {
-                    ++index;
+            let index = -1;
+            for (const I of ITEMS) {
+                ++index;
 
-                    let valueString;
-                    if (_.isNull(I)) {
-                        valueString = '*(null)*';
+                let valueString;
+                if (_.isNull(I)) {
+                    valueString = '*(null)*';
+                }
+                else if (_.isUndefined(I)) {
+                    valueString = '*(undefined)*';                        
+                }
+                else if (_.isBoolean(I)) {
+                    valueString = '*(' + (I ? 'true' : 'false') + ')*';                        
+                }
+                else if (_.isArray(I) || _.isPlainObject(I)) {
+                    valueString = '`' + JSON.stringify(I) + '`';
+                }
+                else {
+                    valueString = $h.toStringSafe(I);
+                    if ('' !== valueString) {
+                        valueString = "`" + valueString + "`";
                     }
-                    else if (_.isUndefined(I)) {
-                        valueString = '*(undefined)*';                        
-                    }
-                    else if (_.isBoolean(I)) {
-                        valueString = '*(' + (I ? 'true' : 'false') + ')*';                        
-                    }
-                    else if (_.isArray(I) || _.isPlainObject(I)) {
-                        valueString = '`' + JSON.stringify(I) + '`';
-                    }
-                    else {
-                        valueString = $h.toStringSafe(I);
-                        if ('' !== valueString) {
-                            valueString = "`" + valueString + "`";
-                        }
-                    }
-                    
-                    md += "\n| " + index +
-                          " | " + valueString
-                          + " | `" + HTML_ENC.encode(GET_TYPE_OF(I)) + "` |";
-                }    
+                }
+                
+                md += "\n| " + index +
+                        " | " + valueString
+                        + " | `" + HTML_ENC.encode(GET_TYPE_OF(I)) + "` |";
             }
 
             md = md.trim();
@@ -834,6 +924,13 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "$err('Test')\n";
     help += "```\n";
     help += "\n";
+    // $exec
+    help += "### $exec\n";
+    help += "Executes a chain of functions.\n";
+    help += "```javascript\n";
+    help += "$exec(() => 1, (res1) => $trim(res1 + 2), (res2) => res2 + '4')  // '34'\n";
+    help += "```\n";
+    help += "\n";  
     // $fp
     help += "### $fp\n";
     help += "Keeps sure to return a full path.\n";
@@ -843,18 +940,11 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "```\n";
     help += "\n";
     // $guid
-    help += "### $s\n";
+    help += "### $guid\n";
     help += "Generates a GUID.\n";
     help += "```javascript\n";
     help += "$guid\n";
     help += "$guid('v4')\n";
-    help += "```\n";
-    help += "\n";
-    // $help
-    help += "### $help\n";
-    help += "Shows this help.\n";
-    help += "```javascript\n";
-    help += "$help\n";
     help += "```\n";
     help += "\n";
     // $hash
@@ -863,6 +953,13 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "```javascript\n";
     help += "$hash('md5', 'abc')\n";
     help += "$hash('md5', 'abc', true)\n";
+    help += "```\n";
+    help += "\n";
+    // $help
+    help += "### $help\n";
+    help += "Shows this help.\n";
+    help += "```javascript\n";
+    help += "$help\n";
     help += "```\n";
     help += "\n";
     // $info
@@ -881,6 +978,13 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "$ip(false, 2000)  // IPv4 and 2000ms timeout\n";
     help += "```\n";
     help += "\n";
+    // $ltrim
+    help += "### $ltrim\n";
+    help += "Handles a value as string and removes whitespaces from the beginning.\n";
+    help += "```javascript\n";
+    help += "$ltrim('  \"abc e\" ')\n";
+    help += "```\n";
+    help += "\n";        
     // $lower
     help += "### $lower\n";
     help += "Handles a value as string and converts all characters to lower case.\n";
@@ -896,8 +1000,15 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "$md5('abc', true)\n";
     help += "```\n";
     help += "\n";
+    // $new_script
+    help += "### $new_script\n";
+    help += "Opens a new blank text editor with example script code, which can be executed by `$run`.\n";
+    help += "```javascript\n";
+    help += "$new_script\n";
+    help += "```\n";
+    help += "\n";
     // $now
-    help += "### $utc\n";
+    help += "### $now\n";
     help += "Returns the current time.\n";
     help += "```javascript\n";
     help += "$now\n";
@@ -944,6 +1055,21 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "$rf('./myFile.txt')\n";
     help += "```\n";
     help += "\n";
+    // $rtrim
+    help += "### $rtrim\n";
+    help += "Handles a value as string and removes whitespaces from the end.\n";
+    help += "```javascript\n";
+    help += "$rtrim('  \"abc ef\"   ')\n";
+    help += "```\n";
+    help += "\n";    
+    // $run
+    help += "### $run\n";
+    help += "Runs the (JavaScript) code, that is stored in currently opened text editor in the context of that extension.\n";
+    help += "```javascript\n";
+    help += "$run\n";
+    help += "$run('MK', 23979, 'TM', 5979)\n";
+    help += "```\n";
+    help += "\n";  
     // $s
     help += "### $s\n";
     help += "Converts a value / object to a string that is not `(null)` and not `(undefined)`.\n";
@@ -971,7 +1097,7 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "### $trim\n";
     help += "Handles a value as string and removes whitespaces from the beginning and the end.\n";
     help += "```javascript\n";
-    help += "$trim\n";
+    help += "$trim(' \"abc\"  ')\n";
     help += "```\n";
     help += "\n";
     // $upper
@@ -1065,11 +1191,25 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "$linq.from([1, 2, 3]).reverse().joinToString('; ')\n";
     help += "```\n";
     help += "\n";
+    // $m
+    help += "### $m\n";
+    help += "[Moment.js](https://mkloubert.github.io/vscode-deploy-reloaded/modules/_helpers_.html)\n";
+    help += "```javascript\n";
+    help += "$m.utc()\n";
+    help += "```\n";
+    help += "\n";
     // $p
     help += "### $p\n";
     help += "[Node.js path module](https://nodejs.org/api/path.html)\n";
     help += "```javascript\n";
     help += "$p.join('/path/to/something', '../')\n";
+    help += "```\n";
+    help += "\n";
+    // $tz
+    help += "### $tz\n";
+    help += "[Moment Timezone](https://momentjs.com/timezone)\n";
+    help += "```javascript\n";
+    help += "$m().tz('America/Los_Angeles').format('ha z')\n";
     help += "```\n";
     help += "\n";
     // $vs

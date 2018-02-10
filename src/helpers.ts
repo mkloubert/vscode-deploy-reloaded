@@ -1723,6 +1723,20 @@ export function open(target: string, opts?: OpenOptions): Promise<ChildProcess.C
 }
 
 /**
+ * Opens and shows a text document.
+ * 
+ * @param {string|object} [filenameOrOptions] Optional filename or options.
+ * 
+ * @return {Promise<vscode.TextEditor>} The promise with the new text editor.
+ */
+export async function openAndShowTextDocument(filenameOrOptions?: string | { language?: string; content?: string; }) {
+    return await vscode.window.showTextDocument(
+        await vscode.workspace.openTextDocument
+                              .apply(null, arguments)
+    );
+}
+
+/**
  * Promise version of 'crypto.randomBytes()' function.
  * 
  * @param {number} size The size of the result.
