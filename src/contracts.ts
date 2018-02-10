@@ -192,6 +192,10 @@ export interface Configuration extends deploy_packages.WithFastFileCheckSettings
      */
     readonly ignoreGitFolder?: boolean;
     /**
+     * Ignore settings folder by default or not.
+     */
+    readonly ignoreSettingsFolder?: boolean;
+    /**
      * Ignore '.svn' folder by default or not.
      */
     readonly ignoreSvnFolder?: boolean;

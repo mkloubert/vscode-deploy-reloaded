@@ -2091,8 +2091,10 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             return true;  // no (valid) file path
         }
 
-        if (this.isInSettingsFolder(file)) {
-            return true;  // not from settings folder
+        if (deploy_helpers.toBooleanSafe(this.config.ignoreSettingsFolder, true)) {
+            if (this.isInSettingsFolder(file)) {
+                return true;  // not from settings folder
+            }
         }
 
         if (deploy_helpers.toBooleanSafe(this.config.ignoreGitFolder, true)) {
