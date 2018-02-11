@@ -41,7 +41,6 @@ const DEFAULT_PORT = 23979;
 const LAST_PORT_KEY = "vscdrLastReceiveFileHostPort";
 const LAST_REMOTE_ADDR_KEY = "vscdrLastSendFileRemoteAddress";
 let server: Net.Server;
-const SERVER_BTN_COMMAND = "";
 let serverButton: vscode.StatusBarItem;
 
 /**
@@ -113,7 +112,7 @@ export async function receiveFile(context: vscode.ExtensionContext) {
         context.globalState.update(LAST_PORT_KEY, port).then(() => {
         }, (err) => {
             deploy_log.CONSOLE
-                      .trace(err, "tools.sendfile.receiveFile('updateLastPort')")
+                      .trace(err, "tools.sendfile.receiveFile('updateLastPort')");
         });
 
         serverButton = vscode.window.createStatusBarItem();
@@ -123,7 +122,7 @@ export async function receiveFile(context: vscode.ExtensionContext) {
         serverButton.tooltip = i18.t('tools.sendOrReceiveFile.receive.button.tooltip');
         serverButton.show();
 
-        const NEW_SERVER = server = await SimpleSocket.listen(port, (err, remoteConnection) => {
+        server = await SimpleSocket.listen(port, (err, remoteConnection) => {
             if (err) {
                 closeServer();
 

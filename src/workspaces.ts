@@ -31,7 +31,6 @@ import * as deploy_gui from './gui';
 import * as deploy_helpers from './helpers';
 import * as deploy_list from './list';
 import * as deploy_log from './log';
-import * as deploy_mappings from './mappings';
 import * as deploy_objects from './objects';
 import * as deploy_output from './output';
 import * as deploy_packages from './packages';
@@ -50,7 +49,6 @@ import * as i18 from './i18';
 import * as i18next from 'i18next';
 const MergeDeep = require('merge-deep');
 import * as Moment from 'moment';
-import * as OS from 'os';
 import * as Path from 'path';
 import * as vscode from 'vscode';
 
@@ -572,7 +570,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 if (deploy_helpers.toBooleanSafe(settings.isMustHave)) {
                     // must match
     
-                    const SELECTED_ITEM = await this.showErrorMessage<deploy_contracts.MessageItemWithValue>(
+                    await this.showErrorMessage<deploy_contracts.MessageItemWithValue>(
                         i18.t('requirements.conditions.mustMatch',
                               NAME),
                         {
@@ -1393,8 +1391,6 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     public getSelectedSwitchOption(target: SwitchTarget): SwitchTargetOption | false {
         const ME = this;
 
-        const MY_ID = deploy_helpers.toStringSafe(ME.id);
-
         if (ME.canBeHandledByMe(target)) {
             const ALL_OPTIONS = ME.getAllSwitchOptions(target);
             if (ALL_OPTIONS.length > 0) {
@@ -1875,8 +1871,6 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 section: string;
             }
 
-            const ALTERNATIVE_FILENAME = './.vscode/deploy.json';
-            const ALTERNATIVE_SECTION_NAME = 'deploy';
             const DEFAULT_DIR = this.folder.uri.fsPath;
             const DEFAULT_FILENAME = './.vscode/settings.json';
             const DEFAULT_FILE = Path.join(

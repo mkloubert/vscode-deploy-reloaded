@@ -1,3 +1,5 @@
+/* tslint:disable */
+
 /**
  * This file is part of the vscode-deploy-reloaded distribution.
  * Copyright (c) Marcel Joachim Kloubert.

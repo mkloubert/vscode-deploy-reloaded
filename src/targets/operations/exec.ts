@@ -19,7 +19,6 @@ import * as deploy_helpers from '../../helpers';
 import * as deploy_log from '../../log';
 import * as deploy_targets from '../../targets';
 import * as Path from 'path';
-import * as vscode from 'vscode';
 
 
 /**

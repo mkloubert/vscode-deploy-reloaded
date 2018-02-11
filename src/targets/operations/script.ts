@@ -18,7 +18,6 @@
 import * as deploy_contracts from '../../contracts';
 import * as deploy_events from '../../events';
 import * as deploy_helpers from '../../helpers';
-import * as deploy_log from '../../log';
 import * as deploy_session from '../../session';
 import * as deploy_targets from '../../targets';
 import * as i18 from '../../i18';
@@ -96,7 +95,7 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
                               scriptFile));
     }
 
-    const SCRIPT_MODULE = await deploy_helpers.loadModule<ScriptTargetOperationModule>(scriptFullPath);
+    const SCRIPT_MODULE = deploy_helpers.loadModule<ScriptTargetOperationModule>(scriptFullPath);
     if (SCRIPT_MODULE) {
         const EXECUTE = SCRIPT_MODULE.execute;
         if (EXECUTE) {

@@ -19,14 +19,10 @@ import * as deploy_contracts from '../../contracts';
 import * as deploy_events from '../../events';
 import * as deploy_helpers from '../../helpers';
 import * as deploy_http from '../../http';
-import * as deploy_log from '../../log';
 import * as deploy_session from '../../session';
 import * as deploy_targets from '../../targets';
 import * as i18 from '../../i18';
-import * as OS from 'os';
-import * as Path from 'path';
 import * as Url from 'url';
-import * as vscode from 'vscode';
 
 
 /**
@@ -197,7 +193,7 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
                                   bodyScript));
         }
 
-        const BODY_MODULE = await deploy_helpers.loadModule<HttpBodyModule>(bodyScriptFullPath);
+        const BODY_MODULE = deploy_helpers.loadModule<HttpBodyModule>(bodyScriptFullPath);
         if (BODY_MODULE) {
             const GET_BODY = BODY_MODULE.getBody;
             if (GET_BODY) {

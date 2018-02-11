@@ -36,7 +36,6 @@ import * as deploy_values from './values';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
 import * as i18 from './i18';
-import * as Minimatch from 'minimatch';
 import * as Moment from 'moment';
 import * as Path from 'path';
 import * as SanitizeFilename from 'sanitize-filename';
@@ -1036,7 +1035,7 @@ export async function mapFilesForTarget<TFile extends deploy_contracts.WithNameA
             continue;
         }
 
-        const NEW_MAPPING = await getNameAndPathForFileDeployment(
+        const NEW_MAPPING = getNameAndPathForFileDeployment(
             target, FULL_PATH,
             MAPPING_SCOPE_DIRS
         );
