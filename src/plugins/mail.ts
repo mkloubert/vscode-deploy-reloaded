@@ -21,7 +21,6 @@ import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
 import * as Enumerable from 'node-enumerable';
 import * as Mailer from 'nodemailer';
-import { Constants } from 'azure-storage';
 const Zip = require('node-zip');
 
 

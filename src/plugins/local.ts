@@ -15,7 +15,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as deploy_contracts from '../contracts';
 import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
 import * as deploy_plugins from '../plugins';
@@ -158,7 +157,6 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
         const ME = this;
 
         const DIR = ME.normalizeDir(context.target, context);
-        const WORKSPACE = context.workspace;
 
         let targetDir = Path.join(
             DIR,
@@ -263,7 +261,7 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
 
                 RESULT.others.push(FSI);
             }
-        };
+        }
 
         return RESULT;
     }
@@ -274,7 +272,7 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
             target.dir
         );
         if (deploy_helpers.isEmptyString(dir)) {
-            dir = './out'
+            dir = './out';
         }
 
         if (!Path.isAbsolute(dir)) {

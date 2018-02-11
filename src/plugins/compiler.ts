@@ -15,7 +15,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as deploy_contracts from '../contracts';
 import * as deploy_compilers from '../compilers';
 import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
@@ -296,7 +295,7 @@ class CompilerPlugin extends deploy_plugins.PluginBase<CompilerTarget> {
 
                 RESULT.others.push(FSI);
             }
-        };
+        }
 
         return RESULT;
     }

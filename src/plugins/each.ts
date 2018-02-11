@@ -15,14 +15,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as deploy_contracts from '../contracts';
 import * as deploy_download from '../download';
 import * as deploy_helpers from '../helpers';
 import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
 import * as Enumerable from 'node-enumerable';
-import * as OS from 'os';
-import * as Path from 'path';
 
 
 /**
@@ -69,7 +66,7 @@ class EachPlugin extends deploy_plugins.IterablePluginBase<EachTarget> {
         from = deploy_helpers.asArray(from, false);
 
         const TO = Enumerable.from(deploy_helpers.asArray(eachTarget.to)).select(t => {
-            return deploy_helpers.toStringSafe(t).trim()
+            return deploy_helpers.toStringSafe(t).trim();
         }).where(t => '' !== t)
           .toArray();
         const USE_PLACE_HOLDERS = deploy_helpers.toBooleanSafe(eachTarget.usePlaceholders, true);

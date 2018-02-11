@@ -337,7 +337,7 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
 
     private getFiles(target: AppTarget,
                      files: deploy_contracts.WithNameAndPath | deploy_contracts.WithNameAndPath[]) {
-        files = deploy_helpers.asArray(files)
+        files = deploy_helpers.asArray(files);
 
         const CWD = this.getCwd(target);
         const USE_RELATIVE_PATHS = deploy_helpers.toBooleanSafe(target.useRelativePaths);
@@ -631,7 +631,7 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
 
                         argsScriptFile = Path.resolve(argsScriptFile);
 
-                        const SCRIPT_MODULE = await deploy_helpers.loadModule<AppArgumentsScriptModule>(argsScriptFile);
+                        const SCRIPT_MODULE = deploy_helpers.loadModule<AppArgumentsScriptModule>(argsScriptFile);
                         if (SCRIPT_MODULE) {
                             const GET_ARGUMENTS = SCRIPT_MODULE.getArguments;
                             if (GET_ARGUMENTS) {
@@ -809,7 +809,7 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
 
                         inputScriptFile = Path.resolve(inputScriptFile);
 
-                        const SCRIPT_MODULE = await deploy_helpers.loadModule<AppInputScriptModule>(inputScriptFile);
+                        const SCRIPT_MODULE = deploy_helpers.loadModule<AppInputScriptModule>(inputScriptFile);
                         if (SCRIPT_MODULE) {
                             let inputValue: string;
 

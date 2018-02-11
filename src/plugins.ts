@@ -20,16 +20,13 @@ import * as deploy_contracts from './contracts';
 import * as deploy_events from './events';
 import * as deploy_files from './files';
 import * as deploy_helpers from './helpers';
-import * as deploy_log from './log';
 import * as deploy_objects from './objects';
 import * as deploy_session from './session';
 import * as deploy_targets from './targets';
 import * as deploy_transformers from './transformers';
 import * as deploy_values from './values';
 import * as deploy_workspaces from './workspaces';
-import * as Events from 'events';
 import * as i18 from './i18';
-import * as Path from 'path';
 import * as Stream from 'stream';
 import * as vscode from 'vscode';
 

@@ -16,8 +16,6 @@
  */
 
 import * as deploy_clients_azureblob from '../clients/azureblob';
-import * as deploy_files from '../files';
-import * as deploy_log from '../log';
 import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
 
@@ -68,7 +66,7 @@ class AzureBlobPlugin extends deploy_plugins.AsyncFileClientPluginBase<AzureBlob
         const DIR = this.replaceWithValues(target, target.dir);
 
         return {
-            client: await deploy_clients_azureblob.createClient({
+            client: deploy_clients_azureblob.createClient({
                 accessKey: this.replaceWithValues(target, target.accessKey),
                 account: this.replaceWithValues(target, target.account),
                 container: this.replaceWithValues(target, target.container),

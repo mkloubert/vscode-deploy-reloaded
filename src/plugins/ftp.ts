@@ -16,9 +16,7 @@
  */
 
 import * as deploy_clients_ftp from '../clients/ftp';
-import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
-import * as deploy_log from '../log';
 import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
 
