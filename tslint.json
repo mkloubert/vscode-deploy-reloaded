@@ -1,0 +1,17 @@
+{
+    "rules": {
+        "await-promise": true,
+        "curly": true,
+        "indent": [
+            true,
+            "spaces"
+        ],
+        "no-var-keyword": true,
+        "no-unused-variable": true,
+        "semicolon": [
+            true,
+            "always"
+        ]
+    },
+    "defaultSeverity": "warning"
+}

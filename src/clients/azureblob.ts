@@ -20,7 +20,6 @@ import * as Crypto from 'crypto';
 import * as deploy_clients from '../clients';
 import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
-import * as Enumerable from 'node-enumerable';
 import * as FS from 'fs';
 import * as MimeTypes from 'mime-types';
 import * as Path from 'path';

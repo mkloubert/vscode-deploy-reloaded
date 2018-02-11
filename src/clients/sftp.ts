@@ -148,8 +148,6 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
 
     /** @inheritdoc */
     public async deleteFile(path: string): Promise<boolean> {
-        const ME = this;
-
         path = toSFTPPath(path);
 
         try {
@@ -174,7 +172,7 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
             try {
                 const STREAM = await ME.client.get(path);
 
-                STREAM.once('error', (err) => {;
+                STREAM.once('error', (err) => {
                     COMPLETED(err);
                 });
         
@@ -297,7 +295,6 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
                 const REMOTE_DIR = toSFTPPath(
                     Path.dirname(path)
                 );
-                const FILE = Path.basename(path);
 
                 path = toSFTPPath(path);
 

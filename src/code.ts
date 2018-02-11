@@ -49,11 +49,15 @@ export function exec<TResult = any, TContext = any>(context: CodeExecutionContex
         return;
     }
 
+    // tslint:disable-next-line:no-unused-variable
     const $ctx = context.context;
+    // tslint:disable-next-line:no-unused-variable
     const $h = require('./helpers');
+    // tslint:disable-next-line:no-unused-variable
     const $r = (id) => {
         return $h.requireFromExtension(id);
     };
+    // tslint:disable-next-line:no-unused-variable
     const $v = deploy_values.toValueStorage(context.values);
 
     const $e = (code: any) => {

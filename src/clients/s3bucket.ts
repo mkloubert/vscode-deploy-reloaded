@@ -89,9 +89,9 @@ export type S3DirectoryScopeProvider = () => string | string[] | PromiseLike<str
 export type S3ValueProvider = () => deploy_values.Value | deploy_values.Value[] | PromiseLike<deploy_values.Value | deploy_values.Value[]>;
 
 interface SharedIniFileCredentialsOptions {
-    profile?: string
-    filename?: string
-    disableAssumeRole?: boolean
+    profile?: string;
+    filename?: string;
+    disableAssumeRole?: boolean;
 }
 
 

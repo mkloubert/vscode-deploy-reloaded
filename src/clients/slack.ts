@@ -16,7 +16,6 @@
  */
 
 import * as deploy_clients from '../clients';
-import * as deploy_download from '../download';
 import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
 import * as deploy_http from '../http';
@@ -25,7 +24,6 @@ import * as FS from 'fs';
 import * as Moment from 'moment';
 import * as Path from 'path';
 const Slack = require('@slack/client');
-import * as Stream from 'stream';
 
 
 /**
@@ -160,7 +158,7 @@ export class SlackClient extends deploy_clients.AsyncFileListBase {
                 const FILE_TO_DOWNLOAD = ALL_MATCHING_FILES[0];
 
                 COMPLETED(null,
-                          await FILE_TO_DOWNLOAD.download());
+                          await Promise.resolve( FILE_TO_DOWNLOAD.download() ));
             }
             catch (e) {
                 COMPLETED(e);

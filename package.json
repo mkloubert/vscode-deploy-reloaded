@@ -70479,7 +70479,8 @@
   "compile": "tsc -p ./",
   "watch": "tsc -watch -p ./",
   "postinstall": "node ./node_modules/vscode/bin/install",
-  "test": "npm run compile && node ./node_modules/vscode/bin/test"
+  "test": "npm run compile && node ./node_modules/vscode/bin/test",
+  "tslint": "tslint --project tsconfig.json -t verbose"
  },
  "devDependencies": {
   "@types/copy-paste": "^1.1.30",
@@ -70509,6 +70510,7 @@
   "@types/ssh2-sftp-client": "^2.0.0",
   "@types/tmp": "0.0.33",
   "@types/uuid": "^3.4.3",
+  "tslint": "^5.9.1",
   "typescript": "^2.6.2",
   "vscode": "^1.1.10"
  },
