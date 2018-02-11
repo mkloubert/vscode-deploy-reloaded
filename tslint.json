@@ -1,6 +1,6 @@
 {
     "rules": {
-        "await-promise": [true, "Thenable"],
+        "await-promise": [true, "Thenable", "PromiseLike"],
         "curly": true,
         "indent": [
             true,

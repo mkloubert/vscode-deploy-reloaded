@@ -282,7 +282,7 @@ async function findExecutable(exe: string, args: string[]): Promise<Executable> 
         return { 
             cmd: await runDownPath(exe),
             args: args 
-        }
+        };
     }
 
     if (!(await deploy_helpers.exists(exe))) {

@@ -1911,7 +1911,7 @@ export function readStream(stream: NodeJS.ReadableStream): Promise<Buffer> {
             return;
         }
 
-        stream.once('error', (err) => {;
+        stream.once('error', (err) => {
             COMPLETED(err);
         });
 
@@ -1923,7 +1923,7 @@ export function readStream(stream: NodeJS.ReadableStream): Promise<Buffer> {
                     try {
                         const PIPE = stream.pipe( FS.createWriteStream(tmpFile) );
 
-                        PIPE.once('error', (err) => {;
+                        PIPE.once('error', (err) => {
                             COMP(err);
                         });
 
@@ -2404,7 +2404,7 @@ export function uriParamsToObject(uri: URL.Url | vscode.Uri): deploy_contracts.K
         params = uri.query.replace(/(^\?)/,'')
                           .split("&")
                           .map(function(n) { return n = n.split("="), this[normalizeString(n[0])] =
-                                                                           toStringSafe(decodeURIComponent(n[1])), this}
+                                                                           toStringSafe(decodeURIComponent(n[1])), this; }
                           .bind({}))[0];
     }
 

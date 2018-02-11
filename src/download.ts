@@ -21,7 +21,6 @@ import * as deploy_clients_sftp from './clients/sftp';
 import * as deploy_clients_slack from './clients/slack';
 import * as deploy_helpers from './helpers';
 import * as deploy_http from './http';
-import * as HTTP from 'http';
 import * as i18 from './i18';
 import * as Path from 'path';
 import * as URL from 'url';

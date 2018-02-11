@@ -62,16 +62,6 @@ const WORKSPACE_COMMANDS: deploy_commands.WorkspaceCommandRepository = {};
 const WORKSPACES: deploy_workspaces.Workspace[] = [];
 
 
-function getActivePackages() {
-    const PACKAGES: deploy_packages.Package[] = [];
-    activeWorkspaces.forEach((ws) => {
-        PACKAGES.push
-                .apply(PACKAGES, ws.getPackages());
-    });
-
-    return PACKAGES;
-}
-
 function getActiveWorkspacesOrAll() {
     let listOfWorkspaces = deploy_helpers.asArray(activeWorkspaces);
     if (listOfWorkspaces.length < 1) {

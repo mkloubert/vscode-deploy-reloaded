@@ -122,7 +122,7 @@ export class OutputChannelWrapper extends deploy_objects.DisposableBase implemen
     }
 
     /** @inheritdoc */
-	public get name() {
+    public get name() {
         return this.baseChannel.name;
     }
 

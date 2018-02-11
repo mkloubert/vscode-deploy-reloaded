@@ -717,7 +717,7 @@ export async function deployScmCommit(client: deploy_scm.SourceControlClient,
         return;
     }
 
-    const CHANGES = await COMMIT.changes();
+    const CHANGES = await Promise.resolve( COMMIT.changes() );
 
     let branch: string;
     if (COMMIT.branch) {

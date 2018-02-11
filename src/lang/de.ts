@@ -716,4 +716,4 @@ export const translation: Translation = {
         selectWorkspace: "Wählen Sie einen Arbeitsbereich ...",
     },
     yes: 'Ja',
-}
+};

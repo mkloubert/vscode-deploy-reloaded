@@ -24,9 +24,9 @@ import * as vscode from 'vscode';
 
 
 interface LastExecutedActions {
-    executionCount: { [ id: string ]: any }, 
+    executionCount: { [ id: string ]: any };
     lastExecuted: string | false;
-};
+}
 
 
 /**
