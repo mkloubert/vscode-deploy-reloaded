@@ -87,7 +87,7 @@ export async function compareFiles(workspaces: deploy_workspaces.Workspace | dep
                                             }
                                             else {
                                                 if (deploy_helpers.isObject<deploy_plugins.DownloadedFile>(data)) {
-                                                    remoteFile = await data.read();
+                                                    remoteFile = await Promise.resolve( data.read() );
                                                 }
                                                 else {
                                                     remoteFile = await deploy_helpers.asBuffer(data);
@@ -102,7 +102,7 @@ export async function compareFiles(workspaces: deploy_workspaces.Workspace | dep
                                             target: t,
                                         };
 
-                                        await PI.downloadFiles(CTX);
+                                        await Promise.resolve( PI.downloadFiles(CTX) );
                                     }
                                 }
                                 finally {

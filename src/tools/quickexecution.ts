@@ -29,36 +29,50 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
     activeWorkspaces: any | any[],
 ) {
     // vscode
+    // tslint:disable-next-line:no-unused-variable
     const $vs = require('vscode');    
 
     // i18
+    // tslint:disable-next-line:no-unused-variable
     const $i18 = require('../i18');
 
     // lodash
+    // tslint:disable-next-line:no-unused-variable
     const _ = require('lodash');
 
     // helpers
+    // tslint:disable-next-line:no-unused-variable
     const $dl = require('../download');
     // FS-Extra
+    // tslint:disable-next-line:no-unused-variable
     const $fs = require('fs-extra');
     // glob
+    // tslint:disable-next-line:no-unused-variable
     const $g = require('glob');
     // helpers
+    // tslint:disable-next-line:no-unused-variable
     const $h = require('../helpers');
     // HTML
+    // tslint:disable-next-line:no-unused-variable
     const $html = require('../html');
     // logger
+    // tslint:disable-next-line:no-unused-variable
     const $l = require('../log').CONSOLE;
     // s. https://github.com/mkloubert/node-enumerable
+    // tslint:disable-next-line:no-unused-variable
     const $linq = require('node-enumerable');
     // s. https://momentjs.com/
+    // tslint:disable-next-line:no-unused-variable
     const $m = require('moment');
     // Node.js path module
+    // tslint:disable-next-line:no-unused-variable
     const $p = require('path');
     // s. https://momentjs.com/timezone/
+    // tslint:disable-next-line:no-unused-variable
     const $tz = require('moment-timezone');
 
     // all workspaces
+    // tslint:disable-next-line:no-unused-variable
     const $w: any[] = $h.asArray(allWorkspaces).map(ws => {
         const CLONED_WS = $h.makeNonDisposable(ws);
 
@@ -78,6 +92,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         return CLONED_WS;
     });
     // active workspaces
+    // tslint:disable-next-line:no-unused-variable
     const $aw: any[] = $h.asArray(activeWorkspaces).map(aws => {
         const CLONED_AWS = $h.makeNonDisposable(aws);
 
@@ -98,10 +113,12 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
     });
     
     // require
+    // tslint:disable-next-line:no-unused-variable
     const $r = (id: any) => {
         return $h.requireFromExtension(id);
     };
     
+    // tslint:disable-next-line:no-unused-variable
     const $unwrap = async (val: any, maxDepth?: number, currentDepth?: number) => {
         if (isNaN(maxDepth)) {
             maxDepth = 64;
@@ -126,6 +143,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         return val;
     };
 
+    // tslint:disable-next-line:no-unused-variable
     const $unwrapArgs = async (args: IArguments | ArrayLike<any>): Promise<any[]> => {
         const UNWRAPPED_ARGS: any[] = [];
 
@@ -142,6 +160,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
     };
 
     // resolve()
+    // tslint:disable-next-line:no-unused-variable
     const $res = async (val: any, ...funcs: ((v: any) => any)[]) => {
         val = await $unwrap(val);
 
@@ -160,6 +179,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         
         return lastResult;
     };
+    // tslint:disable-next-line:no-unused-variable
     const $exec = async function(...funcs: ((v: any) => any)[]) {
         let lastResult: any;
 
@@ -178,6 +198,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
     };
 
     // toStringSafe()
+    // tslint:disable-next-line:no-unused-variable
     const $s = async (val: any) => {
         return $h.toStringSafe(
             await $unwrap(val)
@@ -185,6 +206,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
     };
 
     // eval()
+    // tslint:disable-next-line:no-unused-variable
     const $e = async (code: any) => {
         return await $unwrap(
             eval(await $s(code))
@@ -192,6 +214,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
     };
 
     // toFullPath()
+    // tslint:disable-next-line:no-unused-variable
     const $fp = async (p: string) => {
         const Path = require('path');
 
@@ -209,6 +232,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         return Path.resolve(p);
     };
 
+    // tslint:disable-next-line:no-unused-variable
     const $asc = async (str) => {
         str = await $unwrap(str);
         
@@ -228,6 +252,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
     };
 
     // executeCommand()
+    // tslint:disable-next-line:no-unused-variable
     const $c = async (id: string, ...cmdArgs: any[]) => {
         id = $h.toStringSafe(
             await $unwrap(id)
@@ -252,6 +277,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         );
     };
 
+    // tslint:disable-next-line:no-unused-variable
     const $cleanup = async (dir: string) => {
         dir = await $unwrap(dir);
         if ($h.isEmptyString(dir)) {
@@ -270,6 +296,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
     };
 
     // list commands
+    // tslint:disable-next-line:no-unused-variable
     const $commands = async (alsoInternalCommands?: boolean) => {
         alsoInternalCommands = $h.toBooleanSafe(
             await $unwrap(alsoInternalCommands)
@@ -307,6 +334,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
                                          '[vscode-deploy-reloaded] Visual Studio Code commands');
     };
 
+    // tslint:disable-next-line:no-unused-variable
     const $emoji = async (key: string) => {
         key = $h.toStringSafe(
             await $unwrap(key)
@@ -315,6 +343,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         return require('node-emoji').get(key);
     };
 
+    // tslint:disable-next-line:no-unused-variable
     const $emoji_list = () => {
         return $linq.from( require('node-emoji').search('') ).orderBy(e => {
             return $h.normalizeString(e.key);
@@ -323,6 +352,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         }).toArray();
     };
 
+    // tslint:disable-next-line:no-unused-variable
     const $emoji_name = async (e: string) => {
         e = $h.toStringSafe(
             await $unwrap(e)
@@ -332,6 +362,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
     };
 
     // showErrorMessage
+    // tslint:disable-next-line:no-unused-variable
     const $err = async function() {
         const ARGS = await $unwrapArgs(arguments);
 
@@ -347,6 +378,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
                         .apply(null, [ msg ].concat(moreParams));
     };    
 
+    // tslint:disable-next-line:no-unused-variable
     const $guid = async (ver?: string, ...guidArgs: any[]) => {
         const UUID = require('uuid');
 
@@ -393,6 +425,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         return func.apply(null, ARGS);
     };
 
+    // tslint:disable-next-line:no-unused-variable
     const $hash = async (algo: string, val: any, asBinary?: boolean) => {
         algo = $h.normalizeString(
             await $unwrap(algo)
@@ -421,6 +454,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
     };
 
     // showInformationMessage
+    // tslint:disable-next-line:no-unused-variable
     const $info = async function() {
         const ARGS = await $unwrapArgs(arguments);
 
@@ -436,6 +470,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
                         .apply(null, [ msg ].concat(moreParams));
     };
 
+    // tslint:disable-next-line:no-unused-variable
     const $ip = async (v6 = false, timeout?: number, useHttps = false) => {
         const PublicIP = require('public-ip');
 
@@ -467,17 +502,20 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         return await GET_IP(OPTS);
     };
 
+    // tslint:disable-next-line:no-unused-variable
     const $lower = async (val: any) => {
         return $h.toStringSafe(
             await $unwrap(val)   
         ).toLowerCase();
     };
 
+    // tslint:disable-next-line:no-unused-variable
     const $md5 = async (val: any, asBinary?: boolean) => {
         return await $hash('md5',
                            val, asBinary);
     };
 
+    // tslint:disable-next-line:no-unused-variable
     const $new_script = async () => {
         const EXAMPLE_CODE = `
 // _     => https://lodash.com
@@ -526,6 +564,7 @@ $exec(() => {
         });
     };
 
+    // tslint:disable-next-line:no-unused-variable
     const $now = async (timeZone?: string) => {
         const NOW = $m();
         
@@ -537,6 +576,7 @@ $exec(() => {
                                : NOW.tz(timeZone);
     };
 
+    // tslint:disable-next-line:no-unused-variable
     const $pwd = async (size = 20, chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789') => {
         size = await $unwrap(size);
 
@@ -556,6 +596,7 @@ $exec(() => {
         return result;
     };
 
+    // tslint:disable-next-line:no-unused-variable
     const $rand = async function (minOrMax?: number, max?: number) {
         const RandomFloat = require('random-float');
 
@@ -583,12 +624,14 @@ $exec(() => {
     };
 
     // readFile()
+    // tslint:disable-next-line:no-unused-variable
     const $rf = async (file: string) => {
         return await $h.readFile(
             await $fp(file)
         );
     };
 
+    // tslint:disable-next-line:no-unused-variable
     const $run = function() {
         let activeDocument;
         
@@ -608,47 +651,56 @@ $exec(() => {
         );
     };
 
+    // tslint:disable-next-line:no-unused-variable
     const $sha1 = async (val: any, asBinary?: boolean) => {
         return await $hash('sha1',
                            val, asBinary);
     };
 
+    // tslint:disable-next-line:no-unused-variable
     const $sha256 = async (val: any, asBinary?: boolean) => {
         return await $hash('sha256',
                            val, asBinary);
     };
 
+    // tslint:disable-next-line:no-unused-variable
     const $ltrim = async (val: any) => {
         return $h.toStringSafe(
             await $unwrap(val)   
         ).replace(/^\s+/, '');
     };
+    // tslint:disable-next-line:no-unused-variable
     const $trim = async (val: any) => {
         return $h.toStringSafe(
             await $unwrap(val)   
         ).trim();
     };
+    // tslint:disable-next-line:no-unused-variable
     const $rtrim = async (val: any) => {
         return $h.toStringSafe(
             await $unwrap(val)   
         ).replace(/\s+$/, '');
     };
 
+    // tslint:disable-next-line:no-unused-variable
     const $upper = async (val: any) => {
         return $h.toStringSafe(
             await $unwrap(val)   
         ).toUpperCase();
     };
 
+    // tslint:disable-next-line:no-unused-variable
     const $utc = async () => {
         return $m.utc();
     };
 
+    // tslint:disable-next-line:no-unused-variable
     const $uuid = async function (ver?: string, ...args: any[]) {
         return await $guid.apply(null, arguments);
     };
 
     // showWarningMessage
+    // tslint:disable-next-line:no-unused-variable
     const $warn = async function() {
         const ARGS = await $unwrapArgs(arguments);
 
@@ -665,6 +717,7 @@ $exec(() => {
     };
 
     // writeFile()
+    // tslint:disable-next-line:no-unused-variable
     const $wf = async (file: string, data: any, enc?: string) => {
         data = await $h.asBuffer(
             await $unwrap(data),
@@ -678,6 +731,7 @@ $exec(() => {
     };
 
     // show help
+    // tslint:disable-next-line:no-unused-variable
     const $help = async () => {
         await require('../html').openMarkdownDocument(
             _27adf674_b653_4ee0_a33d_4f60be7859d2(),

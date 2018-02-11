@@ -27,7 +27,6 @@ import * as deploy_scm from './scm';
 import * as deploy_targets from './targets';
 import * as deploy_transformers from './transformers';
 import * as deploy_workspaces from './workspaces';
-import * as Enumerable from 'node-enumerable';
 import * as FS from 'fs';
 import * as i18 from './i18';
 import * as Path from 'path';
@@ -228,7 +227,6 @@ export async function deployFilesTo(files: string[],
     }
 
     const TARGET_NAME = deploy_targets.getTargetName(target);
-    const TARGET_TYPE = deploy_targets.normalizeTargetType(target);
     const STATE_KEY = deploy_helpers.toStringSafe(target.__id);
 
     const PLUGINS = ME.getUploadPlugins(target);

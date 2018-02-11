@@ -26,7 +26,6 @@ import * as deploy_helpers from './helpers';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
 import * as i18 from './i18';
-import * as vscode from 'vscode';
 
 
 /**
@@ -145,7 +144,7 @@ function cleanupPatternList(patterns: string | string[],
         return !deploy_helpers.isEmptyString(p);
     }).distinct()
       .toArray();
-};
+}
 
 /**
  * Collects files for compilation.
@@ -240,8 +239,6 @@ export function getFullOutputPathForSourceFile(file: string, opts: CompileOption
     if (!opts) {
         opts = <any>{};
     }
-
-    const WORKSPACE = opts.workspace;
 
     const BASE_DIR = getBaseDirectory(opts);
     

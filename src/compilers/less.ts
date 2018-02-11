@@ -19,7 +19,6 @@ import * as deploy_compilers from '../compilers';
 import * as deploy_helpers from '../helpers';
 import * as LESS from 'less';
 import * as Path from 'path';
-import * as vscode from 'vscode';
 
 
 /**

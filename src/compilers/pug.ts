@@ -19,7 +19,6 @@ import * as deploy_compilers from '../compilers';
 import * as deploy_helpers from '../helpers';
 import * as Path from 'path';
 import * as Pug from 'pug';
-import * as vscode from 'vscode';
 
 
 /**

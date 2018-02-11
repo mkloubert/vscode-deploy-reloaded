@@ -502,11 +502,11 @@ export abstract class FileToUploadBase implements FileToUpload {
 
     /** @inheritdoc */
     public onBeforeUpload: BeforeUploadFileCallback = async () => {
-    };
+    }
 
     /** @inheritdoc */
     public onUploadCompleted: UploadFileCompletedCallback = async () => {
-    };
+    }
 
     /** @inheritdoc */
     public get path() {
@@ -1020,11 +1020,11 @@ export class SimpleFileToDelete implements FileToDelete {
 
     /** @inheritdoc */
     public onBeforeDelete: BeforeDeleteFileCallback = async () => {
-    };
+    }
 
     /** @inheritdoc */
     public onDeleteCompleted: DeleteFileCompletedCallback = async () => {
-    };
+    }
 
     /** @inheritdoc */
     public get path() {
@@ -1055,11 +1055,11 @@ export class SimpleFileToDownload implements FileToDownload {
 
     /** @inheritdoc */
     public onBeforeDownload: BeforeDownloadFileCallback = async () => {
-    };
+    }
 
     /** @inheritdoc */
     public onDownloadCompleted: DownloadFileCompletedCallback = async () => {
-    };
+    }
 
     /** @inheritdoc */
     public get path() {

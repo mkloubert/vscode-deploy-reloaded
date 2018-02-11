@@ -60,6 +60,7 @@ export function exec<TResult = any, TContext = any>(context: CodeExecutionContex
     // tslint:disable-next-line:no-unused-variable
     const $v = deploy_values.toValueStorage(context.values);
 
+    // tslint:disable-next-line:no-unused-variable
     const $e = (code: any) => {
         return eval(
             $h.toStringSafe(code)

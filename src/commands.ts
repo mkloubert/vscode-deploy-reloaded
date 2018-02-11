@@ -27,7 +27,6 @@ import * as deploy_targets from './targets';
 import * as deploy_values from './values';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
-import * as Events from 'events';
 import * as i18 from './i18';
 import * as Path from 'path';
 import * as vscode from 'vscode';

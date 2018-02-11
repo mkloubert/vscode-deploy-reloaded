@@ -17,15 +17,11 @@
 
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
-import * as deploy_gui from './gui';
-import * as deploy_log from './log';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
 import * as deploy_targets from './targets';
 import * as deploy_workspaces from './workspaces';
-import * as Enumerable from 'node-enumerable';
 import * as i18 from './i18';
-import * as Path from 'path';
 import * as vscode from 'vscode';
 
 
@@ -544,10 +540,6 @@ export async function deletePackage(pkg: deploy_packages.Package,
         throw new Error(ME.t('DELETE.errors.invalidWorkspaceForPackage',
                              deploy_packages.getPackageName(pkg), ME.name));
     }
-
-    const FILES = deploy_helpers.asArray(pkg.files).filter(f => {
-        return !deploy_helpers.isEmptyString(f);
-    });
 
     let exclude = deploy_helpers.asArray(pkg.exclude).filter(f => {
         return !deploy_helpers.isEmptyString(f);
