@@ -25,10 +25,6 @@ import * as Enumerable from 'node-enumerable';
 const Zip = require('node-zip');
 
 
-interface SlackContext extends deploy_plugins.AsyncFileClientPluginContext<SlackTarget,
-                                                                           deploy_clients_slack.SlackClient> {
-}
-
 /**
  * A 'test' target.
  */

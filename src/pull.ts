@@ -18,14 +18,12 @@
 import * as deploy_contracts from './contracts';
 import * as deploy_events from './events';
 import * as deploy_helpers from './helpers';
-import * as deploy_log from './log';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
 import * as deploy_session from './session';
 import * as deploy_targets from './targets';
 import * as deploy_transformers from './transformers';
 import * as deploy_workspaces from './workspaces';
-import * as Enumerable from 'node-enumerable';
 import * as FS from 'fs';
 import * as i18 from './i18';
 import * as IsStream from 'is-stream';

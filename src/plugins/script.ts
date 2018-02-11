@@ -19,7 +19,6 @@ import * as deploy_contracts from '../contracts';
 import * as deploy_events from '../events';
 import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
-import * as deploy_log from '../log';
 import * as deploy_plugins from '../plugins';
 import * as deploy_session from '../session';
 import * as deploy_targets from '../targets';
@@ -241,7 +240,7 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
                                  'plugins.script.scriptNotFound', script));
         }
 
-        const SCRIPT_MODULE = await deploy_helpers.loadModule<ScriptModule>(SCRIPT_FILE, args.target.cache);
+        const SCRIPT_MODULE = deploy_helpers.loadModule<ScriptModule>(SCRIPT_FILE, args.target.cache);
         if (SCRIPT_MODULE) {
             const EXECUTE = SCRIPT_MODULE.execute;
             if (EXECUTE) {
@@ -278,7 +277,7 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
         const ARGS = await this.createScriptArgsFromContext(context,
                                                             deploy_contracts.DeployOperation.ListDirectory);
 
-        const EXEC_RES: deploy_files.FileSystemInfo[] = await deploy_helpers.asArray(
+        const EXEC_RES: deploy_files.FileSystemInfo[] = deploy_helpers.asArray(
             await this.executeScript(ARGS)
         );
 

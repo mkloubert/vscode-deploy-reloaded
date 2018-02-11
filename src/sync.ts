@@ -15,7 +15,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
 import * as deploy_packages from './packages';
@@ -31,7 +30,7 @@ import * as vscode from 'vscode';
 interface TargetAndLastModifiedTime {
     target: deploy_targets.Target;
     time: Moment.Moment;
-};
+}
 
 
 /**

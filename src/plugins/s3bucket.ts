@@ -17,9 +17,7 @@
 
 import * as deploy_contracts from '../contracts';
 import * as deploy_clients_s3bucket from '../clients/s3bucket';
-import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
-import * as deploy_log from '../log';
 import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
 import * as OS from 'os';

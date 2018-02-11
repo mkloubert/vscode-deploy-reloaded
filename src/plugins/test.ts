@@ -15,12 +15,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as deploy_contracts from '../contracts';
 import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
 import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
-import * as deploy_workspaces from '../workspaces';
 import * as Moment from 'moment';
 import * as Path from 'path';
 

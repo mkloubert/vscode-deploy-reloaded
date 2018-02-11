@@ -21,8 +21,6 @@ import * as deploy_helpers from '../helpers';
 import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
 const MergeDeep = require('merge-deep');
-import * as OS from 'os';
-import * as Path from 'path';
 import * as vscode from 'vscode';
 
 
@@ -267,7 +265,7 @@ class PromptPlugin extends deploy_plugins.IterablePluginBase<PromptTarget> {
                 );
             }
 
-            const PROPERTIES = deploy_helpers.asArray(P.properties).map(p => {
+            deploy_helpers.asArray(P.properties).map(p => {
                 return deploy_helpers.toStringSafe(p).trim();
             }).filter(p => '' !== p).forEach(p => {
                 PROPERTIES_AND_VALUES[p] = valueToSet;

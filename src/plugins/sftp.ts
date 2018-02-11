@@ -16,16 +16,10 @@
  */
 
 import * as deploy_clients_sftp from '../clients/sftp';
-import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
-import * as deploy_log from '../log';
 import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
-import * as FS from 'fs';
 import * as i18 from '../i18';
-import * as Moment from 'moment';
-import * as OS from 'os';
-import * as Path from 'path';
 
 
 interface SFTPContext extends deploy_plugins.AsyncFileClientPluginContext<SFTPTarget,
