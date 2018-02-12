@@ -151,6 +151,14 @@ export interface Target extends deploy_values.Applyable,
      */
     readonly beforePull?: TargetOperationValue | TargetOperationValue[];
     /**
+     * Check for newer files before a deploy operation starts or not.
+     */
+    readonly checkBeforeDeploy?: boolean;
+    /**
+     * Check for older files before a pull operation starts or not.
+     */
+    readonly checkBeforePull?: boolean;
+    /**
      * One or more target operations that should be invoked
      * AFTER a deletion in that target has been done.
      */

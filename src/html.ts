@@ -170,6 +170,10 @@ export async function openHtmlDocument(html: string, title?: string, id?: any) {
  * @returns {Promise<any>} The promise with the result.
  */
 export async function openMarkdownDocument(md: string, opts?: MarkdownDocumentOptions) {
+    if (!opts) {
+        opts = {};
+    }
+
     const DEFAULT_OPTS: MarkdownDocumentOptions = {
         breaks: true,
         gfm: true,

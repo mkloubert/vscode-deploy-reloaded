@@ -35,6 +35,7 @@ The extension supports the following destinations:
    * [Auto remove on remote](#auto-remove-on-remote-)
    * [Compare files](#compare-files-)
    * [Download files](#download-files-)
+   * [Check before deploy](#check-before-deploy-)
    * [Compare files](#compare-files-)
    * [List remote files](#list-remote-files-)
    * [Tools](#tools-)
@@ -73,9 +74,14 @@ The extension supports the following destinations:
 
 ![Demo Download files](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo4.gif)
 
+### Check before deploy [[&uarr;](#demos-)]
+
+![Demo Check before deploy](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo25.gif)
+
 ### Compare files [[&uarr;](#demos-)]
 
 ![Demo Compare files](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo3.gif)
+
 
 ### List remote files [[&uarr;](#demos-)]
 

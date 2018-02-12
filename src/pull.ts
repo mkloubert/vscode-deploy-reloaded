@@ -15,9 +15,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as _ from 'lodash';
 import * as deploy_contracts from './contracts';
 import * as deploy_events from './events';
+import * as deploy_files from './files';
 import * as deploy_helpers from './helpers';
+import * as deploy_html from './html';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
 import * as deploy_session from './session';
@@ -25,6 +28,7 @@ import * as deploy_targets from './targets';
 import * as deploy_transformers from './transformers';
 import * as deploy_workspaces from './workspaces';
 import * as FS from 'fs';
+import * as HtmlEntities from 'html-entities';
 import * as i18 from './i18';
 import * as IsStream from 'is-stream';
 import * as Path from 'path';
@@ -32,6 +36,249 @@ import * as vscode from 'vscode';
 
 
 let nextCancelBtnCommandId = Number.MIN_SAFE_INTEGER;
+
+
+async function checkBeforePull(
+    target: deploy_targets.Target,
+    plugin: deploy_plugins.Plugin,
+    files: string[],
+    mappingScopeDirs: string[],
+    cancelToken: vscode.CancellationToken,
+    isCancelling: () => boolean,
+): Promise<boolean> {
+    const TARGET_NAME = deploy_targets.getTargetName(target);
+    const WORKSPACE = target.__workspace;
+
+    if (!deploy_helpers.toBooleanSafe(target.checkBeforePull)) {
+        return true;
+    }
+
+    if (!deploy_plugins.canList(plugin, target)) {
+        let selectedValue: number;
+
+        const SELECTED_ITEM = await WORKSPACE.showWarningMessage(
+            WORKSPACE.t('pull.checkBeforePull.notSupported', TARGET_NAME),
+            {
+                isCloseAffordance: true,
+                title: WORKSPACE.t('no'),
+                value: 0,
+            },
+            {
+                title: WORKSPACE.t('yes'),
+                value: 1,
+            }
+        );
+        if (SELECTED_ITEM) {
+            selectedValue = SELECTED_ITEM.value;
+        }
+
+        if (1 !== selectedValue) {
+            return false;
+        }
+    }
+
+    const WAIT_WHILE_CANCELLING = async () => {
+        await deploy_helpers.waitWhile(() => isCancelling());
+    };
+
+    WORKSPACE.output
+             .append( WORKSPACE.t('pull.checkBeforePull.beginOperation', TARGET_NAME) + ' ');
+    try {
+        const LIST_RESULTS: deploy_contracts.KeyValuePairs<deploy_plugins.ListDirectoryResult> = {};
+
+        const FILES_AND_PATHS: deploy_contracts.KeyValuePairs<deploy_contracts.WithNameAndPath> = {};
+        for (const F of files) {
+            const NAME_AND_PATH = deploy_targets.getNameAndPathForFileDeployment(target, F,
+                                                                                 mappingScopeDirs);
+            if (false !== NAME_AND_PATH) {
+                FILES_AND_PATHS[F] = NAME_AND_PATH;
+            }
+        }
+
+        for (const F in FILES_AND_PATHS) {            
+            await WAIT_WHILE_CANCELLING();
+
+            if (cancelToken.isCancellationRequested) {
+                return false;
+            }
+
+            try {
+                const NAME_AND_PATH = FILES_AND_PATHS[F];
+
+                const KEY = NAME_AND_PATH.path;
+                if (!_.isNil( LIST_RESULTS[KEY] )) {
+                    continue;
+                }
+
+                const CTX: deploy_plugins.ListDirectoryContext = {
+                    cancellationToken: cancelToken,
+                    dir: NAME_AND_PATH.path,
+                    isCancelling: undefined,
+                    target: target,
+                    workspace: WORKSPACE,
+                };
+
+                // CTX.isCancelling
+                Object.defineProperty(CTX, 'isCancelling', {
+                    get: () => cancelToken.isCancellationRequested,
+                });
+
+                const LIST = await plugin.listDirectory(CTX);
+                if (LIST) {
+                    LIST_RESULTS[KEY] = LIST;
+                }
+            }
+            catch (e) {
+                WORKSPACE.logger
+                         .trace(e, 'pull.checkBeforePull(1)');
+            }
+        }
+
+        const OLDER_FILES: deploy_contracts.KeyValuePairs<deploy_files.FileInfo[]> = {};
+        for (const PATH in LIST_RESULTS) {
+            const LIST = LIST_RESULTS[PATH];
+
+            for (const F in FILES_AND_PATHS) {
+                const NAME_AND_PATH = FILES_AND_PATHS[F];
+                if (PATH !== NAME_AND_PATH.path) {
+                    continue;
+                }
+
+                const FILE_NAME = Path.basename(F);
+                const FILE_STATS = await deploy_helpers.lstat(F);
+
+                for (const RF of deploy_helpers.asArray(LIST.files)) {
+                    if (RF.name !== FILE_NAME) {
+                        continue;
+                    }
+
+                    const REMOTE_MTIME = deploy_helpers.asUTC(RF.time);
+                    if (REMOTE_MTIME) {
+                        const LOCAL_TIME = deploy_helpers.asUTC(FILE_STATS.mtime);
+                        if (LOCAL_TIME) {
+                            if (REMOTE_MTIME.isBefore(LOCAL_TIME)) {
+                                if (_.isNil(OLDER_FILES[F])) {
+                                    OLDER_FILES[F] = [];
+                                }
+
+                                OLDER_FILES[F].push(RF);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        WORKSPACE.output
+                 .appendLine( `[${ WORKSPACE.t('done') }]` );
+
+        const NEWER_FILES = Object.keys(OLDER_FILES).sort((x, y) => {
+            return deploy_helpers.compareValuesBy(x, y,
+                                                  i => deploy_helpers.normalizeString(i));
+        });
+        if (NEWER_FILES.length > 0) {
+            let selectedValue: number;
+
+            const SELECTED_ITEM = await WORKSPACE.showWarningMessage(
+                WORKSPACE.t('pull.checkBeforePull.olderFilesFound', NEWER_FILES.length),
+                {
+                    isCloseAffordance: true,
+                    title: WORKSPACE.t('no'),
+                    value: 0,
+                },
+                {
+                    title: WORKSPACE.t('yes'),
+                    value: 1,
+                }
+            );
+            if (SELECTED_ITEM) {
+                selectedValue = SELECTED_ITEM.value;
+            }
+
+            switch (selectedValue) {
+                case 0:
+                    {
+                        const HTML_ENCODER = new HtmlEntities.AllHtmlEntities();
+
+                        const TITLE = WORKSPACE.t('pull.checkBeforePull.report.title', TARGET_NAME);
+
+                        const TABLE_HEADER_LOCAL_FILE = HTML_ENCODER.encode(
+                            WORKSPACE.t('pull.checkBeforePull.report.localFile')
+                        );
+                        const TABLE_HEADER_REMOTE_FILE = HTML_ENCODER.encode(
+                            WORKSPACE.t('pull.checkBeforePull.report.remoteFile')
+                        );
+                        const TABLE_HEADER_LAST_CHANGE = HTML_ENCODER.encode(
+                            WORKSPACE.t('pull.checkBeforePull.report.lastChange')
+                        );
+                        const TABLE_HEADER_SIZE = HTML_ENCODER.encode(
+                            WORKSPACE.t('pull.checkBeforePull.report.size')
+                        );
+
+                        let md = `# ${HTML_ENCODER.encode(TITLE)}\n`;
+                        
+                        md += `\n`;
+                        md += `${TABLE_HEADER_LOCAL_FILE} | ${TABLE_HEADER_LAST_CHANGE} | ${TABLE_HEADER_SIZE} | ${TABLE_HEADER_REMOTE_FILE} | ${TABLE_HEADER_LAST_CHANGE} | ${TABLE_HEADER_SIZE}\n`;
+                        md += `------------|:-------------:|:-------------:|-------------|:-------------:|:-------------:\n`;
+
+                        for (const F of NEWER_FILES) {
+                            const OLD_FILE_LIST = OLDER_FILES[F];
+
+                            const STATS = await deploy_helpers.lstat(F);
+                            const LOCAL_MTIME = deploy_helpers.asLocalTime(STATS.mtime);
+                            const LOCAL_SIZE = deploy_helpers.toStringSafe(STATS.size);
+
+                            for (const RF of OLD_FILE_LIST) {
+                                const REMOTE_MTIME = deploy_helpers.asLocalTime(RF.time);
+                                const REMOTE_SIZE = deploy_helpers.toStringSafe(RF.size);
+
+                                const TABLE_CELL_LOCAL_FILE = HTML_ENCODER.encode(F);
+                                const TABLE_CELL_LOCAL_FILE_MTIME = HTML_ENCODER.encode(
+                                    LOCAL_MTIME.format( WORKSPACE.t('time.dateTimeWithSeconds') )
+                                );
+                                const TABLE_CELL_LOCAL_FILE_SIZE = HTML_ENCODER.encode(LOCAL_SIZE);
+                                
+                                const TABLE_CELL_REMOTE_FILE = HTML_ENCODER.encode(
+                                    '/' + 
+                                    deploy_helpers.normalizePath(
+                                        '/' +
+                                        deploy_helpers.normalizePath(RF.path) + 
+                                        '/' +
+                                        deploy_helpers.normalizePath(RF.name)
+                                    )
+                                );
+                                const TABLE_CELL_REMOTE_FILE_MTIME = HTML_ENCODER.encode(
+                                    REMOTE_MTIME.format( WORKSPACE.t('time.dateTimeWithSeconds') )
+                                );
+                                const TABLE_CELL_REMOTE_FILE_SIZE = HTML_ENCODER.encode(REMOTE_SIZE);
+
+                                md += `${TABLE_CELL_LOCAL_FILE} | ${TABLE_CELL_LOCAL_FILE_MTIME} | ${TABLE_CELL_LOCAL_FILE_SIZE} | ${TABLE_CELL_REMOTE_FILE} | ${TABLE_CELL_REMOTE_FILE_MTIME} | ${TABLE_CELL_REMOTE_FILE_SIZE}\n`;
+                            }
+                        }
+
+                        await deploy_html.openMarkdownDocument(md, {
+                            documentTitle: TITLE,
+                        });
+                    }
+                    return false;
+
+                case 1:
+                    break;  // start deployment
+
+                default:
+                    return false;
+            }
+        }
+
+        return !cancelToken.isCancellationRequested;
+    }
+    catch (e) {
+        WORKSPACE.output
+                 .appendLine( `[${ WORKSPACE.t('error', e) }]` );
+
+        return false;
+    }
+}
 
 /**
  * Pulls all opened files.
@@ -352,16 +599,18 @@ export async function pullFilesFrom(files: string[],
 
         while (PLUGINS.length > 0) {
             await WAIT_WHILE_CANCELLING();            
-
+            
             if (CANCELLATION_SOURCE.token.isCancellationRequested) {
                 break;
-            }
+            }    
 
             const PI = PLUGINS.shift();
 
             try {
-                await deploy_helpers.waitWhile(() => isCancelling);
-
+                if (!(await checkBeforePull(target, PI, files, MAPPING_SCOPE_DIRS, CANCELLATION_SOURCE.token, () => isCancelling))) {
+                    continue;
+                }
+                
                 ME.output.appendLine('');
 
                 if (files.length > 1) {

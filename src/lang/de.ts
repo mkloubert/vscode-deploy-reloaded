@@ -119,6 +119,18 @@ export const translation: Translation = {
         },
         canceledByOperation: "Das Bereitstellen der Dateien in{0:trim,surround,leading_space} wurde durch eine Operation abgebrochen.",
         cancelling: "Breche das Bereitstellen ab ...",
+        checkBeforeDeploy: {
+            beginOperation: "Suche nach neueren Dateien in{0:trim,surround,leading_space} ...",
+            newerFilesFound: "{0:trim,ending_space}Datei(en) wurde(n) gefunden, die neuer sind. Forfahren?",
+            notSupported: "Die Funktion 'checkBeforeDeploy' steht für das Ziel{0:trim,surround,leading_space} nicht zur Verfügung! Forfahren?",
+            report: {
+                lastChange: "Letzte Änderung",
+                localFile: "Lokale Datei",
+                remoteFile: "Ziel-Datei",
+                size: "Grösse",
+                title: "Neuere Dateien in{0:trim,surround,leading_space}",
+            },
+        },
         currentFile: {
             description: "Stellt die aktuelle Datei bereit",
             label: "Aktuelle Datei ...",
@@ -377,6 +389,18 @@ export const translation: Translation = {
         },
         canceledByOperation: "Das Laden der Dateien von{0:trim,surround,leading_space} wurde durch eine Operation abgebrochen.",
         cancelling: "Breche das Laden ab ...",
+        checkBeforePull: {
+            beginOperation: "Suche nach älteren Dateien in{0:trim,surround,leading_space} ...",
+            notSupported: "Die Funktion 'checkBeforePull' steht für die Quelle{0:trim,surround,leading_space} nicht zur Verfügung! Forfahren?",
+            olderFilesFound: "{0:trim,ending_space}Datei(en) wurde(n) gefunden, die älter sind. Forfahren?",
+            report: {
+                lastChange: "Letzte Änderung",
+                localFile: "Lokale Datei",
+                remoteFile: "Quell-Datei",
+                size: "Grösse",
+                title: "Ältere Dateien in{0:trim,surround,leading_space}",
+            },
+        },
         currentFile: {
             description: "Lädt die aktuelle Datei",
             label: "Aktuelle Datei ...",

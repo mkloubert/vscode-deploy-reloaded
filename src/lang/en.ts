@@ -119,6 +119,18 @@ export const translation: Translation = {
         },
         canceledByOperation: "Deploying files to{0:trim,surround,leading_space} has been cancelled by target operation.",
         cancelling: "Cancelling deploy operation ...",
+        checkBeforeDeploy: {
+            beginOperation: "Check for newer files in{0:trim,surround,leading_space} ...",
+            newerFilesFound: "{0:trim,ending_space}files was/were found, which is/are newer. Continue?",
+            notSupported: "'checkBeforeDeploy' is not supported for target{0:trim,surround,leading_space}! Continue?",
+            report: {
+                lastChange: "Last change",
+                localFile: "Local file",
+                remoteFile: "Remote file",
+                size: "Size",
+                title: "Newer files in{0:trim,surround,leading_space}",
+            },
+        },        
         currentFile: {
             description: "Deploys the current file",
             label: "Current file ...",
@@ -378,6 +390,18 @@ export const translation: Translation = {
         },
         canceledByOperation: "Pulling files from{0:trim,surround,leading_space} has been cancelled by target operation.",
         cancelling: "Cancelling pull operation ...",
+        checkBeforePull: {
+            beginOperation: "Check for older files in{0:trim,surround,leading_space} ...",
+            notSupported: "'checkBeforePull' is not supported for source{0:trim,surround,leading_space}! Continue?",
+            olderFilesFound: "{0:trim,ending_space}files was/were found, which is/are older. Continue?",
+            report: {
+                lastChange: "Last change",
+                localFile: "Local file",
+                remoteFile: "Remote file",
+                size: "Size",
+                title: "Older files in{0:trim,surround,leading_space}",
+            },
+        }, 
         currentFile: {
             description: "Pull the current file",
             label: "Current file ...",

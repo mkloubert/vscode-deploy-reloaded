@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.46.0",
+ "version": "0.47.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.20.0"
@@ -2448,6 +2448,16 @@
               }
              ]
             }
+           },
+           "checkBeforeDeploy": {
+            "description": "Check for newer files before a deploy operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
+           "checkBeforePull": {
+            "description": "Check for older files before a pull operation starts or not.",
+            "type": "boolean",
+            "default": false
            },
            "cwd": {
             "type": "string",
@@ -6130,6 +6140,16 @@
              ]
             }
            },
+           "checkBeforeDeploy": {
+            "description": "Check for newer files before a deploy operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
+           "checkBeforePull": {
+            "description": "Check for older files before a pull operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
            "container": {
             "type": "string",
             "description": "The container name."
@@ -9752,6 +9772,16 @@
              ]
             }
            },
+           "checkBeforeDeploy": {
+            "description": "Check for newer files before a deploy operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
+           "checkBeforePull": {
+            "description": "Check for older files before a pull operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
            "deleted": {
             "description": "One or more operations that should be invoked AFTER a delete operation has been finished.",
             "type": "array",
@@ -13361,6 +13391,16 @@
               }
              ]
             }
+           },
+           "checkBeforeDeploy": {
+            "description": "Check for newer files before a deploy operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
+           "checkBeforePull": {
+            "description": "Check for older files before a pull operation starts or not.",
+            "type": "boolean",
+            "default": false
            },
            "compiler": {
             "description": "The compiler to use.",
@@ -16989,6 +17029,16 @@
              ]
             }
            },
+           "checkBeforeDeploy": {
+            "description": "Check for newer files before a deploy operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
+           "checkBeforePull": {
+            "description": "Check for older files before a pull operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
            "deleted": {
             "description": "One or more operations that should be invoked AFTER a delete operation has been finished.",
             "type": "array",
@@ -20599,6 +20649,16 @@
               }
              ]
             }
+           },
+           "checkBeforeDeploy": {
+            "description": "Check for newer files before a deploy operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
+           "checkBeforePull": {
+            "description": "Check for older files before a pull operation starts or not.",
+            "type": "boolean",
+            "default": false
            },
            "deleted": {
             "description": "One or more operations that should be invoked AFTER a delete operation has been finished.",
@@ -24241,6 +24301,16 @@
              ]
             }
            },
+           "checkBeforeDeploy": {
+            "description": "Check for newer files before a deploy operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
+           "checkBeforePull": {
+            "description": "Check for older files before a pull operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
            "deleted": {
             "description": "One or more operations that should be invoked AFTER a delete operation has been finished.",
             "type": "array",
@@ -27875,6 +27945,16 @@
               }
              ]
             }
+           },
+           "checkBeforeDeploy": {
+            "description": "Check for newer files before a deploy operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
+           "checkBeforePull": {
+            "description": "Check for older files before a pull operation starts or not.",
+            "type": "boolean",
+            "default": false
            },
            "deleted": {
             "description": "One or more operations that should be invoked AFTER a delete operation has been finished.",
@@ -31528,6 +31608,16 @@
              ]
             }
            },
+           "checkBeforeDeploy": {
+            "description": "Check for newer files before a deploy operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
+           "checkBeforePull": {
+            "description": "Check for older files before a pull operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
            "deleted": {
             "description": "One or more operations that should be invoked AFTER a delete operation has been finished.",
             "type": "array",
@@ -35137,6 +35227,16 @@
               }
              ]
             }
+           },
+           "checkBeforeDeploy": {
+            "description": "Check for newer files before a deploy operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
+           "checkBeforePull": {
+            "description": "Check for older files before a pull operation starts or not.",
+            "type": "boolean",
+            "default": false
            },
            "deleted": {
             "description": "One or more operations that should be invoked AFTER a delete operation has been finished.",
@@ -38794,6 +38894,16 @@
              ]
             }
            },
+           "checkBeforeDeploy": {
+            "description": "Check for newer files before a deploy operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
+           "checkBeforePull": {
+            "description": "Check for older files before a pull operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
            "deleted": {
             "description": "One or more operations that should be invoked AFTER a delete operation has been finished.",
             "type": "array",
@@ -42429,6 +42539,16 @@
               }
              ]
             }
+           },
+           "checkBeforeDeploy": {
+            "description": "Check for newer files before a deploy operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
+           "checkBeforePull": {
+            "description": "Check for older files before a pull operation starts or not.",
+            "type": "boolean",
+            "default": false
            },
            "deleted": {
             "description": "One or more operations that should be invoked AFTER a delete operation has been finished.",
@@ -46158,6 +46278,16 @@
             "pattern": "\\S+",
             "default": "vscode-deploy-reloaded"
            },
+           "checkBeforeDeploy": {
+            "description": "Check for newer files before a deploy operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
+           "checkBeforePull": {
+            "description": "Check for older files before a pull operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
            "credentials": {
             "type": "object",
             "description": "Credential settings.",
@@ -49794,6 +49924,16 @@
             "description": "Load script from cache or not.",
             "default": false
            },
+           "checkBeforeDeploy": {
+            "description": "Check for newer files before a deploy operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
+           "checkBeforePull": {
+            "description": "Check for older files before a pull operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
            "deleted": {
             "description": "One or more operations that should be invoked AFTER a delete operation has been finished.",
             "type": "array",
@@ -53413,6 +53553,16 @@
               }
              ]
             }
+           },
+           "checkBeforeDeploy": {
+            "description": "Check for newer files before a deploy operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
+           "checkBeforePull": {
+            "description": "Check for older files before a pull operation starts or not.",
+            "type": "boolean",
+            "default": false
            },
            "debug": {
             "type": "boolean",
@@ -57108,6 +57258,16 @@
              "type": "string"
             }
            },
+           "checkBeforeDeploy": {
+            "description": "Check for newer files before a deploy operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
+           "checkBeforePull": {
+            "description": "Check for older files before a pull operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
            "deleted": {
             "description": "One or more operations that should be invoked AFTER a delete operation has been finished.",
             "type": "array",
@@ -60763,6 +60923,16 @@
              }
             ]
            },
+           "checkBeforeDeploy": {
+            "description": "Check for newer files before a deploy operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
+           "checkBeforePull": {
+            "description": "Check for older files before a pull operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
            "deleted": {
             "description": "One or more operations that should be invoked AFTER a delete operation has been finished.",
             "type": "array",
@@ -64416,6 +64586,16 @@
              ]
             }
            },
+           "checkBeforeDeploy": {
+            "description": "Check for newer files before a deploy operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
+           "checkBeforePull": {
+            "description": "Check for older files before a pull operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
            "deleted": {
             "description": "One or more operations that should be invoked AFTER a delete operation has been finished.",
             "type": "array",
@@ -68023,6 +68203,16 @@
               }
              ]
             }
+           },
+           "checkBeforeDeploy": {
+            "description": "Check for newer files before a deploy operation starts or not.",
+            "type": "boolean",
+            "default": false
+           },
+           "checkBeforePull": {
+            "description": "Check for older files before a pull operation starts or not.",
+            "type": "boolean",
+            "default": false
            },
            "deleted": {
             "description": "One or more operations that should be invoked AFTER a delete operation has been finished.",

@@ -125,6 +125,18 @@ export interface Translation {
         };
         canceledByOperation?: string;
         cancelling?: string;
+        checkBeforeDeploy?: {
+            beginOperation?: string;
+            newerFilesFound?: string;
+            notSupported?: string;
+            report?: {
+                lastChange?: string;
+                localFile?: string;
+                remoteFile?: string;
+                size?: string;
+                title?: string;
+            };
+        };
         currentFile?: {
             description?: string;
             label?: string;
@@ -382,6 +394,18 @@ export interface Translation {
         };
         canceledByOperation?: string;
         cancelling?: string;
+        checkBeforePull?: {
+            beginOperation?: string;
+            notSupported?: string;
+            olderFilesFound?: string;
+            report?: {
+                lastChange?: string;
+                localFile?: string;
+                remoteFile?: string;
+                size?: string;
+                title?: string;
+            };
+        };
         currentFile?: {
             description?: string;
             label?: string;

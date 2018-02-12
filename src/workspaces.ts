@@ -1135,13 +1135,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             return;
         }
 
-        const TARGET_TYPE = deploy_targets.normalizeTargetType(target);
-
         return this.context.plugins.filter(pi => {
-            const PLUGIN_TYPE = deploy_helpers.normalizeString(pi.__type);
-
-            return '' === PLUGIN_TYPE || 
-                   (TARGET_TYPE === PLUGIN_TYPE && pi.canDelete && pi.deleteFiles);
+            return deploy_plugins.canDelete(pi, target);
         });
     }
 
@@ -1157,13 +1152,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             return;
         }
 
-        const TARGET_TYPE = deploy_targets.normalizeTargetType(target);
-
         return this.context.plugins.filter(pi => {
-            const PLUGIN_TYPE = deploy_helpers.normalizeString(pi.__type);
-
-            return '' === PLUGIN_TYPE || 
-                   (TARGET_TYPE === PLUGIN_TYPE && pi.canDownload && pi.downloadFiles);
+            return deploy_plugins.canDownload(pi, target);
         });
     }
 
@@ -1336,13 +1326,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             return;
         }
 
-        const TARGET_TYPE = deploy_targets.normalizeTargetType(target);
-
         return this.context.plugins.filter(pi => {
-            const PLUGIN_TYPE = deploy_helpers.normalizeString(pi.__type);
-
-            return '' === PLUGIN_TYPE || 
-                   (TARGET_TYPE === PLUGIN_TYPE && pi.canList && pi.listDirectory);
+            return deploy_plugins.canList(pi, target);
         });
     }
 
@@ -1598,13 +1583,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             return;
         }
 
-        const TARGET_TYPE = deploy_targets.normalizeTargetType(target);
-
         return this.context.plugins.filter(pi => {
-            const PLUGIN_TYPE = deploy_helpers.normalizeString(pi.__type);
-
-            return '' === PLUGIN_TYPE || 
-                   (TARGET_TYPE === PLUGIN_TYPE && pi.canUpload && pi.uploadFiles);
+            return deploy_plugins.canUpload(pi, target);
         });
     }
 

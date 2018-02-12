@@ -314,14 +314,14 @@ export async function deleteFilesIn(files: string[],
 
         while (PLUGINS.length > 0) {
             await WAIT_WHILE_CANCELLING();
-
+            
             if (CANCELLATION_SOURCE.token.isCancellationRequested) {
                 break;
             }
 
             const PI = PLUGINS.shift();
 
-            try {
+            try {                
                 ME.output.appendLine('');
 
                 if (files.length > 1) {

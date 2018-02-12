@@ -1528,3 +1528,84 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
         );
     }
 }
+
+
+/**
+ * Checks if a plugin can delete files.
+ * 
+ * @param {Plugin} plugin The plugin.
+ * @param {deploy_targets.Target} target The target.
+ * 
+ * @return {boolean} Can delete or not.
+ */
+export function canDelete(plugin: Plugin, target: deploy_targets.Target) {
+    if (!plugin) {
+        return false;
+    }
+
+    const PLUGIN_TYPE = deploy_helpers.normalizeString(plugin.__type);
+    const TARGET_TYPE = deploy_targets.normalizeTargetType(target);
+
+    return '' === PLUGIN_TYPE || 
+           (TARGET_TYPE === PLUGIN_TYPE && plugin.canDelete && plugin.deleteFiles);
+}
+
+/**
+ * Checks if a plugin can download files.
+ * 
+ * @param {Plugin} plugin The plugin.
+ * @param {deploy_targets.Target} target The target.
+ * 
+ * @return {boolean} Can download or not.
+ */
+export function canDownload(plugin: Plugin, target: deploy_targets.Target) {
+    if (!plugin) {
+        return false;
+    }
+
+    const PLUGIN_TYPE = deploy_helpers.normalizeString(plugin.__type);
+    const TARGET_TYPE = deploy_targets.normalizeTargetType(target);
+
+    return '' === PLUGIN_TYPE || 
+           (TARGET_TYPE === PLUGIN_TYPE && plugin.canDownload && plugin.downloadFiles);
+}
+
+/**
+ * Checks if a plugin can list directories.
+ * 
+ * @param {Plugin} plugin The plugin.
+ * @param {deploy_targets.Target} target The target.
+ * 
+ * @return {boolean} Can list or not.
+ */
+export function canList(plugin: Plugin, target: deploy_targets.Target) {
+    if (!plugin) {
+        return false;
+    }
+
+    const PLUGIN_TYPE = deploy_helpers.normalizeString(plugin.__type);
+    const TARGET_TYPE = deploy_targets.normalizeTargetType(target);
+
+    return '' === PLUGIN_TYPE || 
+           (TARGET_TYPE === PLUGIN_TYPE && plugin.canList && plugin.listDirectory);
+}
+
+/**
+ * Checks if a plugin can upload files.
+ * 
+ * @param {Plugin} plugin The plugin.
+ * @param {deploy_targets.Target} target The target.
+ * 
+ * @return {boolean} Can upload or not.
+ */
+export function canUpload(plugin: Plugin, target: deploy_targets.Target) {
+    if (!plugin) {
+        return false;
+    }
+
+    const PLUGIN_TYPE = deploy_helpers.normalizeString(plugin.__type);
+    const TARGET_TYPE = deploy_targets.normalizeTargetType(target);
+
+    return '' === PLUGIN_TYPE || 
+           (TARGET_TYPE === PLUGIN_TYPE && plugin.canUpload && plugin.uploadFiles);
+}
