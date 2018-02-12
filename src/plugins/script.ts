@@ -76,7 +76,7 @@ export interface ScriptModule {
     readonly execute: ScriptExecutor;
 }
 
- /**
+/**
  * A 'script' target.
  */
 export interface ScriptTarget extends deploy_targets.Target {

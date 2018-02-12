@@ -15,8 +15,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as deploy_objects from './objects';
 import * as deploy_files from './files';
+import * as deploy_objects from './objects';
 import * as vscode from 'vscode';
 
 

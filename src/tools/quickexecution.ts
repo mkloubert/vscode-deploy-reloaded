@@ -16,7 +16,7 @@
  */
 
 
- /**
+/**
  * Quick execution of JavaScript code.
  * 
  * @param {any} extension The extension context.
