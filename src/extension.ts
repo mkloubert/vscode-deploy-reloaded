@@ -768,10 +768,13 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 }
             }),
 
-            // handle current file or folder
-            vscode.commands.registerCommand('extension.deploy.reloaded.currentFileOrFolder', async (u?: vscode.Uri) => {
-                await deploy_commands.handleCurrentFileOrFolder(context, u);
-            }),
+            // handle current file(s) or folder(s)
+            vscode.commands.registerCommand('extension.deploy.reloaded.currentFileOrFolder',
+                async function (fileOrFolder?: vscode.Uri, allItems?: vscode.Uri[]) {
+                    await deploy_commands.handleFilesAndFolders(
+                        context,
+                        fileOrFolder, allItems);
+                }),
 
             // deploy
             vscode.commands.registerCommand('extension.deploy.reloaded.deploy', async () => {

@@ -74,6 +74,10 @@ export const translation: Translation = {
             folder: {
                 description: "Löscht das aktuell ausgewählte Verzeichnis",
                 label: "Ausgewähltes Verzeichnis löschen",
+            },
+            items: {
+                description: "Löscht alle Dateien der aktuell ausgewählten Elemente",
+                label: "Ausgewählte Dateien und Verzeichnisse löschen",
             }
         },
         deletingFile: "Lösche Datei{0:trim,surround,leading_space} in{1:trim,surround,leading_space} ...",
@@ -127,6 +131,10 @@ export const translation: Translation = {
             folder: {
                 description: "Stellt alle Dateien des aktuell ausgewählte Verzeichnis bereit",
                 label: "Ausgewähltes Verzeichnis bereitstellen",
+            },
+            items: {
+                description: "Stellt alle Dateien der aktuell ausgewählten Elemente bereit",
+                label: "Ausgewählte Dateien und Verzeichnisse bereitstellen",
             }
         },
         deployingFile: "Stelle Datei{0:trim,surround,leading_space} in{1:trim,surround,leading_space} bereit ...",
@@ -381,6 +389,10 @@ export const translation: Translation = {
             folder: {
                 description: "Lädt alle Dateien des aktuell ausgewählte Verzeichnis",
                 label: "Ausgewähltes Verzeichnis laden",
+            },
+            items: {
+                description: "Lädt alle Dateien der aktuell ausgewählte Elemente",
+                label: "Ausgewählte Elemente laden",
             }
         },
         errors: {

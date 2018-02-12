@@ -80,6 +80,10 @@ export interface Translation {
             folder?: {
                 description?: string;
                 label?: string;
+            },
+            items?: {
+                description?: string;
+                label?: string;
             }
         };
         deletingFile?: string;
@@ -131,6 +135,10 @@ export interface Translation {
                 label?: string;
             },
             folder?: {
+                description?: string;
+                label?: string;
+            },
+            items?: {
                 description?: string;
                 label?: string;
             }
@@ -384,6 +392,10 @@ export interface Translation {
                 label?: string;
             },
             folder?: {
+                description?: string;
+                label?: string;
+            },
+            items?: {
                 description?: string;
                 label?: string;
             }

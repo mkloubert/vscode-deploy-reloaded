@@ -74,6 +74,10 @@ export const translation: Translation = {
             folder: {
                 description: "Deletes all files of the selected folder",
                 label: "Delete selected folder",
+            },
+            items: {
+                description: "Deletes all files of the selected items",
+                label: "Delete selected items",
             }
         },
         deletingFile: "Deleting file{0:trim,surround,leading_space} in{1:trim,surround,leading_space} ...",
@@ -127,6 +131,10 @@ export const translation: Translation = {
             folder: {
                 description: "Deploys all files of the selected folder",
                 label: "Deploy selected folder",
+            },
+            items: {
+                description: "Deploys all files of the selected items",
+                label: "Deploy selected items",
             }
         },
         deployingFile: "Deploying file{0:trim,surround,leading_space} to{1:trim,surround,leading_space} ...",
@@ -382,6 +390,10 @@ export const translation: Translation = {
             folder: {
                 description: "Pulls all files of the selected folder",
                 label: "Pull selected folder",
+            },
+            items: {
+                description: "Pulls all files of the selected items",
+                label: "Pull selected items",
             }
         },
         errors: {

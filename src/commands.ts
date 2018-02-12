@@ -376,29 +376,42 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
 }
 
 /**
- * Handles a current file or folder.
+ * Handles files and folders.
  * 
  * @param {vscode.ExtensionContext} context The extension context.
  * @param {vscode.Uri} u The URI of the current file / folder.
+ * @param {vscode.Uri[]} allItems The URI of all (selected) items.
  */
-export async function handleCurrentFileOrFolder(context: vscode.ExtensionContext, u: vscode.Uri) {
-    let fileOrFolder: string;
-    if (deploy_helpers.isNullOrUndefined(u)) {
+export async function handleFilesAndFolders(
+    context: vscode.ExtensionContext,
+    u: vscode.Uri, allItems: vscode.Uri[],
+) {
+    allItems = deploy_helpers.asArray(allItems);
+    if (allItems.length < 1) {
+        allItems.push(u);
+    }
+    allItems = deploy_helpers.asArray(allItems);
+
+    let filesAndFolders: string[];
+    if (allItems.length < 1) {
         // try get active editor document
 
         const ACTIVE_EDITOR = vscode.window.activeTextEditor;
         if (ACTIVE_EDITOR) {
             const DOC = ACTIVE_EDITOR.document;
             if (DOC) {
-                fileOrFolder = DOC.fileName;
+                filesAndFolders = [ DOC.fileName ];
             }
         }
     }
     else {
-        fileOrFolder = u.fsPath;
+        filesAndFolders = allItems.map(u => u.fsPath);
     }
+    filesAndFolders = Enumerable.from( deploy_helpers.asArray(filesAndFolders) )
+                                .where(ff => !deploy_helpers.isEmptyString(ff))
+                                .toArray();
 
-    if (deploy_helpers.isEmptyString(fileOrFolder)) {
+    if (filesAndFolders.length < 1) {
         deploy_helpers.showWarningMessage(
             i18.t('currentFileOrFolder.noneSelected')
         );
@@ -419,9 +432,12 @@ export async function handleCurrentFileOrFolder(context: vscode.ExtensionContext
     }
 
     try {
-        const STATS = await deploy_helpers.lstat(fileOrFolder);
-        
-        const URI_TYPE: 'file' | 'folder' = STATS.isDirectory() ? 'folder' : 'file';
+        let uriType: 'file' | 'folder' | 'items' = 'items';
+        if (1 === filesAndFolders.length) {
+            const STATS = await deploy_helpers.lstat( filesAndFolders[0] );
+
+            uriType = STATS.isDirectory() ? 'folder' : 'file';
+        }
 
         const INVOKE_TARGET_ACTION = async (action: (target: deploy_targets.Target, files: string[]) => any,
                                             promptId: string) => {
@@ -439,20 +455,26 @@ export async function handleCurrentFileOrFolder(context: vscode.ExtensionContext
             const WORKSPACE = SELECTED_TARGET.__workspace;
 
             let filesToHandle: string[] = [];
-            if ('file' === URI_TYPE) {
-                filesToHandle.push(u.fsPath);
-            }
-            else {
-                Enumerable.from(await deploy_helpers.glob('**', {
-                    cwd: fileOrFolder,
-                    dot: true,
-                    nosort: true,
-                    nounique: false,
-                    root: fileOrFolder,                    
-                })).pushTo(filesToHandle);
+            for (const FF of filesAndFolders) {
+                const STATS = await deploy_helpers.lstat(FF);
+
+                if (STATS.isFile()) {
+                    filesToHandle.push(FF);
+                }
+                else {
+                    Enumerable.from(await deploy_helpers.glob('**', {
+                        cwd: FF,
+                        dot: true,
+                        nosort: true,
+                        nounique: false,
+                        root: FF,                        
+                    })).pushTo(filesToHandle);
+                }
             }
 
-            filesToHandle = Enumerable.from(filesToHandle).distinct().where(f => {
+            filesToHandle = Enumerable.from(filesToHandle).select(f => {
+                return Path.resolve(f);
+            }).distinct().where(f => {
                 return WORKSPACE.isPathOf(f) &&
                        !WORKSPACE.isFileIgnored(f);
             }).orderBy(f => {
@@ -463,8 +485,7 @@ export async function handleCurrentFileOrFolder(context: vscode.ExtensionContext
                 return Path.basename(f).length;
             }).thenBy(f => {
                 return deploy_helpers.normalizeString(Path.basename(f));
-            }).distinct()
-              .toArray();
+            }).toArray();
             
             if (filesToHandle.length > 0) {
                 await Promise.resolve(
@@ -485,8 +506,8 @@ export async function handleCurrentFileOrFolder(context: vscode.ExtensionContext
                           () => files);
                     }, 'deploy.selectTarget');
                 },
-                label: '$(rocket)  ' + i18.t(`deploy.currentFileOrFolder.${URI_TYPE}.label`),
-                description: i18.t(`deploy.currentFileOrFolder.${URI_TYPE}.description`),
+                label: '$(rocket)  ' + i18.t(`deploy.currentFileOrFolder.${uriType}.label`),
+                description: i18.t(`deploy.currentFileOrFolder.${uriType}.description`),
             },
             {
                 action: async () => {
@@ -499,8 +520,8 @@ export async function handleCurrentFileOrFolder(context: vscode.ExtensionContext
                           () => files);
                     }, 'pull.selectSource');
                 },
-                label: '$(cloud-download)  ' + i18.t(`pull.currentFileOrFolder.${URI_TYPE}.label`),
-                description: i18.t(`pull.currentFileOrFolder.${URI_TYPE}.description`),
+                label: '$(cloud-download)  ' + i18.t(`pull.currentFileOrFolder.${uriType}.label`),
+                description: i18.t(`pull.currentFileOrFolder.${uriType}.description`),
             },
             {
                 action: async () => {
@@ -546,16 +567,13 @@ export async function handleCurrentFileOrFolder(context: vscode.ExtensionContext
                           deleteLocalFiles);
                     }, 'DELETE.selectTarget');
                 },
-                label: '$(trashcan)  ' + i18.t(`DELETE.currentFileOrFolder.${URI_TYPE}.label`),
-                description: i18.t(`DELETE.currentFileOrFolder.${URI_TYPE}.description`),
+                label: '$(trashcan)  ' + i18.t(`DELETE.currentFileOrFolder.${uriType}.label`),
+                description: i18.t(`DELETE.currentFileOrFolder.${uriType}.description`),
             },
         ];
 
         const SELECTED_ITEM = await vscode.window.showQuickPick(
-            QUICK_PICKS,
-            {
-                ignoreFocusOut: true
-            }
+            QUICK_PICKS
         );
         if (SELECTED_ITEM) {
             await Promise.resolve(
