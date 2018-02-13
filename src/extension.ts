@@ -576,7 +576,7 @@ async function updateWorkspaceButton() {
 
         if (ALL_WORKSPACES.length > 0) {
             command = 'extension.deploy.reloaded.selectWorkspace';
-            tooltip = i18.t('workspaces.selectButtonTooltip');
+            tooltip = i18.t('workspaces.selectButton.tooltip');
         }
 
         BTN.color = color;

@@ -5,6 +5,7 @@ img/**
 out/test/**
 out/**/*.map
 src/**
+tsdoc/**
 _res/**
 .gitignore
 package-lock.json
