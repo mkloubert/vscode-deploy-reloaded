@@ -637,7 +637,7 @@ export const translation: Translation = {
                 },
                 packageFileContainsNoModules: "{0:trim,surround,ending_space}contains no modules!",
                 packageFileNotFound: "No 'package.json' file found in{0:trim,surround,leading_space}!",
-                label: "Run 'npm UNinstall' ...",
+                label: "Run 'npm uninstall' ...",
             },
         },
         quickExecution: {
@@ -686,6 +686,26 @@ export const translation: Translation = {
             description: "Displays the files of a package",
             label: "Show package files ...",
             title: "Files of package{0:trim,surround,leading_space}",
+        },
+        yarn: {
+            description: "Tools for simple use of 'Yarn'",
+            executing: "Running{0:trim,surround,leading_space} ...",
+            label: "Yarn",
+            moduleExample: "'lodash' e.g.",
+            runAdd: {
+                description: "Runs 'yarn add' inside the current workspace",
+                enterModuleName: "Enter the name of the Yarn module ...",
+                label: "Run 'yarn add' ...",
+            },
+            runRemove: {
+                description: "Runs 'yarn remove' inside the current workspace",
+                errors: {
+                    loadingPackageFileFailed: "Loading{0:trim,surround,leading_space} failed:{1:trim,surround,leading_space}",
+                },
+                label: "Run 'yarn remove' ...",
+                packageFileContainsNoModules: "{0:trim,surround,ending_space}contains no modules!",
+                packageFileNotFound: "No 'package.json' file found in{0:trim,surround,leading_space}!",
+            },
         },
     },
     values: {
@@ -751,6 +771,14 @@ export const translation: Translation = {
         selectSource: "Select source for workspace{0:trim,surround,leading_space} ...",
         selectTarget: "Select target for workspace{0:trim,surround,leading_space} ...",
         selectWorkspace: "Select a workspace ...",
+        yarn: {
+            install: {
+                errors: {
+                    failed: "'yarn install' failed:{0:trim,surround,leading_space}",
+                },
+                running: "Running 'yarn install' in{0:trim,surround,leading_space} ..."
+            }
+        },
     },
     yes: 'Yes',
 };

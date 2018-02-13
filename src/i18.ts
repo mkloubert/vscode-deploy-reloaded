@@ -643,7 +643,7 @@ export interface Translation {
                 packageFileNotFound?: string;
                 label?: string;
             };
-        },
+        };
         quickExecution?: {
             description?: string;
             errors?: {
@@ -690,6 +690,26 @@ export interface Translation {
             description?: string;
             label?: string;
             title?: string;
+        };
+        yarn?: {
+            description?: string;
+            executing?: string;
+            label?: string;
+            moduleExample?: string;
+            runAdd?: {
+                description?: string;
+                enterModuleName?: string;                
+                label?: string;                
+            };
+            runRemove?: {
+                description?: string;
+                errors?: {
+                    loadingPackageFileFailed?: string;
+                };
+                label?: string;
+                packageFileContainsNoModules?: string;
+                packageFileNotFound?: string;
+            };
         };
     };
     values?: {
@@ -755,6 +775,14 @@ export interface Translation {
         selectSource?: string;
         selectTarget?: string;
         selectWorkspace?: string;
+        yarn?: {
+            install?: {
+                errors?: {
+                    failed?: string;
+                };
+                running?: string;
+            }
+        };
     };
     yes?: string;
 }

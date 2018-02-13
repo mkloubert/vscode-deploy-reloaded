@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.47.0",
+ "version": "0.48.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.20.0"
@@ -18,7 +18,8 @@
   "Workspace",
   "Files",
   "SFTP",
-  "Cloud"
+  "Cloud",
+  "multi-root ready"
  ],
  "activationEvents": [
   "*"
@@ -466,6 +467,11 @@
       },
       "initNodeModules": {
        "description": "Runs 'npm install' inside the workspace folder on startup, if a 'package.json' file exists and NO 'node_modules' folder has been found.",
+       "type": "boolean",
+       "default": false
+      },
+      "initYarn": {
+       "description": "Runs 'yarn install' (instead of 'npm install') inside the workspace folder on startup, if a 'package.json' file exists and NO 'node_modules' folder has been found.",
        "type": "boolean",
        "default": false
       },

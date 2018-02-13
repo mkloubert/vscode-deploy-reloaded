@@ -1984,11 +1984,21 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             return;
         }
 
-        if (!deploy_helpers.toBooleanSafe(cfg.initNodeModules)) {
+        const USE_YARN = deploy_helpers.toBooleanSafe(cfg.initYarn);
+
+        if (!deploy_helpers.toBooleanSafe(cfg.initNodeModules) && !USE_YARN) {
             return;
         }
 
         const ME = this;
+
+        let langErrId: string;
+        if (USE_YARN) {
+            langErrId = 'workspaces.yarn.install.errors.failed';
+        }
+        else {
+            langErrId = 'workspaces.npm.install.errors.failed';
+        }
 
         try {
             const PACKAGE_JSON = Path.resolve(
@@ -2011,13 +2021,24 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 return;  // 'node_modules' already exist
             }
 
+            let cmd: string;
+            let langId: string;
+            if (USE_YARN) {
+                cmd = 'yarn install';
+                langId = 'workspaces.yarn.install.running';                
+            }
+            else {
+                cmd = 'npm install';
+                langId = 'workspaces.npm.install.running';
+            }
+
             ME.output.appendLine('');
             ME.output.append(
-                ME.t('workspaces.npm.install.running',
+                ME.t(langId,
                      ME.rootPath) + ' '
             );
             try {
-                await ME.exec('npm install');
+                await ME.exec(cmd);
 
                 ME.output.appendLine(
                     `[${ME.t('ok')}]`
@@ -2031,8 +2052,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         }
         catch (e) {
             ME.showErrorMessage(
-                ME.t('workspaces.npm.install.errors.failed',
-                     e)
+                ME.t(langErrId, e)
             );
         }
     }

@@ -636,7 +636,7 @@ export const translation: Translation = {
                 },
                 packageFileContainsNoModules: "{0:trim,surround,ending_space}beinhaltet keine Module!",
                 packageFileNotFound: "Es wurde keine 'package.json'-Datei in{0:trim,surround,leading_space} gefunden!",
-                label: "'npm UNinstall' ausführen ...",
+                label: "'npm uninstall' ausführen ...",
             },
         },
         quickExecution: {
@@ -685,6 +685,26 @@ export const translation: Translation = {
             description: "Zeigt die Dateien eines Paketes an",
             label: "Paket-Dateien anzeigen",
             title: "Dateien des Paketes{0:trim,surround,leading_space}",
+        },
+        yarn: {
+            description: "Werkzeuge für das einfache Arbeiten mit 'Yarn'",
+            executing: "Führe{0:trim,surround,leading_space} aus ...",
+            label: "Yarn",
+            moduleExample: "z.B. 'lodash'",
+            runAdd: {
+                description: "Führt den Befehl 'yarn add' im aktuellen Arbeitsbereich aus",
+                enterModuleName: "Geben Sie den Namen des Yarn-Moduls an ...",
+                label: "'yarn add' ausführen ...",
+            },
+            runRemove: {
+                description: "Führt den Befehl 'yarn remove' im aktuellen Arbeitsbereich aus",
+                errors: {
+                    loadingPackageFileFailed: "Das Laden von{0:trim,surround,leading_space} ist fehlgeschlagen:{1:trim,surround,leading_space}",
+                },
+                label: "'yarn remove' ausführen ...",
+                packageFileContainsNoModules: "{0:trim,surround,ending_space}beinhaltet keine Module!",
+                packageFileNotFound: "Es wurde keine 'package.json'-Datei in{0:trim,surround,leading_space} gefunden!",
+            },
         },
     },
     values: {
@@ -750,6 +770,14 @@ export const translation: Translation = {
         selectSource: "Wählen Sie eine Quelle für den Arbeitsbereich{0:trim,surround,leading_space} ...",
         selectTarget: "Wählen Sie ein Ziel für den Arbeitsbereich{0:trim,surround,leading_space} ...",
         selectWorkspace: "Wählen Sie einen Arbeitsbereich ...",
+        yarn: {
+            install: {
+                errors: {
+                    failed: "'yarn install' konnte nicht ausgeführt werden:{0:trim,surround,leading_space}",
+                },
+                running: "Führe 'yarn install' in{0:trim,surround,leading_space} aus ..."
+            }
+        },
     },
     yes: 'Ja',
 };

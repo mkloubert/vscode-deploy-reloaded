@@ -39,6 +39,7 @@ import * as deploy_tools_composer from './tools/composer';
 import * as deploy_tools_npm from './tools/npm';
 import * as deploy_tools_quick_execution from './tools/quickexecution';
 import * as deploy_tools_send_file from './tools/sendfile';
+import * as deploy_tools_yarn from './tools/yarn';
 import * as deploy_workflows from './workflows';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
@@ -1374,7 +1375,16 @@ async function activateExtension(context: vscode.ExtensionContext) {
                             label: '$(package)  ' + i18.t('tools.git.listFileChanges.label'),
                             description: i18.t('tools.git.listFileChanges.description'),
                             state: 8,
-                        }
+                        },
+
+                        {
+                            action: async () => {
+                                await deploy_tools_yarn.showYarnTools(context);
+                            },
+                            label: '$(package)  ' + i18.t('tools.yarn.label'),
+                            description: i18.t('tools.yarn.description'),
+                            state: 9,
+                        },
                     ];
 
                     const SELECTED_ITEM = await vscode.window.showQuickPick(
@@ -1531,6 +1541,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 deploy_targets.resetTargetUsage(context);
                 deploy_tools.resetToolUsage(context);
                 deploy_workspaces.resetWorkspaceUsage(context);
+                deploy_tools_yarn.resetYarnToolsUsage(context);
 
                 onDidChangeConfiguration(e).then(() => {
                 }).catch((err) => {

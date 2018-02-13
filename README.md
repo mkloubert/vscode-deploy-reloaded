@@ -33,7 +33,6 @@ The extension supports the following destinations:
    * [Deploy git commit](#deploy-git-commit-)
    * [Sync when open](#sync-when-open-)
    * [Auto remove on remote](#auto-remove-on-remote-)
-   * [Compare files](#compare-files-)
    * [Download files](#download-files-)
    * [Check before deploy](#check-before-deploy-)
    * [Compare files](#compare-files-)

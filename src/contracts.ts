@@ -216,6 +216,10 @@ export interface Configuration extends deploy_packages.WithFastFileCheckSettings
      */
     readonly initNodeModules?: boolean;
     /**
+     * Runs 'yarn install' (instead of 'npm install') inside the workspace folder on startup, if a 'package.json' file exists and NO 'node_modules' folder has been found.
+     */
+    readonly initYarn?: boolean;
+    /**
      * The custom ID of the language to use (e.g. 'en', 'de').
      */
     readonly language?: string;
