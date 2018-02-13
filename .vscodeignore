@@ -10,3 +10,6 @@ _res/**
 .gitignore
 package-lock.json
 tsconfig.json
+/pushall.sh
+/typedoc.cmd
+/tslint.json
