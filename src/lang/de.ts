@@ -767,6 +767,9 @@ export const translation: Translation = {
             }
         },
         removing: "Schliesse Arbeitsbereich{0:trim,surround,leading_space} ...",
+        selectButton: {
+            tooltip: "Hier klicken, um einen anderen Arbeitsbereich als aktiv auszuwählen ...",
+        },
         selectSource: "Wählen Sie eine Quelle für den Arbeitsbereich{0:trim,surround,leading_space} ...",
         selectTarget: "Wählen Sie ein Ziel für den Arbeitsbereich{0:trim,surround,leading_space} ...",
         selectWorkspace: "Wählen Sie einen Arbeitsbereich ...",

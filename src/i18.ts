@@ -772,6 +772,9 @@ export interface Translation {
             }
         };
         removing?: string;
+        selectButton?: {
+            tooltip?: string;
+        };
         selectSource?: string;
         selectTarget?: string;
         selectWorkspace?: string;

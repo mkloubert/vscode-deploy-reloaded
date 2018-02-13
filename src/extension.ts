@@ -242,6 +242,8 @@ async function onDidChangeConfiguration(e: vscode.ConfigurationChangeEvent) {
                       .trace(e, 'extension.onDidChangeConfiguration()');
         }
     });
+
+    await updateWorkspaceButton();
 }
 
 async function onDidFileChange(e: vscode.Uri, type: deploy_contracts.FileChangeType) {
@@ -550,12 +552,18 @@ async function updateWorkspaceButton() {
     }
 
     try {
-        const ACTIVE_WORKSPACES = deploy_helpers.asArray(activeWorkspaces)
-                                                .map(ws => ws);
+        const ACTIVE_WORKSPACES = deploy_helpers.asArray(activeWorkspaces);
+        const ALL_WORKSPACES = deploy_helpers.asArray(WORKSPACES);
 
+        const ALWAYS_SHOW_BUTTON = Enumerable.from(ALL_WORKSPACES).any(ws => {
+            const CFG = ws.config;
+
+            return CFG && deploy_helpers.toBooleanSafe(CFG.alwaysShowWorkspaceSelector);
+        });
         let command: string;
         let color = '#ffffff';
         let text = 'Deploy Reloaded: ';
+        let tooltip: string;
         if (ACTIVE_WORKSPACES.length < 1) {
             color = '#ffff00';
             text += `(${i18.t('workspaces.noSelected')})`;
@@ -566,15 +574,17 @@ async function updateWorkspaceButton() {
             }).joinToString(', ');
         }
 
-        if (WORKSPACES.length > 0) {
+        if (ALL_WORKSPACES.length > 0) {
             command = 'extension.deploy.reloaded.selectWorkspace';
+            tooltip = i18.t('workspaces.selectButtonTooltip');
         }
 
         BTN.color = color;
         BTN.command = command;
         BTN.text = text;
+        BTN.tooltip = tooltip;
 
-        if (WORKSPACES.length > 0) {
+        if (ALL_WORKSPACES.length > 1 || ALWAYS_SHOW_BUTTON) {
             BTN.show();
         }
         else {

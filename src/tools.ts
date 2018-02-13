@@ -168,158 +168,108 @@ exports.execute = function(args) {
 
 
 // DELETE
-function deleteFiles(args) {
-    return new Promise((resolve, reject) => {
+async function deleteFiles(args) {
+    for (let file of args.files) {
+        // file: https://mkloubert.github.io/vscode-deploy-reloaded/interfaces/_plugins_.filetodelete.html
+
+        if (args.isCancelling)
+            break;  // user wants to cancel
+
         try {
-            for (let file of args.files) {
-                // file: https://mkloubert.github.io/vscode-deploy-reloaded/interfaces/_plugins_.filetodelete.html
+            await file.onBeforeDelete();  // tell that we are going to start the
+                                          // delete operation for this file now
+                                          // 
+                                          // you can submit an optional string that
+                                          // is displayed as 'destination' in the GUI
 
-                if (args.isCancelling)
-                    break;  // user wants to cancel
+            // do the delete operation here
+            throw new Error('Not implemented!');
 
-                try {
-                    file.onBeforeDelete();  // tell that we are going to start the
-                                            // delete operation for this file now
-                                            // 
-                                            // you can submit an optional string that
-                                            // is displayed as 'destination' in the GUI
-                                            //
-                                            // this is done async
-
-                    // do the delete operation here
-                    throw new Error('Not implemented!');
-
-                    file.onDeleteCompleted();  // tell that anything worked fine (async)
-                }
-                catch (e) {
-                    file.onDeleteCompleted(e);  // submit the error (async)
-                }
-            }
-
-            resolve();
+            await file.onDeleteCompleted();  // tell that anything worked fine
         }
         catch (e) {
-            reject( e );
+            await file.onDeleteCompleted(e);  // submit the error
         }
-    });
+    }
 }
 
 // DEPLOY / UPLOAD
-function deployFiles(args) {
-    return new Promise((resolve, reject) => {
+async function deployFiles(args) {
+    for (let file of args.files) {
+        // file: https://mkloubert.github.io/vscode-deploy-reloaded/interfaces/_plugins_.filetoupload.html
+
+        if (args.isCancelling)
+            break;  // user wants to cancel
+
         try {
-            for (let file of args.files) {
-                // file: https://mkloubert.github.io/vscode-deploy-reloaded/interfaces/_plugins_.filetoupload.html
+            await file.onBeforeUpload();  // tell that we are going to start the
+                                          // deploy operation for this file now
+                                          // 
+                                          // you can submit an optional string that
+                                          // is displayed as 'destination' in the GUI
 
-                if (args.isCancelling)
-                    break;  // user wants to cancel
-
-                try {
-                    file.onBeforeUpload();  // tell that we are going to start the
-                                            // deploy operation for this file now
-                                            // 
-                                            // you can submit an optional string that
-                                            // is displayed as 'destination' in the GUI
-                                            //
-                                            // this is done async
-
-                    // do the deploy operation here
-                    
-                    // reads the content of this file async
-                    // and returns a Promise with the buffer
-                    // of the data to deploy
-                    // 
-                    let contentToDeploy = file.read();
-
-                    throw new Error('Not implemented!');
-
-                    file.onUploadCompleted();  // tell that anything worked fine (async)
-                }
-                catch (e) {
-                    file.onUploadCompleted(e);  // submit the error (async)
-                }
-            }
-
-            resolve();
-        }
-        catch (e) {
-            reject( e );
-        }
-    });
-}
-
-// LIST DIRECTORY
-function listDirectory(args) {
-    return new Promise((resolve, reject) => {
-        try {
-            let result = {
-                dirs: [],   // DirectoryInfo: https://mkloubert.github.io/vscode-deploy-reloaded/interfaces/_files_.directoryinfo.html
-                files: [],  // FileInfo: https://mkloubert.github.io/vscode-deploy-reloaded/interfaces/_files_.fileinfo.html
-                others: [],  // other FileSystemInfo objects: https://mkloubert.github.io/vscode-deploy-reloaded/interfaces/_files_.filesysteminfo.html
-                target: args.target
-            };
-
-            // the directory to list is stored in
-            // 'args.dir'
-
-            // args.isCancelling provides if
-            // user wants to cancel or not
+            let contentToDeploy = await Promise.resolve( file.read() );
 
             throw new Error('Not implemented!');
 
-            resolve( result );
+            await file.onUploadCompleted();  // tell that anything worked fine
         }
         catch (e) {
-            reject( e );
+            await file.onUploadCompleted(e);  // submit the error
         }
-    });
+    }
+}
+
+// LIST DIRECTORY
+async function listDirectory(args) {
+    let result = {
+        dirs: [],   // DirectoryInfo: https://mkloubert.github.io/vscode-deploy-reloaded/interfaces/_files_.directoryinfo.html
+        files: [],  // FileInfo: https://mkloubert.github.io/vscode-deploy-reloaded/interfaces/_files_.fileinfo.html
+        others: [],  // other FileSystemInfo objects: https://mkloubert.github.io/vscode-deploy-reloaded/interfaces/_files_.filesysteminfo.html
+        target: args.target
+    };
+
+    // the directory to list is stored in
+    // 'args.dir'
+
+    // args.isCancelling provides if
+    // user wants to cancel or not
+
+    return result;
 }
 
 // PULL / DOWNLOAD
-function pullFiles(args) {
-    return new Promise((resolve, reject) => {
+async function pullFiles(args) {
+    for (let file of args.files) {
+        // file: https://mkloubert.github.io/vscode-deploy-reloaded/interfaces/_plugins_.filetodownload.html
+
+        if (args.isCancelling)
+            break;  // user wants to cancel
+
         try {
-            for (let file of args.files) {
-                // file: https://mkloubert.github.io/vscode-deploy-reloaded/interfaces/_plugins_.filetodownload.html
+            await file.onBeforeDownload();  // tell that we are going to start the
+                                            // pull operation for this file now
+                                            // 
+                                            // you can submit an optional string that
+                                            // is displayed as 'source' in the GUI
 
-                if (args.isCancelling)
-                    break;  // user wants to cancel
+            // do the pull operation here
+            // 
+            // we store the data in 'downloadedData' var
+            // for this example
+            // 
+            // recommended is to load the data as buffer
+            // or readable NodeJS stream
+            throw new Error('Not implemented!');
 
-                try {
-                    file.onBeforeDownload();  // tell that we are going to start the
-                                              // pull operation for this file now
-                                              // 
-                                              // you can submit an optional string that
-                                              // is displayed as 'source' in the GUI
-                                              //
-                                              // this is done async
-
-                    // do the pull operation here
-                    // 
-                    // we store the data in 'downloadedData' var
-                    // for this example
-                    // 
-                    // recommended is to load the data as buffer
-                    // or readable NodeJS stream
-                    throw new Error('Not implemented!');
-
-                    // tell that anything worked fine
-                    // and submit the data to write
-                    // 
-                    // this is done async
-                    file.onDownloadCompleted(null, downloadedData);
-                }
-                catch (e) {
-                    file.onDownloadCompleted(e);  // submit the error (async)
-                }
-            }
-
-            resolve();
+            // tell that anything worked fine
+            // and submit the data to write
+            await file.onDownloadCompleted(null, downloadedData);
         }
         catch (e) {
-            reject( e );
+            await file.onDownloadCompleted(e);  // submit the error
         }
-    });
+    }
 }
 `;
 
@@ -590,33 +540,19 @@ const vscode = require('vscode');
 
 
 // entry point
-exports.execute = function(args) {
+exports.execute = async function(args) {
     // args: https://mkloubert.github.io/vscode-deploy-reloaded/interfaces/_targets_operations_script_.scripttargetoperationexecutionarguments.html
 
-    // you also can execute the
-    // function synchronous
-    return new Promise((resolve, reject) => {
-        try {
-            // the root path of the underyling workspace
-            const WORKSPACE_DIR = args.context.target.__workspace.rootPath;
+    // the root path of the underyling workspace
+    const WORKSPACE_DIR = args.context.target.__workspace.rootPath;
 
 
-            // replace the following TEST CODE
-            for (let file of args.context.files) {
-                vscode.window.showWarningMessage(
-                    'File: ' + Path.join(WORKSPACE_DIR, file)
-                );
-            }
-
-
-            // call this on SUCCESS
-            resolve();
-        }
-        catch (e) {
-            // call this on ERROR
-            reject( e );
-        }
-    });
+    // replace the following TEST CODE
+    for (let file of args.context.files) {
+        vscode.window.showWarningMessage(
+            'File: ' + Path.join(WORKSPACE_DIR, file)
+        );
+    }
 }
 `;
 

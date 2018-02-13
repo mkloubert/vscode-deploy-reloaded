@@ -768,6 +768,9 @@ export const translation: Translation = {
             }
         },
         removing: "Closing workspace{0:trim,surround,leading_space} ...",
+        selectButton: {
+            tooltip: "Click here to select another workspace as active one ...",
+        },
         selectSource: "Select source for workspace{0:trim,surround,leading_space} ...",
         selectTarget: "Select target for workspace{0:trim,surround,leading_space} ...",
         selectWorkspace: "Select a workspace ...",

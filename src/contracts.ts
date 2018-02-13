@@ -142,6 +142,10 @@ export interface Configuration extends deploy_packages.WithFastFileCheckSettings
                                        deploy_values.WithValueItems
 {
     /**
+     * Always show workspace button, even if there is only one workspace open or not.
+     */
+    readonly alwaysShowWorkspaceSelector?: boolean;
+    /**
      * One or more requirements to check.
      */
     readonly checkForRequirements?: CheckForRequirementsEntry | CheckForRequirementsEntry[];
