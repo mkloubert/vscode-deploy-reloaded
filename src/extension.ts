@@ -52,7 +52,6 @@ import * as vscode from 'vscode';
 
 let activeWorkspaces: deploy_workspaces.Workspace[] = [];
 let currentContext: vscode.ExtensionContext;
-let fileWatcher: vscode.FileSystemWatcher;
 let isDeactivating = false;
 let nextWorkspaceId = Number.MAX_SAFE_INTEGER;
 let outputChannel: vscode.OutputChannel;
@@ -246,24 +245,6 @@ async function onDidChangeConfiguration(e: vscode.ConfigurationChangeEvent) {
     await updateWorkspaceButton();
 }
 
-async function onDidFileChange(e: vscode.Uri, type: deploy_contracts.FileChangeType) {
-    if (isDeactivating) {
-        return;
-    }
-
-    for (const WS of WORKSPACES) {
-        try {
-            if (WS.isPathOf(e.fsPath)) {
-                await WS.onDidFileChange(e, type);
-            }
-        }
-        catch (e) {
-            deploy_log.CONSOLE
-                      .trace(e, 'extension.onDidFileChange()');
-        }
-    }
-}
-
 async function onDidSaveTextDocument(e: vscode.TextDocument) {
     if (isDeactivating) {
         return;
@@ -326,10 +307,17 @@ async function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?:
     if (added) {
         for (const WSF of added) {
             let newWorkspace: deploy_workspaces.Workspace;
+            let fileWatcher: vscode.FileSystemWatcher;
             try {
+                fileWatcher = vscode.workspace.createFileSystemWatcher(
+                    new vscode.RelativePattern(WSF, '**'),
+                    false, false, false,
+                );
+
                 const CTX: deploy_workspaces.WorkspaceContext = {
                     commands: WORKSPACE_COMMANDS,
                     extension: currentContext,
+                    fileWatcher: fileWatcher,
                     outputChannel: outputChannel,
                     plugins: undefined,
                     workspaces: undefined,
@@ -386,6 +374,7 @@ async function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?:
                 deploy_log.CONSOLE
                           .err(e, 'extension.reloadWorkspaceFolders(1)');
 
+                deploy_helpers.tryDispose(fileWatcher);
                 deploy_helpers.tryDispose(newWorkspace);
             }
         }
@@ -1426,42 +1415,9 @@ async function activateExtension(context: vscode.ExtensionContext) {
                     );
                 }
             }),
-
-            // receive file
-            vscode.commands.registerCommand('extension.deploy.reloaded.receiveFile', async () => {
-                try {
-                    await deploy_tools_send_file.receiveFile(context);
-                }
-                catch (e) {
-                    deploy_log.CONSOLE
-                              .trace(e, 'extension.deploy.reloaded.receiveFile');
-
-                    deploy_helpers.showErrorMessage(
-                        i18.t('tools.errors.operationFailed')
-                    );
-                }
-            }),
-
-            // send file
-            vscode.commands.registerCommand('extension.deploy.reloaded.sendFile', async () => {
-                try {
-                    await deploy_tools_send_file.sendFile(context);
-                }
-                catch (e) {
-                    deploy_log.CONSOLE
-                              .trace(e, 'extension.deploy.reloaded.sendFile');
-
-                    deploy_helpers.showErrorMessage(
-                        i18.t('tools.errors.operationFailed')
-                    );
-                }
-            }),
-
-            // close server instance that waits for a file
-            vscode.commands.registerCommand(deploy_tools_send_file.CLOSE_SERVER_COMMAND, () => {
-                deploy_tools_send_file.closeServer();
-            }),
         );
+
+        deploy_tools_send_file.registerCommands(context);
     });
 
     // HTML document provider
@@ -1575,42 +1531,6 @@ async function activateExtension(context: vscode.ExtensionContext) {
         await reloadWorkspaceFolders(
             vscode.workspace.workspaceFolders
         );
-    });
-
-    // file system watcher
-    WF.next(() => {
-        let newWatcher: vscode.FileSystemWatcher;
-        try {
-            newWatcher = vscode.workspace.createFileSystemWatcher('**',
-                                                                  false, false, false);
-
-            const TRIGGER_CHANGE_EVENT = (e: vscode.Uri, type: deploy_contracts.FileChangeType) => {
-                onDidFileChange(e, type).then(() => {
-                }).catch((err) => {
-                    deploy_log.CONSOLE
-                              .trace(e, 'extension.activate(file system watcher #2)');
-                });
-            };
-
-            newWatcher.onDidChange((e) => {
-                TRIGGER_CHANGE_EVENT(e, deploy_contracts.FileChangeType.Changed);
-            });
-            newWatcher.onDidCreate((e) => {
-                TRIGGER_CHANGE_EVENT(e, deploy_contracts.FileChangeType.Created);
-            });
-            newWatcher.onDidDelete((e) => {
-                TRIGGER_CHANGE_EVENT(e, deploy_contracts.FileChangeType.Deleted);
-            });
-
-            deploy_helpers.tryDispose(fileWatcher);
-            fileWatcher = newWatcher;
-        }
-        catch (e) {
-            deploy_log.CONSOLE
-                      .trace(e, 'extension.activate(file system watcher #1)');
-
-            deploy_helpers.tryDispose(newWatcher);
-        }
     });
 
     // select workspace button
@@ -1759,8 +1679,6 @@ export function deactivate() {
         return;
     }
     isDeactivating = true;
-
-    deploy_helpers.tryDispose(fileWatcher);
 
     while (WORKSPACES.length > 0) {
         deploy_helpers.tryDispose(

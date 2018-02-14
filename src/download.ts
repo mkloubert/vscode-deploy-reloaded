@@ -35,6 +35,54 @@ type DownloadClientConfigTargetType = undefined | null |
 
 type Downloader = (url: URL.Url) => Buffer | PromiseLike<Buffer>;
 
+/**
+ * Additional result data for 'download()' function.
+ */
+export interface DownloadOutValue {
+    /**
+     * The full path of the download source.
+     */
+    fullPath?: string;
+    /**
+     * The source.
+     */
+    source?: DownloadSourceType;
+    /**
+     * The URL.
+     */
+    url?: URL.Url;
+}
+
+/**
+ * List of download source types.
+ */
+export enum DownloadSourceType {
+    /**
+     * Local file.
+     */
+    Local = 0,
+    /**
+     * DropBox
+     */
+    DropBox = 1,
+    /**
+     * FTP
+     */
+    FTP = 2,
+    /**
+     * HTTP
+     */
+    HTTP = 3,
+    /**
+     * SFTP
+     */
+    SFTP = 4,
+    /**
+     * Slack channel
+     */
+    Slack = 5,
+}
+
 
 function createDownloadConfig(url: URL.Url, mappings: DownloadClientConfigMappings): any {
     if (!mappings) {
@@ -107,10 +155,15 @@ function createDownloadConfig(url: URL.Url, mappings: DownloadClientConfigMappin
  * 
  * @param {string|URL.Url} url The URL.
  * @param {string|string[]} [scopes] One or more custom scope directories.
+ * @param {DownloadOutValue} [outVal] Additional result data.
  * 
  * @return {Promise<Buffer>} The promise with the downloaded data.
  */
-export async function download(url: string | URL.Url, scopes?: string | string[]): Promise<Buffer> {
+export async function download(url: string | URL.Url, scopes?: string | string[], outVal?: DownloadOutValue): Promise<Buffer> {
+    if (!outVal) {
+        outVal = <any>{};
+    }
+    
     if (!deploy_helpers.isObject<URL.Url>(url)) {
         let urlString = deploy_helpers.toStringSafe(url);
         if (deploy_helpers.isEmptyString(urlString)) {
@@ -119,6 +172,8 @@ export async function download(url: string | URL.Url, scopes?: string | string[]
 
         url = URL.parse(urlString);
     }
+    outVal.url = url;
+    outVal.fullPath = url.href;
 
     scopes = deploy_helpers.asArray(scopes).map(s => {
         return deploy_helpers.toStringSafe(s);
@@ -143,23 +198,28 @@ export async function download(url: string | URL.Url, scopes?: string | string[]
     switch (PROTOCOL) {
         case 'dropbox:':
             downloader = download_dropbox;
+            outVal.source = DownloadSourceType.DropBox;
             break;
         
         case 'ftp:':
             downloader = download_ftp;
+            outVal.source = DownloadSourceType.FTP;
             break;
             
         case 'http:':
         case 'https:':
             downloader = download_http;
+            outVal.source = DownloadSourceType.HTTP;
             break;
 
         case 'sftp:':
             downloader = download_sftp;
+            outVal.source = DownloadSourceType.SFTP;
             break;
 
         case 'slack:':
             downloader = download_slack;
+            outVal.source = DownloadSourceType.Slack;
             break;
 
         default:
@@ -186,10 +246,14 @@ export async function download(url: string | URL.Url, scopes?: string | string[]
                     throw new Error(`Local file '${LOCAL_URL.href}' not found!`);
                 }
 
+                file = Path.resolve(file);
+
+                outVal.fullPath = file;
                 return await deploy_helpers.readFile(
-                    Path.resolve(file)
+                    file
                 );
             };
+            outVal.source = DownloadSourceType.Local;
             break;
     }
 

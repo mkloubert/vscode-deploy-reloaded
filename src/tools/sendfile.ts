@@ -208,6 +208,50 @@ export async function receiveFile(context: vscode.ExtensionContext) {
 }
 
 /**
+ * Registers commands for these kind of tools.
+ * 
+ * @param {vscode.ExtensionContext} context The extension context.
+ */
+export function registerCommands(context: vscode.ExtensionContext) {
+    context.subscriptions.push(
+        // receive file
+        vscode.commands.registerCommand('extension.deploy.reloaded.receiveFile', async () => {
+            try {
+                await receiveFile(context);
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .trace(e, 'extension.deploy.reloaded.receiveFile');
+
+                deploy_helpers.showErrorMessage(
+                    i18.t('tools.errors.operationFailed')
+                );
+            }
+        }),
+
+        // send file
+        vscode.commands.registerCommand('extension.deploy.reloaded.sendFile', async () => {
+            try {
+                await sendFile(context);
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .trace(e, 'extension.deploy.reloaded.sendFile');
+
+                deploy_helpers.showErrorMessage(
+                    i18.t('tools.errors.operationFailed')
+                );
+            }
+        }),
+
+        // close server instance that waits for a file
+        vscode.commands.registerCommand(CLOSE_SERVER_COMMAND, () => {
+            closeServer();
+        }),
+    );
+}
+
+/**
  * Sends a file.
  * 
  * @param {vscode.ExtensionContext} context The extension context.

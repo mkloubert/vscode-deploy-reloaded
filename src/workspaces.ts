@@ -144,6 +144,10 @@ export interface WorkspaceContext {
      */
     readonly extension: vscode.ExtensionContext;
     /**
+     * The file system watcher for that workspace.
+     */
+    readonly fileWatcher: vscode.FileSystemWatcher;
+    /**
      * The output channel.
      */
     readonly outputChannel: vscode.OutputChannel;
@@ -255,6 +259,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Stores the current configuration.
      */
     protected _config: WorkspaceSettings;
+    private readonly _CONFIG_FILE_WATCHERS: vscode.FileSystemWatcher[] = [];
     /**
      * Stores the source of the configuration data.
      */
@@ -357,7 +362,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      */
     public get canDoAutoOperations() {
         return !this.isInFinalizeState &&
-               !this.isReloadingConfig;
+               !this.isReloadingConfig &&
+               this.isInitialized;
     }
 
     /**
@@ -835,6 +841,14 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     public async deployPackage(pkg: deploy_packages.Package) {
         await deploy_deploy.deployPackage
                            .apply(this, arguments);
+    }
+
+    private disposeConfigFileWatchers() {
+        while (this._CONFIG_FILE_WATCHERS.length > 0) {
+            deploy_helpers.tryDispose(
+                this._CONFIG_FILE_WATCHERS.pop()
+            );
+        }
     }
 
     /**
@@ -1827,6 +1841,78 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         }
     }
 
+    private async initConfigFileWatchers(files: string[]) {
+        const ME = this;
+
+        Enumerable.from(files).select(f => Path.resolve(f)).distinct().forEach(f => {
+            const FILE_URI = vscode.Uri.file(f);
+
+            const HANDLE_FILE_CHANGE = async (type: deploy_contracts.FileChangeType) => {
+                switch (type) {
+                    case deploy_contracts.FileChangeType.Changed:
+                    case deploy_contracts.FileChangeType.Created:
+                        await ME.reloadConfiguration();
+                        break;
+                }
+            };
+
+            const TRIGGER_CONFIG_FILE_CHANGE = (e: vscode.Uri, type: deploy_contracts.FileChangeType) => {
+                try {
+                    if (ME.isInFinalizeState) {
+                        return;
+                    }
+
+                    if (!ME.isInitialized) {
+                        return;
+                    }
+
+                    if (Path.resolve(e.fsPath) === Path.resolve(FILE_URI.fsPath)) {
+                        HANDLE_FILE_CHANGE(type).then(() => {                                
+                        }, (err) => {
+                            ME.logger
+                                .trace(e, 'workspaces.Workspace.initConfigFileWatchers(4)');
+                        });
+                    }
+                }
+                catch (e) {
+                    ME.logger
+                        .trace(e, 'workspaces.Workspace.initConfigFileWatchers(3)');
+                }
+            };
+
+            let newWatcher: vscode.FileSystemWatcher;
+            try {
+                const BASE = vscode.Uri.file(Path.dirname(f));
+                const PATTERN = Path.basename(f);
+
+                newWatcher = vscode.workspace.createFileSystemWatcher(
+                    new vscode.RelativePattern(
+                        BASE.fsPath, PATTERN
+                    ),
+                    false, false, false,
+                );
+
+                newWatcher.onDidChange((e) => {
+                    TRIGGER_CONFIG_FILE_CHANGE(e, deploy_contracts.FileChangeType.Changed);
+                });
+                newWatcher.onDidCreate((e) => {
+                    TRIGGER_CONFIG_FILE_CHANGE(e, deploy_contracts.FileChangeType.Created);
+                });
+                newWatcher.onDidDelete((e) => {
+                    TRIGGER_CONFIG_FILE_CHANGE(e, deploy_contracts.FileChangeType.Deleted);
+                });
+
+                ME._CONFIG_FILE_WATCHERS.push(newWatcher);
+            }
+            catch (e) {
+                ME.logger
+                  .trace(e, 'workspaces.Workspace.initConfigFileWatchers(2)');
+
+                deploy_helpers.tryDispose(newWatcher);
+            }
+        });
+    }
+
     /**
      * Initializes that workspace.
      * 
@@ -1972,6 +2058,29 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         }
 
         await ME.reloadConfiguration();
+
+        // file system watcher
+        {
+            const TRIGGER_FILE_CHANGE_EVENT = (e: vscode.Uri, type: deploy_contracts.FileChangeType) => {
+                ME.onDidFileChange(e, type).then(() => {
+                }, (err) => {
+                    ME.logger
+                      .trace(err, 'workspaces.Workspace.initialize(3)');
+                });
+            };
+
+            this.context.fileWatcher.onDidChange((e) => {
+                TRIGGER_FILE_CHANGE_EVENT(e, deploy_contracts.FileChangeType.Changed);
+            });
+
+            this.context.fileWatcher.onDidCreate((e) => {
+                TRIGGER_FILE_CHANGE_EVENT(e, deploy_contracts.FileChangeType.Created);
+            });
+
+            this.context.fileWatcher.onDidDelete((e) => {
+                TRIGGER_FILE_CHANGE_EVENT(e, deploy_contracts.FileChangeType.Deleted);
+            });
+        }
 
         ME._startTime = Moment();
         ME._isInitialized = true;
@@ -2461,54 +2570,54 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         await this.reloadConfiguration();
     }
 
-    /**
-     * Is invoked on a file / directory change.
-     * 
-     * @param {vscode.Uri} e The URI of the item.
-     * @param {deploy_contracts.FileChangeType} type The type of change.
-     */
-    public async onDidFileChange(e: vscode.Uri, type: deploy_contracts.FileChangeType, retry = true) {
+    private async onDidFileChange(e: vscode.Uri, type: deploy_contracts.FileChangeType, retry = true) {
         const ME = this;
 
-        if (!ME.canDoAutoOperations) {
-            return;
-        }
-
-        if (!ME.isPathOf(e.fsPath)) {
-            return;
-        }
-
-        const MY_ARGS = arguments;
-
-        if ('undefined' !== typeof FILES_CHANGES[e.fsPath]) {
-            if (retry) {
-                await deploy_helpers.invokeAfter(async () => {
-                    await ME.onDidFileChange
-                            .apply(ME, MY_ARGS);
-                });
-            }
-
-            return;
-        }
-        FILES_CHANGES[e.fsPath] = type;
-
         try {
-            switch (type) {
-                case deploy_contracts.FileChangeType.Changed:
-                    await this.deployOnChange(e.fsPath);
-                    break;
+            if (!ME.canDoAutoOperations) {
+                return;
+            }
 
-                case deploy_contracts.FileChangeType.Created:
-                    await this.deployOnChange(e.fsPath);
-                    break;
+            if (!ME.isPathOf(e.fsPath)) {
+                return;
+            }
 
-                case deploy_contracts.FileChangeType.Deleted:
-                    await ME.removeOnChange(e.fsPath);
-                    break;
+            const MY_ARGS = arguments;
+
+            if (!_.isNil(FILES_CHANGES[e.fsPath])) {
+                if (retry) {
+                    await deploy_helpers.invokeAfter(async () => {
+                        await ME.onDidFileChange
+                                .apply(ME, MY_ARGS);
+                    });
+                }
+
+                return;
+            }
+
+            FILES_CHANGES[e.fsPath] = type;
+            try {
+                switch (type) {
+                    case deploy_contracts.FileChangeType.Changed:
+                        await this.deployOnChange(e.fsPath);
+                        break;
+
+                    case deploy_contracts.FileChangeType.Created:
+                        await this.deployOnChange(e.fsPath);
+                        break;
+
+                    case deploy_contracts.FileChangeType.Deleted:
+                        await ME.removeOnChange(e.fsPath);
+                        break;
+                }
+            }
+            finally {
+                delete FILES_CHANGES[e.fsPath];
             }
         }
-        finally {
-            delete FILES_CHANGES[e.fsPath];
+        catch (e) {
+            ME.logger
+              .trace(e, 'workspaces.Workspace.onDidFileChange(1)');
         }
     }
 
@@ -2531,8 +2640,12 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
     /** @inheritdoc */
     protected onDispose() {
-        // dispose output channel
-        this._OUTPUT_CHANNEL.dispose();
+        // file system watchers
+        this.disposeConfigFileWatchers();
+        deploy_helpers.tryDispose(this.context.fileWatcher);
+
+        // output channel
+        deploy_helpers.tryDispose(this._OUTPUT_CHANNEL);
 
         // and last but not least:
         // dispose logger
@@ -2704,7 +2817,9 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
             return;
         }
+
         ME._isReloadingConfig = true;
+        this.disposeConfigFileWatchers();
 
         const SCOPES = ME.getSettingScopes();
 
@@ -2716,6 +2831,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             ME._isDeployOnChangeFreezed = false;
             ME._isRemoveOnChangeFreezed = false;
 
+            const IMPORTED_LOCAL_FILES: string[] = [];            
             let loadedCfg: WorkspaceSettings = vscode.workspace.getConfiguration(ME.configSource.section,
                                                                                  ME.configSource.resource) || <any>{};
             loadedCfg = deploy_helpers.cloneObjectFlat(loadedCfg);
@@ -2786,8 +2902,10 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                         continue;
                     }
 
+                    const DOWNLOAD_RESULT: deploy_download.DownloadOutValue = {
+                    };
                     const DATA = await deploy_download.download(
-                        importFile, SCOPES
+                        importFile, SCOPES, DOWNLOAD_RESULT
                     );
 
                     deploy_helpers.asArray(JSON.parse(DATA.toString('utf8')))
@@ -2800,6 +2918,10 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
                                       loadedCfg = MergeDeep(loadedCfg, SUB_SUBSETTINGS);
                                   });
+
+                    if (deploy_download.DownloadSourceType.Local === DOWNLOAD_RESULT.source) {
+                        IMPORTED_LOCAL_FILES.push(DOWNLOAD_RESULT.fullPath);
+                    }
                 }
             }
             finally {
@@ -2948,6 +3070,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 await ME.reloadSwitches();
 
                 await ME.executeStartupCommands();
+
+                await ME.initConfigFileWatchers(IMPORTED_LOCAL_FILES);
             };
         }
         catch (e) {
