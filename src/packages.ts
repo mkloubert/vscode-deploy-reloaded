@@ -85,7 +85,7 @@ export interface Package extends deploy_values.Applyable,
 /**
  * A package button.
  */
-export interface PackageButton extends deploy_contracts.ButtonWithCustomCommand {
+export interface PackageButton extends deploy_contracts.ButtonWithCustomCommand, deploy_targets.TargetProvider {
     /**
      * Ask before start deploy operation or not.
      */
@@ -453,17 +453,18 @@ export function getPackageName(pkg: Package): string {
  * Returns the targets of a package.
  * 
  * @param {pkg: Package} pkg The package.
+ * @param {deploy_targets.TargetResolver} targetResolver A function to receive optional targets.
  * 
  * @return {deploy_targets.Target[] | false} The targets or (false) if at least one target could not be found.
  */
-export function getTargetsOfPackage(pkg: Package): deploy_targets.Target[] | false {
+export function getTargetsOfPackage(pkg: Package, targetResolver: deploy_targets.TargetResolver): deploy_targets.Target[] | false {
     const ME: deploy_workspaces.Workspace = this;
 
     if (!pkg) {
         return;
     }
 
-    let targets = ME.getTargetsOfPackage(pkg);
+    let targets = ME.getTargetsOfPackage(pkg, targetResolver);
 
     if (false !== targets) {
         if (targets.length < 1) {

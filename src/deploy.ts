@@ -829,8 +829,9 @@ export async function deployFileTo(file: string, target: deploy_targets.Target) 
  * Deploys a package.
  * 
  * @param {deploy_packages.Package} pkg The package to deploy. 
+ * @param {deploy_targets.TargetResolver} targetResolver A function to receive optional targets.
  */
-export async function deployPackage(pkg: deploy_packages.Package) {
+export async function deployPackage(pkg: deploy_packages.Package, targetResolver: deploy_targets.TargetResolver) {
     const ME: deploy_workspaces.Workspace = this;
 
     if (ME.isInFinalizeState) {
@@ -875,7 +876,9 @@ export async function deployPackage(pkg: deploy_packages.Package) {
             return;
         }
 
-        const TARGETS = deploy_helpers.applyFuncFor(deploy_packages.getTargetsOfPackage, ME)(pkg);
+        const TARGETS = deploy_helpers.applyFuncFor(deploy_packages.getTargetsOfPackage, ME)(
+            pkg, targetResolver
+        );
         if (false === TARGETS) {
             return;
         }

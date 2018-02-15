@@ -522,9 +522,10 @@ export async function deleteFilesIn(files: string[],
  * Deletes a package.
  * 
  * @param {deploy_packages.Package} pkg The package to delete.
+ * @param {deploy_targets.TargetResolver} targetResolver A function to receive optional targets.
  * @param {boolean} [askForDeleteLocalFiles] Also ask for deleting the local files or not.
  */
-export async function deletePackage(pkg: deploy_packages.Package,
+export async function deletePackage(pkg: deploy_packages.Package, targetResolver: deploy_targets.TargetResolver,
                                     askForDeleteLocalFiles = true) {
     const ME: deploy_workspaces.Workspace = this;
 
@@ -602,7 +603,9 @@ export async function deletePackage(pkg: deploy_packages.Package,
         deleteLocalFiles = 2 === PRESSED_BTN.value;
     }
 
-    const TARGETS = deploy_helpers.applyFuncFor(deploy_packages.getTargetsOfPackage, ME)(pkg);
+    const TARGETS = deploy_helpers.applyFuncFor(deploy_packages.getTargetsOfPackage, ME)(
+        pkg, targetResolver
+    );
     if (false === TARGETS) {
         return;
     }

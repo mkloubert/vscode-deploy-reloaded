@@ -329,6 +329,13 @@ export interface TargetProvider {
     readonly targets?: string | string[];
 }
 
+/**
+ * A function that resolves one or more targets.
+ * 
+ * @return {string|string[]} The target name(s).
+ */
+export type TargetResolver = () => string | string[];
+
 
 /**
  * The default type or a target operation.

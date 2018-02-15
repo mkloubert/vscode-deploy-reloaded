@@ -742,12 +742,15 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Deletes a package.
      * 
      * @param {deploy_packages.Package} pkg The package to delete.
+     * @param {deploy_targets.TargetResolver} [targetResolver] A function to receive optional targets. 
      * @param {boolean} [askForDeleteLocalFiles] Also ask for deleting the local files or not.
      */
-    public async deletePackage(pkg: deploy_packages.Package,
+    public async deletePackage(pkg: deploy_packages.Package, targetResolver?: deploy_targets.TargetResolver,
                                askForDeleteLocalFiles = true) {
-        return await deploy_delete.deletePackage
-                                  .apply(this, arguments);
+        await deploy_helpers.applyFuncFor(
+            deploy_delete.deletePackage,
+            this
+        )(pkg, targetResolver, askForDeleteLocalFiles);
     }
 
     /**
@@ -837,10 +840,13 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Deploys a package.
      * 
      * @param {deploy_packages.Package} pkg The package to deploy. 
+     * @param {deploy_targets.TargetResolver} [targetResolver] A function to receive optional targets. 
      */
-    public async deployPackage(pkg: deploy_packages.Package) {
-        await deploy_deploy.deployPackage
-                           .apply(this, arguments);
+    public async deployPackage(pkg: deploy_packages.Package, targetResolver?: deploy_targets.TargetResolver) {
+        await deploy_helpers.applyFuncFor(
+            deploy_deploy.deployPackage,
+            this
+        )(pkg, targetResolver);
     }
 
     private disposeConfigFileWatchers() {
@@ -1525,11 +1531,12 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Returns the targets of a package.
      * 
      * @param {deploy_packages.Package} pkg The package.
+     * @param {deploy_targets.TargetResolver} targetResolver A function to receive optional targets.
      * 
      * @return {deploy_targets.Target[]|false} The targets or (false) if at least one target could not be found
      *                                         or (false) if package cannot be handled by that workspace.
      */
-    public getTargetsOfPackage(pkg: deploy_packages.Package): deploy_targets.Target[] | false {
+    public getTargetsOfPackage(pkg: deploy_packages.Package, targetResolver: deploy_targets.TargetResolver): deploy_targets.Target[] | false {
         if (!pkg) {
             return;
         }
@@ -1538,17 +1545,26 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             return false;
         }
 
-        const TARGET_NAMES = deploy_helpers.asArray(pkg.targets).map(tn => {
-            return deploy_helpers.normalizeString(tn);
-        }).filter(tn => {
-            return '' !== tn;
-        });
+        let targetNames: false | string[] = false;
+        if (targetResolver) {
+            targetNames = deploy_helpers.asArray( targetResolver() )
+                                        .map(t => deploy_helpers.toStringSafe(t))
+                                        .filter(t => !deploy_helpers.isEmptyString(t));
+        }
 
-        if (TARGET_NAMES.length < 1) {
+        if (false === targetNames || targetNames.length < 1) {
+            targetNames = deploy_helpers.asArray(pkg.targets).map(tn => {
+                return deploy_helpers.normalizeString(tn);
+            }).filter(tn => {
+                return '' !== tn;
+            });    
+        }
+
+        if (targetNames.length < 1) {
             return [];
         }
 
-        return deploy_targets.getTargetsByName(TARGET_NAMES, this.getTargets());
+        return deploy_targets.getTargetsByName(targetNames, this.getTargets());
     }
 
     /**
@@ -2791,10 +2807,13 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Pulls a package.
      * 
      * @param {deploy_packages.Package} pkg The package to pull. 
+     * @param {deploy_targets.TargetResolver} [targetResolver] A function to receive optional targets.
      */
-    public async pullPackage(pkg: deploy_packages.Package) {
-        return await deploy_pull.pullPackage
-                                .apply(this, arguments);
+    public async pullPackage(pkg: deploy_packages.Package, targetResolver?: deploy_targets.TargetResolver) {
+        await deploy_helpers.applyFuncFor(
+            deploy_pull.pullPackage,
+            this
+        )(pkg, targetResolver);
     }
 
     /**
@@ -3234,6 +3253,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                         newCmdId = `extension.deploy.reloaded.buttons.deployPackage${nextPackageButtonId++}`;
                     }
 
+                    const TARGET_RESOLVER: deploy_targets.TargetResolver = () => buttonDesc.targets;
+
                     if ((await vscode.commands.getCommands()).indexOf(newCmdId) < 0) {
                         newBtnCommand = vscode.commands.registerCommand(newCmdId, async () => {
                             let deployAction: (() => Promise<void>) | false = false;
@@ -3245,21 +3266,21 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                                     case "":
                                     case "deploy":
                                         deployAction = async () => {
-                                            await ME.deployPackage(PACKAGE_TO_HANDLE);
+                                            await ME.deployPackage(PACKAGE_TO_HANDLE, TARGET_RESOLVER);
                                         };
                                         promptMsg = 'askBeforeDeploy';
                                         break;
 
                                     case "delete":
                                         deployAction = async () => {
-                                            await ME.deletePackage(PACKAGE_TO_HANDLE);
+                                            await ME.deletePackage(PACKAGE_TO_HANDLE, TARGET_RESOLVER);
                                         };
                                         promptMsg = 'askBeforeDelete';
                                         break;
 
                                     case "pull":
                                         deployAction = async () => {
-                                            await ME.pullPackage(PACKAGE_TO_HANDLE);
+                                            await ME.pullPackage(PACKAGE_TO_HANDLE, TARGET_RESOLVER);
                                         };
                                         promptMsg = 'askBeforePull';
                                         break;

@@ -1371,7 +1371,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
                             action: async () => {
                                 await deploy_tools.detectGitChanges(context);
                             },
-                            label: '$(package)  ' + i18.t('tools.git.listFileChanges.label'),
+                            label: '$(git-compare)  ' + i18.t('tools.git.listFileChanges.label'),
                             description: i18.t('tools.git.listFileChanges.description'),
                             state: 8,
                         },

@@ -887,9 +887,10 @@ export async function pullFilesFrom(files: string[],
 /**
  * Pulls a package.
  * 
- * @param {deploy_packages.Package} pkg The package to pull. 
+ * @param {deploy_packages.Package} pkg The package to pull.
+ * @param {deploy_targets.TargetResolver} targetResolver A function to receive optional targets.
  */
-export async function pullPackage(pkg: deploy_packages.Package) {
+export async function pullPackage(pkg: deploy_packages.Package, targetResolver: deploy_targets.TargetResolver) {
     const ME: deploy_workspaces.Workspace = this;
 
     if (ME.isInFinalizeState) {
@@ -928,7 +929,9 @@ export async function pullPackage(pkg: deploy_packages.Package) {
         return;
     }
 
-    const TARGETS = deploy_helpers.applyFuncFor(deploy_packages.getTargetsOfPackage, ME)(pkg);
+    const TARGETS = deploy_helpers.applyFuncFor(deploy_packages.getTargetsOfPackage, ME)(
+        pkg, targetResolver
+    );
     if (false === TARGETS) {
         return;
     }
