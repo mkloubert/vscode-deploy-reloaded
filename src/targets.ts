@@ -36,6 +36,7 @@ import * as deploy_values from './values';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
 import * as i18 from './i18';
+import * as Minimatch from 'minimatch';
 import * as Moment from 'moment';
 import * as Path from 'path';
 import * as SanitizeFilename from 'sanitize-filename';
@@ -689,7 +690,12 @@ export function getNameAndPathForFileDeployment(target: Target,
             const PATTERN = TO_MINIMATCH(P);
             const PATH_TO_CHECK = TO_MINIMATCH(relPath);
             
-            if (deploy_helpers.doesMatch(PATH_TO_CHECK, PATTERN)) {
+            const MATCH_OPTS: Minimatch.IOptions = {
+                dot: true,
+                nocase: true,                
+            };
+
+            if (deploy_helpers.doesMatch(PATH_TO_CHECK, PATTERN, MATCH_OPTS)) {
                 const DIR_NAME = Path.dirname(<string>relPath);
 
                 const MATCHING_DIRS = <string[]>dirs.map(d => {
