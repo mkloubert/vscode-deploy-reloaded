@@ -68,6 +68,7 @@ export abstract class FTPClientBase extends deploy_clients.AsyncFileListBase {
      * Stores the internal connection object / value.
      */
     protected _connection: any;
+    private _existingRemoteDirs: { [ path: string ]: boolean } = {};
 
     /**
      * Initializes a new instance of that class.
@@ -92,6 +93,36 @@ export abstract class FTPClientBase extends deploy_clients.AsyncFileListBase {
      */
     public get connection() {
         return this._connection;
+    }
+
+    /**
+     * Creates a directory if it does not exist.
+     * 
+     * @param {string} dir The directory.
+     * 
+     * @return {Promise<boolean>} The promise that indicates if directory has been created or not.
+     */
+    protected async createDirectoryIfNeeded(dir: string) {
+        dir = toFTPPath(dir);
+
+        // check if remote directory exists
+        if (true === this._existingRemoteDirs[dir]) {
+            return false;
+        }
+
+        try {
+            // check if exist
+            await this.list(dir);
+        }
+        catch (e) {
+            // no, try to create
+            await this.mkdir(dir);
+        }
+
+        // mark as checked
+        this._existingRemoteDirs[dir] = true;
+
+        return true;
     }
 
     /**
@@ -506,10 +537,14 @@ class FtpClient extends FTPClientBase {
             data = Buffer.alloc(0);
         }
 
-        return new Promise<void>((resolve, reject) => {
+        return new Promise<void>(async (resolve, reject) => {
             const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
 
             try {
+                await ME.createDirectoryIfNeeded(
+                    Path.dirname(file)                    
+                );
+
                 ME.connection.put(data, file, (err) => {
                     if (err) {
                         COMPLETED(err);
@@ -873,10 +908,14 @@ class JsFTPClient extends FTPClientBase {
             data = Buffer.alloc(0);
         }
 
-        return new Promise<void>((resolve, reject) => {
+        return new Promise<void>(async (resolve, reject) => {
             const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
 
             try {
+                await ME.createDirectoryIfNeeded(
+                    Path.dirname(file)                    
+                );
+
                 ME.connection.put(data, file, (err) => {
                     if (err) {
                         COMPLETED(err);
