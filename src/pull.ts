@@ -78,7 +78,9 @@ async function checkBeforePull(
     }
 
     const WAIT_WHILE_CANCELLING = async () => {
-        await deploy_helpers.waitWhile(() => isCancelling());
+        await deploy_helpers.waitWhile(() => isCancelling(), {
+            timeUntilNextCheck: 1000,
+        });
     };
 
     WORKSPACE.output
@@ -559,15 +561,21 @@ export async function pullFilesFrom(files: string[],
                         }
                     ];
 
-                    const PRESSED_BTN = await ME.showWarningMessage.apply(
-                        ME,
-                        [ <any>ME.t('pull.askForCancelOperation', TARGET_NAME) ].concat(
-                            POPUP_BTNS
-                        )
+                    const PRESSED_BTN: deploy_contracts.MessageItemWithValue<number> = await ME.showWarningMessage(
+                        ME.t('pull.askForCancelOperation', TARGET_NAME),
+                        {
+                            isCloseAffordance: true,
+                            title: ME.t('no'),
+                            value: 0,
+                        },
+                        {
+                            title: ME.t('yes'),
+                            value: 1,
+                        }
                     );
 
                     if (PRESSED_BTN) {
-                        if (1 === PRESSED_BTN) {
+                        if (1 === PRESSED_BTN.value) {
                             CANCELLATION_SOURCE.cancel();
                         }
                     }
@@ -594,7 +602,9 @@ export async function pullFilesFrom(files: string[],
         }
 
         const WAIT_WHILE_CANCELLING = async () => {
-            await deploy_helpers.waitWhile(() => isCancelling);
+            await deploy_helpers.waitWhile(() => isCancelling, {
+                timeUntilNextCheck: 1000,
+            });
         };
 
         while (PLUGINS.length > 0) {

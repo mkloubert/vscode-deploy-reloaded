@@ -176,7 +176,7 @@ export interface WaitWhileOptions {
      */
     readonly timeout?: number;
     /**
-     * The optional time, in , to wait until next check.
+     * The optional time, in milliseconds, to wait until next check.
      */
     readonly timeUntilNextCheck?: number;
 }

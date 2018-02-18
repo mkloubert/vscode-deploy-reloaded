@@ -87,7 +87,9 @@ async function checkBeforeDeploy(
     }
 
     const WAIT_WHILE_CANCELLING = async () => {
-        await deploy_helpers.waitWhile(() => isCancelling());
+        await deploy_helpers.waitWhile(() => isCancelling(), {
+            timeUntilNextCheck: 1000,
+        });
     };
 
     WORKSPACE.output
@@ -529,7 +531,8 @@ export async function deployFilesTo(files: string[],
                     cancelBtn.command = undefined;
                     cancelBtn.text = ME.t('deploy.cancelling');
 
-                    const POPUP_BTNS: deploy_contracts.MessageItemWithValue[] = [
+                    const PRESSED_BTN: deploy_contracts.MessageItemWithValue<number> = await ME.showWarningMessage(
+                        ME.t('deploy.askForCancelOperation', TARGET_NAME),
                         {
                             isCloseAffordance: true,
                             title: ME.t('no'),
@@ -539,17 +542,10 @@ export async function deployFilesTo(files: string[],
                             title: ME.t('yes'),
                             value: 1,
                         }
-                    ];
-
-                    const PRESSED_BTN = await ME.showWarningMessage.apply(
-                        ME,
-                        [ <any>ME.t('deploy.askForCancelOperation', TARGET_NAME) ].concat(
-                            POPUP_BTNS
-                        )
                     );
 
                     if (PRESSED_BTN) {
-                        if (1 === PRESSED_BTN) {
+                        if (1 === PRESSED_BTN.value) {
                             CANCELLATION_SOURCE.cancel();
                         }
                     }
@@ -576,7 +572,9 @@ export async function deployFilesTo(files: string[],
         }
 
         const WAIT_WHILE_CANCELLING = async () => {
-            await deploy_helpers.waitWhile(() => isCancelling);
+            await deploy_helpers.waitWhile(() => isCancelling, {
+                timeUntilNextCheck: 1000,
+            });
         };
 
         while (PLUGINS.length > 0) {

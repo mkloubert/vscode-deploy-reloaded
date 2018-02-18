@@ -942,6 +942,7 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
                     );
                     
                     const TERMIMAL = vscode.window.createTerminal({
+                        cwd: CWD,
                         env: process.env,
                         name: deploy_targets.getTargetName(target),
                         shellArgs: args,
@@ -961,7 +962,7 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
 
                     const EXEC_OPTS: ChildProcess.ExecFileSyncOptions = {
                         cwd: CWD,
-                        env: process.env,
+                        env: process.env,                        
                     };
 
                     if (false !== ENC) {
