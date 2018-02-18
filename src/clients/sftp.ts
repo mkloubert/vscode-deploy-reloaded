@@ -20,6 +20,7 @@ import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
 import * as deploy_log from '../log';
 import * as FS from 'fs';
+import * as Minimatch from 'minimatch';
 import * as Moment from 'moment';
 import * as Path from 'path';
 import * as SFTP from 'ssh2-sftp-client';
@@ -333,7 +334,12 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
                             pattern = '/' + pattern;
                         }
 
-                        if (deploy_helpers.doesMatch(path, pattern)) {
+                        const MATCH_OPTS: Minimatch.IOptions = {
+                            dot: true,
+                            nocase: true,                
+                        };
+
+                        if (deploy_helpers.doesMatch(path, pattern, MATCH_OPTS)) {
                             modeToSet = parseInt(deploy_helpers.toStringSafe(fileModes[P]).trim(),
                                                  8);
                             break;

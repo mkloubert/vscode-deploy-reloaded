@@ -368,7 +368,6 @@ export function checkIfDoesMatchByFileFilter(val: any, filter: deploy_contracts.
     const OPTS: Minimatch.IOptions = {
         dot: true,
         nocase: true,
-        nonull: false,
     };
 
     const IS_EXCLUDED = doesMatch(val, filter.exclude, OPTS);
@@ -1026,53 +1025,6 @@ export function getExtensionLogDirInHome() {
         Path.join(getExtensionDirInHome(),
                   '.logs')
     );
-}
-
-/**
- * Returns a mapped path (if possible).
- * 
- * @param {deploy_mappings.FolderMappings} mappings The folder mappings.
- * @param {string} path The path to check. 
- * @param {Minimatch.IOptions} [opts] Custom options.
- * 
- * @return {string|false} The new path or (false) if path could not be mapped.
- */
-export function getMappedPath(mappings: deploy_mappings.FolderMappings, path: string,
-                              opts?: Minimatch.IOptions): string | false {
-    path = toStringSafe(path);
-    if (!path.trim().startsWith('/')) {
-        path = '/' + path;
-    }
-    
-    if (!opts) {
-        opts = {
-            dot: true,
-            nocase: false,
-            nonull: false,
-        };
-    }
-
-    if (mappings) {
-        for (const P in mappings) {
-            let pattern = toStringSafe(P);
-            if (!pattern.trim().startsWith('/')) {
-                pattern = '/' + pattern;
-            }
-
-            let entry = mappings[P];
-            if (!isObject<deploy_mappings.FolderMappingSettings>(entry)) {
-                entry = {
-                    to: toStringSafe(entry),
-                };
-            }
-
-            if (doesMatch(path, pattern, opts)) {
-                return toStringSafe(entry.to);
-            }
-        }
-    }
-    
-    return false;
 }
 
 /**
