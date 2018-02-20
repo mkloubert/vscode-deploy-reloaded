@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.52.2",
+ "version": "0.53.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.20.0"
@@ -967,6 +967,11 @@
          "minimum": 0
         }
        ]
+      },
+      "saveBeforeDeploy": {
+       "description": "Indicates, if non saved documents will be saved automatically, before they are going to be deployed or not.",
+       "type": "boolean",
+       "default": true
       },
       "startupCommands": {
        "type": "array",

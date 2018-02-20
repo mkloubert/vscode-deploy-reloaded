@@ -723,12 +723,10 @@ export function getNameAndPathForFileDeployment(target: Target,
     return {
         name: name,
         path: deploy_helpers.normalizePath(
-            Path.join(
-                '/' +
-                deploy_helpers.normalizePath(path) + 
-                '/' + 
-                deploy_helpers.normalizePath(pathSuffix)
-            )
+            '/' +
+            deploy_helpers.normalizePath(path) + 
+            '/' + 
+            deploy_helpers.normalizePath(pathSuffix)
         ),
     };
 }

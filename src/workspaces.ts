@@ -53,6 +53,24 @@ import * as Path from 'path';
 import * as vscode from 'vscode';
 
 
+/**
+ * Options for 'Workspace.deactivateAutoDeployOperationsFor()' method.
+ */
+export interface DeactivateAutoDeployOperationsForOptions {
+    /**
+     * Deactivate 'deploy on change' or not.
+     */
+    readonly noDeployOnChange?: boolean;
+    /**
+     * Deactivate 'deploy on save' or not.
+     */
+    readonly noDeployOnSave?: boolean;
+    /**
+     * Deactivate 'remove on change' or not.
+     */
+    readonly noRemoveOnChange?: boolean;
+}
+
 interface PackageWithButton {
     readonly button: vscode.StatusBarItem;
     readonly command: vscode.Disposable;
@@ -269,6 +287,10 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * Stores if 'deploy on change' feature is freezed or not.
      */
     protected _isDeployOnChangeFreezed = false;
+    /**
+     * Stores if 'deploy on save' feature is freezed or not.
+     */
+    protected _isDeployOnSaveFreezed = false;
     /**
      * Stores if workspace has been initialized or not.
      */
@@ -726,6 +748,49 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     }
 
     /**
+     * Deactivates auto deploy operations like 'deploy on change', 'deploy on save' and
+     * 'remove on change' while an action is running.
+     * 
+     * @param {Function} action The action to invoke.
+     * @param {DeactivateAutoDeployOperationsForOptions} [opts] Custom options.
+     */
+    public async deactivateAutoDeployOperationsFor<TResult = any>(
+        action: () => TResult | PromiseLike<TResult>, opts?: DeactivateAutoDeployOperationsForOptions
+    ) {
+        if (!opts) {
+            opts = <any>{};
+        }
+
+        let oldIsDeployOnChangeFreezed = this._isDeployOnChangeFreezed;
+        let oldIsDeployOnSaveFreezed = this._isDeployOnSaveFreezed;
+        let oldIsRemoveOnChangeFreezed = this._isRemoveOnChangeFreezed;
+        try {
+            if (deploy_helpers.toBooleanSafe(opts.noDeployOnChange, true)) {
+                this._isDeployOnChangeFreezed = true;
+            }
+
+            if (deploy_helpers.toBooleanSafe(opts.noRemoveOnChange, true)) {
+                this._isRemoveOnChangeFreezed = true;
+            }
+
+            if (deploy_helpers.toBooleanSafe(opts.noDeployOnSave, true)) {
+                this._isDeployOnSaveFreezed = true;
+            }
+
+            if (action) {
+                return await Promise.resolve(
+                    action()
+                );
+            }
+        }
+        finally {
+            this._isDeployOnChangeFreezed = oldIsDeployOnChangeFreezed;
+            this._isDeployOnSaveFreezed = oldIsDeployOnSaveFreezed;
+            this._isRemoveOnChangeFreezed = oldIsRemoveOnChangeFreezed;
+        }
+    }
+
+    /**
      * Deletes a file in a target.
      * 
      * @param {string} file The file to delete.
@@ -824,6 +889,10 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * @param {string} file The file to check. 
      */
     protected async deployOnSave(file: string) {
+        if (this.isDeployOnSaveFreezed) {
+            return;  // freezed
+        }
+
         if (!deploy_helpers.toBooleanSafe(this.config.deployOnSave, true)) {
             return;  // deactivated
         }
@@ -2198,6 +2267,13 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     }
 
     /**
+     * Gets if 'deploy on change' is currently freezed or not.
+     */
+    public get isDeployOnSaveFreezed() {
+        return this._isDeployOnSaveFreezed;
+    }
+
+    /**
      * Checks if a file is ignored by that workspace.
      * 
      * @param {string} file The file to check.
@@ -2848,6 +2924,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             deploy_helpers.applyFuncFor(deploy_commands.cleanupCommands, ME)();
 
             ME._isDeployOnChangeFreezed = false;
+            ME._isDeployOnSaveFreezed = false;
             ME._isRemoveOnChangeFreezed = false;
 
             const IMPORTED_LOCAL_FILES: string[] = [];            

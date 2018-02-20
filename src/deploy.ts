@@ -29,6 +29,7 @@ import * as deploy_scm from './scm';
 import * as deploy_targets from './targets';
 import * as deploy_transformers from './transformers';
 import * as deploy_workspaces from './workspaces';
+import * as Enumerable from 'node-enumerable';
 import * as FS from 'fs';
 import * as HtmlEntities from 'html-entities';
 import * as i18 from './i18';
@@ -473,6 +474,13 @@ export async function deployFilesTo(files: string[],
     if (!target) {
         return;
     }
+
+    await ME.deactivateAutoDeployOperationsFor(async () => {
+        await deploy_helpers.applyFuncFor(
+            saveBeforeDeploy,
+            ME
+        )(target, files);
+    });
 
     const TARGET_NAME = deploy_targets.getTargetName(target);
     const STATE_KEY = deploy_helpers.toStringSafe(target.__id);
@@ -1092,5 +1100,52 @@ export async function deployScmCommit(client: deploy_scm.SourceControlClient,
             deploy_log.CONSOLE
                       .trace(err, 'deploy.deployScmCommit(1)');
         });
+    }
+}
+
+async function saveBeforeDeploy(target: deploy_targets.Target, files: string[]) {
+    const ME: deploy_workspaces.Workspace = this;
+
+    const CFG = ME.config;
+    if (!CFG) {
+        return;
+    }
+
+    if (!deploy_helpers.toBooleanSafe(CFG.saveBeforeDeploy, true)) {
+        return;
+    }
+
+    const DIRTY_TEXT_EDITORS = Enumerable.from(deploy_helpers.asArray(vscode.window.visibleTextEditors)).where(te => {
+        return te.document &&
+               !te.document.isUntitled &&
+               !deploy_helpers.isEmptyString(te.document.fileName) &&
+               te.document.isDirty;
+    }).toArray();
+    if (DIRTY_TEXT_EDITORS.length < 1) {
+        return;
+    }
+
+    let matchingEditors: vscode.TextEditor[] = [];
+
+    for (const F of files) {
+        const FILE_URI = vscode.Uri.file(F);
+
+        for (const DTE of DIRTY_TEXT_EDITORS) {
+            const EDITOR_URI = vscode.Uri.file(DTE.document.fileName);
+            if (EDITOR_URI.fsPath === FILE_URI.fsPath) {
+                matchingEditors.push( DTE );
+            }
+        }
+    }
+
+    matchingEditors = Enumerable.from(matchingEditors)
+                                .distinct(true)
+                                .toArray();
+    if (matchingEditors.length < 1) {
+        return;
+    }
+
+    for (const TE of matchingEditors) {
+        await TE.document.save();
     }
 }

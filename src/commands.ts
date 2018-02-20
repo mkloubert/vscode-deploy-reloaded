@@ -231,14 +231,14 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
                         }
                     });
 
-                    let args: any[] = [];
+                    const ARGS: any[] = [];
                     if (!deploy_helpers.toBooleanSafe(sc.noFirstArgument)) {
-                        args.push(CTX);
+                        ARGS.push(CTX);
                     }
 
                     return await Promise.resolve(
                         EXECUTE.apply(SCRIPT_MODULE,
-                                      args.concat( deploy_helpers.toArray(arguments) ))
+                                      ARGS.concat( deploy_helpers.toArray(arguments) ))
                     );
                 }
                 else {

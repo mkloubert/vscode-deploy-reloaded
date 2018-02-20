@@ -254,6 +254,10 @@ export interface Configuration extends deploy_packages.WithFastFileCheckSettings
      */
     readonly runGitPullOnStartup?: boolean | number;
     /**
+     * Indicates, if non saved documents will be saved automatically, before they are going to be deployed or not.
+     */
+    readonly saveBeforeDeploy?: boolean;
+    /**
      * One or more commands that should be run on startup.
      */
     readonly startupCommands?: StartupCommandValue | StartupCommandValue[];
