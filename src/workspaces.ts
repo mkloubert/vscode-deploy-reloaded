@@ -2327,6 +2327,23 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                                                            deploy_helpers.toMinimatchFileFilter(FILTER));
     }
 
+    private isInFolder(folder: string, pathToCheck: string) {
+        folder = deploy_helpers.toStringSafe(folder);
+        if (!Path.isAbsolute(pathToCheck)) {
+            folder = Path.join(this.rootPath, folder);
+        }
+        folder = Path.resolve(folder);
+    
+        pathToCheck = deploy_helpers.toStringSafe(pathToCheck);
+        if (!Path.isAbsolute(pathToCheck)) {
+            return true;
+        }
+        pathToCheck = Path.resolve(pathToCheck);
+    
+        return (folder === pathToCheck) ||
+               (pathToCheck + Path.sep).startsWith(folder + Path.sep);
+    }
+
     /**
      * Checks if a path is inside the Git folder.
      * 
@@ -2335,20 +2352,12 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * @return {boolean} Is in Git folder or not.
      */
     public isInGitFolder(path: string) {
-        const GIT_DIR = Path.resolve(
+        return this.isInFolder(
             Path.join(
                 this.rootPath,
                 '.git'
-            )
+            ), path
         );
-
-        path = deploy_helpers.toStringSafe(path);
-        if (!Path.isAbsolute(path)) {
-            return true;
-        }
-        path = Path.resolve(path);
-
-        return path.startsWith(GIT_DIR);
     }
 
     /**
@@ -2366,17 +2375,10 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * @return {boolean} Is in settings folder or not.
      */
     public isInSettingsFolder(path: string) {
-        const SETTINGS_DIR = Path.resolve(
-            Path.dirname(this.configSource.resource.fsPath)
+        return this.isInFolder(
+            Path.dirname(this.configSource.resource.fsPath),
+            path,
         );
-        
-        path = deploy_helpers.toStringSafe(path);
-        if (!Path.isAbsolute(path)) {
-            return true;
-        }
-        path = Path.resolve(path);
-
-        return path.startsWith(SETTINGS_DIR);
     }
 
     /**
@@ -2387,20 +2389,12 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * @return {boolean} Is in Git folder or not.
      */
     public isInSvnFolder(path: string) {
-        const SVN_DIR = Path.resolve(
+        return this.isInFolder(
             Path.join(
                 this.rootPath,
                 '.svn'
-            )
+            ), path
         );
-
-        path = deploy_helpers.toStringSafe(path);
-        if (!Path.isAbsolute(path)) {
-            return true;
-        }
-        path = Path.resolve(path);
-
-        return path.startsWith(SVN_DIR);
     }
 
     /**
