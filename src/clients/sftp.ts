@@ -171,7 +171,7 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
             const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
 
             try {
-                const STREAM = await ME.client.get(path);
+                const STREAM = await ME.client.get(path, null, null);
 
                 STREAM.once('error', (err) => {
                     COMPLETED(err);
