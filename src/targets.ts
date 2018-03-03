@@ -718,7 +718,11 @@ export function getNameAndPathForFileDeployment(target: Target,
                 break;
             }
         }
-    }                                   
+    }
+
+    if ('.' === path) {
+        path = '';
+    }
 
     return {
         name: name,

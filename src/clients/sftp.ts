@@ -304,7 +304,7 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
                     let modes = this.options.modes;
                     if (!deploy_helpers.isObject<SFTPFileModePatterns>(modes)) {
                         modes = {
-                            '**': modes
+                            '**/*': modes
                         };
                     }
 
@@ -328,6 +328,7 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
 
                 let modeToSet: number | false = false;
                 if (false !== fileModes) {
+                    let matchedPattern: false | string = false;
                     for (const P in fileModes) {
                         let pattern = P;
                         if (!pattern.startsWith('/')) {
@@ -340,10 +341,20 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
                         };
 
                         if (deploy_helpers.doesMatch(path, pattern, MATCH_OPTS)) {
+                            matchedPattern = P;
                             modeToSet = parseInt(deploy_helpers.toStringSafe(fileModes[P]).trim(),
                                                  8);
                             break;
                         }
+                    }
+
+                    if (false === matchedPattern) {
+                        deploy_log.CONSOLE
+                                  .notice(`'${path}' does NOT match with a mode pattern`, 'clients.sftp.uploadFile(3)');
+                    }
+                    else {
+                        deploy_log.CONSOLE
+                                  .notice(`'${path}' matches with mode pattern '${matchedPattern}'`, 'clients.sftp.uploadFile(3)');
                     }
                 }
 
@@ -353,7 +364,15 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
                 );
 
                 if (false !== modeToSet) {
+                    deploy_log.CONSOLE
+                              .info(`Setting mode for '${path}' to ${modeToSet.toString(8)} ...`, 'clients.sftp.uploadFile(1)');
+
                     this.client['sftp'].chmod(path, modeToSet, (err) => {
+                        if (err) {
+                            deploy_log.CONSOLE
+                                      .trace(err, 'clients.sftp.uploadFile(2)');
+                        }
+
                         COMPLETED(err);
                     });
                 }
