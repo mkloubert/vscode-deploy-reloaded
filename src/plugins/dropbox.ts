@@ -16,6 +16,7 @@
  */
 
 import * as deploy_clients_dropbox from '../clients/dropbox';
+import * as deploy_helpers from '../helpers';
 import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
 
@@ -50,10 +51,10 @@ class DropboxPlugin extends deploy_plugins.AsyncFileClientPluginBase<DropboxTarg
                 accessToken: this.replaceWithValues(target, target.token),
             }),
             getDir: (subDir) => {
-                return deploy_clients_dropbox.normalizePath(
-                    deploy_clients_dropbox.normalizePath(DIR).trim() + 
+                return deploy_helpers.normalizePath(
+                    deploy_helpers.normalizePath(DIR).trim() + 
                     '/' + 
-                    deploy_clients_dropbox.normalizePath(subDir).trim()
+                    deploy_helpers.normalizePath(subDir).trim()
                 );
             },
             target: target

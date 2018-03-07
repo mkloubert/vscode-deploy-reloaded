@@ -228,7 +228,7 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
                     {
                         //TODO: exportPath: false,
                         name: FI.name,
-                        path: normalizePath(path),
+                        path: deploy_helpers.normalizePath(path),
                         size: FI.size,
                         time: Moment(FI.modifyTime),
                         type: deploy_files.FileSystemType.Directory,
@@ -241,9 +241,9 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
                         const CLIENT = await openConnection(ME.options);
                         try {
                             return await CLIENT.downloadFile(
-                                normalizePath(path) +
+                                deploy_helpers.normalizePath(path) +
                                 '/' +
-                                normalizePath(FI.name)
+                                deploy_helpers.normalizePath(FI.name)
                             );
                         }
                         finally {
@@ -258,7 +258,7 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
                     },
                     //TODO: exportPath: false,
                     name: FI.name,
-                    path: normalizePath(path),
+                    path: deploy_helpers.normalizePath(path),
                     size: FI.size,
                     time: Moment(FI.modifyTime),
                     type: deploy_files.FileSystemType.File,
@@ -271,7 +271,7 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
                     {
                         //TODO: exportPath: false,
                         name: FI.name,
-                        path: normalizePath(path),
+                        path: deploy_helpers.normalizePath(path),
                         size: FI.size,
                         time: Moment(FI.modifyTime),
                     }
@@ -404,31 +404,6 @@ export function createClient(opts: SFTPConnectionOptions): SFTPClient {
 }
 
 /**
- * Normalizes a path.
- * 
- * @param {string} path The path to normalize.
- * 
- * @return {string} The normalized path. 
- */
-export function normalizePath(path: string) {
-    path = deploy_helpers.toStringSafe(path);
-    path = deploy_helpers.replaceAllStrings(path, Path.sep, '/');
-
-    if (deploy_helpers.isEmptyString(path)) {
-        path = '';
-    }
-
-    while (path.startsWith('/')) {
-        path = path.substr(1);
-    }
-    while (path.endsWith('/')) {
-        path = path.substr(0, path.length - 1);
-    }
-
-    return path;
-}
-
-/**
  * Opens a connection.
  * 
  * @param {SFTPConnectionOptions} opts The options.
@@ -539,5 +514,5 @@ export async function openConnection(opts: SFTPConnectionOptions): Promise<SFTPC
  * @return {string} The converted path. 
  */
 export function toSFTPPath(path: string) {
-    return '/' + normalizePath(path);
+    return '/' + deploy_helpers.normalizePath(path);
 }

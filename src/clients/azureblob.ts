@@ -22,8 +22,8 @@ import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
 import * as FS from 'fs';
 import * as MimeTypes from 'mime-types';
-import * as Path from 'path';
 import * as Moment from 'moment';
+import * as Path from 'path';
 
 
 /**
@@ -194,7 +194,7 @@ export class AzureBlobClient extends deploy_clients.AsyncFileListBase {
                 const DIRS_ALREADY_ADDED: { [ dir: string ]: deploy_files.DirectoryInfo } = {};
                 for (const R of ALL_RESULTS) {
                     const NAME = deploy_helpers.toStringSafe(R.name);
-                    const NAME_WITHOUT_PATH = normalizePath( NAME.substr(path.length) );
+                    const NAME_WITHOUT_PATH = deploy_helpers.normalizePath( NAME.substr(path.length) );
 
                     if (NAME_WITHOUT_PATH.indexOf('/') > -1) {
                         // directory
@@ -374,31 +374,6 @@ export function createClient(opts: AzureBlobOptions): AzureBlobClient {
 }
 
 /**
- * Normalizes a path.
- * 
- * @param {string} path The path to normalize.
- * 
- * @return {string} The normalized path. 
- */
-export function normalizePath(path: string) {
-    path = deploy_helpers.toStringSafe(path);
-    path = deploy_helpers.replaceAllStrings(path, Path.sep, '/');
-
-    if (deploy_helpers.isEmptyString(path)) {
-        path = '';
-    }
-
-    while (path.startsWith('/')) {
-        path = path.substr(1);
-    }
-    while (path.endsWith('/')) {
-        path = path.substr(0, path.length - 1);
-    }
-
-    return path;
-}
-
-/**
  * Converts to an Azure path.
  * 
  * @param {string} path The path to convert.
@@ -406,5 +381,5 @@ export function normalizePath(path: string) {
  * @return {string} The converted path. 
  */
 export function toAzurePath(path: string) {
-    return normalizePath(path);
+    return deploy_helpers.normalizePath(path);
 }

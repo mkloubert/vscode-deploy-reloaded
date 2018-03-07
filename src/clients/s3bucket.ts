@@ -381,7 +381,7 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
                 const DIRS_ALREADY_ADDED: { [ dir: string ]: deploy_files.DirectoryInfo } = {};
                 for (const O of ALL_OBJS) {
                     const KEY = deploy_helpers.toStringSafe(O.Key);
-                    const KEY_WITHOUT_PATH = normalizePath( KEY.substr(path.length) );
+                    const KEY_WITHOUT_PATH = deploy_helpers.normalizePath( KEY.substr(path.length) );
 
                     if (KEY_WITHOUT_PATH.indexOf('/') > -1) {
                         // directory
@@ -589,31 +589,6 @@ export function getAclSafe(acl: string) {
 }
 
 /**
- * Normalizes a path.
- * 
- * @param {string} path The path to normalize.
- * 
- * @return {string} The normalized path. 
- */
-export function normalizePath(path: string) {
-    path = deploy_helpers.toStringSafe(path);
-    path = deploy_helpers.replaceAllStrings(path, Path.sep, '/');
-
-    if (deploy_helpers.isEmptyString(path)) {
-        path = '';
-    }
-
-    while (path.startsWith('/')) {
-        path = path.substr(1);
-    }
-    while (path.endsWith('/')) {
-        path = path.substr(0, path.length - 1);
-    }
-
-    return path;
-}
-
-/**
  * Converts to a S3 path.
  * 
  * @param {string} path The path to convert.
@@ -621,5 +596,5 @@ export function normalizePath(path: string) {
  * @return {string} The converted path. 
  */
 export function toS3Path(path: string) {
-    return normalizePath(path);
+    return deploy_helpers.normalizePath(path);
 }

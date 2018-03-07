@@ -724,124 +724,138 @@ export async function detectGitChanges(context: vscode.ExtensionContext) {
         return;
     }
 
-    const BRANCH = RANGE.from.branch;
-    const TOTAL_COUNT = await BRANCH.commitCount();
-    const SKIP = TOTAL_COUNT - RANGE.from.index - 1;
+    await deploy_helpers.withProgress(async (ctx) => {
+        const BRANCH = RANGE.from.branch;
+        const TOTAL_COUNT = await BRANCH.commitCount();
+        const SKIP = TOTAL_COUNT - RANGE.from.index - 1;
 
-    const COMMIT_WINDOW: deploy_scm.Commit[] = [];
+        const COMMIT_WINDOW: deploy_scm.Commit[] = [];
 
-    const ALL_CHANGES: deploy_contracts.KeyValuePairs<deploy_scm.FileChange> = {};
-    let page = 0;
-    let run: boolean;
-    do
-    {
-        ++page;
-        run = true;
+        const ALL_CHANGES: deploy_contracts.KeyValuePairs<deploy_scm.FileChange> = {};
+        let page = 0;
+        let run: boolean;
+        do
+        {
+            ++page;
+            run = true;
 
-        const CURRENT_COMMITS = await BRANCH.commits(page, SKIP);
-        if (CURRENT_COMMITS.length < 1) {
-            break;
-        }
+            ctx.message = SELECT_WORKSPACE.t(
+                'scm.loadingCommits',
+                BRANCH.id, page,
+            );
 
-        for (const C of CURRENT_COMMITS) {
-            COMMIT_WINDOW.unshift(C);
-
-            if (C.id === RANGE.to.id) {
-                run = false;
+            const CURRENT_COMMITS = await BRANCH.commits(page, SKIP);
+            if (CURRENT_COMMITS.length < 1) {
                 break;
             }
+
+            for (const C of CURRENT_COMMITS) {
+                COMMIT_WINDOW.unshift(C);
+
+                if (C.id === RANGE.to.id) {
+                    run = false;
+                    break;
+                }
+            }
         }
-    }
-    while (run);
+        while (run);
 
-    for (const C of COMMIT_WINDOW) {
-        const COMMIT_CHANGES = await C.changes();
-        for (const CHG of COMMIT_CHANGES) {
-            ALL_CHANGES[CHG.file] = CHG;
-        }
-    }
+        for (let i = 0; i < COMMIT_WINDOW.length; i++) {
+            const C = COMMIT_WINDOW[i];
 
-    const ADDED_FILES: string[] = [];
-    const DELETED_FILES: string[] = [];
-    const MODIFIED_FILES: string[] = [];
-    for (const FILE in ALL_CHANGES) {
-        const CHG = ALL_CHANGES[FILE];
+            ctx.message = SELECT_WORKSPACE.t(
+                'scm.loadingCommitChanges',
+                C.id, i + 1, COMMIT_WINDOW.length,
+            );
 
-        const FULL_PATH = Path.resolve(
-            GIT_FOLDER, '..', CHG.file,
-        );
-
-        const RELATIVE_PATH = SELECT_WORKSPACE.toRelativePath(FULL_PATH);
-        if (false === RELATIVE_PATH) {
-            continue;
-        }
-
-        switch (CHG.type) {
-            case deploy_scm.FileChangeType.Added:
-                ADDED_FILES.push(RELATIVE_PATH);
-                break;
-
-            case deploy_scm.FileChangeType.Deleted:
-                DELETED_FILES.push(RELATIVE_PATH);
-                break;
-
-            case deploy_scm.FileChangeType.Modified:
-                MODIFIED_FILES.push(RELATIVE_PATH);
-                break;
-        }
-    }
-
-    if (_.isEmpty(ADDED_FILES) && _.isEmpty(DELETED_FILES) && _.isEmpty(MODIFIED_FILES)) {
-        SELECT_WORKSPACE.showWarningMessage(
-            SELECT_WORKSPACE.t('scm.changes.noneFound')
-        );
-
-        return;        
-    }
-
-    const DOC = await vscode.workspace.openTextDocument({
-        content: '',
-        language: 'markdown',
-    });
-    const EDITOR = await vscode.window.showTextDocument(DOC);
-
-    const EOL = deploy_helpers.toEOL(DOC.eol);
-
-    let text = '';
-
-    const FILES_TO_DISPLAY = [
-        [ DELETED_FILES, SELECT_WORKSPACE.t('scm.changes.deleted') ],
-        [ ADDED_FILES, SELECT_WORKSPACE.t('scm.changes.added') ],
-        [ MODIFIED_FILES, SELECT_WORKSPACE.t('scm.changes.modified') ],
-    ];
-    for (const ITEM of FILES_TO_DISPLAY) {
-        const FTD = <string[]>ITEM[0];
-        const HEADER = <string>ITEM[1];
-
-        if (FTD.length < 1) {
-            continue;
+            const COMMIT_CHANGES = await C.changes();
+            for (const CHG of COMMIT_CHANGES) {
+                ALL_CHANGES[CHG.file] = CHG;
+            }
         }
 
-        text += EOL + `# ${HEADER}` + EOL;
+        const ADDED_FILES: string[] = [];
+        const DELETED_FILES: string[] = [];
+        const MODIFIED_FILES: string[] = [];
+        for (const FILE in ALL_CHANGES) {
+            const CHG = ALL_CHANGES[FILE];
 
-        const SORTED_FILE_LIST = Enumerable
-            .from(FTD)
-            .distinct()
-            .orderBy(f => deploy_helpers.normalizeString(Path.dirname(f)).length)
-            .thenBy(f => deploy_helpers.normalizeString(Path.dirname(f)))
-            .thenBy(f => deploy_helpers.normalizeString(Path.basename(f)).length)
-            .thenBy(f => deploy_helpers.normalizeString(Path.basename(f)));
+            const FULL_PATH = Path.resolve(
+                GIT_FOLDER, '..', CHG.file,
+            );
 
-        for (const FILE of SORTED_FILE_LIST) {
-            text += FILE + EOL;            
+            const RELATIVE_PATH = SELECT_WORKSPACE.toRelativePath(FULL_PATH);
+            if (false === RELATIVE_PATH) {
+                continue;
+            }
+
+            switch (CHG.type) {
+                case deploy_scm.FileChangeType.Added:
+                    ADDED_FILES.push(RELATIVE_PATH);
+                    break;
+
+                case deploy_scm.FileChangeType.Deleted:
+                    DELETED_FILES.push(RELATIVE_PATH);
+                    break;
+
+                case deploy_scm.FileChangeType.Modified:
+                    MODIFIED_FILES.push(RELATIVE_PATH);
+                    break;
+            }
         }
-    }
 
-    await EDITOR.edit((builder) => {
-        builder.insert(
-            new vscode.Position(0, 0),
-            text.trim(),
-        );
+        if (_.isEmpty(ADDED_FILES) && _.isEmpty(DELETED_FILES) && _.isEmpty(MODIFIED_FILES)) {
+            SELECT_WORKSPACE.showWarningMessage(
+                SELECT_WORKSPACE.t('scm.changes.noneFound')
+            );
+
+            return;        
+        }
+
+        const DOC = await vscode.workspace.openTextDocument({
+            content: '',
+            language: 'markdown',
+        });
+        const EDITOR = await vscode.window.showTextDocument(DOC);
+
+        const EOL = deploy_helpers.toEOL(DOC.eol);
+
+        let text = '';
+
+        const FILES_TO_DISPLAY = [
+            [ DELETED_FILES, SELECT_WORKSPACE.t('scm.changes.deleted') ],
+            [ ADDED_FILES, SELECT_WORKSPACE.t('scm.changes.added') ],
+            [ MODIFIED_FILES, SELECT_WORKSPACE.t('scm.changes.modified') ],
+        ];
+        for (const ITEM of FILES_TO_DISPLAY) {
+            const FTD = <string[]>ITEM[0];
+            const HEADER = <string>ITEM[1];
+
+            if (FTD.length < 1) {
+                continue;
+            }
+
+            text += EOL + `# ${HEADER}` + EOL;
+
+            const SORTED_FILE_LIST = Enumerable
+                .from(FTD)
+                .distinct()
+                .orderBy(f => deploy_helpers.normalizeString(Path.dirname(f)).length)
+                .thenBy(f => deploy_helpers.normalizeString(Path.dirname(f)))
+                .thenBy(f => deploy_helpers.normalizeString(Path.basename(f)).length)
+                .thenBy(f => deploy_helpers.normalizeString(Path.basename(f)));
+
+            for (const FILE of SORTED_FILE_LIST) {
+                text += FILE + EOL;            
+            }
+        }
+
+        await EDITOR.edit((builder) => {
+            builder.insert(
+                new vscode.Position(0, 0),
+                text.trim(),
+            );
+        });
     });
 }
 

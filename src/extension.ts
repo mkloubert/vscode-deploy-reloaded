@@ -664,6 +664,8 @@ async function activateExtension(context: vscode.ExtensionContext) {
         context.subscriptions.push(
             outputChannel = vscode.window.createOutputChannel('Deploy Reloaded')
         );
+
+        outputChannel.hide();
     });
 
     // workspace providers
@@ -1685,6 +1687,4 @@ export function deactivate() {
             WORKSPACES.pop()
         );
     }
-
-    deploy_helpers.tryDispose(outputChannel);
 }

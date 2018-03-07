@@ -110,14 +110,14 @@ export class DropBoxClient extends deploy_clients.AsyncFileListBase {
                             const FI: deploy_files.FileInfo = {
                                 download: async () => {
                                     return await ME.downloadFile(
-                                        normalizePath(
-                                            normalizePath(path) + '/' + ENTRY.name
+                                        deploy_helpers.normalizePath(
+                                            deploy_helpers.normalizePath(path) + '/' + ENTRY.name
                                         )
                                     );
                                 },
                                 //TODO: exportPath: false,
                                 name: ENTRY.name,
-                                path: normalizePath(path),
+                                path: deploy_helpers.normalizePath(path),
                                 size: ENTRY.size,
                                 time: Moment(ENTRY.server_modified),
                                 type: deploy_files.FileSystemType.File,
@@ -132,7 +132,7 @@ export class DropBoxClient extends deploy_clients.AsyncFileListBase {
                             const DI: deploy_files.DirectoryInfo = {
                                 //TODO: exportPath: false,
                                 name: ENTRY.name,
-                                path: normalizePath(path),
+                                path: deploy_helpers.normalizePath(path),
                                 type: deploy_files.FileSystemType.Directory,
                             };
 
@@ -145,7 +145,7 @@ export class DropBoxClient extends deploy_clients.AsyncFileListBase {
                             const FSI: deploy_files.FileSystemInfo = {
                                 //TODO: exportPath: false,
                                 name: ENTRY.name,
-                                path: normalizePath(path),
+                                path: deploy_helpers.normalizePath(path),
                             };
 
                             RESULT.push(FSI);
@@ -194,31 +194,6 @@ export function createClient(opts: DropboxOptions): DropBoxClient {
 }
 
 /**
- * Normalizes a path.
- * 
- * @param {string} path The path to normalize.
- * 
- * @return {string} The normalized path. 
- */
-export function normalizePath(path: string) {
-    path = deploy_helpers.toStringSafe(path);
-    path = deploy_helpers.replaceAllStrings(path, Path.sep, '/');
-
-    if (deploy_helpers.isEmptyString(path)) {
-        path = '';
-    }
-
-    while (path.startsWith('/')) {
-        path = path.substr(1);
-    }
-    while (path.endsWith('/')) {
-        path = path.substr(0, path.length - 1);
-    }
-
-    return path;
-}
-
-/**
  * Converts to a Dropbox path.
  * 
  * @param {string} path The path to convert.
@@ -226,7 +201,7 @@ export function normalizePath(path: string) {
  * @return {string} The converted path. 
  */
 export function toDropBoxPath(path: string) {
-    path = normalizePath(path);
+    path = deploy_helpers.normalizePath(path);
 
     if ('' !== path) {
         path = '/' + path;

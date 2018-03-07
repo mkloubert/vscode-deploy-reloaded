@@ -148,10 +148,10 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
                 user: target.user,
             }),
             getDir: (subDir) => {
-                return deploy_clients_sftp.normalizePath(
-                    deploy_clients_sftp.normalizePath(DIR) + 
+                return deploy_helpers.normalizePath(
+                    deploy_helpers.normalizePath(DIR) + 
                     '/' + 
-                    deploy_clients_sftp.normalizePath(subDir)
+                    deploy_helpers.normalizePath(subDir)
                 );
             },
             target: target,

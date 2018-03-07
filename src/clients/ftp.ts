@@ -433,9 +433,9 @@ class FtpClient extends FTPClientBase {
                                                 try {
                                                     return await CLIENT.get(
                                                         toFTPPath(
-                                                            normalizePath(dir) +
+                                                            deploy_helpers.normalizePath(dir) +
                                                             '/' +
-                                                            normalizePath(ITEM.name)
+                                                            deploy_helpers.normalizePath(ITEM.name)
                                                         )
                                                     );
                                                 }
@@ -799,9 +799,9 @@ class JsFTPClient extends FTPClientBase {
                                                         try {
                                                             return await CLIENT.get(
                                                                 toFTPPath(
-                                                                    normalizePath(dir) +
+                                                                    deploy_helpers.normalizePath(dir) +
                                                                     '/' +
-                                                                    normalizePath(ITEM.name)
+                                                                    deploy_helpers.normalizePath(ITEM.name)
                                                                 )
                                                             );
                                                         }
@@ -978,31 +978,6 @@ export function createClient(opts: FTPConnectionOptions): FTPClientBase {
 }
 
 /**
- * Normalizes a path.
- * 
- * @param {string} path The path to normalize.
- * 
- * @return {string} The normalized path. 
- */
-export function normalizePath(path: string) {
-    path = deploy_helpers.toStringSafe(path);
-    path = deploy_helpers.replaceAllStrings(path, Path.sep, '/');
-
-    if (deploy_helpers.isEmptyString(path)) {
-        path = '';
-    }
-
-    while (path.startsWith('/')) {
-        path = path.substr(1);
-    }
-    while (path.endsWith('/')) {
-        path = path.substr(0, path.length - 1);
-    }
-
-    return path;
-}
-
-/**
  * Opens a connection.
  * 
  * @param {FTPConnectionOptions} opts The options.
@@ -1027,5 +1002,5 @@ export async function openConnection(opts: FTPConnectionOptions): Promise<FTPCli
  * @return {string} The converted path. 
  */
 export function toFTPPath(path: string) {
-    return '/' + normalizePath(path);
+    return '/' + deploy_helpers.normalizePath(path);
 }

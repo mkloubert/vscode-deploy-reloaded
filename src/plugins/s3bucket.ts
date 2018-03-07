@@ -133,10 +133,10 @@ class S3BucketPlugin extends deploy_plugins.AsyncFileClientPluginBase<S3BucketTa
                 }
             }),
             getDir: (subDir) => {
-                return deploy_clients_s3bucket.normalizePath(
-                    deploy_clients_s3bucket.normalizePath(DIR).trim() + 
+                return deploy_helpers.normalizePath(
+                    deploy_helpers.normalizePath(DIR).trim() + 
                     '/' + 
-                    deploy_clients_s3bucket.normalizePath(subDir).trim()
+                    deploy_helpers.normalizePath(subDir).trim()
                 );
             },
             target: target

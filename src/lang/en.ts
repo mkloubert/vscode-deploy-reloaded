@@ -476,6 +476,8 @@ export const translation: Translation = {
             selectFirstCommit: "Select first commit ...",
             selectLastCommit: "Select last commit ...",
         },
+        loadingCommitChanges: "Loading changes of{0:trim,surround,leading_space} ({1:trim} / {2:trim}) ...",
+        loadingCommits: "Loading commits from{0:trim,surround,leading_space} ({1:trim}) ...",
     },
     sftp: {
         privateKeyNotFound: "Private key file{0:trim,surround,leading_space} not found!",

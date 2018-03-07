@@ -16,6 +16,7 @@
  */
 
 import * as deploy_clients_azureblob from '../clients/azureblob';
+import * as deploy_helpers from '../helpers';
 import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
 
@@ -75,10 +76,10 @@ class AzureBlobPlugin extends deploy_plugins.AsyncFileClientPluginBase<AzureBlob
                 useDevelopmentStorage: target.useDevelopmentStorage,
             }),
             getDir: (subDir) => {
-                return deploy_clients_azureblob.normalizePath(
-                    deploy_clients_azureblob.normalizePath(DIR).trim() + 
+                return deploy_helpers.normalizePath(
+                    deploy_helpers.normalizePath(DIR).trim() + 
                     '/' + 
-                    deploy_clients_azureblob.normalizePath(subDir).trim()
+                    deploy_helpers.normalizePath(subDir).trim()
                 );
             },
             target: target

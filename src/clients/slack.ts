@@ -466,31 +466,6 @@ export function createClient(opts: SlackOptions): SlackClient {
 }
 
 /**
- * Normalizes a path.
- * 
- * @param {string} path The path to normalize.
- * 
- * @return {string} The normalized path. 
- */
-export function normalizePath(path: string) {
-    path = deploy_helpers.toStringSafe(path);
-    path = deploy_helpers.replaceAllStrings(path, Path.sep, '/');
-
-    if (deploy_helpers.isEmptyString(path)) {
-        path = '';
-    }
-
-    while (path.startsWith('/')) {
-        path = path.substr(1);
-    }
-    while (path.endsWith('/')) {
-        path = path.substr(0, path.length - 1);
-    }
-
-    return path;
-}
-
-/**
  * Converts to a Slack path.
  * 
  * @param {string} path The path to convert.
@@ -498,5 +473,5 @@ export function normalizePath(path: string) {
  * @return {string} The converted path. 
  */
 export function toSlackPath(path: string) {
-    return normalizePath(path);
+    return deploy_helpers.normalizePath(path);
 }

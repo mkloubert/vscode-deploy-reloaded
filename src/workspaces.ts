@@ -3060,7 +3060,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             if (deploy_helpers.toBooleanSafe(loadedCfg.clearOutputOnStartup)) {
                 ME.output.clear();
             }
-            if (deploy_helpers.toBooleanSafe(loadedCfg.openOutputOnStartup, true)) {
+            if (deploy_helpers.toBooleanSafe(loadedCfg.openOutputOnStartup)) {
                 ME.output.show();
             }
 

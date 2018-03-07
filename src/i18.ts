@@ -480,6 +480,8 @@ export interface Translation {
             selectFirstCommit?: string;
             selectLastCommit?: string;
         };
+        loadingCommitChanges?: string;
+        loadingCommits?: string;
     };
     sftp?: {
         privateKeyNotFound?: string;
