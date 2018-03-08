@@ -681,6 +681,13 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 if (false === gitCwd) {
                     gitCwd = this.rootPath;
                 }
+                else {
+                    gitCwd = Path.resolve(
+                        Path.join(
+                            gitCwd, '..'
+                        )
+                    );
+                }
                 
                 return new deploy_git.GitClient(GIT,
                                                 gitCwd);
@@ -843,7 +850,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     }
 
     /**
-     * Deploys a files of a git commit.
+     * Deploys files of a git commit.
      * 
      * @param {deploy_targets.Target} target The target to deploy to. 
      */
@@ -916,6 +923,25 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             deploy_deploy.deployPackage,
             this
         )(pkg, targetResolver);
+    }
+
+    /**
+     * Deploys uncomitted files of the git repository.
+     * 
+     * @param {deploy_targets.Target} target The target to deploy to. 
+     */
+    public async deployUncomittedGitChanges(target: deploy_targets.Target) {
+        if (!this.canBeHandledByMe(target)) {
+            return;
+        }
+        
+        const GIT = await this.createGitClient();
+        if (!GIT) {
+            return;
+        }
+
+        await deploy_deploy.deployUncommitedScmChanges
+                           .apply(this, [ GIT, target ]);
     }
 
     private disposeConfigFileWatchers() {

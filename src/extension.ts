@@ -812,6 +812,13 @@ async function activateExtension(context: vscode.ExtensionContext) {
                         },
                         {
                             action: async () => {
+                                await vscode.commands.executeCommand('extension.deploy.reloaded.deployUncomittedGitFiles');
+                            },
+                            label: '$(git-commit)  ' + i18.t('deploy.uncomittedGitFiles.label'),
+                            description: i18.t('deploy.uncomittedGitFiles.description'),
+                        },
+                        {
+                            action: async () => {
                                 await vscode.commands.executeCommand('extension.deploy.reloaded.deployFileList');
                             },
                             label: '$(list-ordered)  ' + i18.t('deploy.fileList.label'),
@@ -940,6 +947,38 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 catch (e) {
                     deploy_log.CONSOLE
                               .trace(e, 'extension.deploy.reloaded.deployGitCommit');
+                    
+                    deploy_helpers.showErrorMessage(
+                        i18.t('deploy.errors.operationFailed')
+                    );
+                }
+            }),
+
+            // deploy uncommited git files
+            vscode.commands.registerCommand('extension.deploy.reloaded.deployUncomittedGitFiles', async () => {
+                try {
+                    const WORKSPACE = await deploy_workspaces.showWorkspaceQuickPick(
+                        context,
+                        WORKSPACES,
+                        {
+                            placeHolder: i18.t('workspaces.selectWorkspace')
+                        }
+                    );
+
+                    if (!WORKSPACE) {
+                        return;
+                    }
+
+                    const TARGET = await WORKSPACE.showTargetQuickPick();
+                    if (!TARGET) {
+                        return;
+                    }
+
+                    await WORKSPACE.deployUncomittedGitChanges(TARGET);
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'extension.deploy.reloaded.deployUncomittedGitFiles');
                     
                     deploy_helpers.showErrorMessage(
                         i18.t('deploy.errors.operationFailed')

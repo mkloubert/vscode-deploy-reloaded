@@ -192,6 +192,10 @@ export const translation: Translation = {
         },
         selectTarget: "Select the target to deploy to ...",
         startOperation: "Start deploying files to{0:trim,surround,leading_space} ...",
+        uncomittedGitFiles: {
+            description: "Deploys uncommited files of that git repository",
+            label: "Uncommited git files",
+        },
     },
     disposeNotAllowed: "Cannot invoke 'dispose()' method!",
     documents: {

@@ -159,6 +159,30 @@ export interface SourceControlClient {
      * @return {Branch[]|PromiseLike<Branch[]>} The result with the list of branches.
      */
     readonly branches: () => Branch[] | PromiseLike<Branch[]>;
+    /**
+     * Returns a list of all uncomitted file changes.
+     * 
+     * @return {UncommitedFileChange[]|PromiseLike<UncommitedFileChange[]>} The result with the list of (uncommited) file changes.
+     */
+    readonly changes: () => UncommitedFileChange[] | PromiseLike<UncommitedFileChange[]>;
+    /**
+     * Gets the current working directory.
+     */
+    readonly cwd: string;
+}
+
+/**
+ * An uncommitted file change.
+ */
+export interface UncommitedFileChange {
+    /**
+     * The file.
+     */
+    readonly file: string;
+    /**
+     * The type of change.
+     */
+    readonly type?: FileChangeType;
 }
 
 

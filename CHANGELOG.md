@@ -2,7 +2,16 @@
 
 [![Share via Facebook](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/share/Facebook.png)](https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded&quote=vscode-deploy-reloaded) [![Share via Twitter](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/share/Twitter.png)](https://twitter.com/intent/tweet?source=https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded&text=vscode-deploy-reloaded:%20https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded&via=mjkloubert) [![Share via Google+](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/share/Google+.png)](https://plus.google.com/share?url=https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded) [![Share via Pinterest](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/share/Pinterest.png)](https://pinterest.com/pin/create/button/?url=https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded&media=https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo1.gif&description=Recoded%20version%20of%20Visual%20Studio%20Code%20extension%20%27vs-deploy%27%2C%20which%20provides%20commands%20to%20deploy%20files%20to%20one%20or%20more%20destinations.) [![Share via Reddit](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/share/Reddit.png)](https://www.reddit.com/submit?url=https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded&title=vscode-deploy-reloaded) [![Share via LinkedIn](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/share/LinkedIn.png)](https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded&title=vscode-deploy-reloaded&summary=Recoded%20version%20of%20Visual%20Studio%20Code%20extension%20%27vs-deploy%27%2C%20which%20provides%20commands%20to%20deploy%20files%20to%20one%20or%20more%20destinations.&source=https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded) [![Share via Wordpress](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/share/Wordpress.png)](https://wordpress.com/press-this.php?u=https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded&quote=vscode-deploy-reloaded&s=Recoded%20version%20of%20Visual%20Studio%20Code%20extension%20%27vs-deploy%27%2C%20which%20provides%20commands%20to%20deploy%20files%20to%20one%20or%20more%20destinations.&i=https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo1.gif) [![Share via Email](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/share/Email.png)](mailto:?subject=vscode-deploy-reloaded&body=Recoded%20version%20of%20Visual%20Studio%20Code%20extension%20'vs-deploy'%2C%20which%20provides%20commands%20to%20deploy%20files%20to%20one%20or%20more%20destinations.:%20https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded)
 
-## 0.55.1 (March 8th, npm updates)
+
+## 0.56.0 (March 8th, 2018; deploy uncommited git changes)
+
+* merged [pull request #37](https://github.com/mkloubert/vscode-deploy-reloaded/pull/37) ... thanks to [Pelly](https://github.com/solid-pixel)!
+* bugfixes
+* can deploy uncomitted git changes now:
+
+![Demo Deploy uncommited git changes](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo27.gif)
+
+## 0.55.1 (March 8th, 2018; npm updates)
 
 * updated the following [npm](https://www.npmjs.com/) modules:
   * [aws-sdk](https://www.npmjs.com/package/aws-sdk) `2.205.0`
@@ -19,18 +28,19 @@
 * removed the following (obsolete) modules:
   * [ip](https://www.npmjs.com/package/ip)
 
-## 0.54.0 (March 7th, improvements)
+## 0.54.0 (March 7th, 2018; improvements)
 
+* extension is build for [Visual Studio Code 1.21](https://code.visualstudio.com/updates/v1_21) now
 * showing progress when running `Detect git changes` feature in `Deploy Reloaded: Tools`
 * output channel of extension is not opened on startup by default anymore (s. [issue #36](https://github.com/mkloubert/vscode-deploy-reloaded/issues/36)) ... to activate the option, you have to set `openOutputOnStartup` to `(true)`
 * code cleanups and improvements
 
-## 0.53.3 (March 3rd, bugfixes)
+## 0.53.3 (March 3rd, 2018; bugfixes)
 
 * fixed encoding problem, when pulling, especially binary, files, via [SFTP](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_sftp) ... s. [issue #34](https://github.com/mkloubert/vscode-deploy-reloaded/issues/34)
 * fixed setting [modes](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_sftp#modes-for-specific-files) of root files after upload to a [SFTP](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_sftp) server ... s. issues [#32](https://github.com/mkloubert/vscode-deploy-reloaded/issues/32) and [#33](https://github.com/mkloubert/vscode-deploy-reloaded/issues/33)
 
-## 0.53.1 (February 21st, bugfixes)
+## 0.53.1 (February 21st, 2018; bugfixes)
 
 * fixed bug, s. [issue #30](https://github.com/mkloubert/vscode-deploy-reloaded/issues/30)
 
@@ -39,24 +49,24 @@
 * added `saveBeforeDeploy` [setting](https://github.com/mkloubert/vscode-deploy-reloaded/wiki#settings--), which indicates to save documents in non saved editors, before they are going to be deployed ... this value is `(true)` by default ... s. [issue #143](https://github.com/mkloubert/vs-deploy/issues/143) of [vs-deploy](https://github.com/mkloubert/vs-deploy)
 * code cleanups and improvements
 
-## 0.52.2 (February 18th, FTP and folder mappings)
+## 0.52.2 (February 18th, 2018; FTP and folder mappings)
 
 * automatic create folder that does not exist on a [FTP target](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_ftp), s. [issue #27](https://github.com/mkloubert/vscode-deploy-reloaded/issues/27#issuecomment-366529357)
 * fixed [folder mappings](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/folder_mappings), when handling files with leading dot, s. [issue #28](https://github.com/mkloubert/vscode-deploy-reloaded/issues/28)
 * other fixes and improvements
 
-## 0.51.1 (February 18th, bugfixes)
+## 0.51.1 (February 18th, 2018; bugfixes)
 
 * fixed bug of cancelling a deploy operation, s. [issue #26](https://github.com/mkloubert/vscode-deploy-reloaded/issues/26)
 * setting working directory (cwd) of [app target](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_app) explicitly now
 
-## 0.51.0 (February 15th, package buttons)
+## 0.51.0 (February 15th, 2018; package buttons)
 
 * can define custom [targets](https://github.com/mkloubert/vscode-deploy-reloaded/wiki#targets-) for a [package button](https://github.com/mkloubert/vscode-deploy-reloaded/wiki#buttons-) now, s. [issue #25](https://github.com/mkloubert/vscode-deploy-reloaded/issues/25)
 * code cleanups and improvements
 * bugfixes
 
-## 0.50.0 (February 14th, auto deployment)
+## 0.50.0 (February 14th, 2018; auto deployment)
 
 * improved auto deployment, like [deployOnChange](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/deploy_on_change) or [deployOnSave](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/deploy_on_save), especially for [multi-root workspace](https://code.visualstudio.com/docs/editor/multi-root-workspaces) usage
 * [imports](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/imports), which are loaded from local files, will reload the configuration automatically now, if they have been changed

@@ -198,6 +198,10 @@ export interface Translation {
         };
         selectTarget?: string;
         startOperation?: string;
+        uncomittedGitFiles?: {
+            description?: string;
+            label?: string;
+        };
     };
     disposeNotAllowed?: string;
     documents?: {

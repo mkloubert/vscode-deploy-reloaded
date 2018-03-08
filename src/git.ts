@@ -63,10 +63,12 @@ export class GitClient implements deploy_scm.SourceControlClient {
      * Initializes a new instance of that class.
      * 
      * @param {GitExecutable} executable The data of the executable.
+     * @param {string} [cwd] The optional working directory.
      */
     constructor(public readonly executable: GitExecutable,
-                public readonly cwd?) {
+               cwd?: string) {
         this.cwd = deploy_helpers.toStringSafe(cwd);
+
         if (deploy_helpers.isEmptyString(this.cwd)) {
             this.cwd = undefined;
         }
@@ -170,8 +172,16 @@ export class GitClient implements deploy_scm.SourceControlClient {
                                     return l.trim();
                                 }).filter(l => '' !== l);
 
-                                LINES.forEach(l => {
+                                LINES.forEach(l => {                                
                                     let changeType: deploy_scm.FileChangeType;
+                                    let pushNewItems = () => {
+                                        LOADED_CHANGES.push({
+                                            commit: COMMIT,
+                                            file: l.substr(2).trim(),
+                                            type: changeType,
+                                        });
+                                    };
+
                                     switch (deploy_helpers.normalizeString(l.substr(0, 1))) {
                                         case 'a':
                                             changeType = deploy_scm.FileChangeType.Added;
@@ -184,13 +194,15 @@ export class GitClient implements deploy_scm.SourceControlClient {
                                         case 'm':
                                             changeType = deploy_scm.FileChangeType.Modified;
                                             break;
+
+                                        default:
+                                            pushNewItems = null;  //TODO: implement later
+                                            break;                                                                    
                                     }
 
-                                    LOADED_CHANGES.push({
-                                        commit: COMMIT,
-                                        file: l.substr(2).trim(),
-                                        type: changeType,
-                                    });
+                                    if (pushNewItems) {
+                                        pushNewItems();
+                                    }
                                 });
 
                                 return LOADED_CHANGES;
@@ -226,6 +238,74 @@ export class GitClient implements deploy_scm.SourceControlClient {
 
         return BRANCHES;
     }
+
+    /** @inheritdoc */
+    public async changes(): Promise<deploy_scm.UncommitedFileChange[]> {
+        const CHANGED_FILES: deploy_scm.UncommitedFileChange[] = [];
+
+        const LINES = (await this.exec([
+            'status', '-s'
+        ])).split("\n").filter(l => {
+            return !deploy_helpers.isEmptyString(l);
+        });
+
+        for (const L of LINES) {
+            const GIT_TYPE = L.substr(0, 3).toLowerCase().trim();
+            const GIT_FILE = L.substr(3);
+
+            let changeType: deploy_scm.FileChangeType;
+            let pushNewItems = () => {
+                CHANGED_FILES.push({
+                    file: GIT_FILE,
+                    type: changeType,
+                });
+            };
+
+            switch (GIT_TYPE) {
+                case 'a':
+                    changeType = deploy_scm.FileChangeType.Added;
+                    break;
+
+                case 'd':
+                    changeType = deploy_scm.FileChangeType.Deleted;
+                    break;
+
+                case 'm':
+                    changeType = deploy_scm.FileChangeType.Modified;
+                    break;
+
+                case 'r':
+                    pushNewItems = () => {
+                        const SEP = GIT_FILE.indexOf(' -> ');
+                        if (SEP > -1) {
+                            CHANGED_FILES.push({
+                                file: GIT_FILE.substr(0, SEP),
+                                type: deploy_scm.FileChangeType.Deleted,
+                            });
+
+                            CHANGED_FILES.push({
+                                file: GIT_FILE.substr(SEP + 4),
+                                type: deploy_scm.FileChangeType.Added,
+                            });
+                        }
+                    };
+                    break;
+
+                default:
+                    pushNewItems = null;  //TODO: implement later
+                    break;
+            }
+
+            if (pushNewItems) {
+                pushNewItems();
+            }
+        }
+
+        return CHANGED_FILES;
+    }
+
+    /** @inheritdoc */
+    public readonly cwd: string;
 
     /**
      * Executes the Git client and returns the stdout.

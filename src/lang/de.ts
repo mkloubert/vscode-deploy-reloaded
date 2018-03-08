@@ -192,6 +192,10 @@ export const translation: Translation = {
         },
         selectTarget: "Wählen Sie das Ziel, in das Sie die Dateien bereitstellen wollen ...",
         startOperation: "Beginne das Bereitstellen der Dateien in{0:trim,surround,leading_space} ...",
+        uncomittedGitFiles: {
+            description: "Stellt Dateien bereit, die noch nicht ins git-Repository übertragen wurden",
+            label: "Nicht übertragene git-Dateien",
+        },
     },
     disposeNotAllowed: "'dispose()' Methode kann nicht aufgerufen werden!",
     documents: {

@@ -1103,6 +1103,72 @@ export async function deployScmCommit(client: deploy_scm.SourceControlClient,
     }
 }
 
+/**
+ * Deploys uncommited changes of a SCM client.
+ * 
+ * @param {deploy_scm.SourceControlClient} client The scm client.
+ * @param {deploy_targets.Target} target The target to deploy to.
+ */
+export async function deployUncommitedScmChanges(client: deploy_scm.SourceControlClient,
+                                                 target: deploy_targets.Target) {
+    if (!client) {
+        return;
+    }
+
+    const ME: deploy_workspaces.Workspace = this;
+
+    const CHANGES = await client.changes();
+    if (!CHANGES) {
+        return;
+    }
+
+    const FILES_TO_DELETE: string[] = [];
+    const FILES_TO_UPLOAD: string[] = [];
+    for (const C of CHANGES) {
+        const FILE = deploy_helpers.toStringSafe(C.file);
+        if (deploy_helpers.isEmptyString(FILE)) {
+            continue;
+        }
+
+        const FULL_PATH = Path.resolve(
+            Path.join(
+                client.cwd,
+                FILE,
+            )
+        );
+
+        switch (C.type) {
+            case deploy_scm.FileChangeType.Added:
+            case deploy_scm.FileChangeType.Modified:
+                FILES_TO_UPLOAD.push( FULL_PATH );
+                break;
+
+            case deploy_scm.FileChangeType.Deleted:
+                FILES_TO_DELETE.push( FULL_PATH );
+                break;
+        }
+    }
+
+    // first delete files
+    if (FILES_TO_DELETE.length > 0) {
+        await deploy_helpers.applyFuncFor(
+            deploy_delete.deleteFilesIn,
+            ME,
+        )(FILES_TO_DELETE, target,
+          null,
+          false);
+    }
+
+    // then upload files
+    if (FILES_TO_UPLOAD.length > 0) {
+        await deploy_helpers.applyFuncFor(
+            deployFilesTo,
+            ME,
+        )(FILES_TO_UPLOAD, target,
+          null);
+    }
+}
+
 async function saveBeforeDeploy(target: deploy_targets.Target, files: string[]) {
     const ME: deploy_workspaces.Workspace = this;
 
