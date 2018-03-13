@@ -384,6 +384,21 @@ export interface Translation {
             invalidDirectory?: string;
         };
     };
+    proxies?: {
+        buttons?: {
+            defaultText?: string;
+            defaultTooltip?: string;
+        };
+        errors?: {
+            couldNotRegister?: string;
+            couldNotToggleRunningState?: string;
+            failed?: string;
+        },
+        noneFound?: string;
+        selectProxy?: string;
+        startProxy?: string;
+        stopProxy?: string;        
+    };
     pull?: {
         allOpenFiles?: {
             description?: string;

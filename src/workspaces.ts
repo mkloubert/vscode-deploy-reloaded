@@ -35,6 +35,7 @@ import * as deploy_objects from './objects';
 import * as deploy_output from './output';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
+import * as deploy_proxies from './proxies';
 import * as deploy_pull from './pull';
 import * as deploy_sync from './sync';
 import * as deploy_targets from './targets';
@@ -47,6 +48,7 @@ import * as FS from 'fs';
 import * as Glob from 'glob';
 import * as i18 from './i18';
 import * as i18next from 'i18next';
+import * as ip from 'ip';
 const MergeDeep = require('merge-deep');
 import * as Moment from 'moment';
 import * as Path from 'path';
@@ -147,6 +149,14 @@ interface TargetWithButton<TTarget = deploy_targets.Target> {
     readonly command: vscode.Disposable;
     readonly settings: deploy_contracts.Button;
     readonly target: TTarget;
+}
+
+interface TcpProxyButton extends vscode.Disposable {
+    readonly button: vscode.StatusBarItem;
+    readonly command: vscode.Disposable;
+    readonly proxy: deploy_proxies.TcpProxy;
+    readonly proxySettings: deploy_proxies.ProxySettings;
+    readonly settings: deploy_proxies.ProxyButton;
 }
 
 /**
@@ -266,6 +276,7 @@ let allWorkspacesProvider: WorkspaceProvider;
 const FILES_CHANGES: { [path: string]: deploy_contracts.FileChangeType } = {};
 const KEY_WORKSPACE_USAGE = 'vscdrLastExecutedWorkspaceActions';
 let nextPackageButtonId = Number.MIN_SAFE_INTEGER;
+let nextTcpProxyButtonId = Number.MIN_SAFE_INTEGER;
 let nextSwitchButtonId = Number.MIN_SAFE_INTEGER;
 const SWITCH_STATE_REPO_COLLECTION_KEY = 'SwitchStates';
 
@@ -323,6 +334,11 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     /**
      * The current translation function.
      */
+    private readonly _TCP_PROXIES: deploy_proxies.TcpProxyDestinationContext[] = [];
+    private readonly _TCP_PROXY_BUTTONS: TcpProxyButton[] = [];
+    private readonly _TCP_PROXY_FILTERS: deploy_proxies.TcpProxyRemoteFilterContext[] = [];
+    private readonly _TCP_PROXY_LOGGERS: deploy_proxies.TcpProxyLoggingContext[] = [];
+    private readonly _TCP_PROXY_NAMES_AND_DESCS: deploy_proxies.TcpProxyNameAndDescriptionResolverContext[] = [];
     protected _translator: i18next.TranslationFunction;
     private _workspaceSessionState: deploy_contracts.KeyValuePairs;
 
@@ -952,6 +968,43 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         }
     }
 
+    private disposeTcpProxies() {
+        // loggers
+        while (this._TCP_PROXY_LOGGERS.length > 0) {
+            deploy_helpers.tryDispose(
+                this._TCP_PROXY_LOGGERS.pop()
+            );
+        }
+
+        // name and description resolvers
+        while (this._TCP_PROXY_NAMES_AND_DESCS.length > 0) {
+            deploy_helpers.tryDispose(
+                this._TCP_PROXY_NAMES_AND_DESCS.pop()
+            );
+        }
+
+        // buttons
+        while (this._TCP_PROXY_BUTTONS.length > 0) {
+            deploy_helpers.tryDispose(
+                this._TCP_PROXY_BUTTONS.pop()
+            );
+        }
+
+        // proxies
+        while (this._TCP_PROXIES.length > 0) {
+            deploy_helpers.tryDispose(
+                this._TCP_PROXIES.pop()
+            );
+        }
+
+        // filters
+        while (this._TCP_PROXY_FILTERS.length > 0) {
+            deploy_helpers.tryDispose(
+                this._TCP_PROXY_FILTERS.pop()
+            );
+        }
+    }
+
     /**
      * Gets the root path of the editor.
      */
@@ -1191,25 +1244,6 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
         return await deploy_helpers.glob(patterns,
                                          MergeDeep(DEFAULT_OPTS, opts));
-    }
-
-    /**
-     * Returns all directories of that workspace.
-     * 
-     * @return {Promise<string[]>} The promise with the directories.
-     */
-    public async getAllDirectories() {
-        return Enumerable.from(
-            await scanForDirectoriesRecursive(this.rootPath, true)
-        ).orderBy(d => {
-            return deploy_helpers.normalizeString(
-                Path.dirname(d)
-            );
-        }).thenBy(d => {
-            return deploy_helpers.normalizeString(
-                Path.basename(d)
-            );
-        }).toArray();
     }
 
     private getAllSwitchOptions(target: SwitchTarget): SwitchTargetOption[] {
@@ -1694,6 +1728,18 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         );
 
         return TARGETS;
+    }
+
+    /**
+     * Returns a list of all TCP proxies handled by that workspace.
+     * 
+     * @return {deploy_proxies.TcpProxy[]} The list of proxies.
+     */
+    public getTcpProxies(): deploy_proxies.TcpProxy[] {
+        return Enumerable.from( this._TCP_PROXIES )
+                         .select(x => x.proxy)
+                         .distinct(true)
+                         .toArray();
     }
 
     /**
@@ -2752,6 +2798,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
     /** @inheritdoc */
     protected onDispose() {
+        this.disposeTcpProxies();
+
         // file system watchers
         this.disposeConfigFileWatchers();
         deploy_helpers.tryDispose(this.context.fileWatcher);
@@ -3187,6 +3235,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
                 await ME.executeStartupCommands();
 
+                await ME.reloadTcpProxies();
+
                 await ME.initConfigFileWatchers(IMPORTED_LOCAL_FILES);
             };
         }
@@ -3516,6 +3566,351 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
         }).toArray();
 
         ME._packages = packages;
+    }
+
+    private async reloadTcpProxies() {
+        const ME = this;
+
+        ME.disposeTcpProxies();
+
+        const CFG = ME.config;
+        if (!CFG) {
+            return;
+        }
+
+        const PROXY_LIST = CFG.proxies;
+        if (!PROXY_LIST) {
+            return;
+        }
+
+        const SETUP_LOGGING = (proxy: deploy_proxies.TcpProxy) => {
+            ME._TCP_PROXY_LOGGERS.push(
+                deploy_proxies.registerLoggingForTcpProxy(
+                    proxy,
+                    () => ME.logger,
+                )
+            );
+        };
+
+        const ADD_PROXY_FILTER = (proxy: deploy_proxies.TcpProxy, settings: deploy_proxies.ProxySettings) => {
+            const ALLOWED = deploy_helpers.asArray(settings.allowed).map(a => {
+                return deploy_helpers.toStringSafe(a)
+                                     .trim();
+            }).filter(a => '' !== a).map(a => {
+                if (a.indexOf('/') < 0) {
+                    if (ip.isV4Format(a)) {
+                        a += "/32";
+                    }
+                    else {
+                        a += "/128";
+                    }
+                }
+
+                return a;
+            });
+
+            ME._TCP_PROXY_FILTERS.push(
+                proxy.addFilter((addr, port) => {
+                    if (ALLOWED.length > 0) {
+                        return Enumerable.from(ALLOWED)
+                                         .any(a => ip.cidrSubnet(a)
+                                                     .contains(addr));
+                    }
+
+                    return true;
+                })
+            );
+        };
+
+        const SET_NAME_AND_DESC_RESOLVER = (proxy: deploy_proxies.TcpProxy, settings: deploy_proxies.ProxySettings) => {
+            proxy.setNameAndDescriptionResolver(
+                ME,
+                () => {
+                    const ADDITIONAL_VALUES: deploy_values.Value[] = [
+                        new deploy_values.FunctionValue(() => {
+                            return deploy_helpers.toStringSafe(proxy.port);
+                        }, 'proxyPort')
+                    ];
+
+                    let name = deploy_helpers.toStringSafe(
+                        ME.replaceWithValues(settings.name, ADDITIONAL_VALUES)
+                    ).trim();
+                    if ('' === name) {
+                        name = undefined;
+                    }
+
+                    let desc = deploy_helpers.toStringSafe(
+                        ME.replaceWithValues(settings.description, ADDITIONAL_VALUES)
+                    ).trim();
+                    if ('' === desc) {
+                        desc = undefined;
+                    }
+
+                    return {
+                        description: desc,
+                        name: name,
+                    };
+                }
+            );
+        };
+
+        const SETUP_PROXY_BUTTON = async (proxy: deploy_proxies.TcpProxy, settings: deploy_proxies.ProxySettings) => {
+            const BTN_ID = nextTcpProxyButtonId++;
+
+            let btn: deploy_proxies.ProxyButton;
+            if (_.isNil(settings.button)) {
+                btn = {};
+            }
+            else {
+                if (deploy_helpers.isObject<deploy_proxies.ProxyButton>(settings.button)) {
+                    btn = settings.button;
+                }
+                else if (_.isBoolean(settings.button)) {
+                    btn = {
+                        enabled: settings.button,
+                    };
+                }
+                else {
+                    btn = {
+                        text: deploy_helpers.toStringSafe( settings.button ),
+                    };
+                }
+            }            
+
+            if (!btn || !deploy_helpers.toBooleanSafe(btn.enabled, true)) {
+                return;
+            }
+
+            const GET_PROXY_NAME = () => {
+                return proxy.getNameAndDescriptionFor(ME).name;
+            };
+
+            const GET_STATE_ICON = () => {
+                return '$(' + (proxy.isRunning ? 'triangle-right' : 'primitive-square') + ')';
+            };
+
+            const ADDITIONAL_BTN_VALUES: deploy_values.Value[] = [
+                new deploy_values.FunctionValue(() => {
+                    return GET_PROXY_NAME();
+                }, 'proxy'),
+                new deploy_values.FunctionValue(() => {
+                    return deploy_helpers.toStringSafe( proxy.port );
+                }, 'proxyPort'),
+                new deploy_values.FunctionValue(() => {
+                    return GET_STATE_ICON();
+                }, 'proxyStateIcon'),
+            ];
+
+            let guiBtn: vscode.StatusBarItem;
+            let btnCmd: vscode.Disposable;
+            let defaultColor: string | vscode.ThemeColor;
+            const DISPOSE_BUTTON = () => {
+                deploy_helpers.tryDispose(guiBtn);
+                deploy_helpers.tryDispose(btnCmd);
+            };
+
+            const UPDATE_BUTTON = () => {
+                const GB = guiBtn;
+                if (!GB) {
+                    return;
+                }
+
+                try {
+                    let text = deploy_helpers.toStringSafe(
+                        ME.replaceWithValues(btn.text, ADDITIONAL_BTN_VALUES)
+                    ).trim();
+                    if ('' === text) {
+                        text = GET_STATE_ICON() + '  ' + ME.t('proxies.buttons.defaultText',
+                                                              GET_PROXY_NAME());
+                    }
+
+                    let tooltip = deploy_helpers.toStringSafe(
+                        ME.replaceWithValues(btn.tooltip, ADDITIONAL_BTN_VALUES)
+                    ).trim();
+                    if ('' === tooltip) {
+                        tooltip = ME.t('proxies.buttons.defaultTooltip');
+                    }
+
+                    let newColor = defaultColor;
+                    if (!proxy.isRunning) {
+                        if (deploy_helpers.isEmptyString(btn.stopColor)) {
+                            newColor = new vscode.ThemeColor('panelTitle.inactiveForeground');
+                        }
+                        else {
+                            newColor = deploy_helpers.normalizeString( btn.stopColor );
+                        }
+                    }
+
+                    if (GB.text !== text) {
+                        GB.text = text;
+                    }
+                    if (GB.tooltip !== tooltip) {
+                        GB.tooltip = tooltip;
+                    }
+                    if (GB.color !== newColor) {
+                        GB.color = newColor;
+                    }
+                }
+                catch (e) {
+                    this.logger
+                        .trace(e, 'workspaces.Workspace.reloadTcpProxies.SETUP_PROXY_BUTTON.UPDATE_BUTTON(1)');
+                }
+            };
+
+            const START_STOP_EVENT_LISTENER = () => {
+                UPDATE_BUTTON();
+            };
+
+            const REMOVE_EVENT_LISTENERS = () => {
+                proxy.removeListener(deploy_proxies.EVENT_STARTED, START_STOP_EVENT_LISTENER);
+                proxy.removeListener(deploy_proxies.EVENT_STOPPED, START_STOP_EVENT_LISTENER);
+            };
+
+            try {
+                const CMD_NAME = `extension.deploy.reloaded.buttons.tcpProxy${BTN_ID}`;
+
+                btnCmd = vscode.commands.registerCommand(CMD_NAME, async () => {
+                    try {
+                        await proxy.toggle();
+                    }
+                    catch (e) {
+                        ME.showErrorMessage(
+                            ME.t('proxies.errors.couldNotToggleRunningState',
+                                 proxy.getNameAndDescriptionFor(ME).name,
+                                 e)
+                        );
+                    }
+                    finally {
+                        UPDATE_BUTTON();
+                    }
+                });
+
+                guiBtn = await deploy_helpers.createButton(btn, (b) => {
+                    b.command = CMD_NAME;
+                });
+                defaultColor = guiBtn.color;
+
+                proxy.on(deploy_proxies.EVENT_STARTED, START_STOP_EVENT_LISTENER);
+                proxy.on(deploy_proxies.EVENT_STOPPED, START_STOP_EVENT_LISTENER);    
+
+                ME._TCP_PROXY_BUTTONS.push({
+                    button: guiBtn,
+                    command: btnCmd,
+                    dispose: function() {
+                        REMOVE_EVENT_LISTENERS();
+                        DISPOSE_BUTTON();
+                    },
+                    proxy: proxy,
+                    proxySettings: settings,                    
+                    settings: btn,                    
+                });
+
+                UPDATE_BUTTON();
+
+                guiBtn.show();
+            }
+            catch (e) {
+                DISPOSE_BUTTON();
+
+                throw e;
+            }
+        };
+
+        for (const P in PROXY_LIST) {
+            const PROXY_ENTRY = PROXY_LIST[ P ];
+            
+            if (deploy_helpers.filterPlatformItems( PROXY_ENTRY ).length < 1) {
+                continue;  // not for platform
+            }
+            if (ME.filterConditionalItems( PROXY_ENTRY ).length < 1) {
+                continue;  // filter does not match
+            }
+            
+            const PORT = parseInt(
+                deploy_helpers.toStringSafe(P)
+            );
+
+            const ADDITIONAL_PROXY_VALUES: deploy_values.Value[] = [
+                new deploy_values.FunctionValue(() => {
+                    return deploy_helpers.toStringSafe( PORT );
+                }, 'proxyPort'),
+            ];
+
+            try {
+                const PROXY = deploy_proxies.getTcpProxy(PORT);
+
+                if (deploy_helpers.toBooleanSafe(PROXY_ENTRY.debug)) {
+                    SETUP_LOGGING(PROXY);
+                }
+
+                if (!_.isNil(PROXY_ENTRY.destination)) {
+                    const DV = PROXY_ENTRY.destination;
+
+                    let d: deploy_proxies.ProxyDestination;
+                    if (deploy_helpers.isObject<deploy_proxies.ProxyDestination>(DV)) {
+                        d = DV;
+                    }
+                    else if (_.isNumber(DV)) {
+                        d = {
+                            port: DV,
+                        };
+                    }
+                    else {
+                        let addr: string;
+                        let port: number;
+
+                        const ADDR_AND_PORT = deploy_helpers.toStringSafe(
+                            ME.replaceWithValues(DV, ADDITIONAL_PROXY_VALUES)
+                        );
+
+                        const SEP = ADDR_AND_PORT.indexOf(':');
+                        if (SEP > -1) {
+                            addr = addr.substr(0, SEP);
+                            port = parseInt(
+                                addr.substr(SEP + 1).trim()
+                            );
+                        }
+                        else {
+                            addr = ADDR_AND_PORT;
+                        }
+
+                        d = {
+                            address: addr.trim(),
+                            port: port,
+                        };
+                    }
+
+                    if (deploy_helpers.filterPlatformItems( d ).length > 0) {
+                        if (ME.filterConditionalItems( d ).length > 0) {                            
+                            // filters match
+
+                            ADD_PROXY_FILTER(PROXY, PROXY_ENTRY);
+                            SET_NAME_AND_DESC_RESOLVER(PROXY, PROXY_ENTRY);
+
+                            ME._TCP_PROXIES.push(
+                                PROXY.addDestination(
+                                    d.address, d.port,
+                                )
+                            );                                    
+                        }    
+                    }
+                }
+                
+                if (deploy_helpers.toBooleanSafe(PROXY_ENTRY.autoStart, true)) {
+                    if (!PROXY.isRunning) {
+                        await PROXY.start();
+                    }
+                }
+                
+                await SETUP_PROXY_BUTTON(PROXY, PROXY_ENTRY);
+            }
+            catch (e) {
+                ME.showErrorMessage(
+                    ME.t('proxies.errors.couldNotRegister',
+                         PORT, e)
+                );
+            }
+        }
     }
 
     private async reloadSwitches() {
@@ -4238,33 +4633,4 @@ export async function showWorkspaceQuickPick(context: vscode.ExtensionContext,
     if (selectedItem) {
         return selectedItem.action();
     }
-}
-
-async function scanForDirectoriesRecursive(dir: string, isRoot: boolean) {
-    const RESULT: string[] = [];
-
-    const FILES_AND_FOLDERS = await deploy_helpers.readDir(dir);
-    for (const FF of FILES_AND_FOLDERS) {
-        const FULL_PATH = Path.resolve(
-            Path.join( dir, FF )
-        );
-        const STATS = await deploy_helpers.lstat(FULL_PATH);
-
-        if (STATS.isDirectory()) {
-            if (isRoot) {
-                switch (FF) {
-                    case '.git':
-                    case '.vscode':
-                        continue;
-                }
-            }
-
-            RESULT.push(FULL_PATH);
-
-            RESULT.push
-                  .apply(RESULT, await scanForDirectoriesRecursive(FULL_PATH, false));
-        }
-    }
-
-    return RESULT;
 }

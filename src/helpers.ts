@@ -216,7 +216,7 @@ export function asArray<T>(val: T | T[], removeEmpty = true): T[] {
 
     return (Array.isArray(val) ? val : [ val ]).filter(i => {
         if (removeEmpty) {
-            return !isNullOrUndefined(i);
+            return !_.isNil(i);
         }
 
         return true;
@@ -549,9 +549,14 @@ export async function createButton<TButton extends deploy_contracts.Button = dep
         let alignment = toBooleanSafe(buttonDesc.isRight) ? vscode.StatusBarAlignment.Right
                                                           : vscode.StatusBarAlignment.Left;
 
-        let color = normalizeString(buttonDesc.color);
+        let color: string | vscode.ThemeColor = normalizeString(buttonDesc.color);
         if ('' === color) {
-            color = '#ffffff';
+            color = new vscode.ThemeColor('button.foreground');
+        }
+        if (_.isString(color)) {
+            if (!color.startsWith('#')) {
+                color = new vscode.ThemeColor(color);
+            }
         }
 
         let prio = parseInt( toStringSafe(buttonDesc.priority).trim() );

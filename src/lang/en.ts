@@ -380,6 +380,21 @@ export const translation: Translation = {
             invalidDirectory: "{0:trim,surround,ending_space}is an invalid directory!",
         },
     },
+    proxies: {
+        buttons: {
+            defaultText: "Proxy{0:trim,surround,leading_space}",
+            defaultTooltip: "Click here to change the state of that proxy ...",
+        },
+        errors: {
+            couldNotRegister: "Could not register TCP proxy for port{0:trim,leading_space}:{1:trim,surround,leading_space}",
+            couldNotToggleRunningState: "Could not toggle state of TCP proxy{0:trim,surround,leading_space} nicht ändern:{1:trim,surround,leading_space}",
+            failed: "TCP proxy operation failed:{0:trim,surround,leading_space}",
+        },
+        noneFound: "No TCP proxy has been defined in the settings.",
+        selectProxy: "Select a TCP proxy ...",
+        startProxy: "Start TCP proxy ...",
+        stopProxy: "Stop TCP proxy ...",
+    },
     pull: {
         allOpenFiles: {
             description: "Pulls the files of all opened text editors",

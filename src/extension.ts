@@ -30,6 +30,7 @@ import * as deploy_html from './html';
 import * as deploy_log from './log';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
+import * as deploy_proxies from './proxies';
 import * as deploy_pull from './pull';
 import * as deploy_switch from './switch';
 import * as deploy_targets from './targets';
@@ -735,7 +736,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
         outputChannel.appendLine(i18.t('extension.initializing'));
         outputChannel.appendLine('');
         outputChannel.appendLine('');
-    });
+    });    
 
     // commands
     WF.next(() => {
@@ -1251,6 +1252,18 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 }
             }),
 
+            // (TCP) proxies
+            vscode.commands.registerCommand('extension.deploy.reloaded.proxies', async () => {
+                try {
+                    await deploy_proxies.showTcpProxyQuickPick();
+                }
+                catch (e) {
+                    vscode.window.showErrorMessage(
+                        i18.t('proxies.errors.failed', e)  
+                    );
+                }
+            }),
+
             // quick code execution
             vscode.commands.registerCommand('extension.deploy.reloaded.quickExecution', async () => {
                 try {
@@ -1702,6 +1715,13 @@ async function activateExtension(context: vscode.ExtensionContext) {
             deploy_log.CONSOLE
                       .trace(e, 'extension.displayNetworkInfo()');
         }
+    });
+
+    // TCP proxies
+    WF.next(() => {
+        context.subscriptions.push(
+            deploy_proxies.PROXY_DISPOSER
+        );
     });
 
     WF.next(() => {

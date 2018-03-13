@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.56.0",
+ "version": "0.57.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.21.0"
@@ -48,13 +48,18 @@
     "category": "Deploy Reloaded"
    },
    {
-    "command": "extension.deploy.reloaded.pull",
-    "title": "Pull ...",
+    "command": "extension.deploy.reloaded.listDirectory",
+    "title": "List directory ...",
     "category": "Deploy Reloaded"
    },
    {
-    "command": "extension.deploy.reloaded.listDirectory",
-    "title": "List directory ...",
+    "command": "extension.deploy.reloaded.proxies",
+    "title": "Proxies ...",
+    "category": "Deploy Reloaded"
+   },
+   {
+    "command": "extension.deploy.reloaded.pull",
+    "title": "Pull ...",
     "category": "Deploy Reloaded"
    },
    {
@@ -236,7 +241,7 @@
               "color": {
                "description": "The (text) color for the button.",
                "type": "string",
-               "default": "#ffffff"
+               "default": "button.foreground"
               },
               "enabled": {
                "description": "Enable button or not.",
@@ -527,7 +532,7 @@
              "color": {
               "description": "The (text) color for the button.",
               "type": "string",
-              "default": "#ffffff"
+              "default": "button.foreground"
              },
              "command": {
               "description": "The custom ID for the command.",
@@ -880,6 +885,166 @@
            "type": "string"
           }
          }
+        }
+       }
+      },
+      "proxies": {
+       "description": "One or more TCP proxies.",
+       "type": "object",
+       "patternProperties": {
+        "([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])": {
+         "description": "The TCP port, the proxy should listen on.",
+         "type": "object",
+         "properties": {
+          "allowed": {
+           "description": "A list of one or more allowed IP addresses in CIDR format.",
+           "type": "array",
+           "items": {
+            "description": "A single IP address or an IP range in CIDR format.",
+            "type": "string"
+           }
+          },
+          "autoStart": {
+           "description": "Run proxy on startup or not.",
+           "type": "boolean",
+           "default": true
+          },
+          "button": {
+           "oneOf": [
+            {
+             "description": "Indicates if a button for that proxy should be enabled or not.",
+             "type": "boolean",
+             "default": true
+            },
+            {
+             "description": "Defines the display text for the button of that proxy.",
+             "type": "string"
+            },
+            {
+             "description": "Settings for a button of that proxy.",
+             "type": "object",
+             "properties": {
+              "color": {
+               "description": "The (text) color for the button when proxy is running.",
+               "type": "string",
+               "default": "button.foreground"
+              },
+              "enabled": {
+               "description": "Enable button or not.",
+               "type": "boolean",
+               "default": true
+              },
+              "isRight": {
+               "description": "Put button on the right side or not.",
+               "type": "boolean",
+               "default": false
+              },
+              "priority": {
+               "description": "The priority.",
+               "type": "integer"
+              },
+              "stopColor": {
+               "description": "The (text) color for the button when proxy is stopped.",
+               "type": "string"
+              },
+              "text": {
+               "description": "The custom display text.",
+               "type": "string"
+              },
+              "tooltip": {
+               "description": "The custom tooltip.",
+               "type": "string"
+              }
+             }
+            }
+           ]
+          },
+          "description": {
+           "description": "A description for the proxy.",
+           "type": "string"
+          },
+          "destination": {
+           "description": "The destination to send data to and from.",
+           "oneOf": [
+            {
+             "description": "The address (and optional port) of the destination. If no port is defined, the value of the proxy will be used.",
+             "type": "string"
+            },
+            {
+             "description": "The port on the local machine of the description.",
+             "type": "integer",
+             "minimum": 0,
+             "maximum": 65535
+            },
+            {
+             "description": "Settings for the destination.",
+             "type": "object",
+             "properties": {
+              "address": {
+               "description": "The address / hostname of the destination.",
+               "type": "string",
+               "default": "127.0.0.1"
+              },
+              "if": {
+               "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+               "type": "string"
+              },
+              "name": {
+               "description": "The custom (display) name of the destination.",
+               "type": "string"
+              },
+              "platforms": {
+               "description": "One or more platform names the entry is available for.",
+               "type": "array",
+               "items": {
+                "description": "The name of the platform.",
+                "type": "string",
+                "enum": [
+                 "darwin",
+                 "freebsd",
+                 "linux",
+                 "sunos",
+                 "win32"
+                ]
+               }
+              },
+              "port": {
+               "description": "The TCP port of the destination.",
+               "type": "integer",
+               "minimum": 0,
+               "maximum": 65535
+              }
+             }
+            }
+           ]
+          },
+          "if": {
+           "description": "(JavaScript) Code, which indicates, if entry is available or not.",
+           "type": "string"
+          },
+          "name": {
+           "description": "The custom (display) name of the proxy.",
+           "type": "string"
+          },
+          "platforms": {
+           "description": "One or more platform names the entry is available for.",
+           "type": "array",
+           "items": {
+            "description": "The name of the platform.",
+            "type": "string",
+            "enum": [
+             "darwin",
+             "freebsd",
+             "linux",
+             "sunos",
+             "win32"
+            ]
+           }
+          }
+         },
+         "required": [
+          "destination"
+         ]
         }
        }
       },
@@ -60918,7 +61083,7 @@
                "color": {
                 "type": "string",
                 "description": "The custom (text) color for the button.",
-                "default": "#ffffff"
+                "default": "button.foreground"
                },
                "enabled": {
                 "type": "boolean",
@@ -70704,6 +70869,7 @@
   "@types/html-entities": "^1.2.16",
   "@types/html-minifier": "^1.1.31",
   "@types/i18next": "^8.4.3",
+  "@types/ip": "0.0.30",
   "@types/is-stream": "^1.1.0",
   "@types/less": "0.0.32",
   "@types/lodash": "^4.14.104",
@@ -70762,6 +70928,7 @@
   "html-entities": "^1.2.1",
   "html-minifier": "^3.5.10",
   "i18next": "^10.5.0",
+  "ip": "^1.1.5",
   "is-stream": "^1.1.0",
   "isbinaryfile": "^3.0.2",
   "jsftp": "^2.1.3",

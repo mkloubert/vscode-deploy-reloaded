@@ -322,6 +322,7 @@ You can also use the following, predefined, shortcuts:
 | `extension.deploy.reloaded.deployFile` | `CTRL + ALT + F` | Deploys the current file. |
 | `extension.deploy.reloaded.deployWorkspace` | `CTRL + ALT + W` | Deploys files of a package. |
 | `extension.deploy.reloaded.listDirectory` | `CTRL + ALT + L, D` | Lists a directory on remote. |
+| `extension.deploy.reloaded.proxies` | N/A | Options for [TCP proxies](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/proxies). |
 | `extension.deploy.reloaded.pullFile` | `CTRL + ALT + P, F` | Pulls / downloads the current file. |
 | `extension.deploy.reloaded.pullWorkspace` | `CTRL + ALT + P, W` | Pulls / downloads files of a package from remote. |
 | `extension.deploy.reloaded.quickExecution` | `CTRL + SHIFT + Q` | Quick JavaScript code execution. |

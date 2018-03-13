@@ -379,6 +379,21 @@ export const translation: Translation = {
             invalidDirectory: "{0:trim,surround,ending_space}ist ein ungültiges Verzeichnis!",
         },
     },
+    proxies: {
+        buttons: {
+            defaultText: "Proxy{0:trim,surround,leading_space}",
+            defaultTooltip: "Hier klicken, um den Status des Proxies zu ändern ...",
+        },
+        errors: {
+            couldNotRegister: "Konnte TCP Proxy nicht für den Port{0:trim,leading_space} registríeren:{1:trim,surround,leading_space}",
+            couldNotToggleRunningState: "Konnte Status des TCP Proxies{0:trim,surround,leading_space} nicht ändern:{1:trim,surround,leading_space}",
+            failed: "TCP Proxy Operation fehlgeschlagen:{0:trim,surround,leading_space}",
+        },
+        noneFound: "Es wurde kein TCP Proxy in den Einstellungen definiert.",
+        selectProxy: "Wählen Sie einen TCP Proxy aus ...",
+        startProxy: "Starte TCP Proxy ...",
+        stopProxy: "Stoppe TCP Proxy ...",
+    },
     pull: {
         allOpenFiles: {
             description: "Lädt die Dateien aller geöffneten Editoren",

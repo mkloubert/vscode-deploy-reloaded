@@ -18,6 +18,7 @@
 import * as deploy_commands from './commands';
 import * as deploy_log from './log';
 import * as deploy_packages from './packages';
+import * as deploy_proxies from './proxies';
 import * as deploy_targets from './targets';
 import * as deploy_values from './values';
 import * as vscode from 'vscode';
@@ -235,6 +236,10 @@ export interface Configuration extends deploy_packages.WithFastFileCheckSettings
      * One or more package.
      */
     readonly packages?: deploy_packages.Package | deploy_packages.Package[];
+    /**
+     * One or more TCP proxies.
+     */
+    readonly proxies?: deploy_proxies.Proxies;
     /**
      * Checks for one or more required extensions.
      */
