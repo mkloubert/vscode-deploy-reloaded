@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.58.0",
+ "version": "0.59.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.21.0"
@@ -1137,6 +1137,27 @@
        "description": "Indicates, if non saved documents will be saved automatically, before they are going to be deployed or not.",
        "type": "boolean",
        "default": true
+      },
+      "showPopupOnSuccess": {
+       "description": "Show a popup after a successfull deploy operation or not. This requires to set up 'showPopupWhenFinished' setting.",
+       "type": "boolean",
+       "default": true
+      },
+      "showPopupWhenFinished": {
+       "description": "Shows a popup, after a deploy operation has been finished.",
+       "oneOf": [
+        {
+         "description": "Indicates to show a pop, after a deploy operation has been finished.",
+         "type": "boolean",
+         "default": false
+        },
+        {
+         "description": "Defines the minimum number of files, which are required, to show a popup, after a deploy operation has been finished.",
+         "type": "integer",
+         "minimum": 1,
+         "default": 2
+        }
+       ]
       },
       "startupCommands": {
        "type": "array",
@@ -70956,6 +70977,6 @@
   "tmp": "0.0.33",
   "uglify-js": "^3.3.13",
   "uuid": "^3.2.1",
-  "vscode-helpers": "^0.2.0"
+  "vscode-helpers": "^0.7.0"
  }
 }

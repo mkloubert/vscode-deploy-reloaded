@@ -15,10 +15,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
+import * as _ from 'lodash';
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
+import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
 import * as vscode from 'vscode';
 
@@ -28,6 +29,157 @@ interface LastExecutedActions {
     lastExecuted: string | false;
 }
 
+/**
+ * Statistics for 'showPopupWhenFinished()' function.
+ */
+export interface ShowPopupWhenFinishedStats {
+    /**
+     * The number of failed elements.
+     */
+    failed: number;
+    /**
+     * The type of deploy operation.
+     */
+    readonly operation: deploy_contracts.DeployOperation;    
+    /**
+     * The number of succeeded elements.
+     */
+    succeeded: number;
+}
+
+/**
+ * A possible value for 'showPopupWhenFinished' setting.
+ */
+export type ShowPopupWhenFinishedValue = boolean | number;
+
+/**
+ * The default value for the minimum number of files, which are required,
+ * before 'showPopupWhenFinished()' shows a popup.
+ */
+export const DEFAULT_REQUIRED_FILES_BEFORE_SHOW_POPUP_WHEN_FINISHED = 2;
+
+/**
+ * Shows a popup when a deploy operation has been finished.
+ * 
+ * @param {ShowPopupWhenFinishedStats} stats The statistics.
+ */
+export async function showPopupWhenFinished(stats: ShowPopupWhenFinishedStats) {
+    const ME: deploy_workspaces.Workspace = this;
+
+    const CFG = ME.config;
+    if (!CFG) {
+        return;
+    }
+
+    const CLOSE: deploy_contracts.MessageItemWithValue<number> = {
+        isCloseAffordance: true,
+        title: ME.t('close'),
+        value: 0,
+    };
+    const OPEN_OUTPUT: deploy_contracts.MessageItemWithValue<number> = {
+        title: ME.t('output.open'),
+        value: 1,
+    };
+    const AFTER_POPUP = async (val: deploy_contracts.MessageItemWithValue) => {
+        if (val) {
+            if (1 === val.value) {
+                try {
+                    ME.output.show();
+                }
+                catch (e) {
+                    deploy_log.CONSOLE
+                              .trace(e, 'gui.showPopupWhenFinished.AFTER_POPUP(1)');
+                }
+            }
+        }
+    };
+
+    let setting = CFG.showPopupWhenFinished;
+
+    if (_.isNil(setting)) {
+        setting = false;
+    }
+
+    if (_.isBoolean(setting)) {
+        if (!setting) {
+            return;
+        }
+
+        setting = DEFAULT_REQUIRED_FILES_BEFORE_SHOW_POPUP_WHEN_FINISHED;
+    }
+    else {
+        setting = parseInt(
+            deploy_helpers.toStringSafe(setting).trim()
+        );
+    }
+
+    if (isNaN(setting)) {
+        setting = DEFAULT_REQUIRED_FILES_BEFORE_SHOW_POPUP_WHEN_FINISHED;
+    }
+
+    let popupShower: () => any;
+
+    const ALL_COUNT = stats.failed + stats.succeeded;
+    
+    let translationKey: string;
+    switch (stats.operation) {
+        case deploy_contracts.DeployOperation.Delete:
+            translationKey = 'DELETE';
+            break;
+
+        case deploy_contracts.DeployOperation.Pull:
+            translationKey = 'pull';
+            break;
+            
+        default:
+            translationKey = 'deploy';
+            break;
+    }
+
+    if (ALL_COUNT >= setting) {
+        if (stats.failed > 0) {
+            if (stats.succeeded < 1) {
+                popupShower = async () => {
+                    await AFTER_POPUP(
+                        await ME.showErrorMessage(
+                            ME.t(`${translationKey}.popups.allFailed`),
+                            
+                            OPEN_OUTPUT,
+                            CLOSE,
+                        ),                        
+                    );
+                };
+            }
+            else {
+                popupShower = async () => {
+                    await AFTER_POPUP(
+                        await ME.showErrorMessage(
+                            ME.t(`${translationKey}.popups.someFailed`),
+                            
+                            OPEN_OUTPUT,
+                            CLOSE,
+                        )
+                    );
+                };
+            }
+        }
+        else {
+            if (deploy_helpers.toBooleanSafe(CFG.showPopupOnSuccess, true)) {
+                popupShower = async () => {
+                    await ME.showInformationMessage(
+                        ME.t(`${translationKey}.popups.succeeded`),
+                    )
+                };
+            }
+        }
+    }
+
+    if (popupShower) {
+        await Promise.resolve(
+            popupShower()
+        );
+    }
+}
 
 /**
  * Sorts quick pick items by usage by using the 'state' property as ID value.

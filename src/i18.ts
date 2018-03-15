@@ -17,7 +17,6 @@
 
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
-import * as deploy_workflows from './workflows';
 import * as deploy_workspaces from './workspaces';
 import * as i18next from 'i18next';
 import * as Path from 'path';
@@ -31,6 +30,7 @@ export interface Translation {
     cancel?: string;
     canceled?: string;
     changelog?: string;
+    close?: string;
     commands?: {
         executionError?: string;
         scriptNotFound?: string;
@@ -107,6 +107,11 @@ export interface Translation {
         package?: {
             description?: string;
             label?: string;
+        };
+        popups?: {
+            allFailed?: string;
+            someFailed?: string;
+            succeeded?: string;
         };
         selectTarget?: string;
         startOperation?: string;
@@ -195,6 +200,11 @@ export interface Translation {
         package?: {
             description?: string;
             label?: string;
+        };
+        popups?: {
+            allFailed?: string;
+            someFailed?: string;
+            succeeded?: string;
         };
         selectTarget?: string;
         startOperation?: string;
@@ -293,6 +303,9 @@ export interface Translation {
         dir?: string;
     };
     ok?: string;
+    output?: {
+        open?: string;
+    };
     packages?: {
         buttons?: {
             defaultText?: string;
@@ -458,6 +471,11 @@ export interface Translation {
         package?: {
             description?: string;
             label?: string;
+        };
+        popups?: {
+            allFailed?: string;
+            someFailed?: string;
+            succeeded?: string;
         };
         pullingFile?: string;
         selectSource?: string;
@@ -837,7 +855,7 @@ export async function create(lang?: string): Promise<i18next.TranslationFunction
 
     let isDirectory = false;
 
-    return await deploy_workflows.build().next(async () => {
+    return await deploy_helpers.buildWorkflow().next(async () => {
         try {
             if (await deploy_helpers.exists(LANG_DIR)) {
                 isDirectory = (await deploy_helpers.lstat(LANG_DIR)).isDirectory();

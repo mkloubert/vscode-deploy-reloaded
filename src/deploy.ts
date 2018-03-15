@@ -20,6 +20,7 @@ import * as Crypto from 'crypto';
 import * as deploy_contracts from './contracts';
 import * as deploy_delete from './delete';
 import * as deploy_files from './files';
+import * as deploy_gui from './gui';
 import * as deploy_helpers from './helpers';
 import * as deploy_html from './html';
 import * as deploy_log from './log';
@@ -594,6 +595,11 @@ export async function deployFilesTo(files: string[],
 
             const PI = PLUGINS.shift();
 
+            const POPUP_STATS: deploy_gui.ShowPopupWhenFinishedStats = {
+                failed: 0,
+                operation: deploy_contracts.DeployOperation.Deploy,
+                succeeded: 0,
+            };
             try {
                 if (!(await checkBeforeDeploy(target, PI, files, MAPPING_SCOPE_DIRS, CANCELLATION_SOURCE.token, () => isCancelling))) {
                     continue;
@@ -646,6 +652,13 @@ export async function deployFilesTo(files: string[],
                             }
 
                             ME.output.appendLine(`[${ME.t('ok')}]`);
+                        }
+
+                        if (err) {
+                            ++POPUP_STATS.failed;
+                        }
+                        else {
+                            ++POPUP_STATS.succeeded;
                         }
                     };
 
@@ -786,6 +799,12 @@ export async function deployFilesTo(files: string[],
                     ME.t('deploy.finishedOperationWithErrors',
                          TARGET_NAME, e)
                 );
+            }
+            finally {
+                deploy_helpers.applyFuncFor(
+                    deploy_gui.showPopupWhenFinished,
+                    ME
+                )( POPUP_STATS );
             }
         }
     }

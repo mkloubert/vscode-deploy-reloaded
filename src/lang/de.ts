@@ -25,6 +25,7 @@ export const translation: Translation = {
     cancel: "Abbrechen",
     canceled: "Abgebrochen",
     changelog: "Änderungsprotokoll",
+    close: "Schliessen",
     commands: {
         executionError: "Das Kommando{0:surround,leading_space} konnte nicht ausgeführt werden:{1:trim,surround,leading_space}",
         scriptNotFound: "Das Skript {0:surround} wurde nicht gefunden!",
@@ -101,6 +102,11 @@ export const translation: Translation = {
         package: {
             description: "Löscht die Dateien eines Paketes",
             label: "Paket ...",
+        },
+        popups: {
+            allFailed: "Keine Datei konnte gelöscht werden!",
+            someFailed: "{0:trim,ending_space}Datei(en) konnte(n) nicht gelöscht werden!",
+            succeeded: "Alle Dateien wurden erfolgreich gelöscht.",
         },
         selectTarget: "Wählen Sie das Ziel, wo Sie Dateien löschen wollen ...",
         startOperation: "Beginne das Löschen der Dateien in{0:trim,surround,leading_space} ...",
@@ -189,6 +195,11 @@ export const translation: Translation = {
         package: {
             description: "Stellt die Dateien eines Paketes bereit",
             label: "Paket ...",
+        },
+        popups: {
+            allFailed: "Keine Datei konnte bereitgestellt werden!",
+            someFailed: "{0:trim,ending_space}Datei(en) konnte(n) nicht bereitgestellt werden!",
+            succeeded: "Alle Dateien wurden erfolgreich bereitgestellt.",
         },
         selectTarget: "Wählen Sie das Ziel, in das Sie die Dateien bereitstellen wollen ...",
         startOperation: "Beginne das Bereitstellen der Dateien in{0:trim,surround,leading_space} ...",
@@ -285,6 +296,9 @@ export const translation: Translation = {
     noFiles: "Keine Dateien gefunden!",
     notFound: {
         dir: "Das Verzeichnis{0:trim,surround,leading_space} wurde nicht gefunden!",
+    },
+    output: {
+        open: "Ausgabe öffnen",
     },
     packages: {
         buttons: {
@@ -453,6 +467,11 @@ export const translation: Translation = {
         package: {
             description: "Lädt die Dateien eines Paketes",
             label: "Paket ...",
+        },
+        popups: {
+            allFailed: "Keine Datei konnte geladen werden!",
+            someFailed: "{0:trim,ending_space}Datei(en) konnte(n) nicht geladen werden!",
+            succeeded: "Alle Dateien wurden erfolgreich geladen.",
         },
         pullingFile: "Lade Datei{0:trim,surround,leading_space} von {1:trim,surround,leading_space} ...",
         selectSource: "Wählen Sie die Quelle von der Sie die Datei(en) laden wollen ...",

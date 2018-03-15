@@ -16,6 +16,7 @@
  */
 
 import * as deploy_contracts from './contracts';
+import * as deploy_gui from './gui';
 import * as deploy_helpers from './helpers';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
@@ -317,6 +318,11 @@ export async function deleteFilesIn(files: string[],
 
             const PI = PLUGINS.shift();
 
+            const POPUP_STATS: deploy_gui.ShowPopupWhenFinishedStats = {
+                failed: 0,
+                operation: deploy_contracts.DeployOperation.Delete,
+                succeeded: 0,
+            };
             try {                
                 ME.output.appendLine('');
 
@@ -374,6 +380,13 @@ export async function deleteFilesIn(files: string[],
                             catch (e) {
                                 ME.output.appendLine(`[${ME.t('warning')}: ${deploy_helpers.toStringSafe(e)}]`);
                             }
+                        }
+
+                        if (err) {
+                            ++POPUP_STATS.failed;
+                        }
+                        else {
+                            ++POPUP_STATS.succeeded;
                         }
                     };
 
@@ -500,6 +513,12 @@ export async function deleteFilesIn(files: string[],
                     ME.t('DELETE.finishedOperationWithErrors',
                          TARGET_NAME, e)
                 );
+            }
+            finally {
+                deploy_helpers.applyFuncFor(
+                    deploy_gui.showPopupWhenFinished,
+                    ME
+                )( POPUP_STATS );
             }
         }
     }

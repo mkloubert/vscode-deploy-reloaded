@@ -25,6 +25,7 @@ export const translation: Translation = {
     cancel: "Cancel",
     canceled: "Canceled",
     changelog: "Changelog",
+    close: "Close",
     commands: {
         executionError: "Could not execute command{0:surround,leading_space}:{1:trim,surround,leading_space}",
         scriptNotFound: "{0:surround} script not found!",
@@ -101,6 +102,11 @@ export const translation: Translation = {
         package: {
             description: "Deletes the files of a package",
             label: "Package ...",
+        },
+        popups: {
+            allFailed: "No file could be deleted!",
+            someFailed: "{0:trim,ending_space}file(s) could not be deleted!",
+            succeeded: "All files have been deleted.",
         },
         selectTarget: "Select the target where to delete ...",
         startOperation: "Start deleting files in{0:trim,surround,leading_space} ...",
@@ -189,6 +195,11 @@ export const translation: Translation = {
         package: {
             description: "Deploys the files of a package",
             label: "Package ...",
+        },
+        popups: {
+            allFailed: "No file could be deployed!",
+            someFailed: "{0:trim,ending_space}file(s) could not be deployed!",
+            succeeded: "All files have been deployed.",
         },
         selectTarget: "Select the target to deploy to ...",
         startOperation: "Start deploying files to{0:trim,surround,leading_space} ...",
@@ -287,6 +298,9 @@ export const translation: Translation = {
         dir: "Directory{0:trim,surround,leading_space} not found!",
     },
     ok: 'OK',
+    output: {
+        open: "Open output",
+    },
     packages: {
         buttons: {
             defaultText: "Deploy package{0:trim,surround,leading_space}",
@@ -455,6 +469,11 @@ export const translation: Translation = {
         package: {
             description: "Pulls the files of a package",
             label: "Package ...",
+        },
+        popups: {
+            allFailed: "No file could be pulled!",
+            someFailed: "{0:trim,ending_space}file(s) could not be pulled!",
+            succeeded: "All files have been pulled.",
         },
         selectSource: "Select the source from where to pull from ...",
         startOperation: "Start pulling files from{0:trim,surround,leading_space} ...",

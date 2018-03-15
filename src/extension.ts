@@ -41,7 +41,6 @@ import * as deploy_tools_npm from './tools/npm';
 import * as deploy_tools_quick_execution from './tools/quickexecution';
 import * as deploy_tools_send_file from './tools/sendfile';
 import * as deploy_tools_yarn from './tools/yarn';
-import * as deploy_workflows from './workflows';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
 import * as i18 from './i18';
@@ -589,7 +588,7 @@ async function updateWorkspaceButton() {
 
 
 export async function activate(context: vscode.ExtensionContext) {
-    const WF = deploy_workflows.build();
+    const WF = deploy_helpers.buildWorkflow();
 
     // global translations
     WF.next(async () => {
@@ -644,7 +643,7 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 async function activateExtension(context: vscode.ExtensionContext) {
-    const WF = deploy_workflows.build();
+    const WF = deploy_helpers.buildWorkflow();
 
     WF.next(() => {
         currentContext = context;

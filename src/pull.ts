@@ -19,6 +19,7 @@ import * as _ from 'lodash';
 import * as deploy_contracts from './contracts';
 import * as deploy_events from './events';
 import * as deploy_files from './files';
+import * as deploy_gui from './gui';
 import * as deploy_helpers from './helpers';
 import * as deploy_html from './html';
 import * as deploy_packages from './packages';
@@ -616,6 +617,11 @@ export async function pullFilesFrom(files: string[],
 
             const PI = PLUGINS.shift();
 
+            const POPUP_STATS: deploy_gui.ShowPopupWhenFinishedStats = {
+                failed: 0,
+                operation: deploy_contracts.DeployOperation.Pull,
+                succeeded: 0,
+            };
             try {
                 if (!(await checkBeforePull(target, PI, files, MAPPING_SCOPE_DIRS, CANCELLATION_SOURCE.token, () => isCancelling))) {
                     continue;
@@ -744,10 +750,14 @@ export async function pullFilesFrom(files: string[],
                                     );
                                 }
 
+                                ++POPUP_STATS.succeeded;
+
                                 ME.output.appendLine(`[${ME.t('ok')}]`);
                             }
                         }
                         catch (e) {
+                            ++POPUP_STATS.failed;
+
                             ME.output.appendLine(`[${ME.t('error', e)}]`);
                         }
                         finally {
@@ -880,6 +890,12 @@ export async function pullFilesFrom(files: string[],
                     ME.t('pull.finishedOperationWithErrors',
                          TARGET_NAME, e)
                 );
+            }
+            finally {
+                deploy_helpers.applyFuncFor(
+                    deploy_gui.showPopupWhenFinished,
+                    ME
+                )( POPUP_STATS );
             }
         }
     }

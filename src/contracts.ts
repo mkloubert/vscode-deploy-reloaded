@@ -16,6 +16,7 @@
  */
 
 import * as deploy_commands from './commands';
+import * as deploy_gui from './gui';
 import * as deploy_log from './log';
 import * as deploy_packages from './packages';
 import * as deploy_proxies from './proxies';
@@ -262,6 +263,14 @@ export interface Configuration extends deploy_packages.WithFastFileCheckSettings
      * Indicates, if non saved documents will be saved automatically, before they are going to be deployed or not.
      */
     readonly saveBeforeDeploy?: boolean;
+    /**
+     * Show a popup after a successfull deploy operation or not.
+     */
+    readonly showPopupOnSuccess?: boolean;
+    /**
+     * Shows a popup when a deploy operation has been finished.
+     */
+    readonly showPopupWhenFinished?: deploy_gui.ShowPopupWhenFinishedValue;
     /**
      * One or more commands that should be run on startup.
      */

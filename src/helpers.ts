@@ -22,7 +22,6 @@ import * as deploy_code from './code';
 import * as deploy_contracts from './contracts';
 import * as deploy_log from './log';
 import * as deploy_mappings from './mappings';
-import * as deploy_workflows from './workflows';
 import * as Enumerable from 'node-enumerable';
 import * as FS from 'fs';
 import * as FSExtra from 'fs-extra';
@@ -42,7 +41,9 @@ import * as URL from 'url';
 import * as vscode from 'vscode';
 import {
     applyFuncFor, asArray,
+    buildWorkflow,
     cloneObject, compareValuesBy, createCompletedAction,
+    normalizeString,
     toBooleanSafe, toStringSafe
 } from 'vscode-helpers';
 
@@ -126,44 +127,6 @@ export type NewButtonSetup<TButton extends deploy_contracts.Button = deploy_cont
  * Possible results for NewButtonSetup<TButton> function.
  */
 export type NewButtonSetupResult = void | boolean | null | undefined;
-
-/**
- * A progress context.
- */
-export interface ProgressContext {
-    /**
-     * Gets or sets the status message.
-     */
-    message: string;
-}
-
-/**
- * Progress options.
- */
-export interface ProgressOptions {
-    /**
-     * The location.
-     */
-    readonly location?: vscode.ProgressLocation;
-    /**
-     * The title.
-     */
-    readonly title?: string;
-}
-
-/**
- * A progress result.
- */
-export type ProgressResult<TResult = any> = TResult | PromiseLike<TResult>;
-
-/**
- * A progress task.
- * 
- * @param {ProgressContext} context The underlying context.
- * 
- * @return {ProgressResult<TResult>} The result.
- */
-export type ProgressTask<TResult = any> = (context: ProgressContext) => ProgressResult<TResult>;
 
 /**
  * Additional options for 'waitWhile()' function.
@@ -943,7 +906,7 @@ export async function glob(patterns: string | string[], opts?: Glob.IOptions) {
 
     opts = MergeDeep({}, DEFAULT_OPTS, opts);
 
-    const WF = deploy_workflows.build();
+    const WF = buildWorkflow();
 
     WF.next(() => {
         return [];
@@ -1080,7 +1043,7 @@ export function invokeForTempFile<TResult = any>(action: (path: string) => TResu
                     try {
                         tempFile = Path.resolve(tf);
 
-                        deploy_workflows.build().next(async () => {
+                        buildWorkflow().next(async () => {
                             if (!isNullOrUndefined(opts.data)) {
                                 await writeFile(tempFile, opts.data);
                             }
@@ -1406,22 +1369,6 @@ export function normalizePath(path: string) {
     }
 
     return path;
-}
-
-/**
- * Normalizes a value as string so that is comparable.
- * 
- * @param {any} val The value to convert.
- * @param {(str: string) => string} [normalizer] The custom normalizer.
- * 
- * @return {string} The normalized value.
- */
-export function normalizeString(val: any, normalizer?: (str: string) => string): string {
-    if (!normalizer) {
-        normalizer = (str) => str.toLowerCase().trim();
-    }
-
-    return normalizer(toStringSafe(val));
 }
 
 /**
@@ -2226,60 +2173,6 @@ export async function waitWhile(predicate: () => boolean | PromiseLike<boolean>,
     while (wait);
 
     return true;
-}
-
-/**
- * Runs a task with progress information.
- * 
- * @param {ProgressTask<TResult>} task The task to execute.
- * @param {ProgressOptions} [options] Additional options.
- * 
- * @return {Promise<TResult>} The promise with the result.
- */
-export async function withProgress<TResult = any>(task: ProgressTask<TResult>,
-                                                  options?: ProgressOptions): Promise<TResult> {
-    if (!options) {
-        options = {};
-    }
-
-    const OPTS: vscode.ProgressOptions = {
-        location: isNullOrUndefined(options.location) ? vscode.ProgressLocation.Window : options.location,
-        title: toStringSafe(options.title),
-    };
-
-    return await vscode.window.withProgress(OPTS, async (p) => {
-        const CTX: ProgressContext = {
-            message: undefined,
-        };
-
-        // CTX.message
-        let msg: string;
-        Object.defineProperty(CTX, 'message', {
-            enumerable: true,
-
-            get: () => {
-                return msg;
-            },
-
-            set: (newValue) => {
-                if (!isNullOrUndefined(newValue)) {
-                    newValue = toStringSafe(newValue);
-                }
-
-                p.report({
-                    message: newValue,
-                });
-
-                msg = newValue;
-            }
-        });
-        
-        if (task) {
-            return await Promise.resolve(
-                task(CTX)
-            );
-        }
-    });
 }
 
 /**
