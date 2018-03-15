@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.57.1",
+ "version": "0.58.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.21.0"
@@ -70955,6 +70955,7 @@
   "ssh2-sftp-client": "^2.0.1",
   "tmp": "0.0.33",
   "uglify-js": "^3.3.13",
-  "uuid": "^3.2.1"
+  "uuid": "^3.2.1",
+  "vscode-helpers": "^0.2.0"
  }
 }

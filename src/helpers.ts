@@ -40,7 +40,13 @@ import * as Stream from "stream";
 import * as TMP from 'tmp';
 import * as URL from 'url';
 import * as vscode from 'vscode';
+import {
+    applyFuncFor, asArray,
+    cloneObject, compareValuesBy, createCompletedAction,
+    toBooleanSafe, toStringSafe
+} from 'vscode-helpers';
 
+export * from 'vscode-helpers';
 
 /**
  * Result of an execution.
@@ -160,14 +166,6 @@ export type ProgressResult<TResult = any> = TResult | PromiseLike<TResult>;
 export type ProgressTask<TResult = any> = (context: ProgressContext) => ProgressResult<TResult>;
 
 /**
- * Describes a simple 'completed' action.
- * 
- * @param {any} err The occurred error.
- * @param {TResult} [result] The result.
- */
-export type SimpleCompletedAction<TResult> = (err: any, result?: TResult) => void;
-
-/**
  * Additional options for 'waitWhile()' function.
  */
 export interface WaitWhileOptions {
@@ -181,47 +179,6 @@ export interface WaitWhileOptions {
     readonly timeUntilNextCheck?: number;
 }
 
-
-/**
- * Applies a function for a specific object / value.
- * 
- * @param {TFunc} func The function. 
- * @param {any} [thisArgs] The object to apply to the function.
- * 
- * @return {TFunc} The wrapped function.
- */
-export function applyFuncFor<TFunc extends Function = Function>(
-    func: TFunc,
-    thisArgs: any
-): TFunc {
-    if (!func) {
-        return func;
-    }
-
-    return <any>function() {
-        return func.apply(thisArgs, arguments);
-    };
-}
-
-/**
- * Returns a value as array.
- * 
- * @param {T|T[]} val The value.
- * @param {boolean} [removeEmpty] Remove items that are (null)/(undefined) or not.
- * 
- * @return {T[]} The value as array.
- */
-export function asArray<T>(val: T | T[], removeEmpty = true): T[] {
-    removeEmpty = toBooleanSafe(removeEmpty, true);
-
-    return (Array.isArray(val) ? val : [ val ]).filter(i => {
-        if (removeEmpty) {
-            return !_.isNil(i);
-        }
-
-        return true;
-    });
-}
 
 /**
  * Returns a value as buffer.
@@ -379,23 +336,6 @@ export function checkIfDoesMatchByFileFilter(val: any, filter: deploy_contracts.
 }
 
 /**
- * Clones an object / value deep.
- * 
- * @param {T} val The value / object to clone.
- * 
- * @return {T} The cloned value / object.
- */
-export function cloneObject<T>(val: T): T {
-    if (!val) {
-        return val;
-    }
-
-    return JSON.parse(
-        JSON.stringify(val)
-    );
-}
-
-/**
  * Clones an value flat.
  * 
  * @param {T} val The object to clone.
@@ -481,49 +421,6 @@ export function cloneObjectWithoutFunctions<T>(val: T): T {
 }
 
 /**
- * Compares two values for a sort operation.
- * 
- * @param {T} x The left value.
- * @param {T} y The right value.
- * 
- * @return {number} The "sort value".
- */
-export function compareValues<T>(x: T, y: T): number {
-    if (x === y) {
-        return 0;
-    }
-
-    if (x > y) {
-        return 1;
-    }
-
-    if (x < y) {
-        return -1;
-    }
-
-    return 0;
-}
-
-/**
- * Compares values by using a selector.
- * 
- * @param {T} x The left value. 
- * @param {T} y The right value.
- * @param {Function} selector The selector.
- * 
- * @return {number} The "sort value".
- */
-export function compareValuesBy<T, U>(x: T, y: T,
-                                      selector: (t: T) => U): number {
-    if (!selector) {
-        selector = (t) => <any>t;
-    }
-
-    return compareValues<U>(selector(x),
-                            selector(y));
-}
-
-/**
  * Creates a new status bar button.
  * 
  * @param {TButton} buttonDesc The description for the button.
@@ -603,37 +500,6 @@ export async function createButton<TButton extends deploy_contracts.Button = dep
 
         throw e;
     }
-}
-
-/**
- * Creates a simple 'completed' callback for a promise.
- * 
- * @param {Function} resolve The 'succeeded' callback.
- * @param {Function} reject The 'error' callback.
- * 
- * @return {SimpleCompletedAction<TResult>} The created action.
- */
-export function createCompletedAction<TResult = any>(resolve: (value?: TResult | PromiseLike<TResult>) => void,
-                                                     reject?: (reason: any) => void): SimpleCompletedAction<TResult> {
-    let completedInvoked = false;
-
-    return (err, result?) => {
-        if (completedInvoked) {
-            return;
-        }
-        completedInvoked = true;
-        
-        if (err) {
-            if (reject) {
-                reject(err);
-            }
-        }
-        else {
-            if (resolve) {
-                resolve(result);
-            }
-        }
-    };
 }
 
 /**
@@ -2079,26 +1945,6 @@ export function toArray<T>(arr: ArrayLike<T>, normalize = true): T[] {
 }
 
 /**
- * Converts a value to a boolean.
- * 
- * @param {any} val The value to convert.
- * @param {any} defaultValue The value to return if 'val' is (null) or (undefined).
- * 
- * @return {boolean} The converted value.
- */
-export function toBooleanSafe(val: any, defaultValue: any = false): boolean {
-    if (isBool(val)) {
-        return val;
-    }
-
-    if (isNullOrUndefined(val)) {
-        return !!defaultValue;
-    }
-
-    return !!val;
-}
-
-/**
  * Converts a path to a "displayable" one.
  * 
  * @param {string} path The input value.
@@ -2174,52 +2020,6 @@ export function toMinimatchFileFilter<TFilter extends deploy_contracts.FileFilte
     }
 
     return filter;
-}
-
-/**
- * Converts a value to a string that is NOT (null) or (undefined).
- * 
- * @param {any} val The input value.
- * @param {any} defValue The default value.
- * 
- * @return {string} The output value.
- */
-export function toStringSafe(val: any, defValue: any = ''): string {
-    if (isString(val)) {
-        return val;
-    }
-
-    try {
-        if (isNullOrUndefined(val)) {
-            return '' + defValue;
-        }
-
-        if (val instanceof Error) {
-            return '' + val.message;
-        }
-    
-        if (isFunc(val['toString'])) {
-            return '' + val.toString();
-        }
-
-        try {
-            if (Array.isArray(val) || isObject(val)) {
-                return JSON.stringify(val);
-            }
-        }
-        catch (e) {
-            deploy_log.CONSOLE
-                      .trace(e, 'helpers.toStringSafe(2)');
-        }
-
-        return '' + val;
-    }
-    catch (e) {
-        deploy_log.CONSOLE
-                  .trace(e, 'helpers.toStringSafe(1)');
-
-        return typeof val;
-    }
 }
 
 /**
