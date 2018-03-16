@@ -1,0 +1,1 @@
+GET http://localhost/api/commands HTTP/1.1

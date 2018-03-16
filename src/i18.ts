@@ -27,6 +27,16 @@ import * as vscode from 'vscode';
  * Stores the strings of a translation.
  */
 export interface Translation {
+    apis?: {
+        errors?: {
+            couldNotRegister?: string;
+            failed?: string;
+        };
+        noneFound?: string;
+        selectHost?: string;
+        startHost?: string;
+        stopHost?: string;
+    };
     cancel?: string;
     canceled?: string;
     changelog?: string;

@@ -19,7 +19,6 @@ import * as _ from 'lodash';
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
-import * as deploy_objects from './objects';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
 import * as i18 from './i18';
@@ -251,7 +250,7 @@ const TCP_PROXIES: { [port: number]: TcpProxy } = {};
 /**
  * A TCP propxy.
  */
-export class TcpProxy extends deploy_objects.DisposableBase {
+export class TcpProxy extends deploy_helpers.DisposableBase {
     private _destinations: TcpProxyDestination[] = [];
     private _filters: TcpProxyRemoteFilter[] = [];
     private readonly _NAME_AND_DESC_RESOLVERS: deploy_contracts.KeyValuePairs<TcpProxyNameAndDescriptionResolver> = {};

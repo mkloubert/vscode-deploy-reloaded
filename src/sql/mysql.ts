@@ -17,7 +17,6 @@
 
 import * as deploy_contracts from '../contracts';
 import * as deploy_helpers from '../helpers';
-import * as deploy_objects from '../objects';
 import * as deploy_sql from '../sql';
 import * as MySQL from 'mysql';
 
@@ -68,7 +67,7 @@ export interface MySQLResult extends deploy_sql.SqlResult {
 /**
  * A MySQL connection.
  */
-export class MySQLConnection extends deploy_objects.DisposableBase implements deploy_sql.SqlConnection {
+export class MySQLConnection extends deploy_helpers.DisposableBase implements deploy_sql.SqlConnection {
     /**
      * Initializes a new instance of that class.
      * 

@@ -22,6 +22,16 @@ import { Translation } from '../i18';
 // 
 // Translated by: Marcel Joachim Kloubert (https://github.com/mkloubert)
 export const translation: Translation = {
+    apis: {
+        errors: {
+            couldNotRegister: "Konnte API Host nicht für den Port{0:trim,leading_space} registríeren:{1:trim,surround,leading_space}",
+            failed: "API Host Operation fehlgeschlagen:{0:trim,surround,leading_space}",
+        },
+        noneFound: "Es wurden keine API Hosts gefunden.",
+        selectHost: "Wählen Sie einen Host aus ...",
+        startHost: "Starte API Host ...",
+        stopHost: "Stoppe API Host ...",
+    },
     cancel: "Abbrechen",
     canceled: "Abgebrochen",
     changelog: "Änderungsprotokoll",

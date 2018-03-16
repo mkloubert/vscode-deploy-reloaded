@@ -18,6 +18,7 @@
  */
 
 const CompareVersion = require('compare-versions');
+import * as deploy_api from './api';
 import * as deploy_commands from './commands';
 import * as deploy_compare from './compare';
 import * as deploy_contracts from './contracts';
@@ -59,20 +60,96 @@ let packageFile: deploy_contracts.PackageFile;
 const PLUGINS: deploy_plugins.Plugin[] = [];
 let selectWorkspaceBtn: vscode.StatusBarItem;
 const WORKSPACE_COMMANDS: deploy_commands.WorkspaceCommandRepository = {};
-const WORKSPACES: deploy_workspaces.Workspace[] = [];
+let workspaceWatcher: deploy_helpers.WorkspaceWatcherContext<deploy_workspaces.Workspace>;
 
+
+async function createNewWorkspace(folder: vscode.WorkspaceFolder): Promise<deploy_workspaces.Workspace> {
+    let newWorkspace: deploy_workspaces.Workspace;
+    let fileWatcher: vscode.FileSystemWatcher;
+    try {
+        fileWatcher = vscode.workspace.createFileSystemWatcher(
+            new vscode.RelativePattern(folder, '**'),
+            false, false, false,
+        );
+
+        const CTX: deploy_workspaces.WorkspaceContext = {
+            commands: WORKSPACE_COMMANDS,
+            extension: currentContext,
+            fileWatcher: fileWatcher,
+            outputChannel: outputChannel,
+            plugins: undefined,
+            workspaces: undefined,
+        };
+
+        // CTX.plugins
+        Object.defineProperty(CTX, 'plugins', {
+            enumerable: true,
+            
+            get: () => {
+                return PLUGINS;
+            }
+        });
+
+        // CTX.workspaces
+        Object.defineProperty(CTX, 'workspaces', {
+            enumerable: true,
+            
+            get: () => {
+                return deploy_workspaces.getAllWorkspaces().filter(ws => {
+                    return ws !== newWorkspace;
+                });
+            }
+        });
+
+        newWorkspace = new deploy_workspaces.Workspace(
+            nextWorkspaceId--, folder, CTX
+        );
+
+        outputChannel.append(i18.t('workspaces.initializing',
+                                   folder.uri.fsPath) + ' ');
+        try {
+            const HAS_BEEN_INITIALIZED = await newWorkspace.initialize();
+            if (HAS_BEEN_INITIALIZED) {
+                outputChannel.appendLine(`[${i18.t('ok')}]`);
+            }
+            else {
+                throw new Error(
+                    i18.t('workspaces.errors.notInitialized',
+                          folder.uri.fsPath)
+                );
+            }
+        }
+        catch (err) {
+            deploy_helpers.tryDispose(newWorkspace);
+
+            outputChannel.appendLine(`[${i18.t('error', err)}]`);
+        }
+        outputChannel.appendLine('');
+    }
+    catch (e) {
+        deploy_log.CONSOLE
+                  .err(e, 'extension.reloadWorkspaceFolders(1)');
+
+        deploy_helpers.tryDispose(fileWatcher);
+        deploy_helpers.tryDispose(newWorkspace);
+
+        newWorkspace = null;
+    }
+
+    return newWorkspace;
+}
 
 function getActiveWorkspacesOrAll() {
     let listOfWorkspaces = deploy_helpers.asArray(activeWorkspaces);
     if (listOfWorkspaces.length < 1) {
-        listOfWorkspaces = WORKSPACES;
+        listOfWorkspaces = deploy_workspaces.getAllWorkspaces();
     }
 
     return listOfWorkspaces.map(ws => ws);
 }
 
 function getAllWorkspacesSorted() {
-    return Enumerable.from( WORKSPACES ).orderBy(ws => {
+    return Enumerable.from( deploy_workspaces.getAllWorkspaces() ).orderBy(ws => {
         return ws.isActive ? 0 : 1;
     }).thenBy(ws => {
         return deploy_helpers.normalizeString(ws.name);
@@ -109,7 +186,7 @@ async function invokeForActiveEditor(placeHolder: string,
                                      action: (file: string, target: deploy_targets.Target) => any) {
     const ACTIVE_EDITOR = vscode.window.activeTextEditor;
     if (ACTIVE_EDITOR) {
-        const MATCHING_WORKSPACES = WORKSPACES.filter(ws => {
+        const MATCHING_WORKSPACES = deploy_workspaces.getAllWorkspaces().filter(ws => {
             return ACTIVE_EDITOR.document &&
                    ws.isPathOf(ACTIVE_EDITOR.document.fileName);
         });
@@ -171,9 +248,9 @@ function normalizeActiveWorkspaces(aws: deploy_workspaces.Workspace | deploy_wor
     aws = deploy_helpers.asArray(aws);
 
     if (aws.length < 1) {
-        if (1 === WORKSPACES.length) {
+        if (1 === deploy_workspaces.getAllWorkspaces().length) {
             aws = deploy_helpers.asArray(
-                Enumerable.from(WORKSPACES)
+                Enumerable.from(deploy_workspaces.getAllWorkspaces())
                           .firstOrDefault(x => true, undefined)
             );
         }
@@ -189,7 +266,7 @@ async function onDidChangeActiveTextEditor(editor: vscode.TextEditor) {
 
     const NEW_ACTIVE_WORKSPACES: deploy_workspaces.Workspace[] = [];
     try {
-        await deploy_helpers.forEachAsync(WORKSPACES, async (ws) => {
+        await deploy_helpers.forEachAsync(deploy_workspaces.getAllWorkspaces(), async (ws) => {
             try {
                 let doc: vscode.TextDocument;
                 if (editor) {
@@ -229,28 +306,12 @@ async function onDidChangeActiveTextEditor(editor: vscode.TextEditor) {
     }
 }
 
-async function onDidChangeConfiguration(e: vscode.ConfigurationChangeEvent) {
-    await deploy_helpers.forEachAsync(WORKSPACES, async (ws) => {
-        try {
-            if (e.affectsConfiguration(ws.configSource.section, ws.configSource.resource)) {
-                await ws.onDidChangeConfiguration(e);
-            }
-        }
-        catch (e) {
-            deploy_log.CONSOLE
-                      .trace(e, 'extension.onDidChangeConfiguration()');
-        }
-    });
-
-    await updateWorkspaceButton();
-}
-
 async function onDidSaveTextDocument(e: vscode.TextDocument) {
     if (isDeactivating) {
         return;
     }
 
-    for (const WS of WORKSPACES) {
+    for (const WS of deploy_workspaces.getAllWorkspaces()) {
         try {
             if (WS.isPathOf(e.fileName)) {
                 await WS.onDidSaveTextDocument(e);
@@ -261,128 +322,6 @@ async function onDidSaveTextDocument(e: vscode.TextDocument) {
                       .trace(e, 'extension.onDidSaveTextDocument()');
         }
     }
-}
-
-async function reloadWorkspaceFolders(added: vscode.WorkspaceFolder[], removed?: vscode.WorkspaceFolder[]) {
-    if (isDeactivating) {
-        return;
-    }
-
-    if (removed) {
-        for (let i = 0; i < WORKSPACES.length; ) {
-            const WS = WORKSPACES[i];
-            let removeWorkspace = false;
-            let hasBeenRemoved = false;
-
-            for (let rws of removed) {
-                if (Path.resolve(rws.uri.fsPath) === Path.resolve(WS.folder.uri.fsPath)) {
-                    removeWorkspace = true;
-                    break;
-                }
-            }
-
-            if (removeWorkspace) {
-                outputChannel.append(i18.t('workspaces.removing',
-                                           WS.folder.uri.fsPath) + ' ');
-                try {
-                    WS.dispose();
-
-                    WORKSPACES.splice(i, 1);
-                    hasBeenRemoved = true;
-
-                    outputChannel.appendLine(`[${i18.t('ok')}]`);
-                }
-                catch (e) {
-                    outputChannel.appendLine(`[${i18.t('error', e)}]`);
-                }
-                outputChannel.appendLine('');
-            }
-
-            if (!hasBeenRemoved) {
-                ++i;
-            }
-        }
-    }
-
-    if (added) {
-        for (const WSF of added) {
-            let newWorkspace: deploy_workspaces.Workspace;
-            let fileWatcher: vscode.FileSystemWatcher;
-            try {
-                fileWatcher = vscode.workspace.createFileSystemWatcher(
-                    new vscode.RelativePattern(WSF, '**'),
-                    false, false, false,
-                );
-
-                const CTX: deploy_workspaces.WorkspaceContext = {
-                    commands: WORKSPACE_COMMANDS,
-                    extension: currentContext,
-                    fileWatcher: fileWatcher,
-                    outputChannel: outputChannel,
-                    plugins: undefined,
-                    workspaces: undefined,
-                };
-
-                // CTX.plugins
-                Object.defineProperty(CTX, 'plugins', {
-                    enumerable: true,
-                    
-                    get: () => {
-                        return PLUGINS;
-                    }
-                });
-
-                // CTX.workspaces
-                Object.defineProperty(CTX, 'workspaces', {
-                    enumerable: true,
-                    
-                    get: () => {
-                        return WORKSPACES.filter(ws => {
-                            return ws !== newWorkspace;
-                        });
-                    }
-                });
-
-                newWorkspace = new deploy_workspaces.Workspace(
-                    nextWorkspaceId--, WSF, CTX
-                );
-
-                outputChannel.append(i18.t('workspaces.initializing',
-                                           WSF.uri.fsPath) + ' ');
-                try {
-                    const HAS_BEEN_INITIALIZED = await newWorkspace.initialize();
-                    if (HAS_BEEN_INITIALIZED) {
-                        WORKSPACES.push(newWorkspace);
-
-                        outputChannel.appendLine(`[${i18.t('ok')}]`);
-                    }
-                    else {
-                        throw new Error(
-                            i18.t('workspaces.errors.notInitialized',
-                                  WSF.uri.fsPath)
-                        );
-                    }
-                }
-                catch (err) {
-                    deploy_helpers.tryDispose(newWorkspace);
-
-                    outputChannel.appendLine(`[${i18.t('error', err)}]`);
-                }
-                outputChannel.appendLine('');
-            }
-            catch (e) {
-                deploy_log.CONSOLE
-                          .err(e, 'extension.reloadWorkspaceFolders(1)');
-
-                deploy_helpers.tryDispose(fileWatcher);
-                deploy_helpers.tryDispose(newWorkspace);
-            }
-        }
-    }
-
-    activeWorkspaces = normalizeActiveWorkspaces(WORKSPACES);
-
-    await updateActiveWorkspaces();
 }
 
 async function reloadPlugins() {
@@ -542,7 +481,7 @@ async function updateWorkspaceButton() {
 
     try {
         const ACTIVE_WORKSPACES = deploy_helpers.asArray(activeWorkspaces);
-        const ALL_WORKSPACES = deploy_helpers.asArray(WORKSPACES);
+        const ALL_WORKSPACES = deploy_helpers.asArray(deploy_workspaces.getAllWorkspaces());
 
         const ALWAYS_SHOW_BUTTON = Enumerable.from(ALL_WORKSPACES).any(ws => {
             const CFG = ws.config;
@@ -668,10 +607,27 @@ async function activateExtension(context: vscode.ExtensionContext) {
         outputChannel.hide();
     });
 
-    // workspace providers
+    // workspace (folders)
     WF.next(() => {
+        context.subscriptions.push(
+            workspaceWatcher = deploy_helpers.registerWorkspaceWatcher<deploy_workspaces.Workspace>(
+                context,
+                async (ev, folder) => {
+                    let newWorkspace: deploy_workspaces.Workspace;
+
+                    switch (ev) {
+                        case deploy_helpers.WorkspaceWatcherEvent.Added:
+                            newWorkspace = await createNewWorkspace( folder );
+                            break;
+                    }
+
+                    return newWorkspace;
+                }
+            )
+        );
+
         deploy_workspaces.setAllWorkspacesProvider(() => {
-            return WORKSPACES;
+            return workspaceWatcher.workspaces;
         });
 
         deploy_workspaces.setActiveWorkspaceProvider(() => {
@@ -746,7 +702,9 @@ async function activateExtension(context: vscode.ExtensionContext) {
                     const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = [
                         {
                             action: async () => {
-                                await deploy_compare.compareFiles(WORKSPACES);
+                                await deploy_compare.compareFiles(
+                                    deploy_workspaces.getActiveWorkspaces()
+                                );
                             },
                             label: '$(diff)  ' + i18.t('compare.currentFile.label'),
                             description: i18.t('compare.currentFile.description'),
@@ -909,7 +867,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
             vscode.commands.registerCommand('extension.deploy.reloaded.deployAllOpenFiles', async () => {
                 try {
                     await deploy_deploy.deployAllOpenFiles(
-                        WORKSPACES
+                        deploy_workspaces.getActiveWorkspaces()
                     );
                 }
                 catch (e) {
@@ -927,7 +885,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 try {
                     const WORKSPACE = await deploy_workspaces.showWorkspaceQuickPick(
                         context,
-                        WORKSPACES,
+                        deploy_workspaces.getActiveWorkspaces(),
                         {
                             placeHolder: i18.t('workspaces.selectWorkspace')
                         }
@@ -959,7 +917,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 try {
                     const WORKSPACE = await deploy_workspaces.showWorkspaceQuickPick(
                         context,
-                        WORKSPACES,
+                        deploy_workspaces.getActiveWorkspaces(),
                         {
                             placeHolder: i18.t('workspaces.selectWorkspace')
                         }
@@ -1106,7 +1064,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
             vscode.commands.registerCommand('extension.deploy.reloaded.pullAllOpenFiles', async () => {
                 try {
                     await deploy_pull.pullAllOpenFiles(
-                        WORKSPACES
+                        deploy_workspaces.getActiveWorkspaces()
                     );
                 }
                 catch (e) {
@@ -1251,6 +1209,18 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 }
             }),
 
+            // API (hosts)
+            vscode.commands.registerCommand('extension.deploy.reloaded.apis', async () => {
+                try {
+                    await deploy_api.showApiHostQuickPick();
+                }
+                catch (e) {
+                    vscode.window.showErrorMessage(
+                        i18.t('apis.errors.failed', e)  
+                    );
+                }
+            }),
+
             // (TCP) proxies
             vscode.commands.registerCommand('extension.deploy.reloaded.proxies', async () => {
                 try {
@@ -1284,7 +1254,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 try {
                     const SELECTED_WORKSPACE = await deploy_workspaces.showWorkspaceQuickPick(
                         context,
-                        WORKSPACES
+                        deploy_workspaces.getActiveWorkspaces()
                     );
 
                     if (SELECTED_WORKSPACE) {
@@ -1536,14 +1506,6 @@ async function activateExtension(context: vscode.ExtensionContext) {
     // global VSCode events
     WF.next(() => {
         context.subscriptions.push(
-            vscode.workspace.onDidChangeWorkspaceFolders((e) => {
-                reloadWorkspaceFolders(e.added, e.removed).then(() => {
-                }).catch((err) => {
-                    deploy_log.CONSOLE
-                              .trace(err, 'vscode.workspace.onDidChangeWorkspaceFolders');
-                });
-            }),
-
             vscode.window.onDidChangeActiveTextEditor((e) => {
                 onDidChangeActiveTextEditor(e).then(() => {
                 }).catch((err) => {
@@ -1561,12 +1523,6 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 deploy_tools.resetToolUsage(context);
                 deploy_workspaces.resetWorkspaceUsage(context);
                 deploy_tools_yarn.resetYarnToolsUsage(context);
-
-                onDidChangeConfiguration(e).then(() => {
-                }).catch((err) => {
-                    deploy_log.CONSOLE
-                              .trace(err, 'vscode.workspace.onDidChangeConfiguration');
-                });
             }),
 
             vscode.workspace.onDidSaveTextDocument((e) => {
@@ -1581,9 +1537,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
 
     // reload workspace folders
     WF.next(async () => {
-        await reloadWorkspaceFolders(
-            vscode.workspace.workspaceFolders
-        );
+        await workspaceWatcher.reload();
     });
 
     // select workspace button
@@ -1716,7 +1670,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
         }
     });
 
-    // TCP proxies
+    // TCP hosts and proxies
     WF.next(() => {
         context.subscriptions.push(
             deploy_proxies.PROXY_DISPOSER
@@ -1739,10 +1693,4 @@ export function deactivate() {
         return;
     }
     isDeactivating = true;
-
-    while (WORKSPACES.length > 0) {
-        deploy_helpers.tryDispose(
-            WORKSPACES.pop()
-        );
-    }
 }

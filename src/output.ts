@@ -17,7 +17,6 @@
 
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
-import * as deploy_objects from './objects';
 import * as vscode from 'vscode';
 
 
@@ -51,7 +50,7 @@ export interface ChannelWriterContext {
 /**
  * A wrapper for an output channel.
  */
-export class OutputChannelWrapper extends deploy_objects.DisposableBase implements vscode.OutputChannel {
+export class OutputChannelWrapper extends deploy_helpers.DisposableBase implements vscode.OutputChannel {
     private readonly _OWNS_CHANNEL: boolean;
     private readonly _WRITERS: ChannelWriter[] = [];
 

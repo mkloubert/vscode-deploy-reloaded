@@ -1,0 +1,1 @@
+GET http://localhost/api/extensions HTTP/1.1

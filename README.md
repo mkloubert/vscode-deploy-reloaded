@@ -50,6 +50,8 @@ The extension supports the following destinations:
    * [How to execute](#how-to-execute-)
 5. [Support and contribute](#support-and-contribute-)
    * [Contributors](#contributors-)
+6. [Related projects](#related-projects-)
+   * [vscode-helpers](#vscode-helpers-)
 
 ## Demos [[&uarr;](#table-of-contents)]
 
@@ -304,6 +306,7 @@ Press `F1` and enter one of the following commands:
 
 | Name | Description |
 | ---- | --------- |
+| `Deploy Reloaded: API ...` | Handles [API hosts](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/apis). |
 | `Deploy Reloaded: Compare ...` | Opens a set of commands, to compare local and remote files. |
 | `Deploy Reloaded: Delete ...` | Commands for deleting files.  |
 | `Deploy Reloaded: Deploy ...` | List of commands for deploying files. |
@@ -354,3 +357,9 @@ The API documentation can be found [here](https://mkloubert.github.io/vscode-dep
 
 * [Robert Ehlers](https://github.com/rehlers)
 * [Pelly](https://github.com/solid-pixel)
+
+## Related projects [[&uarr;](#table-of-contents)]
+
+### vscode-helpers [[&uarr;](#related-projects-)]
+
+[vscode-helpers](https://github.com/mkloubert/vscode-helpers) is a NPM module, which you can use in your own [VSCode extension](https://code.visualstudio.com/docs/extensions/overview) and contains a lot of helpful classes and functions.

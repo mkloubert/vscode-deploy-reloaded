@@ -44,7 +44,7 @@ import {
     buildWorkflow,
     cloneObject, compareValuesBy, createCompletedAction,
     normalizeString,
-    toBooleanSafe, toStringSafe
+    toBooleanSafe, toStringSafe, tryDispose
 } from 'vscode-helpers';
 
 export * from 'vscode-helpers';
@@ -128,20 +128,6 @@ export type NewButtonSetup<TButton extends deploy_contracts.Button = deploy_cont
  */
 export type NewButtonSetupResult = void | boolean | null | undefined;
 
-/**
- * Additional options for 'waitWhile()' function.
- */
-export interface WaitWhileOptions {
-    /**
-     * A timeout, in milliseconds.
-     */
-    readonly timeout?: number;
-    /**
-     * The optional time, in milliseconds, to wait until next check.
-     */
-    readonly timeUntilNextCheck?: number;
-}
-
 
 /**
  * Returns a value as buffer.
@@ -206,68 +192,6 @@ async function asBufferInner(val: any, enc?: string,
     // handle as string
     return new Buffer(toStringSafe(val),
                       enc);
-}
-
-/**
- * Returns a value as local Moment instance.
- * 
- * @param {Moment.Moment} val The input value.
- * 
- * @return {Moment.Moment} The output value.
- */
-export function asLocalTime(val: any): Moment.Moment {
-    let localTime: Moment.Moment;
-    
-    if (!isNullOrUndefined(val)) {
-        if (Moment.isMoment(val)) {
-            localTime = val;
-        }
-        else if (Moment.isDate(val)) {
-            localTime = Moment(val);
-        }
-        else {
-            localTime = Moment( toStringSafe(val) );
-        }
-    }
-
-    if (localTime) {
-        if (!localTime.isLocal()) {
-            localTime = localTime.local();
-        }
-    }
-
-    return localTime;
-}
-
-/**
- * Returns a value as UTC Moment instance.
- * 
- * @param {Moment.Moment} val The input value.
- * 
- * @return {Moment.Moment} The output value.
- */
-export function asUTC(val: any): Moment.Moment {
-    let utcTime: Moment.Moment;
-    
-    if (!isNullOrUndefined(val)) {
-        if (Moment.isMoment(val)) {
-            utcTime = val;
-        }
-        else if (Moment.isDate(val)) {
-            utcTime = Moment(val);
-        }
-        else {
-            utcTime = Moment( toStringSafe(val) );
-        }
-    }
-
-    if (utcTime) {
-        if (!utcTime.isUTC()) {
-            utcTime = utcTime.utc();
-        }
-    }
-
-    return utcTime;
 }
 
 /**
@@ -717,127 +641,6 @@ export function filterPlatformItems<TItem extends deploy_contracts.PlatformItem 
 }
 
 /**
- * Async 'forEach'.
- * 
- * @param {Enumerable.Sequence<T>} items The items to iterate.
- * @param {Function} action The item action.
- * @param {any} [thisArg] The underlying object / value for the item action.
- * 
- * @return {TResult} The result of the last action call.
- */
-export async function forEachAsync<T, TResult>(items: Enumerable.Sequence<T>,
-                                               action: (item: T, index: number, array: T[]) => TResult | PromiseLike<TResult>,
-                                               thisArg?: any) {
-    if (!isNullOrUndefined(items)) {
-        if (!Array.isArray(items)) {
-            items = Enumerable.from(items)
-                              .toArray();
-        }
-    }
-
-    let lastResult: TResult;
-
-    if (action) {
-        for (let i = 0; i < (<T[]>items).length; i++) {
-            lastResult = await Promise.resolve(
-                action.apply(thisArg,
-                             [ items[i], i, items ]),
-            );
-        }
-    }
-
-    return lastResult;
-}
-
-/**
- * Formats a string.
- * 
- * @param {any} formatStr The value that represents the format string.
- * @param {any[]} [args] The arguments for 'formatStr'.
- * 
- * @return {string} The formated string.
- */
-export function format(formatStr: any, ...args: any[]): string {
-    return formatArray(formatStr, args);
-}
-
-/**
- * Formats a string.
- * 
- * @param {any} formatStr The value that represents the format string.
- * @param {any[]} [args] The arguments for 'formatStr'.
- * 
- * @return {string} The formated string.
- */
-export function formatArray(formatStr: any, args: any[]): string {
-    if (!args) {
-        args = [];
-    }
-
-    formatStr = toStringSafe(formatStr);
-
-    // apply arguments in
-    // placeholders
-    return formatStr.replace(/{(\d+)(\:)?([^}]*)}/g, (match, index, formatSeparator, formatExpr) => {
-        index = parseInt(toStringSafe(index).trim());
-        
-        let resultValue = args[index];
-
-        if (':' === formatSeparator) {
-            // collect "format providers"
-            let formatProviders = toStringSafe(formatExpr).split(',')
-                                                          .map(x => x.toLowerCase().trim())
-                                                          .filter(x => x);
-
-            // transform argument by
-            // format providers
-            formatProviders.forEach(fp => {
-                switch (fp) {
-                    case 'ending_space':
-                        resultValue = toStringSafe(resultValue);
-                        if ('' !== resultValue) {
-                            resultValue = resultValue + ' ';
-                        }
-                        break;
-
-                    case 'leading_space':
-                        resultValue = toStringSafe(resultValue);
-                        if ('' !== resultValue) {
-                            resultValue = ' ' + resultValue;
-                        }
-                        break;
-
-                    case 'lower':
-                        resultValue = toStringSafe(resultValue).toLowerCase();
-                        break;
-
-                    case 'trim':
-                        resultValue = toStringSafe(resultValue).trim();
-                        break;
-
-                    case 'upper':
-                        resultValue = toStringSafe(resultValue).toUpperCase();
-                        break;
-
-                    case 'surround':
-                        resultValue = toStringSafe(resultValue);
-                        if ('' !== resultValue) {
-                            resultValue = "'" + toStringSafe(resultValue) + "'";
-                        }
-                        break;
-                }
-            });
-        }
-
-        if ('undefined' === typeof resultValue) {
-            return match;
-        }
-
-        return toStringSafe(resultValue);        
-    });
-}
-
-/**
  * Returns the (possible path) of the extension's sub folder inside the home directory.
  * 
  * @return {string} The path of the extension's sub folder inside the home directory.
@@ -883,108 +686,6 @@ export function getUriParam<TDefault = string>(params: Object, name: string, def
     }
 
     return defValue;
-}
-
-/**
- * Promise version of 'Glob()' function.
- * 
- * @param {string|string[]} patterns One or more patterns.
- * @param {Glob.IOptions} [opts] Custom options.
- * 
- * @return {Promise<string[]>} The promise with the matches.
- */
-export async function glob(patterns: string | string[], opts?: Glob.IOptions) {
-    const DEFAULT_OPTS: Glob.IOptions = {
-        absolute: true,
-        dot: false,
-        nocase: true,
-        nodir: true,
-        nonull: false,
-        nosort: false,
-        sync: false,
-    };
-
-    opts = MergeDeep({}, DEFAULT_OPTS, opts);
-
-    const WF = buildWorkflow();
-
-    WF.next(() => {
-        return [];
-    });
-
-    asArray(patterns).forEach(p => {
-        WF.next((allMachtes: string[]) => {
-            return new Promise<string[]>((res, rej) => {
-                const COMP = createCompletedAction(res, rej);
-
-                try {
-                    Glob(p, opts, (err, matches) => {
-                        if (err) {
-                            COMP(err);
-                        }
-                        else {
-                            allMachtes.push
-                                      .apply(allMachtes, matches);
-
-                            COMP(null, allMachtes);
-                        }
-                    });
-                }
-                catch (e) {
-                    COMP(e);
-                }
-            });
-        });
-    });
-
-    return Enumerable.from( await WF.start<string[]>() )
-                     .select(f => Path.resolve(f))
-                     .distinct()
-                     .toArray();
-}
-
-/**
- * Invokes an action after a timeout.
- * 
- * @param {Function} action The action to invoke. 
- * @param {number} [ms] The custom time, in milliseconds, after the action should be invoked.
- * @param {any[]} [args] One or more arguments for the action.
- * 
- * @return {Promise<TResult>} The promise with the result. 
- */
-export function invokeAfter<TResult = any>(action: (...args: any[]) => TResult, ms: number = 1000, ...args: any[]) {
-    const ACTION_ARGS = args.filter((x, index) => {
-        return index >= 2;
-    });
-
-    return new Promise<TResult>((resolve, reject) => {
-        const COMPLETED = createCompletedAction(resolve, reject);
-
-        try {
-            setTimeout(() => {
-                try {
-                    if (action) {
-                        Promise.resolve(
-                            action.apply(null, ACTION_ARGS),
-                        ).then((result: TResult) => {
-                            COMPLETED(null, result);
-                        }).catch((err) => {
-                            COMPLETED(err);
-                        });
-                    }
-                    else {
-                        COMPLETED(null);
-                    }
-                }
-                catch (e) {
-                    COMPLETED(e);
-                }
-            }, ms);
-        }
-        catch (e) {
-            COMPLETED(e);
-        }
-    });
 }
 
 /**
@@ -1507,32 +1208,6 @@ export async function openAndShowTextDocument(filenameOrOptions?: string | { lan
 }
 
 /**
- * Promise version of 'crypto.randomBytes()' function.
- * 
- * @param {number} size The size of the result.
- * 
- * @return {Promise<Buffer>} The buffer with the random bytes. 
- */
-export function randomBytes(size: number) {
-    size = parseInt(
-        toStringSafe(size).trim()
-    );
-
-    return new Promise<Buffer>((resolve, reject) => {
-        const COMPLETED = createCompletedAction(resolve, reject);
-        
-        Crypto.randomBytes(size, (err, buf) => {
-            if (err) {
-                COMPLETED(err);
-            }
-            else {
-                COMPLETED(null, buf);
-            }
-        });
-    });
-}
-
-/**
  * Reads the content of a stream.
  * 
  * @param {Stream.Readable} stream The stream.
@@ -1808,15 +1483,6 @@ export async function showWarningMessage<TItem extends vscode.MessageItem = vsco
 }
 
 /**
- * Waits a number of milliseconds.
- * 
- * @param {number} [ms] The custom time, in milliseconds, to wait.
- */
-export async function sleep(ms = 1000) {
-    await invokeAfter(() => {}, ms);
-}
-
-/**
  * Sorts items by its label.
  * 
  * @param {T|T[]} items The item(s).
@@ -1867,31 +1533,6 @@ export function stat(path: string | Buffer) {
 }
 
 /**
- * Returns an array like object as new array.
- * 
- * @param {ArrayLike<T>} arr The input object. 
- * @param {boolean} [normalize] Returns an empty array, if input object is (null) / undefined.
- * 
- * @return {T[]} The input object as array. 
- */
-export function toArray<T>(arr: ArrayLike<T>, normalize = true): T[] {
-    if (isNullOrUndefined(arr)) {
-        if (toBooleanSafe(normalize, true)) {
-            return [];
-        }
-        
-        return <any>arr;
-    }
-
-    const NEW_ARRAY: T[] = [];
-    for (let i = 0; i < arr.length; i++) {
-        NEW_ARRAY.push(arr[i]);
-    }
-
-    return NEW_ARRAY;
-}
-
-/**
  * Converts a path to a "displayable" one.
  * 
  * @param {string} path The input value.
@@ -1907,25 +1548,6 @@ export function toDisplayablePath(path: string): string {
     }
 
     return path;
-}
-
-/**
- * Converts an EOL enum value to a string.
- * 
- * @param {vscode.EndOfLine} [eol] The (optional)  enum value.
- * 
- * @return string The EOL string.
- */
-export function toEOL(eol?: vscode.EndOfLine): string {
-    switch (eol) {
-        case vscode.EndOfLine.CRLF:
-            return "\r\n";
-
-        case vscode.EndOfLine.LF:
-            return "\n";
-    }
-
-    return OS.EOL;
 }
 
 /**
@@ -1967,52 +1589,6 @@ export function toMinimatchFileFilter<TFilter extends deploy_contracts.FileFilte
     }
 
     return filter;
-}
-
-/**
- * Tries to clear a timeout.
- * 
- * @param {NodeJS.Timer} timeoutId The timeout (ID).
- * 
- * @return {boolean} Operation was successfull or not.
- */
-export function tryClearTimeout(timeoutId: NodeJS.Timer): boolean {
-    try {
-        if (!isNullOrUndefined(timeoutId)) {
-            clearTimeout(timeoutId);
-        }
-
-        return true;
-    }
-    catch (e) {
-        deploy_log.CONSOLE
-                  .trace(e, 'helpers.tryClearTimeout()');
-
-        return false;
-    }
-}
-
-/**
- * Tries to dispose an object.
- * 
- * @param {object} obj The object to dispose.
- * 
- * @return {boolean} Operation was successful or not.
- */
-export function tryDispose(obj: { dispose?: () => any }): boolean {
-    try {
-        if (obj && obj.dispose) {
-            obj.dispose();
-        }
-
-        return true;
-    }
-    catch (e) {
-        deploy_log.CONSOLE
-                  .trace(e, 'helpers.tryDispose()');
-
-        return false;
-    }
 }
 
 /**
@@ -2113,66 +1689,6 @@ export function uriParamsToObject(uri: URL.Url | vscode.Uri): deploy_contracts.K
     }
 
     return params || {};
-}
-
-/**
- * Waits while a predicate matches.
- * 
- * @param {Function} predicate The predicate.
- * @param {WaitWhileOptions} {opts} Additional options.
- * 
- * @return {Promise<boolean>} The promise that indicates if timeout reached (false) or not (true).
- */
-export async function waitWhile(predicate: () => boolean | PromiseLike<boolean>,
-                                opts?: WaitWhileOptions) {
-    if (!opts) {
-        opts = <any>{};
-    }
-
-    const TIME_UNTIL_NEXT_CHECK = parseInt(
-        toStringSafe(opts.timeUntilNextCheck).trim()
-    );
-
-    const TIMEOUT = parseInt(
-        toStringSafe(opts.timeout).trim()
-    );
-    
-    if (!predicate) {
-        return;
-    }
-
-    let runUntil: Moment.Moment | false = false;
-    if (!isNaN(TIMEOUT)) {
-        runUntil = Moment.utc()
-                         .add(TIMEOUT, 'ms');
-    }
-
-    let wait: boolean;
-    do
-    {
-        const NOW = Moment.utc();
-        
-        if (false !== runUntil) {
-            if (runUntil.isAfter(NOW)) {
-                return false;
-            }
-        }
-
-        wait = toBooleanSafe(
-            await Promise.resolve(
-                predicate()
-            )
-        );
-
-        if (wait) {
-            if (!isNaN(TIME_UNTIL_NEXT_CHECK)) {
-                await sleep(TIME_UNTIL_NEXT_CHECK);  // wait before next check
-            }
-        }
-    }
-    while (wait);
-
-    return true;
 }
 
 /**

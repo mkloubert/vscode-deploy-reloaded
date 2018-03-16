@@ -19,6 +19,7 @@
 import * as _ from 'lodash';
 import * as ChildProcess from 'child_process';
 import * as Crypto from 'crypto';
+import * as deploy_api from './api';
 import * as deploy_code from './code';
 import * as deploy_commands from './commands';
 import * as deploy_contracts from './contracts';
@@ -31,7 +32,6 @@ import * as deploy_gui from './gui';
 import * as deploy_helpers from './helpers';
 import * as deploy_list from './list';
 import * as deploy_log from './log';
-import * as deploy_objects from './objects';
 import * as deploy_output from './output';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
@@ -160,6 +160,12 @@ interface TcpProxyButton extends vscode.Disposable {
 }
 
 /**
+ * Stores data of configuration source.
+ */
+export interface WorkspaceConfigSource extends deploy_helpers.WorkspaceConfigSource {
+}
+
+/**
  * A workspace context.
  */
 export interface WorkspaceContext {
@@ -283,7 +289,8 @@ const SWITCH_STATE_REPO_COLLECTION_KEY = 'SwitchStates';
 /**
  * A workspace.
  */
-export class Workspace extends deploy_objects.DisposableBase implements deploy_contracts.Translator, vscode.Disposable {
+export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_contracts.Translator {
+    private readonly _APIS: deploy_api.ApiHost[] = [];
     /**
      * Stores the current configuration.
      */
@@ -292,7 +299,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     /**
      * Stores the source of the configuration data.
      */
-    protected _configSource: deploy_contracts.ConfigSource;
+    protected _configSource: WorkspaceConfigSource;
     private _gitFolder: string | false;
     /**
      * Stores if 'deploy on change' feature is freezed or not.
@@ -350,9 +357,9 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
      * @param {WorkspaceContext} context the current extension context.
      */
     constructor(public readonly id: any,
-                public readonly folder: vscode.WorkspaceFolder,
+                folder: vscode.WorkspaceFolder,
                 public readonly context: WorkspaceContext) {
-        super();
+        super(folder);
 
         this._OUTPUT_CHANNEL = new deploy_output.OutputChannelWrapper(
             context.outputChannel
@@ -680,7 +687,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     /**
      * Gets the config source.
      */
-    public get configSource(): deploy_contracts.ConfigSource {
+    public get configSource(): WorkspaceConfigSource {
         return this._configSource;
     }
 
@@ -958,6 +965,14 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
         await deploy_deploy.deployUncommitedScmChanges
                            .apply(this, [ GIT, target ]);
+    }
+
+    private disposeApiHosts() {
+        while (this._APIS.length > 0) {
+            deploy_helpers.tryDispose(
+                this._APIS.pop()
+            );
+        }
     }
 
     private disposeConfigFileWatchers() {
@@ -1270,6 +1285,17 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
     
             return o;
         });
+    }
+
+    /**
+     * Returns a list of all API hosts handled by that workspace.
+     * 
+     * @return {deploy_proxies.ApiHost[]} The list of hosts.
+     */
+    public getApiHosts(): deploy_api.ApiHost[] {
+        return Enumerable.from( this._APIS )
+                         .distinct(true)
+                         .toArray();
     }
 
     /**
@@ -2798,6 +2824,7 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
 
     /** @inheritdoc */
     protected onDispose() {
+        this.disposeApiHosts();
         this.disposeTcpProxies();
 
         // file system watchers
@@ -2958,6 +2985,59 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             deploy_pull.pullPackage,
             this
         )(pkg, targetResolver);
+    }
+
+    private async reloadApis() {
+        const ME = this;
+
+        const CFG = ME.config;
+        if (!CFG) {
+            return;
+        }        
+
+        ME.disposeApiHosts();
+
+        const ALL_APIS = CFG.apis;
+        if (!ALL_APIS) {
+            return;
+        }
+
+        for (const P in ALL_APIS) {
+            const PORT = parseInt(
+                deploy_helpers.toStringSafe(P).trim()
+            );
+            const SETTINGS_VALUE = ALL_APIS[P];
+
+            let settings: deploy_api.ApiSettings;
+            if (deploy_helpers.isObject<deploy_api.ApiSettings>(SETTINGS_VALUE)) {
+                settings = SETTINGS_VALUE;
+            }
+            else {
+                settings = {
+                    autoStart: deploy_helpers.toBooleanSafe(SETTINGS_VALUE, true),
+                };
+            }
+
+            let host: deploy_api.ApiHost;
+            try {
+                host = new deploy_api.ApiHost(ME,
+                                              PORT, settings);
+
+                if (host.autoStart) {
+                    await host.start();
+                }
+
+                ME._APIS.push( host );
+            }
+            catch (e) {
+                deploy_helpers.tryDispose( host );
+
+                ME.showErrorMessage(
+                    ME.t('apis.errors.couldNotRegister',
+                         P, e)
+                );
+            }
+        }
     }
 
     /**
@@ -3234,6 +3314,8 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
                 await ME.reloadSwitches();
 
                 await ME.executeStartupCommands();
+
+                await ME.reloadApis();
 
                 await ME.reloadTcpProxies();
 
@@ -3612,9 +3694,12 @@ export class Workspace extends deploy_objects.DisposableBase implements deploy_c
             ME._TCP_PROXY_FILTERS.push(
                 proxy.addFilter((addr, port) => {
                     if (ALLOWED.length > 0) {
-                        return Enumerable.from(ALLOWED)
-                                         .any(a => ip.cidrSubnet(a)
-                                                     .contains(addr));
+                        if (!ip.isLoopback( addr )) {
+                            return Enumerable.from(ALLOWED)
+                                             .any(a => ip.cidrSubnet(a)
+                                                         .contains(addr));
+
+                        }
                     }
 
                     return true;

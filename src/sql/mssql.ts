@@ -17,7 +17,6 @@
 
 import * as deploy_contracts from '../contracts';
 import * as deploy_helpers from '../helpers';
-import * as deploy_objects from '../objects';
 import * as deploy_sql from '../sql';
 import * as Moment from 'moment';
 import * as MSSQL from 'mssql';
@@ -69,7 +68,7 @@ export interface MSSQLResult extends deploy_sql.SqlResult {
 /**
  * A Microsoft SQL connection.
  */
-export class MSSQLConnection extends deploy_objects.DisposableBase implements deploy_sql.SqlConnection {
+export class MSSQLConnection extends deploy_helpers.DisposableBase implements deploy_sql.SqlConnection {
     /**
      * Initializes a new instance of that class.
      * 

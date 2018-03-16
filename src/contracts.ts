@@ -15,6 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as deploy_api from './api';
 import * as deploy_commands from './commands';
 import * as deploy_gui from './gui';
 import * as deploy_log from './log';
@@ -124,20 +125,6 @@ export interface ConditionalItem {
 }
 
 /**
- * Stores data of configuration source.
- */
-export interface ConfigSource {
-    /**
-     * Gets the resource URI.
-     */
-    readonly resource?: vscode.Uri;
-    /**
-     * Gets the name of the section.
-     */
-    readonly section: string;
-}
-
-/**
  * Deploy settings.
  */
 export interface Configuration extends deploy_packages.WithFastFileCheckSettings,
@@ -147,6 +134,10 @@ export interface Configuration extends deploy_packages.WithFastFileCheckSettings
      * Always show workspace button, even if there is only one workspace open or not.
      */
     readonly alwaysShowWorkspaceSelector?: boolean;
+    /**
+     * Defines one or more APIs.
+     */
+    readonly apis?: deploy_api.ApiList;
     /**
      * One or more requirements to check.
      */

@@ -20,7 +20,6 @@ import * as deploy_contracts from './contracts';
 import * as deploy_events from './events';
 import * as deploy_files from './files';
 import * as deploy_helpers from './helpers';
-import * as deploy_objects from './objects';
 import * as deploy_session from './session';
 import * as deploy_targets from './targets';
 import * as deploy_transformers from './transformers';
@@ -636,7 +635,7 @@ export class LocalFileToUpload extends FileToUploadBase {
  * A basic plugin.
  */
 export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_targets.Target>
-    extends deploy_objects.DisposableBase
+    extends deploy_helpers.DisposableBase
     implements Plugin
 {
     /**
