@@ -15,16 +15,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as _ from 'lodash';
 import * as deploy_clients_sftp from '../clients/sftp';
 import * as deploy_helpers from '../helpers';
 import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
 import * as i18 from '../i18';
+import * as vscode from 'vscode';
 
 
 interface SFTPContext extends deploy_plugins.AsyncFileClientPluginContext<SFTPTarget,
                                                                           deploy_clients_sftp.SFTPClient> {
 }
+
+
+const CACHE_PASSWORD = 'password';
+const CACHE_USER = 'user';
 
 /**
  * A 'sftp' target.
@@ -39,6 +45,14 @@ export interface SFTPTarget extends deploy_targets.Target {
      * 'agent' property must also be set to use this feature.
      */
     readonly agentForward?: boolean;
+    /**
+     * Always ask for password and do not cache, if no password is defined.
+     */
+    readonly alwaysAskForPassword?: boolean;
+    /**
+     * Always ask for uasername and do not cache, if no user is defined.
+     */
+    readonly alwaysAskForUser?: boolean;
     /**
      * Show debug output or not.
      */
@@ -98,6 +112,8 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
                                                                   deploy_clients_sftp.SFTPClient,
                                                                   SFTPContext> {
     protected async createContext(target: SFTPTarget): Promise<SFTPContext> {
+        const CACHE = this.getCache( target );
+
         let agent = this.replaceWithValues(target, target.agent);
         if (deploy_helpers.isEmptyString(agent)) {
             agent = undefined;
@@ -124,38 +140,115 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
 
         const DIR = this.replaceWithValues(target, target.dir);
 
-        return {
-            client: await deploy_clients_sftp.openConnection({
-                agent: agent,
-                debug: target.debug,
-                hashAlgorithm: this.replaceWithValues(target, target.hashAlgorithm),
-                hashes: target.hashes,
-                host: this.replaceWithValues(target, target.host),
-                modes: target.modes,
-                password: target.password,
-                port: parseInt(
-                    deploy_helpers.toStringSafe(
-                        this.replaceWithValues(target, target.port)
-                    ).trim()
-                ),
-                privateKey: privateKeyFile,
-                privateKeyPassphrase: target.privateKeyPassphrase,
-                readyTimeout: parseInt(
-                    deploy_helpers.toStringSafe(
-                        this.replaceWithValues(target, target.readyTimeout)
-                    ).trim()
-                ),
-                user: target.user,
-            }),
-            getDir: (subDir) => {
-                return deploy_helpers.normalizePath(
-                    deploy_helpers.normalizePath(DIR) + 
-                    '/' + 
-                    deploy_helpers.normalizePath(subDir)
-                );
-            },
-            target: target,
-        };
+        let cachePassword = false;
+        let cacheUsername = false;
+
+        const ALWAYS_ASK_FOR_USER = deploy_helpers.toBooleanSafe( target.alwaysAskForUser );
+        let user = target.user;
+        if (_.isNil(user)) {
+            let askForUser = ALWAYS_ASK_FOR_USER;
+            if (!askForUser) {
+                askForUser = !CACHE.has( CACHE_USER );
+            }
+
+            if (askForUser) {
+                user = await vscode.window.showInputBox({
+                    ignoreFocusOut: true,
+                    prompt: this.t(target, 'credentials.enterUsername')
+                });
+
+                if (_.isNil(user)) {
+                    return;
+                }
+            }
+            else {
+                user = CACHE.get( CACHE_USER );
+            }
+
+            cacheUsername = !ALWAYS_ASK_FOR_USER;
+        }
+
+        const ALWAYS_ASK_FOR_PASSWORD = deploy_helpers.toBooleanSafe( target.alwaysAskForPassword );
+        let pwd = target.password;
+        if (_.isNil(pwd)) {
+            let askForPassword = ALWAYS_ASK_FOR_PASSWORD;
+            if (!askForPassword) {
+                askForPassword = !CACHE.has( CACHE_PASSWORD );
+            }
+
+            if (askForPassword) {
+                pwd = await vscode.window.showInputBox({
+                    ignoreFocusOut: true,
+                    prompt: this.t(target, 'credentials.enterPassword')
+                });
+
+                if (_.isNil(pwd)) {
+                    return;
+                }
+            }
+            else {
+                pwd = CACHE.get( CACHE_PASSWORD );
+            }
+
+            cachePassword = !ALWAYS_ASK_FOR_PASSWORD;
+        }
+
+        try {
+            const CTX = {
+                client: await deploy_clients_sftp.openConnection({
+                    agent: agent,
+                    debug: target.debug,
+                    hashAlgorithm: this.replaceWithValues(target, target.hashAlgorithm),
+                    hashes: target.hashes,
+                    host: this.replaceWithValues(target, target.host),
+                    modes: target.modes,
+                    password: pwd,
+                    port: parseInt(
+                        deploy_helpers.toStringSafe(
+                            this.replaceWithValues(target, target.port)
+                        ).trim()
+                    ),
+                    privateKey: privateKeyFile,
+                    privateKeyPassphrase: target.privateKeyPassphrase,
+                    readyTimeout: parseInt(
+                        deploy_helpers.toStringSafe(
+                            this.replaceWithValues(target, target.readyTimeout)
+                        ).trim()
+                    ),
+                    user: user,
+                }),
+                getDir: (subDir) => {
+                    return deploy_helpers.normalizePath(
+                        deploy_helpers.normalizePath(DIR) + 
+                        '/' + 
+                        deploy_helpers.normalizePath(subDir)
+                    );
+                },
+                target: target,
+            };
+
+            if (cacheUsername) {
+                CACHE.set(CACHE_USER, user);
+            }
+            else {
+                CACHE.unset(CACHE_USER);
+            }
+
+            if (cachePassword) {
+                CACHE.set(CACHE_PASSWORD, pwd);
+            }
+            else {
+                CACHE.unset(CACHE_PASSWORD);
+            }
+    
+            return CTX;
+        }
+        catch (e) {
+            CACHE.unset(CACHE_USER)
+                 .unset(CACHE_PASSWORD);
+
+            throw e;
+        }
     }
 }
 

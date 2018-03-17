@@ -63,6 +63,10 @@ export interface Translation {
         notSupported?: string;
     };
     'continue'?: string;
+    credentials?: {
+        enterPassword?: string;
+        enterUsername?: string;
+    };
     currentFileOrFolder?: {
         noneSelected?: string;
     };

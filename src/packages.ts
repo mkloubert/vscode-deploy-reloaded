@@ -476,6 +476,7 @@ export function getTargetsOfPackage(pkg: Package, targetResolver: deploy_targets
                        `${Moment.utc().unix()}`;
 
             const BATCH_TARGET = {
+                __cache: new deploy_helpers.MemoryCache(),
                 __id: ID,
                 __index: -1,
                 __searchValue: deploy_helpers.normalizeString(ID),

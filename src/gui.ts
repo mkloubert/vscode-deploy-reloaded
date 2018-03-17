@@ -101,6 +101,14 @@ export async function showPopupWhenFinished(stats: ShowPopupWhenFinishedStats) {
             }
         }
     };
+    const TRY_GET_RELATIVE_PATH = (p: string) => {
+        let relativePath = ME.toRelativePath(p);
+        if (false === relativePath) {
+            relativePath = p;
+        }
+
+        return relativePath;
+    };
 
     let setting = CFG.showPopupWhenFinished;
 
@@ -150,7 +158,7 @@ export async function showPopupWhenFinished(stats: ShowPopupWhenFinishedStats) {
                         await AFTER_POPUP(
                             await ME.showErrorMessage(
                                 ME.t(`${translationKey}.popups.fileFailed`,
-                                     stats.failed[0]),
+                                     TRY_GET_RELATIVE_PATH( stats.failed[0] )),
                                 
                                 OPEN_OUTPUT,
                                 CLOSE,
@@ -190,7 +198,7 @@ export async function showPopupWhenFinished(stats: ShowPopupWhenFinishedStats) {
                     if (1 === ALL_COUNT) {
                         await ME.showInformationMessage(
                             ME.t(`${translationKey}.popups.fileSucceeded`,
-                                 stats.succeeded[0]),
+                                 TRY_GET_RELATIVE_PATH( stats.succeeded[0] )),
                         );    
                     }
                     else {

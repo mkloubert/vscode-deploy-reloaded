@@ -685,6 +685,26 @@ export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_
     }
 
     /**
+     * Returns the cache for a target.
+     * 
+     * @param {deploy_targets.Target} target The target.
+     * 
+     * @return {deploy_helpers.CacheProvider} The cache.
+     */
+    protected getCache(target: deploy_targets.Target): deploy_helpers.CacheProvider {
+        let cache: deploy_helpers.CacheProvider;
+        if (target) {
+            cache = target.__cache;
+        }
+
+        if (!cache) {
+            cache = new deploy_helpers.MemoryCache();  // fallback
+        }
+
+        return cache;
+    }
+
+    /**
      * Returns an existing path for a target, based on the settings folder.
      * 
      * @param {deploy_targets.Target} target The underlying target.
@@ -899,12 +919,14 @@ export abstract class AsyncFileClientPluginBase<TTarget extends deploy_targets.T
         const CTX = await Promise.resolve(
             this.createContext(target)
         );
+        if (!CTX) {
+            return;
+        }
+
         try {
-            if (CTX) {
-                return await Promise.resolve(
-                    action(CTX)
-                );
-            }
+            return await Promise.resolve(
+                action(CTX)
+            );
         }
         finally {
             deploy_helpers.tryDispose(CTX.client);

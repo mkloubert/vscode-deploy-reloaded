@@ -222,6 +222,12 @@ export interface WorkspaceItemFromSettings {
     /**
      * [INTERNAL] DO NOT DEFINE OR OVERWRITE THIS PROPERTY BY YOUR OWN!
      * 
+     * The cache for that item.
+     */
+    readonly __cache: deploy_helpers.CacheProvider;
+    /**
+     * [INTERNAL] DO NOT DEFINE OR OVERWRITE THIS PROPERTY BY YOUR OWN!
+     * 
      * Gets the ID of that item.
      */
     readonly __id: any;
@@ -3634,6 +3640,8 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
             (<any>p)['__searchValue'] = deploy_helpers.normalizeString(
                 deploy_packages.getPackageName(p)
             );
+            
+            (<any>p)['__cache'] = new deploy_helpers.MemoryCache();
 
             Object.defineProperty(p, '__button', {
                 enumerable: true,
@@ -4113,6 +4121,8 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
             (<any>t)['__searchValue'] = deploy_helpers.normalizeString(
                 deploy_targets.getTargetName(t)
             );
+
+            (<any>t)['__cache'] = new deploy_helpers.MemoryCache();
         }).toArray();
 
         ME._targets = targets;

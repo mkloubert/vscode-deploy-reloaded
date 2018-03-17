@@ -58,6 +58,10 @@ export const translation: Translation = {
         notSupported: "Compiler{0:trim,surround,leading_space} is not supported!",
     },
     'continue': "Continue",
+    credentials: {
+        enterPassword: "Enter the password ...",
+        enterUsername: "Enter the name of the user ...",
+    },
     currentFileOrFolder: {
         noneSelected: "There is current no active file or folder selected!",
     },
