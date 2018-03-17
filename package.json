@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.61.0",
+ "version": "0.62.1",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.21.0"
@@ -23191,6 +23191,16 @@
          {
           "type": "object",
           "properties": {
+           "alwaysAskForPassword": {
+            "type": "boolean",
+            "description": "Always ask for password and do not cache, if no password is defined.",
+            "default": false
+           },
+           "alwaysAskForUser": {
+            "type": "boolean",
+            "description": "Always ask for username and do not cache, if no user is defined.",
+            "default": false
+           },
            "applyValuesTo": {
             "description": "Applies values to the properties of that target.",
             "type": "object",
@@ -52444,6 +52454,16 @@
             "description": "Set to (true) to use OpenSSH agent forwarding (auth-agent@openssh.com) for the life of the connection. 'agent' property must also be set to use this feature.",
             "default": false
            },
+           "alwaysAskForPassword": {
+            "type": "boolean",
+            "description": "Always ask for password and do not cache, if no password is defined.",
+            "default": false
+           },
+           "alwaysAskForUser": {
+            "type": "boolean",
+            "description": "Always ask for username and do not cache, if no user is defined.",
+            "default": false
+           },
            "applyValuesTo": {
             "description": "Applies values to the properties of that target.",
             "type": "object",
@@ -71087,6 +71107,6 @@
   "tmp": "0.0.33",
   "uglify-js": "^3.3.13",
   "uuid": "^3.2.1",
-  "vscode-helpers": "^0.15.0"
+  "vscode-helpers": "^0.16.0"
  }
 }
