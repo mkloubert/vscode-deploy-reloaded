@@ -1,0 +1,7 @@
+POST http://localhost/api/editors HTTP/1.1
+x-Vscode-Deploy-Reloaded-Lang: json
+
+{
+    "message": "Test message",
+    "type": "error"
+}

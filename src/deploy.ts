@@ -596,9 +596,9 @@ export async function deployFilesTo(files: string[],
             const PI = PLUGINS.shift();
 
             const POPUP_STATS: deploy_gui.ShowPopupWhenFinishedStats = {
-                failed: 0,
+                failed: [],
                 operation: deploy_contracts.DeployOperation.Deploy,
-                succeeded: 0,
+                succeeded: [],
             };
             try {
                 if (!(await checkBeforeDeploy(target, PI, files, MAPPING_SCOPE_DIRS, CANCELLATION_SOURCE.token, () => isCancelling))) {
@@ -614,15 +614,14 @@ export async function deployFilesTo(files: string[],
                     );
                 }
 
-                const FILES_TO_UPLOAD: deploy_plugins.LocalFileToUpload[] = [];
-                for (const F of files) {
-                    const NAME_AND_PATH = deploy_targets.getNameAndPathForFileDeployment(target, F,
+                const FILES_TO_UPLOAD = files.map(f => {
+                    const NAME_AND_PATH = deploy_targets.getNameAndPathForFileDeployment(target, f,
                                                                                          MAPPING_SCOPE_DIRS);
                     if (false === NAME_AND_PATH) {
-                        continue;
+                        return null;
                     }
 
-                    const LF = new deploy_plugins.LocalFileToUpload(ME, F, NAME_AND_PATH);
+                    const LF = new deploy_plugins.LocalFileToUpload(ME, f, NAME_AND_PATH);
                     LF.onBeforeUpload = async function(destination?: string) {
                         if (arguments.length < 1) {
                             destination = NAME_AND_PATH.path;
@@ -631,7 +630,7 @@ export async function deployFilesTo(files: string[],
 
                         ME.output.append(
                             ME.t('deploy.deployingFile',
-                                 F, destination) + ' '
+                                 f, destination) + ' '
                         );
 
                         await WAIT_WHILE_CANCELLING();
@@ -643,6 +642,8 @@ export async function deployFilesTo(files: string[],
                     LF.onUploadCompleted = async (err?: any) => {
                         if (err) {
                             ME.output.appendLine(`[${ME.t('error', err)}]`);
+
+                            POPUP_STATS.failed.push( f );
                         }
                         else {
                             const SYNC_WHEN_OPEN_ID = ME.getSyncWhenOpenKey(target);
@@ -652,17 +653,12 @@ export async function deployFilesTo(files: string[],
                             }
 
                             ME.output.appendLine(`[${ME.t('ok')}]`);
-                        }
 
-                        if (err) {
-                            ++POPUP_STATS.failed;
-                        }
-                        else {
-                            ++POPUP_STATS.succeeded;
+                            POPUP_STATS.succeeded.push( f );
                         }
                     };
 
-                    LF.transformer = transformer;
+                    LF.transformer = <deploy_transformers.DataTransformer>transformer;
                     LF.transformerSubContext = {
                         deployOperation: deploy_contracts.DeployOperation.Deploy,
                         file: LF.file,
@@ -676,8 +672,8 @@ export async function deployFilesTo(files: string[],
                         return STATE_KEY;
                     };
 
-                    FILES_TO_UPLOAD.push(LF);
-                }
+                    return LF;
+                }).filter(f => !_.isNil(f));
 
                 const CTX: deploy_plugins.UploadContext = {
                     cancellationToken: CANCELLATION_SOURCE.token,
@@ -799,6 +795,9 @@ export async function deployFilesTo(files: string[],
                     ME.t('deploy.finishedOperationWithErrors',
                          TARGET_NAME, e)
                 );
+
+                POPUP_STATS.failed = files;
+                POPUP_STATS.succeeded = [];
             }
             finally {
                 deploy_helpers.applyFuncFor(

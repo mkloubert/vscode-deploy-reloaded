@@ -618,9 +618,9 @@ export async function pullFilesFrom(files: string[],
             const PI = PLUGINS.shift();
 
             const POPUP_STATS: deploy_gui.ShowPopupWhenFinishedStats = {
-                failed: 0,
+                failed: [],
                 operation: deploy_contracts.DeployOperation.Pull,
-                succeeded: 0,
+                succeeded: [],
             };
             try {
                 if (!(await checkBeforePull(target, PI, files, MAPPING_SCOPE_DIRS, CANCELLATION_SOURCE.token, () => isCancelling))) {
@@ -750,15 +750,15 @@ export async function pullFilesFrom(files: string[],
                                     );
                                 }
 
-                                ++POPUP_STATS.succeeded;
-
                                 ME.output.appendLine(`[${ME.t('ok')}]`);
+                                
+                                POPUP_STATS.succeeded.push( f );
                             }
                         }
                         catch (e) {
-                            ++POPUP_STATS.failed;
-
                             ME.output.appendLine(`[${ME.t('error', e)}]`);
+
+                            POPUP_STATS.failed.push( f );
                         }
                         finally {
                             if (disposeDownloadedFile) {
@@ -768,7 +768,7 @@ export async function pullFilesFrom(files: string[],
                     };
 
                     return SF;
-                }).filter(f => null !== f);
+                }).filter(f => !_.isNil(f));
 
                 const CTX: deploy_plugins.DownloadContext = {
                     cancellationToken: CANCELLATION_SOURCE.token,
@@ -890,6 +890,9 @@ export async function pullFilesFrom(files: string[],
                     ME.t('pull.finishedOperationWithErrors',
                          TARGET_NAME, e)
                 );
+
+                POPUP_STATS.failed = files;
+                POPUP_STATS.succeeded = [];
             }
             finally {
                 deploy_helpers.applyFuncFor(

@@ -15,6 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as _ from 'lodash';
 import * as deploy_contracts from './contracts';
 import * as deploy_gui from './gui';
 import * as deploy_helpers from './helpers';
@@ -319,9 +320,9 @@ export async function deleteFilesIn(files: string[],
             const PI = PLUGINS.shift();
 
             const POPUP_STATS: deploy_gui.ShowPopupWhenFinishedStats = {
-                failed: 0,
+                failed: [],
                 operation: deploy_contracts.DeployOperation.Delete,
-                succeeded: 0,
+                succeeded: [],
             };
             try {                
                 ME.output.appendLine('');
@@ -361,6 +362,8 @@ export async function deleteFilesIn(files: string[],
                     SF.onDeleteCompleted = async (err?: any, deleteLocal?: boolean) => {
                         if (err) {
                             ME.output.appendLine(`[${ME.t('error', err)}]`);
+
+                            POPUP_STATS.failed.push( f );
                         }
                         else {
                             try {
@@ -380,18 +383,13 @@ export async function deleteFilesIn(files: string[],
                             catch (e) {
                                 ME.output.appendLine(`[${ME.t('warning')}: ${deploy_helpers.toStringSafe(e)}]`);
                             }
-                        }
-
-                        if (err) {
-                            ++POPUP_STATS.failed;
-                        }
-                        else {
-                            ++POPUP_STATS.succeeded;
+                            
+                            POPUP_STATS.succeeded.push( f );
                         }
                     };
 
                     return SF;
-                }).filter(f => null !== f);
+                }).filter(f => !_.isNil(f));
 
                 const CTX: deploy_plugins.DeleteContext = {
                     cancellationToken: CANCELLATION_SOURCE.token,
@@ -513,6 +511,9 @@ export async function deleteFilesIn(files: string[],
                     ME.t('DELETE.finishedOperationWithErrors',
                          TARGET_NAME, e)
                 );
+
+                POPUP_STATS.failed = files;
+                POPUP_STATS.succeeded = [];                
             }
             finally {
                 deploy_helpers.applyFuncFor(

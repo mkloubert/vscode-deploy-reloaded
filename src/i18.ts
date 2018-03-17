@@ -120,6 +120,8 @@ export interface Translation {
         };
         popups?: {
             allFailed?: string;
+            fileFailed?: string;
+            fileSucceeded?: string;
             someFailed?: string;
             succeeded?: string;
         };
@@ -213,6 +215,8 @@ export interface Translation {
         };
         popups?: {
             allFailed?: string;
+            fileFailed?: string;
+            fileSucceeded?: string;
             someFailed?: string;
             succeeded?: string;
         };
@@ -484,6 +488,8 @@ export interface Translation {
         };
         popups?: {
             allFailed?: string;
+            fileFailed?: string;
+            fileSucceeded?: string;
             someFailed?: string;
             succeeded?: string;
         };

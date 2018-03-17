@@ -42,7 +42,8 @@ import * as vscode from 'vscode';
 import {
     applyFuncFor, asArray,
     buildWorkflow,
-    cloneObject, compareValuesBy, createCompletedAction,
+    cloneObject, cloneObjectFlat, compareValuesBy, createCompletedAction,
+    isEmptyString,
     normalizeString,
     toBooleanSafe, toStringSafe, tryDispose
 } from 'vscode-helpers';
@@ -220,55 +221,6 @@ export function checkIfDoesMatchByFileFilter(val: any, filter: deploy_contracts.
     }
 
     return false;
-}
-
-/**
- * Clones an value flat.
- * 
- * @param {T} val The object to clone.
- * @param {boolean} [useNewObjectForFunctions] Use new object as thisArgs for functions or not.
- * 
- * @return {T} The cloned object.
- */
-export function cloneObjectFlat<T>(val: T,
-                                   useNewObjectForFunctions = true): T {
-    useNewObjectForFunctions = toBooleanSafe(useNewObjectForFunctions, true);
-
-    if (!val) {
-        return val;
-    }
-
-    const CLONED_OBJ: T = <any>{};
-    const ADD_PROPERTY = (prop: string, v: any) => {
-        Object.defineProperty(CLONED_OBJ, prop, {
-            configurable: true,
-            enumerable: true,
-
-            get: () => {
-                return v;
-            },
-            set: (newValue) => {
-                v = newValue;
-            },
-        });
-    };
-
-    const THIS_ARGS: any = useNewObjectForFunctions ? CLONED_OBJ : val;
-
-    for (const P in val) {
-        let valueToSet: any = val[P];
-        if (isFunc(valueToSet)) {
-            const FUNC = valueToSet;
-            
-            valueToSet = function() {
-                return FUNC.apply(THIS_ARGS, arguments);
-            };
-        }
-
-        ADD_PROPERTY(P, valueToSet);
-    }
-
-    return CLONED_OBJ;
 }
 
 /**
@@ -771,38 +723,6 @@ export function invokeForTempFile<TResult = any>(action: (path: string) => TResu
 }
 
 /**
- * Checks if data is binary or text content.
- * 
- * @param {Buffer} data The data to check.
- * 
- * @returns {Promise<boolean>} The promise.
- */
-export function isBinaryContent(data: Buffer): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
-        const COMPLETED = createCompletedAction<boolean>(resolve, reject);
-
-        if (!data) {
-            COMPLETED(null, <any>data);
-            return;
-        }
-
-        try {
-            IsBinaryFile(data, data.length, (err, result) => {
-                if (err) {
-                    COMPLETED(err);
-                }
-                else {
-                    COMPLETED(null, toBooleanSafe(result));
-                }
-            });
-        }
-        catch (e) {
-            COMPLETED(e);
-        }
-    });
-}
-
-/**
  * Checks if a value is a boolean or not.
  * 
  * @param {any} val The value to check.
@@ -811,18 +731,6 @@ export function isBinaryContent(data: Buffer): Promise<boolean> {
  */
 export function isBool(val: any): val is boolean {
     return _.isBoolean(val);
-}
-
-/**
- * Checks if the string representation of a value is empty
- * or contains whitespaces only.
- * 
- * @param {any} val The value to check.
- * 
- * @return {boolean} Is empty or not.
- */
-export function isEmptyString(val: any) {
-    return '' === toStringSafe(val).trim();
 }
 
 /**

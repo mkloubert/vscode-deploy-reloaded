@@ -170,6 +170,12 @@ interface VSCodeInfo {
     version: string;
 }
 
+
+/**
+ * Name of the HTTP header that stores the language of an editor.
+ */
+export const X_HEADER_EDITOR_LANG = 'X-Vscode-Deploy-Reloaded-Lang';
+
 /**
  * An API host.
  */
@@ -342,7 +348,7 @@ export class ApiHost extends deploy_helpers.DisposableBase {
                        .send();
         });
 
-        this.setupEndPoints(APP);
+        await this.setupEndPoints(APP);
 
         // error handler
         APP.use(function(err: any, req: Express.Request, resp: Express.Response, next: Function) {
@@ -469,8 +475,12 @@ export class ApiHost extends deploy_helpers.DisposableBase {
                  .replaceWithValues(val, ADDITIONAL_VALUES);
     }
 
-    private setupEndPoints(app: Express.Express) {
+    private async setupEndPoints(app: Express.Express) {
         const ME = this;
+
+        const KNOWN_LANGUAGES = (await vscode.languages.getLanguages()).map(x => {
+            return deploy_helpers.normalizeString(x);
+        }).sort();
 
         // get host info
         app.get('/api', (req, resp) => {
@@ -674,7 +684,7 @@ export class ApiHost extends deploy_helpers.DisposableBase {
             resp.setHeader('Content-type', 'text/plain; charset=utf-8');
 
             if (!deploy_helpers.isEmptyString(lang)) {
-                resp.setHeader('X-Vscode-Deploy-Reloaded-Lang', lang.trim());
+                resp.setHeader(X_HEADER_EDITOR_LANG, lang.trim());
             }
 
             if (content.length < 1) {
@@ -685,6 +695,53 @@ export class ApiHost extends deploy_helpers.DisposableBase {
             return resp.status(200).send(
                 new Buffer(content, 'utf8')
             );
+        });
+
+        // [POST]  /api/editors
+        app.post('/api/editors', async (req, resp) => {
+            let lang = deploy_helpers.normalizeString( req.header(X_HEADER_EDITOR_LANG) );
+            if ('' === lang) {
+                lang = undefined;
+            }
+            else {
+                if (KNOWN_LANGUAGES.indexOf( lang ) < 0) {
+                    lang = undefined;
+                }
+            }
+
+            const BODY = await deploy_helpers.readAll( req );
+
+            const DOC = await vscode.workspace.openTextDocument({                
+                content: BODY.toString('utf8'),
+                language: lang,
+            });
+            const EDITOR = await vscode.window.showTextDocument( DOC );
+
+            const MATCHING_EDITORS = getTextEditors().toArray().map((te, i) => {
+                return {
+                    editor: te,
+                    obj: textEditorToJsonObject(te, i),
+                };
+            }).filter(x => EDITOR === x.editor)
+              .map(x => x.obj);
+            if (MATCHING_EDITORS.length > 0) {
+                resp.setHeader('Content-type', 'application/json; charset=utf-8');
+
+                return resp.status(200).send(
+                    new Buffer(
+                        JSON.stringify({
+                            success: true,
+                            code: 0,
+                            message: "OK",
+                            data: MATCHING_EDITORS[0],
+                        }),
+                        'utf8'
+                    )
+                );
+            }
+
+            return resp.status(204)
+                       .send();
         });
 
         // [GET]  /api/extensions
@@ -708,7 +765,30 @@ export class ApiHost extends deploy_helpers.DisposableBase {
                 );
             }
 
-            return resp.status(204);
+            return resp.status(204)
+                       .send();
+        });
+
+        // [GET]  /api/languages
+        app.get('/api/languages', (req, resp) => {
+            if (KNOWN_LANGUAGES.length > 0) {
+                resp.setHeader('Content-type', 'application/json; charset=utf-8');
+
+                return resp.status(200).send(
+                    new Buffer(
+                        JSON.stringify({
+                            success: true,
+                            code: 0,
+                            message: "OK",
+                            data: KNOWN_LANGUAGES,
+                        }),
+                        'utf8'
+                    )
+                );
+            }
+
+            return resp.status(204)
+                       .send();
         });
 
         // [POST]  /api/messages
@@ -831,6 +911,18 @@ export class ApiHost extends deploy_helpers.DisposableBase {
             }
 
             showPopup( msg.message );
+
+            return resp.status(204)
+                       .send();
+        });
+
+        // [PUT]  /api/output
+        app.put('/api/output', async (req, resp) => {
+            const STR = (await deploy_helpers.readAll( req )).toString('utf8');
+            if (STR.length > 0) {
+                ME.workspace.output
+                            .append( STR );
+            }
 
             return resp.status(204)
                        .send();
@@ -1111,6 +1203,7 @@ function textEditorToJsonObject(editor: vscode.TextEditor, index: number) {
             eol: deploy_helpers.toEOL( DOC.eol ),
             file: fileObj,
             isDirty: DOC.isDirty,
+            isUntitled: DOC.isUntitled,
             language: DOC.languageId,
             lines: DOC.lineCount,
             resources: {
@@ -1118,7 +1211,7 @@ function textEditorToJsonObject(editor: vscode.TextEditor, index: number) {
                 'content': '/api/editors/' + index + '/content',
             },
             version: DOC.version,
-        };
+        };        
     }
 
     return obj;

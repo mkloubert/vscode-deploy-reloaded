@@ -36,7 +36,7 @@ export interface ShowPopupWhenFinishedStats {
     /**
      * The number of failed elements.
      */
-    failed: number;
+    failed: string[];
     /**
      * The type of deploy operation.
      */
@@ -44,7 +44,7 @@ export interface ShowPopupWhenFinishedStats {
     /**
      * The number of succeeded elements.
      */
-    succeeded: number;
+    succeeded: string[];
 }
 
 /**
@@ -68,6 +68,14 @@ export async function showPopupWhenFinished(stats: ShowPopupWhenFinishedStats) {
 
     const CFG = ME.config;
     if (!CFG) {
+        return;
+    }
+
+    const FAILED_COUNT = stats.failed.length;
+    const SUCCEEDED_COUNT = stats.succeeded.length;
+    const ALL_COUNT = FAILED_COUNT + SUCCEEDED_COUNT;
+
+    if (ALL_COUNT < 0) {
         return;
     }
 
@@ -118,8 +126,6 @@ export async function showPopupWhenFinished(stats: ShowPopupWhenFinishedStats) {
     }
 
     let popupShower: () => any;
-
-    const ALL_COUNT = stats.failed + stats.succeeded;
     
     let translationKey: string;
     switch (stats.operation) {
@@ -137,24 +143,39 @@ export async function showPopupWhenFinished(stats: ShowPopupWhenFinishedStats) {
     }
 
     if (ALL_COUNT >= setting) {
-        if (stats.failed > 0) {
-            if (stats.succeeded < 1) {
+        if (FAILED_COUNT > 0) {
+            if (SUCCEEDED_COUNT < 1) {
                 popupShower = async () => {
-                    await AFTER_POPUP(
-                        await ME.showErrorMessage(
-                            ME.t(`${translationKey}.popups.allFailed`),
-                            
-                            OPEN_OUTPUT,
-                            CLOSE,
-                        ),                        
-                    );
+                    if (1 === FAILED_COUNT) {
+                        await AFTER_POPUP(
+                            await ME.showErrorMessage(
+                                ME.t(`${translationKey}.popups.fileFailed`,
+                                     stats.failed[0]),
+                                
+                                OPEN_OUTPUT,
+                                CLOSE,
+                            ),                        
+                        );
+                    }
+                    else {
+                        await AFTER_POPUP(
+                            await ME.showErrorMessage(
+                                ME.t(`${translationKey}.popups.allFailed`,
+                                     ALL_COUNT),
+                                
+                                OPEN_OUTPUT,
+                                CLOSE,
+                            ),                        
+                        );
+                    }
                 };
             }
             else {
                 popupShower = async () => {
                     await AFTER_POPUP(
-                        await ME.showErrorMessage(
-                            ME.t(`${translationKey}.popups.someFailed`),
+                        await ME.showWarningMessage(
+                            ME.t(`${translationKey}.popups.someFailed`,
+                                 FAILED_COUNT, ALL_COUNT),
                             
                             OPEN_OUTPUT,
                             CLOSE,
@@ -165,10 +186,19 @@ export async function showPopupWhenFinished(stats: ShowPopupWhenFinishedStats) {
         }
         else {
             if (deploy_helpers.toBooleanSafe(CFG.showPopupOnSuccess, true)) {
-                popupShower = async () => {
-                    await ME.showInformationMessage(
-                        ME.t(`${translationKey}.popups.succeeded`),
-                    )
+                popupShower = async () => {                    
+                    if (1 === ALL_COUNT) {
+                        await ME.showInformationMessage(
+                            ME.t(`${translationKey}.popups.fileSucceeded`,
+                                 stats.succeeded[0]),
+                        );    
+                    }
+                    else {
+                        await ME.showInformationMessage(
+                            ME.t(`${translationKey}.popups.succeeded`,
+                                 SUCCEEDED_COUNT),
+                        );                            
+                    }
                 };
             }
         }
