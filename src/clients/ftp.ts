@@ -104,6 +104,9 @@ export abstract class FTPClientBase extends deploy_clients.AsyncFileListBase {
      */
     protected async createDirectoryIfNeeded(dir: string) {
         dir = toFTPPath(dir);
+        if ('/' === dir) {
+            return false;
+        }
 
         // check if remote directory exists
         if (true === this._existingRemoteDirs[dir]) {
@@ -744,8 +747,6 @@ class JsFTPClient extends FTPClientBase {
     public list(dir: string): Promise<deploy_files.FileSystemInfo[]> {
         const ME = this;
 
-        dir = toFTPPath(dir);
-
         return new Promise<deploy_files.FileSystemInfo[]>((resolve, reject) => {
             const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
 
@@ -997,10 +998,15 @@ export async function openConnection(opts: FTPConnectionOptions): Promise<FTPCli
 /**
  * Converts to a FTP path.
  * 
- * @param {string} path The path to convert.
+ * @param {string} p The path to convert.
  * 
  * @return {string} The converted path. 
  */
-export function toFTPPath(path: string) {
-    return '/' + deploy_helpers.normalizePath(path);
+export function toFTPPath(p: string) {
+    p = deploy_helpers.normalizePath(p);
+    if ('.' === p) {
+        p = '';
+    }
+
+    return '/' + p;
 }

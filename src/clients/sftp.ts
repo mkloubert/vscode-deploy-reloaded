@@ -312,18 +312,20 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
                 }
 
                 // check if remote directory exists
-                if (true !== this._checkedRemoteDirs[REMOTE_DIR]) {
-                    try {
-                        // check if exist
-                        await this.client.list(REMOTE_DIR);
-                    }
-                    catch (e) {
-                        // no, try to create
-                        await this.client.mkdir(REMOTE_DIR, true);
-                    }
+                if ('/' !== REMOTE_DIR) {
+                    if (true !== this._checkedRemoteDirs[REMOTE_DIR]) {
+                        try {
+                            // check if exist
+                            await this.client.list(REMOTE_DIR);
+                        }
+                        catch (e) {
+                            // no, try to create
+                            await this.client.mkdir(REMOTE_DIR, true);
+                        }
 
-                    // mark as checked
-                    this._checkedRemoteDirs[REMOTE_DIR] = true;
+                        // mark as checked
+                        this._checkedRemoteDirs[REMOTE_DIR] = true;
+                    }
                 }
 
                 let modeToSet: number | false = false;
@@ -509,10 +511,15 @@ export async function openConnection(opts: SFTPConnectionOptions): Promise<SFTPC
 /**
  * Converts to a SFTP path.
  * 
- * @param {string} path The path to convert.
+ * @param {string} p The path to convert.
  * 
  * @return {string} The converted path. 
  */
-export function toSFTPPath(path: string) {
-    return '/' + deploy_helpers.normalizePath(path);
+export function toSFTPPath(p: string) {
+    p = deploy_helpers.normalizePath(p);
+    if ('.' === p) {
+        p = '';
+    }
+
+    return '/' + p;
 }
