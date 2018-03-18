@@ -1553,7 +1553,7 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
         const CFG = this.config;
         if (CFG) {
             let showWorkspaceName = deploy_helpers.toBooleanSafe(CFG.showWorkspaceNameInPopups, true);
-            if (this.context.workspaces.length < 1) {
+            if (showWorkspaceName && (this.context.workspaces.length < 1)) {
                 showWorkspaceName = deploy_helpers.toBooleanSafe(CFG.alwaysShowWorkspaceNameInPopups);
             }
 
