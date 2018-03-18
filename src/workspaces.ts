@@ -1547,6 +1547,25 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
         return packages;
     }
 
+    private getPopupPrefix() {
+        const PREFIXES: string[] = [];
+
+        const CFG = this.config;
+        if (CFG) {
+            let showWorkspaceName = deploy_helpers.toBooleanSafe(CFG.showWorkspaceNameInPopups, true);
+            if (this.context.workspaces.length < 1) {
+                showWorkspaceName = deploy_helpers.toBooleanSafe(CFG.alwaysShowWorkspaceNameInPopups);
+            }
+
+            if (showWorkspaceName) {
+                PREFIXES.push( `[${this.name}]` );
+            }
+        }
+
+        return PREFIXES.length > 0 ? (PREFIXES.join('::') + ' ')
+                                   : '';
+    }
+
     /**
      * Returns the selected option of a switch (target),
      * 
@@ -4244,9 +4263,9 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
     public async showErrorMessage<TItem extends vscode.MessageItem = vscode.MessageItem>(msg: any, ...items: TItem[]): Promise<TItem> {
         try {
             msg = deploy_helpers.toStringSafe(msg);
-
+    
             return await vscode.window.showErrorMessage
-                                      .apply(null, [ <any>`[vscode-deploy-reloaded]::[${this.name}] ${msg}`.trim() ].concat(items));
+                                      .apply(null, [ <any>`${this.getPopupPrefix()}${msg}`.trim() ].concat(items));
         }
         catch (e) {
             this.logger
@@ -4265,9 +4284,9 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
     public async showInformationMessage<TItem extends vscode.MessageItem = vscode.MessageItem>(msg: any, ...items: TItem[]): Promise<TItem> {
         try {
             msg = deploy_helpers.toStringSafe(msg);
-
+    
             return await vscode.window.showInformationMessage
-                                      .apply(null, [ <any>`[vscode-deploy-reloaded]::[${this.name}] ${msg}`.trim() ].concat(items));
+                                      .apply(null, [ <any>`${this.getPopupPrefix()}${msg}`.trim() ].concat(items));
         }
         catch (e) {
             this.logger
@@ -4307,9 +4326,9 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
     public async showWarningMessage<TItem extends vscode.MessageItem = vscode.MessageItem>(msg: any, ...items: TItem[]): Promise<TItem> {
         try {
             msg = deploy_helpers.toStringSafe(msg);
-
+    
             return await vscode.window.showWarningMessage
-                                      .apply(null, [ <any>`[vscode-deploy-reloaded]::[${this.name}] ${msg}`.trim() ].concat(items));
+                                      .apply(null, [ <any>`${this.getPopupPrefix()}${msg}`.trim() ].concat(items));
         }
         catch (e) {
             this.logger

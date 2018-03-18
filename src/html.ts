@@ -131,7 +131,7 @@ export class HtmlTextDocumentContentProvider implements vscode.TextDocumentConte
  * 
  * @returns {Promise<any>} The promise with the result.
  */
-export async function openHtmlDocument(html: string, title?: string, id?: any) {
+export async function openHtmlDocument(html: string, title?: string, id?: any): Promise<any> {
     let body: Buffer;
     let enc = 'utf8';
     if (!deploy_helpers.isNullOrUndefined(html)) {

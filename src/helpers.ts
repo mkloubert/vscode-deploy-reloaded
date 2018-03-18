@@ -17,25 +17,17 @@
 
 import * as _ from 'lodash';
 import * as ChildProcess from 'child_process';
-import * as Crypto from 'crypto';
 import * as deploy_code from './code';
 import * as deploy_contracts from './contracts';
 import * as deploy_log from './log';
-import * as deploy_mappings from './mappings';
+import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
 import * as FS from 'fs';
 import * as FSExtra from 'fs-extra';
-import * as Glob from 'glob';
-import * as i18 from './i18';
-const IsBinaryFile = require("isbinaryfile");
-import * as IsStream from 'is-stream';
-const MergeDeep = require('merge-deep');
 import * as MimeTypes from 'mime-types';
 import * as Minimatch from 'minimatch';
-import * as Moment from 'moment';
 import * as OS from 'os';
 import * as Path from 'path';
-import * as Stream from "stream";
 import * as TMP from 'tmp';
 import * as URL from 'url';
 import * as vscode from 'vscode';
@@ -43,8 +35,10 @@ import {
     applyFuncFor, asArray,
     buildWorkflow,
     cloneObject, cloneObjectFlat, compareValuesBy, createCompletedAction,
+    doesMatch,
     isEmptyString,
     normalizeString,
+    readAll,
     toBooleanSafe, toStringSafe, tryDispose
 } from 'vscode-helpers';
 
@@ -129,71 +123,6 @@ export type NewButtonSetup<TButton extends deploy_contracts.Button = deploy_cont
  */
 export type NewButtonSetupResult = void | boolean | null | undefined;
 
-
-/**
- * Returns a value as buffer.
- * 
- * @param {any} val The value to convert / cast.
- * @param {string} enc The custom encoding for the string parsers.
- * @param {number} [maxDepth] The custom value for the max depth of wrapped functions. Default: 63
- * 
- * @return {Promise<Buffer>} The promise with the buffer.
- */
-export async function asBuffer(val: any, enc?: string, maxDepth?: number): Promise<Buffer> {
-    return await asBufferInner(val, enc, null, maxDepth);
-}
-
-async function asBufferInner(val: any, enc?: string,
-                             funcDepth?: number, maxDepth?: number) {
-    if (isNaN(funcDepth)) {
-        funcDepth = 0;
-    }
-
-    if (isNaN(maxDepth)) {
-        maxDepth = 63;
-    }
-
-    if (funcDepth > maxDepth) {
-        throw new Error(i18.t('maxDepthReached',
-                              maxDepth));
-    }
-
-    if (Buffer.isBuffer(val) || isNullOrUndefined(val)) {
-        return val;
-    }
-
-    if (isFunc(val)) {
-        // wrapped
-
-        return await asBufferInner(
-            await Promise.resolve(
-                val(enc, funcDepth, maxDepth),  
-            ),
-            enc,
-            funcDepth + 1, maxDepth,
-        );
-    }
-
-    enc = normalizeString(enc);
-    if ('' === enc) {
-        enc = undefined;
-    }
-
-    if (IsStream.readable(val)) {
-        // stream
-        return await readAll(val);
-    }
-
-    if (isObject(val) || Array.isArray(val)) {
-        // JSON object
-        return new Buffer(JSON.stringify(val),
-                          enc);
-    }
-
-    // handle as string
-    return new Buffer(toStringSafe(val),
-                      enc);
-}
 
 /**
  * Handles a value as string and checks if it does match a file filter.
@@ -357,31 +286,6 @@ export async function createDirectoryIfNeeded(dir: string) {
         return true;
     }
 
-    return false;
-}
-
-/**
- * Handles a value as string and checks if it does match at least one (minimatch) pattern.
- * 
- * @param {any} val The value to check.
- * @param {string|string[]} patterns One or more patterns.
- * @param {Minimatch.IOptions} [options] Additional options.
- * 
- * @return {boolean} Does match or not.
- */
-export function doesMatch(val: any, patterns: string | string[], options?: Minimatch.IOptions): boolean {
-    val = toStringSafe(val);
-    
-    patterns = asArray(patterns).map(p => {
-        return toStringSafe(p);
-    });
-
-    for (const P of patterns) {
-        if (Minimatch(val, P, options)) {
-            return true;
-        }
-    }
-    
     return false;
 }
 
@@ -859,34 +763,6 @@ export function lstat(path: string | Buffer) {
 }
 
 /**
- * Clones an object and makes it non disposable.
- * 
- * @param {TObj} obj The object to clone.
- * @param {boolean} [throwOnDispose] Throw error when coll 'dispose()' method or not.
- * 
- * @return {TObj} The cloned object. 
- */
-export function makeNonDisposable<TObj extends { dispose: () => any }>(
-    obj: TObj,
-    throwOnDispose = true,
-): TObj {
-    throwOnDispose = toBooleanSafe(throwOnDispose, true);
-
-    const CLONED_OBJ: any = cloneObjectFlat(obj);
-    if (CLONED_OBJ) {
-        if (isFunc(CLONED_OBJ.dispose)) {
-            CLONED_OBJ.dispose = () => {
-                if (throwOnDispose) {
-                    throw new Error(i18.t('disposeNotAllowed'));
-                }
-            };
-        }
-    }
-
-    return CLONED_OBJ;
-}
-
-/**
  * Merges objects by their names. Last items win.
  * 
  * @param {TObj | TObj[]} objs The object(s) to merge.
@@ -1116,85 +992,6 @@ export async function openAndShowTextDocument(filenameOrOptions?: string | { lan
 }
 
 /**
- * Reads the content of a stream.
- * 
- * @param {Stream.Readable} stream The stream.
- * 
- * @returns {Promise<Buffer>} The promise with the content.
- */
-export function readAll(stream: Stream.Readable): Promise<Buffer> {
-    return new Promise<Buffer>((resolve, reject) => {
-        let buff: Buffer;
-    
-        let dataListener: (chunk: Buffer | string) => void;
-
-        let completedInvoked = false;
-        const COMPLETED = (err: any) => {
-            if (completedInvoked) {
-                return;
-            }
-            completedInvoked = true;
-
-            if (dataListener) {
-                try {
-                    stream.removeListener('data', dataListener);
-                }
-                catch (e) { 
-                    deploy_log.CONSOLE
-                              .trace(e, 'helpers.readAll()');
-                }
-            }
-
-            if (err) {
-                reject(err);
-            }
-            else {
-                resolve(buff);
-            }
-        };
-
-        if (!stream) {
-            COMPLETED(null);
-            return;
-        }
-
-        stream.once('error', (err) => {
-            if (err) {
-                COMPLETED(err);
-            }
-        });
-
-        dataListener = (chunk: Buffer | string) => {
-            try {
-                if (chunk && chunk.length > 0) {
-                    if ('string' === typeof chunk) {
-                        chunk = new Buffer(chunk);
-                    }
-
-                    buff = Buffer.concat([ buff, chunk ]);
-                }
-            }
-            catch (e) {
-                COMPLETED(e);
-            }
-        };
-
-        try {
-            buff = Buffer.alloc(0);
-
-            stream.on('data', dataListener);
-
-            stream.once('end', () => {
-                COMPLETED(null);
-            });
-        }
-        catch (e) {
-            COMPLETED(e);
-        }
-    });
-}
-
-/**
  * Promise version of 'FS.readdir()' function.
  * 
  * @param {string|Buffer} path The path.
@@ -1343,8 +1140,10 @@ export function requireFromExtension<TModule = any>(id: any): TModule {
  */
 export async function showErrorMessage<TItem extends vscode.MessageItem = vscode.MessageItem>(msg: string, ...items: TItem[]): Promise<TItem> {
     try {
+        msg = toStringSafe(msg);
+
         return await vscode.window.showErrorMessage
-                                  .apply(null, [ <any>`[vscode-deploy-reloaded] ${msg}`.trim() ].concat(items));
+                                  .apply(null, [ <any>`${msg}`.trim() ].concat(items));
     }
     catch (e) {
         deploy_log.CONSOLE
@@ -1362,8 +1161,10 @@ export async function showErrorMessage<TItem extends vscode.MessageItem = vscode
  */
 export async function showInformationMessage<TItem extends vscode.MessageItem = vscode.MessageItem>(msg: string, ...items: TItem[]): Promise<TItem> {
     try {
+        msg = toStringSafe(msg);
+
         return await vscode.window.showInformationMessage
-                                  .apply(null, [ <any>`[vscode-deploy-reloaded] ${msg}`.trim() ].concat(items));
+                                  .apply(null, [ <any>`${msg}`.trim() ].concat(items));
     }
     catch (e) {
         deploy_log.CONSOLE
@@ -1381,8 +1182,10 @@ export async function showInformationMessage<TItem extends vscode.MessageItem = 
  */
 export async function showWarningMessage<TItem extends vscode.MessageItem = vscode.MessageItem>(msg: string, ...items: TItem[]): Promise<TItem> {
     try {
+        msg = toStringSafe(msg);
+
         return await vscode.window.showWarningMessage
-                                  .apply(null, [ <any>`[vscode-deploy-reloaded] ${msg}`.trim() ].concat(items));
+                                  .apply(null, [ <any>`${msg}`.trim() ].concat(items));
     }
     catch (e) {
         deploy_log.CONSOLE

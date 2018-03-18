@@ -179,7 +179,8 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
             if (askForPassword) {
                 pwd = await vscode.window.showInputBox({
                     ignoreFocusOut: true,
-                    prompt: this.t(target, 'credentials.enterPassword')
+                    password: true,
+                    prompt: this.t(target, 'credentials.enterPassword'),
                 });
 
                 if (_.isNil(pwd)) {

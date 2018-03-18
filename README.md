@@ -51,6 +51,8 @@ The extension supports the following destinations:
 5. [Support and contribute](#support-and-contribute-)
    * [Contributors](#contributors-)
 6. [Related projects](#related-projects-)
+   * [node-enumerable](#node-enumerable-)
+   * [node-simple-socket](#node-simple-socket-)
    * [vscode-helpers](#vscode-helpers-)
 
 ## Demos [[&uarr;](#table-of-contents)]
@@ -359,6 +361,14 @@ The API documentation can be found [here](https://mkloubert.github.io/vscode-dep
 * [Pelly](https://github.com/solid-pixel)
 
 ## Related projects [[&uarr;](#table-of-contents)]
+
+### node-enumerable [[&uarr;](#related-projects-)]
+
+[node-enumerable](https://github.com/mkloubert/node-enumerable) is a [LINQ](https://en.wikipedia.org/wiki/Language_Integrated_Query) implementation for JavaScript, which runs in [Node.js](https://nodejs.org/) and browsers.
+
+### node-simple-socket [[&uarr;](#related-projects-)]
+
+[node-simple-socket](https://github.com/mkloubert/node-simple-socket) is a simple socket class, which supports automatic [RSA](https://en.wikipedia.org/wiki/RSA_(cryptosystem)) encryption and compression for two connected endpoints and runs in [Node.js](https://nodejs.org/).
 
 ### vscode-helpers [[&uarr;](#related-projects-)]
 

@@ -18,6 +18,7 @@
 import * as _ from 'lodash';
 import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
+import * as deploy_html from './html';
 import * as deploy_values from './values';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
@@ -26,6 +27,7 @@ import * as HTTP from 'http';
 import * as HTTPs from 'https';
 import * as i18 from './i18';
 import * as ip from 'ip';
+const MergeDeep = require('merge-deep');
 import * as OS from 'os';
 import * as Path from 'path';
 import * as vscode from 'vscode';
@@ -148,6 +150,12 @@ export interface ApiUserWithPassword extends ApiUser {
 
 interface HostInfo {
     os: string;
+}
+
+interface MarkdownDocument {
+    content: string;
+    options?: deploy_html.MarkdownDocumentOptions;
+    title?: string;
 }
 
 interface MeInfo {
@@ -791,6 +799,106 @@ export class ApiHost extends deploy_helpers.DisposableBase {
                        .send();
         });
 
+        // [POST]  /api/markdown
+        app.post('/api/markdown', async (req, resp) => {
+            const CONTENT_TYPE = deploy_helpers.normalizeString(
+                req.header('content-type')
+            );
+
+            const BODY = await deploy_helpers.readAll( req );
+
+            let doc: MarkdownDocument;
+            const FROM_JSON = () => {
+                if (BODY.length > 0) {
+                    doc = JSON.parse(
+                        BODY.toString('utf8')
+                    );    
+                }
+            };
+            const FROM_TEXT = () => {
+                if (BODY.length > 0) {
+                    doc = {
+                        content: BODY.toString('utf8')
+                    };
+                }
+            };
+
+            try {
+                switch (CONTENT_TYPE) {
+                    case 'application/json':
+                        FROM_JSON();
+                        break;
+
+                    case 'text/markdown':
+                    case 'text/plain':
+                        FROM_TEXT();
+                        break;
+
+                    case '':
+                        try {
+                            FROM_JSON();
+                        }
+                        catch {
+                            FROM_TEXT();
+                        }
+                        break;
+
+                    default:
+                        return resp.status(406)
+                                   .send();
+                }
+            }
+            catch (e) {
+                return resp.status(400).send(
+                    new Buffer(
+                        JSON.stringify({
+                            success: false,
+                            code: 1,
+                            host: ME.createHostInfo(),
+                            me: ME.createMeInfo(req),
+                            message: "INVALID_INPUT",
+                            error: toErrorObject(e),
+                            vscode: ME.createVSCodeInfo(),
+                        }, null, 2),
+                        'utf8'
+                    )
+                );
+            }
+
+            if (!doc || deploy_helpers.isEmptyString(doc.content)) {
+                return resp.status(400).send(
+                    new Buffer(
+                        JSON.stringify({
+                            success: false,
+                            code: 2,
+                            host: ME.createHostInfo(),
+                            me: ME.createMeInfo(req),
+                            message: "NO_DATA",
+                            vscode: ME.createVSCodeInfo(),
+                        }, null, 2),
+                        'utf8'
+                    )
+                );
+            }
+
+            let title = deploy_helpers.toStringSafe( doc.title ).trim();
+            if ('' === title) {
+                title = undefined;
+            }
+
+            const OPTS: deploy_html.MarkdownDocumentOptions = MergeDeep(doc.options, {
+                documentTitle: title,
+            }, doc.options);
+
+            await deploy_html.openMarkdownDocument(
+                deploy_helpers.toStringSafe( doc.content ),
+                OPTS,
+            );
+
+            return resp.status(204)
+                       .send();
+        });
+
         // [POST]  /api/messages
         app.post('/api/messages', async (req, resp) => {
             const CONTENT_TYPE = deploy_helpers.normalizeString(
@@ -829,13 +937,14 @@ export class ApiHost extends deploy_helpers.DisposableBase {
                         try {
                             FROM_JSON();
                         }
-                        catch (e) {
+                        catch {
                             FROM_TEXT();
                         }
                         break;
 
                     default:
-                        return resp.status(406);
+                        return resp.status(406)
+                                   .send();
                 }
             }
             catch (e) {

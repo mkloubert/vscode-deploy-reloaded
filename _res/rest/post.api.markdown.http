@@ -1,0 +1,9 @@
+POST http://localhost/api/markdown HTTP/1.1
+
+{
+    "title": "A title",
+    "content": "# Header 1\n\n## Header 2\n\n```javascript\nvar s = 'JavaScript syntax highlighting';\nalert(s);\n```",
+    "options": {
+        "css": "body { background-color: white; color: black; }"
+    }
+}

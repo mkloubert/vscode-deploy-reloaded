@@ -116,6 +116,7 @@ class FTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<FTPTarget,
             if (askForPassword) {
                 pwd = await vscode.window.showInputBox({
                     ignoreFocusOut: true,
+                    password: true,
                     prompt: this.t(target, 'credentials.enterPassword')
                 });
 

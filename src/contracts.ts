@@ -131,6 +131,10 @@ export interface Configuration extends deploy_packages.WithFastFileCheckSettings
                                        deploy_values.WithValueItems
 {
     /**
+     * Show workspace name in popups, even if there is only one workspace open.
+     */
+    readonly alwaysShowWorkspaceNameInPopups?: boolean;
+    /**
      * Always show workspace button, even if there is only one workspace open or not.
      */
     readonly alwaysShowWorkspaceSelector?: boolean;
@@ -262,6 +266,10 @@ export interface Configuration extends deploy_packages.WithFastFileCheckSettings
      * Shows a popup when a deploy operation has been finished.
      */
     readonly showPopupWhenFinished?: deploy_gui.ShowPopupWhenFinishedValue;
+    /**
+     * Show workspace name as prefix in popup messages or not.
+     */
+    readonly showWorkspaceNameInPopups?: boolean;
     /**
      * One or more commands that should be run on startup.
      */
