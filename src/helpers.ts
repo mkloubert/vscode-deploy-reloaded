@@ -271,25 +271,6 @@ export async function createButton<TButton extends deploy_contracts.Button = dep
 }
 
 /**
- * Creates a directory (if needed).
- * 
- * @param {string} dir The path of the directory to create.
- * 
- * @return {Promise<boolean>} The promise that indicates if directory has been created or not. 
- */
-export async function createDirectoryIfNeeded(dir: string) {
-    dir = toStringSafe(dir);
-
-    if (!(await exists(dir))) {
-        await mkdirs(dir);
-
-        return true;
-    }
-
-    return false;
-}
-
-/**
  * Executes something.
  * 
  * @param {string} command The thing / command to execute. 
@@ -385,28 +366,6 @@ export async function execFile(command: string, args?: any[], opts?: ChildProces
 
                     COMPLETED(null, RESULT);
                 }
-            });
-        }
-        catch (e) {
-            COMPLETED(e);
-        }
-    });
-}
-
-/**
- * Promise version of 'FS.exists()' function.
- * 
- * @param {string|Buffer} path The path.
- * 
- * @return {Promise<boolean>} The promise that indicates if path exists or not.
- */
-export function exists(path: string | Buffer) {
-    return new Promise<boolean>((resolve, reject) => {
-        const COMPLETED = createCompletedAction(resolve, reject);
-
-        try {
-            FS.exists(path, (doesExist) => {
-                COMPLETED(null, doesExist);
             });
         }
         catch (e) {

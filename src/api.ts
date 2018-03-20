@@ -178,7 +178,10 @@ interface VSCodeInfo {
     version: string;
 }
 
-
+/**
+ * Name of the workspace variable for storing API hosts.
+ */
+export const WS_VAR_APIS = 'apis';
 /**
  * Name of the HTTP header that stores the language of an editor.
  */
@@ -1157,6 +1160,24 @@ export class ApiHost extends deploy_helpers.DisposableBase {
     }
 }
 
+/**
+ * Disposes all API hosts of the underlying workspace.
+ */
+export function disposeApiHosts() {
+    const WORKSPACE: deploy_workspaces.Workspace = this;
+
+    const API_HOSTS = WORKSPACE.vars[ WS_VAR_APIS ];
+    if (!API_HOSTS) {
+        return;    
+    }
+
+    while (API_HOSTS.length > 0) {
+        deploy_helpers.tryDispose(
+            API_HOSTS.pop()
+        );
+    }
+}
+
 function extensionToJsonObject(extension: vscode.Extension<any>, index: number) {
     if (!extension) {
         return <any>extension;
@@ -1186,6 +1207,69 @@ function getTextEditors() {
                 return !te.document || !te.document.isClosed;
             })
      .distinct(true);
+}
+
+/**
+ * Reloads the API hosts for an underlying workspace.
+ */
+export async function reloadApiHosts() {
+    const WORKSPACE: deploy_workspaces.Workspace = this;
+
+    deploy_helpers.applyFuncFor(
+        disposeApiHosts, WORKSPACE
+    )();
+
+    const CFG = WORKSPACE.config;
+    if (!CFG) {
+        return;
+    }
+
+    const API_HOSTS = WORKSPACE.vars[ WS_VAR_APIS ];
+    if (!API_HOSTS) {
+        return;    
+    }
+
+    const APIS_FROM_SETTINGS = CFG.apis;
+    if (!APIS_FROM_SETTINGS) {
+        return;
+    }
+
+    for (const P in APIS_FROM_SETTINGS) {
+        const PORT = parseInt(
+            deploy_helpers.toStringSafe(P).trim()
+        );
+        const SETTINGS_VALUE = APIS_FROM_SETTINGS[P];
+
+        let settings: ApiSettings;
+        if (deploy_helpers.isObject<ApiSettings>(SETTINGS_VALUE)) {
+            settings = SETTINGS_VALUE;
+        }
+        else {
+            settings = {
+                autoStart: deploy_helpers.toBooleanSafe(SETTINGS_VALUE, true),
+            };
+        }
+
+        let newHost: ApiHost;
+        try {
+            newHost = new ApiHost(WORKSPACE,
+                                  PORT, settings);
+
+            if (newHost.autoStart) {
+                await newHost.start();
+            }
+
+            API_HOSTS.push( newHost );
+        }
+        catch (e) {
+            deploy_helpers.tryDispose( newHost );
+
+            await WORKSPACE.showErrorMessage(
+                WORKSPACE.t('apis.errors.couldNotRegister',
+                            P, e)
+            );
+        }
+    }
 }
 
 async function showQuickPickForApiHost(host: ApiHost) {

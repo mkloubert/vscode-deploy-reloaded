@@ -17,7 +17,6 @@
 
 import * as CopyPaste from 'copy-paste';
 import * as deploy_contracts from './contracts';
-import * as deploy_events from './events';
 import * as deploy_files from './files';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
@@ -107,7 +106,7 @@ function createPullDataTransformerContext(file: deploy_contracts.WithNameAndPath
         events: WORKSPACE.workspaceSessionState['pull']['events'],
         extension: WORKSPACE.context.extension,
         folder: WORKSPACE.folder,
-        globalEvents: deploy_events.EVENTS,
+        globalEvents: deploy_helpers.EVENTS,
         globals: WORKSPACE.globals,
         globalState: WORKSPACE.workspaceSessionState['pull']['states']['global'],
         homeDir: deploy_helpers.getExtensionDirInHome(),

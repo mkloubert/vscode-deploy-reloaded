@@ -18,7 +18,6 @@
 import * as deploy_contracts from './contracts';
 import * as deploy_delete from './delete';
 import * as deploy_deploy from './deploy';
-import * as deploy_events from './events';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
 import * as deploy_pull from './pull';
@@ -159,6 +158,56 @@ export function cleanupCommands() {
 }
 
 /**
+ * Executes Visual Studio Code commands on startup for the underlying workspace.
+ */
+export async function executeStartupCommands() {
+    const WORKSPACE: deploy_workspaces.Workspace = this;
+
+    const CFG = WORKSPACE.config;
+    if (!CFG) {
+        return;
+    }
+
+    try {
+        for (let cmd of deploy_helpers.asArray(CFG.startupCommands)) {
+            if (!deploy_helpers.isObject<deploy_contracts.StartupCommand>(cmd)) {
+                cmd = {
+                    command: cmd,
+                };
+            }
+
+            const CMD_ID = deploy_helpers.toStringSafe(cmd.command);
+            if (deploy_helpers.isEmptyString(CMD_ID)) {
+                continue;
+            }
+
+            try {
+                let args: any[];
+                if (deploy_helpers.isNullOrUndefined(cmd.arguments)) {
+                    args = [];
+                }
+                else {
+                    args = deploy_helpers.asArray(cmd.arguments, false);
+                }
+
+                await vscode.commands.executeCommand
+                                     .apply(null, [ <any>CMD_ID ].concat(args));
+            }
+            catch (e) {
+                await WORKSPACE.showErrorMessage(
+                    WORKSPACE.t('commands.executionError',
+                                CMD_ID, e)
+                );
+            }
+        }
+    }
+    catch (e) {
+        WORKSPACE.logger
+                 .trace(e, 'commands.executeStartupCommands()');
+    }
+}
+
+/**
  * Reloads the commands of a workspace.
  * 
  * @param {deploy_contracts.Configuration} newCfg The new config.
@@ -199,7 +248,7 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
                         events: ME.workspaceSessionState['commands']['events'],
                         extension: ME.context.extension,
                         folder: ME.folder,
-                        globalEvents: deploy_events.EVENTS,
+                        globalEvents: deploy_helpers.EVENTS,
                         globals: ME.globals,
                         globalState: GLOBAL_STATE,
                         homeDir: deploy_helpers.getExtensionDirInHome(),

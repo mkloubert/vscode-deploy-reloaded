@@ -24,7 +24,6 @@ import * as deploy_compare from './compare';
 import * as deploy_contracts from './contracts';
 import * as deploy_delete from './delete';
 import * as deploy_deploy from './deploy';
-import * as deploy_events from './events';
 import * as deploy_gui from './gui';
 import * as deploy_helpers from './helpers';
 import * as deploy_html from './html';
@@ -592,8 +591,8 @@ async function activateExtension(context: vscode.ExtensionContext) {
     WF.next(() => {
         context.subscriptions.push({
             dispose: () => {
-                deploy_events.EVENTS
-                             .removeAllListeners();
+                deploy_helpers.EVENTS
+                              .removeAllListeners();
             }
         });
     });

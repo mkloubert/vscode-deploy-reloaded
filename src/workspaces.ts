@@ -973,14 +973,6 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
                            .apply(this, [ GIT, target ]);
     }
 
-    private disposeApiHosts() {
-        while (this._APIS.length > 0) {
-            deploy_helpers.tryDispose(
-                this._APIS.pop()
-            );
-        }
-    }
-
     private disposeConfigFileWatchers() {
         while (this._CONFIG_FILE_WATCHERS.length > 0) {
             deploy_helpers.tryDispose(
@@ -1134,50 +1126,6 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
                     throw e;
                 }
             }
-        }
-    }
-
-    private async executeStartupCommands() {
-        const ME = this;
-
-        const CFG = ME.config;
-
-        try {
-            for (let cmd of deploy_helpers.asArray(CFG.startupCommands)) {
-                if (!deploy_helpers.isObject<deploy_contracts.StartupCommand>(cmd)) {
-                    cmd = {
-                        command: cmd,
-                    };
-                }
-
-                const CMD_ID = deploy_helpers.toStringSafe(cmd.command);
-                if (deploy_helpers.isEmptyString(CMD_ID)) {
-                    continue;
-                }
-
-                try {
-                    let args: any[];
-                    if (deploy_helpers.isNullOrUndefined(cmd.arguments)) {
-                        args = [];
-                    }
-                    else {
-                        args = deploy_helpers.asArray(cmd.arguments, false);
-                    }
-
-                    await vscode.commands.executeCommand
-                                         .apply(null, [ <any>CMD_ID ].concat(args));
-                }
-                catch (e) {
-                    await ME.showErrorMessage(
-                        ME.t('commands.executionError',
-                             CMD_ID, e)
-                    );
-                }
-            }
-        }
-        catch (e) {
-            this.logger
-                .trace(e, 'workspaces.Workspace.executeStartupCommands()');
         }
     }
 
@@ -2138,6 +2086,8 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
 
         ME._rootPath = false;
 
+        ME.vars[ deploy_api.WS_VAR_APIS ] = [];
+
         // settings file
         {
             interface SettingsData {
@@ -2849,7 +2799,10 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
 
     /** @inheritdoc */
     protected onDispose() {
-        this.disposeApiHosts();
+        deploy_helpers.applyFuncFor(
+            deploy_api.disposeApiHosts, this
+        )();
+
         this.disposeTcpProxies();
 
         // file system watchers
@@ -3010,59 +2963,6 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
             deploy_pull.pullPackage,
             this
         )(pkg, targetResolver);
-    }
-
-    private async reloadApis() {
-        const ME = this;
-
-        const CFG = ME.config;
-        if (!CFG) {
-            return;
-        }        
-
-        ME.disposeApiHosts();
-
-        const ALL_APIS = CFG.apis;
-        if (!ALL_APIS) {
-            return;
-        }
-
-        for (const P in ALL_APIS) {
-            const PORT = parseInt(
-                deploy_helpers.toStringSafe(P).trim()
-            );
-            const SETTINGS_VALUE = ALL_APIS[P];
-
-            let settings: deploy_api.ApiSettings;
-            if (deploy_helpers.isObject<deploy_api.ApiSettings>(SETTINGS_VALUE)) {
-                settings = SETTINGS_VALUE;
-            }
-            else {
-                settings = {
-                    autoStart: deploy_helpers.toBooleanSafe(SETTINGS_VALUE, true),
-                };
-            }
-
-            let host: deploy_api.ApiHost;
-            try {
-                host = new deploy_api.ApiHost(ME,
-                                              PORT, settings);
-
-                if (host.autoStart) {
-                    await host.start();
-                }
-
-                ME._APIS.push( host );
-            }
-            catch (e) {
-                deploy_helpers.tryDispose( host );
-
-                ME.showErrorMessage(
-                    ME.t('apis.errors.couldNotRegister',
-                         P, e)
-                );
-            }
-        }
     }
 
     /**
@@ -3338,9 +3238,15 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
                 await ME.reloadPackageButtons();
                 await ME.reloadSwitches();
 
-                await ME.executeStartupCommands();
+                // executeStartupCommands
+                await deploy_helpers.applyFuncFor(
+                    deploy_commands.executeStartupCommands, ME
+                )();
 
-                await ME.reloadApis();
+                // reloadApiHosts
+                await deploy_helpers.applyFuncFor(
+                    deploy_api.reloadApiHosts, ME
+                )();
 
                 await ME.reloadTcpProxies();
 
@@ -4580,6 +4486,11 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
     public get workspaceSessionState(): deploy_contracts.KeyValuePairs {
         return this._workspaceSessionState;
     }
+
+    /**
+     * A storage of variables for that object.
+     */
+    public readonly vars: deploy_contracts.KeyValuePairs = {};
 }
 
 /**

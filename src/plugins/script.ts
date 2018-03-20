@@ -16,7 +16,6 @@
  */
 
 import * as deploy_contracts from '../contracts';
-import * as deploy_events from '../events';
 import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
 import * as deploy_plugins from '../plugins';
@@ -126,7 +125,7 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
             extension: context.target.__workspace.context.extension,
             files: context['files'],
             folder: context.target.__workspace.folder,
-            globalEvents: deploy_events.EVENTS,
+            globalEvents: deploy_helpers.EVENTS,
             globals: context.target.__workspace.globals,
             globalState: ME._GLOBAL_STATE,
             homeDir: deploy_helpers.getExtensionDirInHome(),

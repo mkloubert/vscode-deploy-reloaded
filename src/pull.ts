@@ -17,7 +17,6 @@
 
 import * as _ from 'lodash';
 import * as deploy_contracts from './contracts';
-import * as deploy_events from './events';
 import * as deploy_files from './files';
 import * as deploy_gui from './gui';
 import * as deploy_helpers from './helpers';
@@ -706,7 +705,7 @@ export async function pullFilesFrom(files: string[],
                                         events: ME.workspaceSessionState['pull']['events'],
                                         extension: ME.context.extension,
                                         folder: ME.folder,
-                                        globalEvents: deploy_events.EVENTS,
+                                        globalEvents: deploy_helpers.EVENTS,
                                         globals: ME.globals,
                                         globalState: ME.workspaceSessionState['pull']['states']['global'],
                                         homeDir: deploy_helpers.getExtensionDirInHome(),

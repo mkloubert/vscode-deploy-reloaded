@@ -16,7 +16,6 @@
  */
 
 import * as deploy_contracts from '../../contracts';
-import * as deploy_events from '../../events';
 import * as deploy_helpers from '../../helpers';
 import * as deploy_session from '../../session';
 import * as deploy_targets from '../../targets';
@@ -105,7 +104,7 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
                 events: WORKSPACE.workspaceSessionState['target_operations']['script']['events'],
                 extension: WORKSPACE.context.extension,
                 folder: WORKSPACE.folder,
-                globalEvents: deploy_events.EVENTS,
+                globalEvents: deploy_helpers.EVENTS,
                 globals: WORKSPACE.globals,
                 globalState: WORKSPACE.workspaceSessionState['target_operations']['script']['global'],
                 homeDir: deploy_helpers.getExtensionDirInHome(),

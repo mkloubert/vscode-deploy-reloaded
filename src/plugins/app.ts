@@ -17,7 +17,6 @@
 
 import * as ChildProcess from 'child_process';
 import * as deploy_contracts from '../contracts';
-import * as deploy_events from '../events';
 import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
 import * as deploy_log from '../log';
@@ -642,7 +641,7 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
                                     extension: WORKSPACE.context.extension,
                                     files: FILES.map(f => f),
                                     folder: WORKSPACE.folder,
-                                    globalEvents: deploy_events.EVENTS,
+                                    globalEvents: deploy_helpers.EVENTS,
                                     globals: WORKSPACE.globals,
                                     globalState: ME._GLOBAL_STATE,
                                     homeDir: deploy_helpers.getExtensionDirInHome(),
@@ -823,7 +822,7 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
                                     extension: WORKSPACE.context.extension,
                                     files: FILES.map(f => f),
                                     folder: WORKSPACE.folder,
-                                    globalEvents: deploy_events.EVENTS,
+                                    globalEvents: deploy_helpers.EVENTS,
                                     globals: WORKSPACE.globals,
                                     globalState: ME._GLOBAL_STATE,
                                     homeDir: deploy_helpers.getExtensionDirInHome(),

@@ -138,6 +138,8 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
                                   target.privateKey));
         }
 
+        const IS_PRIVATE_KEY_DEFINED = !deploy_helpers.isEmptyString(privateKeyFile);
+
         const DIR = this.replaceWithValues(target, target.dir);
 
         let cachePassword = false;
@@ -145,7 +147,7 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
 
         const ALWAYS_ASK_FOR_USER = deploy_helpers.toBooleanSafe( target.alwaysAskForUser );
         let user = target.user;
-        if (_.isNil(user)) {
+        if (_.isNil(user) && !IS_PRIVATE_KEY_DEFINED) {
             let askForUser = ALWAYS_ASK_FOR_USER;
             if (!askForUser) {
                 askForUser = !CACHE.has( CACHE_USER );
@@ -170,7 +172,7 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
 
         const ALWAYS_ASK_FOR_PASSWORD = deploy_helpers.toBooleanSafe( target.alwaysAskForPassword );
         let pwd = target.password;
-        if (_.isNil(pwd)) {
+        if (_.isNil(pwd) && !IS_PRIVATE_KEY_DEFINED) {
             let askForPassword = ALWAYS_ASK_FOR_PASSWORD;
             if (!askForPassword) {
                 askForPassword = !CACHE.has( CACHE_PASSWORD );

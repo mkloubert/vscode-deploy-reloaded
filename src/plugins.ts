@@ -17,7 +17,6 @@
 
 import * as deploy_clients from './clients';
 import * as deploy_contracts from './contracts';
-import * as deploy_events from './events';
 import * as deploy_files from './files';
 import * as deploy_helpers from './helpers';
 import * as deploy_session from './session';
@@ -535,7 +534,7 @@ export abstract class FileToUploadBase implements FileToUpload {
                 events: ME.workspace.workspaceSessionState['upload']['events'],
                 extension: ME.workspace.context.extension,
                 folder: ME.workspace.folder,
-                globalEvents: deploy_events.EVENTS,
+                globalEvents: deploy_helpers.EVENTS,
                 globals: ME.workspace.globals,
                 globalState: ME.workspace.workspaceSessionState['upload']['states']['global'],
                 homeDir: deploy_helpers.getExtensionDirInHome(),

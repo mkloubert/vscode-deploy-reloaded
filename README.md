@@ -48,9 +48,10 @@ The extension supports the following destinations:
      * [Packages](#packages-)
      * [Targets](#targets-)
    * [How to execute](#how-to-execute-)
-5. [Support and contribute](#support-and-contribute-)
+5. [Install offline](#install-offline-)
+6. [Support and contribute](#support-and-contribute-)
    * [Contributors](#contributors-)
-6. [Related projects](#related-projects-)
+7. [Related projects](#related-projects-)
    * [node-enumerable](#node-enumerable-)
    * [node-simple-socket](#node-simple-socket-)
    * [vscode-helpers](#vscode-helpers-)
@@ -334,6 +335,14 @@ You can also use the following, predefined, shortcuts:
 | `extension.deploy.reloaded.receiveFile` | `CTRL + ALT + S, R` | Waits for a file from a remote editor. |
 | `extension.deploy.reloaded.receiveFile.closeServer` | `CTRL + ALT + S, C` | Cancels the receiving of a file from a remote editor. |
 | `extension.deploy.reloaded.sendFile` | `CTRL + ALT + S, S` | Sends the current file to a remote editor. |
+
+## Install offline [[&uarr;](#table-of-contents)]
+
+If you have problems with a newer version of that extension (or have no connection to the Visual Studio Marketplace server), you can try to install a `.vsix` file from [release section](https://github.com/mkloubert/vscode-deploy-reloaded/releases) (s. `Assets`):
+
+* open the extension sidebar (`CTRL + SHIFT + X`)
+* click on the ellipsis in the right upper corner (`More`) 
+* choose `Install from VSIX...`
 
 ## Support and contribute [[&uarr;](#table-of-contents)]
 
