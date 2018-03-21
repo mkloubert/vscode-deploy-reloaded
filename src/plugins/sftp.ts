@@ -17,20 +17,49 @@
 
 import * as _ from 'lodash';
 import * as deploy_clients_sftp from '../clients/sftp';
+import * as deploy_contracts from '../contracts';
 import * as deploy_helpers from '../helpers';
 import * as deploy_plugins from '../plugins';
+import * as deploy_session from '../session';
 import * as deploy_targets from '../targets';
+import * as deploy_workspaces from '../workspaces';
+import * as Events from 'events';
 import * as i18 from '../i18';
 import * as vscode from 'vscode';
 
 
+/**
+ * A module for an event that is raised BEFORE a file is going to be uploaded.
+ */
+export interface SFTPBeforeUploadModule {
+    /**
+     * The execution method.
+     */
+    readonly execute: SFTPBeforeUploadModuleExecutor;
+}
+
+/**
+ * Describes an execution method of a module for an event that is raised BEFORE a file is going to be uploaded.
+ * 
+ * @param {SFTPBeforeUploadModuleExecutorArguments} args Arguments for the execution.
+ * 
+ * @return {any} The result.
+ */
+export type SFTPBeforeUploadModuleExecutor = (args: SFTPBeforeUploadModuleExecutorArguments) => any;
+
+/**
+ * Arguments of a module's method for an event that is raised BEFORE a file is going to be uploaded.
+ */
+export interface SFTPBeforeUploadModuleExecutorArguments extends SFTPUploadScriptArguments {
+    /**
+     * The underlying context.
+     */
+    readonly context: deploy_clients_sftp.SFTPBeforeUploadArguments;
+}
+
 interface SFTPContext extends deploy_plugins.AsyncFileClientPluginContext<SFTPTarget,
                                                                           deploy_clients_sftp.SFTPClient> {
 }
-
-
-const CACHE_PASSWORD = 'password';
-const CACHE_USER = 'user';
 
 /**
  * A 'sftp' target.
@@ -53,6 +82,14 @@ export interface SFTPTarget extends deploy_targets.Target {
      * Always ask for uasername and do not cache, if no user is defined.
      */
     readonly alwaysAskForUser?: boolean;
+    /**
+     * The path to an (event) script, which is executed BEFORE a file is going to be uploaded.
+     */
+    readonly beforeUpload?: string;
+    /**
+     * Options for the script defined in 'beforeUpload'.
+     */
+    readonly beforeUploadOptions?: any;
     /**
      * Show debug output or not.
      */
@@ -102,17 +139,76 @@ export interface SFTPTarget extends deploy_targets.Target {
      */
     readonly tryKeyboard?: boolean;
     /**
+     * The path to an (event) script, which is executed AFTER a file has been uploaded or tried to be uploaded.
+     */
+    readonly uploaded?: string;
+    /**
+     * Options for the script defined in 'uploaded'.
+     */
+    readonly uploadedOptions?: any;
+    /**
      * The username.
      */
     readonly user?: string;
 }
 
+/**
+ * Arguments for an upload based event.
+ */
+export interface SFTPUploadScriptArguments extends deploy_contracts.ScriptArguments {
+    /**
+     * The underlying target.
+     */
+    readonly target: SFTPTarget;
+    /**
+     * The underlying workspace.
+     */
+    readonly workspace: deploy_workspaces.Workspace;
+}
+
+/**
+ * A module for an event that is raised AFTER a file has been uploaded or has trying to be uploaded.
+ */
+export interface SFTPUploadedModule {
+    /**
+     * The execution method.
+     */
+    readonly execute: SFTPUploadedModuleExecutor;
+}
+
+/**
+ * Describes an execution method of a module for an event that is raised AFTER a file has been uploaded or has trying to be uploaded.
+ * 
+ * @param {SFTPUploadedModuleExecutorArguments} args Arguments for the execution.
+ * 
+ * @return {any} The result.
+ */
+export type SFTPUploadedModuleExecutor = (args: SFTPUploadedModuleExecutorArguments) => any;
+
+/**
+ * Arguments of a module's method for an event that is raised AFTER a file has been uploaded or has trying to be uploaded.
+ */
+export interface SFTPUploadedModuleExecutorArguments extends SFTPUploadScriptArguments {
+    /**
+     * The underlying context.
+     */
+    readonly context: deploy_clients_sftp.SFTPUploadCompletedArguments;
+}
+
+
+const CACHE_PASSWORD = 'password';
+const CACHE_USER = 'user';
 
 class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
                                                                   deploy_clients_sftp.SFTPClient,
                                                                   SFTPContext> {
+    private readonly _EVENTS = new Events.EventEmitter();
+    private readonly _GLOBAL_STATE: deploy_contracts.KeyValuePairs = {};
+    private readonly _SCRIPT_STATES: deploy_contracts.KeyValuePairs = {};
+
     protected async createContext(target: SFTPTarget): Promise<SFTPContext> {
         const CACHE = this.getCache( target );
+        const WORKSPACE = target.__workspace;
 
         let agent = this.replaceWithValues(target, target.agent);
         if (deploy_helpers.isEmptyString(agent)) {
@@ -196,10 +292,209 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
             cachePassword = !ALWAYS_ASK_FOR_PASSWORD;
         }
 
+        let beforeUpload: deploy_clients_sftp.SFTPBeforeUpload;
+        let uploadCompleted: deploy_clients_sftp.SFTPUploadCompleted;
+        {
+            const SCRIPT_STATE_KEY = deploy_helpers.toStringSafe(target.__id);
+
+            const BEFORE_UPLOAD_SCRIPT = WORKSPACE.replaceWithValues(target.beforeUpload);
+            if (!deploy_helpers.isEmptyString(BEFORE_UPLOAD_SCRIPT)) {
+                const BEFORE_UPLOAD_SCRIPT_PATH = await WORKSPACE.getExistingSettingPath(BEFORE_UPLOAD_SCRIPT);
+                if (false === BEFORE_UPLOAD_SCRIPT_PATH) {
+                    throw new Error(WORKSPACE.t('fileNotFound', BEFORE_UPLOAD_SCRIPT));
+                }
+
+                const BEFORE_UPLOAD_MODULE = deploy_helpers.loadModule<SFTPBeforeUploadModule>( BEFORE_UPLOAD_SCRIPT_PATH );
+                if (BEFORE_UPLOAD_MODULE) {
+                    beforeUpload = async (args) => {
+                        const ARGS: SFTPBeforeUploadModuleExecutorArguments = {
+                            _: require('lodash'),
+                            context: args,
+                            events: this._EVENTS,
+                            extension: target.__workspace.context.extension,
+                            folder: target.__workspace.folder,
+                            globalEvents: deploy_helpers.EVENTS,
+                            globals: target.__workspace.globals,
+                            globalState: this._GLOBAL_STATE,
+                            homeDir: deploy_helpers.getExtensionDirInHome(),
+                            logger: target.__workspace.createLogger(),
+                            options: deploy_helpers.cloneObject(target.beforeUploadOptions),
+                            output: undefined,
+                            replaceWithValues: function (val) {
+                                return this.workspace
+                                           .replaceWithValues(val);
+                            },
+                            require: (id) => {
+                                return deploy_helpers.requireFromExtension(id);
+                            },
+                            sessionState: deploy_session.SESSION_STATE,
+                            settingFolder: undefined,
+                            state: undefined,
+                            target: target,
+                            workspace: undefined,
+                            workspaceRoot: undefined,
+                        };
+
+                        // ARGS.output
+                        Object.defineProperty(ARGS, 'output', {
+                            enumerable: true,
+
+                            get: function () {
+                                return this.workspace.output;
+                            }
+                        });
+
+                        // ARGS.settingFolder
+                        Object.defineProperty(ARGS, 'settingFolder', {
+                            enumerable: true,
+
+                            get: function () {
+                                return this.workspace.settingFolder;
+                            }
+                        });
+
+                        // ARGS.state
+                        Object.defineProperty(ARGS, 'state', {
+                            enumerable: true,
+
+                            get: () => {
+                                return this._SCRIPT_STATES[SCRIPT_STATE_KEY];
+                            },
+
+                            set: (newValue) => {
+                                this._SCRIPT_STATES[SCRIPT_STATE_KEY] = newValue;
+                            }
+                        });
+
+                        // ARGS.workspace
+                        Object.defineProperty(ARGS, 'workspace', {
+                            enumerable: true,
+
+                            get: function () {
+                                return this.target.__workspace;
+                            }
+                        });
+
+                        // ARGS.workspaceRoot
+                        Object.defineProperty(ARGS, 'workspaceRoot', {
+                            enumerable: true,
+
+                            get: function () {
+                                return this.workspace.rootPath;
+                            }
+                        });
+
+                        if (BEFORE_UPLOAD_MODULE.execute) {
+                            await Promise.resolve(
+                                BEFORE_UPLOAD_MODULE.execute( ARGS )
+                            );
+                        }
+                    };
+                }
+            }
+
+            const UPLOADED_SCRIPT = WORKSPACE.replaceWithValues(target.uploaded);
+            if (!deploy_helpers.isEmptyString(UPLOADED_SCRIPT)) {
+                const UPLOADED_SCRIPT_PATH = await WORKSPACE.getExistingSettingPath(UPLOADED_SCRIPT);
+                if (false === UPLOADED_SCRIPT_PATH) {
+                    throw new Error(WORKSPACE.t('fileNotFound', UPLOADED_SCRIPT));
+                }
+
+                const UPLOADED_MODULE = deploy_helpers.loadModule<SFTPBeforeUploadModule>( UPLOADED_SCRIPT_PATH );
+                if (UPLOADED_MODULE) {
+                    uploadCompleted = async (args) => {
+                        const ARGS: SFTPUploadedModuleExecutorArguments = {
+                            _: require('lodash'),
+                            context: args,
+                            events: this._EVENTS,
+                            extension: target.__workspace.context.extension,
+                            folder: target.__workspace.folder,
+                            globalEvents: deploy_helpers.EVENTS,
+                            globals: target.__workspace.globals,
+                            globalState: this._GLOBAL_STATE,
+                            homeDir: deploy_helpers.getExtensionDirInHome(),
+                            logger: target.__workspace.createLogger(),
+                            options: deploy_helpers.cloneObject(target.uploadedOptions),
+                            output: undefined,
+                            replaceWithValues: function (val) {
+                                return this.workspace
+                                           .replaceWithValues(val);
+                            },
+                            require: (id) => {
+                                return deploy_helpers.requireFromExtension(id);
+                            },
+                            sessionState: deploy_session.SESSION_STATE,
+                            settingFolder: undefined,
+                            state: undefined,
+                            target: target,
+                            workspace: undefined,
+                            workspaceRoot: undefined,
+                        };
+
+                        // ARGS.output
+                        Object.defineProperty(ARGS, 'output', {
+                            enumerable: true,
+
+                            get: function () {
+                                return this.workspace.output;
+                            }
+                        });
+
+                        // ARGS.settingFolder
+                        Object.defineProperty(ARGS, 'settingFolder', {
+                            enumerable: true,
+
+                            get: function () {
+                                return this.workspace.settingFolder;
+                            }
+                        });
+
+                        // ARGS.state
+                        Object.defineProperty(ARGS, 'state', {
+                            enumerable: true,
+
+                            get: () => {
+                                return this._SCRIPT_STATES[SCRIPT_STATE_KEY];
+                            },
+
+                            set: (newValue) => {
+                                this._SCRIPT_STATES[SCRIPT_STATE_KEY] = newValue;
+                            }
+                        });
+
+                        // ARGS.workspace
+                        Object.defineProperty(ARGS, 'workspace', {
+                            enumerable: true,
+
+                            get: function () {
+                                return this.target.__workspace;
+                            }
+                        });
+
+                        // ARGS.workspaceRoot
+                        Object.defineProperty(ARGS, 'workspaceRoot', {
+                            enumerable: true,
+
+                            get: function () {
+                                return this.workspace.rootPath;
+                            }
+                        });
+
+                        if (UPLOADED_MODULE.execute) {
+                            await Promise.resolve(
+                                UPLOADED_MODULE.execute( ARGS )
+                            );
+                        }
+                    };
+                }                
+            }
+        }
+
         try {
             const CTX = {
                 client: await deploy_clients_sftp.openConnection({
                     agent: agent,
+                    beforeUpload: beforeUpload,
                     debug: target.debug,
                     hashAlgorithm: this.replaceWithValues(target, target.hashAlgorithm),
                     hashes: target.hashes,
@@ -217,7 +512,8 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
                         deploy_helpers.toStringSafe(
                             this.replaceWithValues(target, target.readyTimeout)
                         ).trim()
-                    ),
+                    ),                    
+                    uploadCompleted: uploadCompleted,
                     user: user,
                 }),
                 getDir: (subDir) => {
@@ -252,6 +548,12 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
 
             throw e;
         }
+    }
+
+    protected onDispose() {
+        super.onDispose();
+
+        this._EVENTS.removeAllListeners();
     }
 }
 

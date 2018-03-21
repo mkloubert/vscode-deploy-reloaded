@@ -27,6 +27,42 @@ import * as SFTP from 'ssh2-sftp-client';
 
 
 /**
+ * An action that is invoked BEFORE an upload process starts.
+ * 
+ * @param {SFTPBeforeUploadArguments} args The arguments.
+ * 
+ * @return {SFTPBeforeUploadResult|PromiseLike<SFTPBeforeUploadResult>} The result.
+ */
+export type SFTPBeforeUpload = (args: SFTPBeforeUploadArguments) => SFTPBeforeUploadResult | PromiseLike<SFTPBeforeUploadResult>;
+
+/**
+ * Arguments for an action that is invoked BEFORE an upload process starts.
+ */
+export interface SFTPBeforeUploadArguments {
+    /**
+     * The underlying (raw) connection.
+     */
+    readonly connection: SFTP;
+    /**
+     * The data to upload.
+     */
+    data: Buffer;
+    /**
+     * The path of the remote file.
+     */
+    readonly file: string;
+    /**
+     * The mode for the file (if defined).
+     */
+    readonly mode: SFTPModeForFile;
+}
+
+/**
+ * A possible file for an action that is invoked BEFORE an upload process starts.
+ */
+export type SFTPBeforeUploadResult = void | false;
+
+/**
  * Options for a SFTP connection.
  */
 export interface SFTPConnectionOptions {
@@ -39,6 +75,10 @@ export interface SFTPConnectionOptions {
      * 'agent' property must also be set to use this feature.
      */
     readonly agentForward?: boolean;
+    /**
+     * Is invoked BEFORE an upload process starts.
+     */
+    readonly beforeUpload?: SFTPBeforeUpload;
     /**
      * Show debug output or not.
      */
@@ -87,6 +127,10 @@ export interface SFTPConnectionOptions {
      * The username.
      */
     readonly user?: string;
+    /**
+     * Is invoked AFTER an upload process.
+     */
+    readonly uploadCompleted?: SFTPUploadCompleted;
 }
 
 /**
@@ -104,6 +148,54 @@ export type SFTPFileModePatterns = { [ pattern: string ]: SFTPFileMode };
  */
 export type SFTPFileModeSettings = SFTPFileMode | SFTPFileModePatterns;
 
+/**
+ * A mode for a file to set.
+ */
+export type SFTPModeForFile = number | false;
+
+/**
+ * An action that is invoked AFTER an upload process.
+ * 
+ * @param {SFTPUploadCompletedArguments} args The arguments.
+ * 
+ * @return {SFTPUploadCompletedResult|PromiseLike<SFTPUploadCompletedResult>} The result.
+ */
+export type SFTPUploadCompleted = (args: SFTPUploadCompletedArguments) => SFTPUploadCompletedResult | PromiseLike<SFTPUploadCompletedResult>;
+
+/**
+ * Arguments for an action that is invoked AFTER an upload process.
+ */
+export interface SFTPUploadCompletedArguments {
+    /**
+     * The underlying (raw) connection.
+     */
+    readonly connection: SFTP;
+    /**
+     * The data.
+     */
+    readonly data: Buffer;
+    /**
+     * The error (if occurred).
+     */
+    readonly error?: any;
+    /**
+     * The path of the remote file.
+     */
+    readonly file: string;
+    /**
+     * Indicates if file has been uploaded or not.
+     */
+    readonly hasBeenUploaded: boolean;
+    /**
+     * The mode for the file (if defined).
+     */
+    readonly mode: SFTPModeForFile;
+}
+
+/**
+ * A possible file for an action that is invoked AFTER an upload process.
+ */
+export type SFTPUploadCompletedResult = void | boolean;
 
 /**
  * The default value for a host address.
@@ -328,12 +420,12 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
                     }
                 }
 
-                let modeToSet: number | false = false;
+                let modeToSet: SFTPModeForFile = false;
                 if (false !== fileModes) {
                     let matchedPattern: false | string = false;
                     for (const P in fileModes) {
                         let pattern = P;
-                        if (!pattern.startsWith('/')) {
+                        if (!pattern.trim().startsWith('/')) {
                             pattern = '/' + pattern;
                         }
 
@@ -360,27 +452,91 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
                     }
                 }
 
-                await this.client.put(
-                    data,
-                    path,
-                );
+                let uploadError: any;
+                let hasBeenUploaded = false;
+                try {
+                    let doUpload = true;
 
-                if (false !== modeToSet) {
-                    deploy_log.CONSOLE
-                              .info(`Setting mode for '${path}' to ${modeToSet.toString(8)} ...`, 'clients.sftp.uploadFile(1)');
+                    const BEFORE_UPLOAD_ARGS: SFTPBeforeUploadArguments = {
+                        connection: this.client,
+                        data: data,
+                        file: path,
+                        mode: modeToSet,
+                    };
 
-                    this.client['sftp'].chmod(path, modeToSet, (err) => {
-                        if (err) {
-                            deploy_log.CONSOLE
-                                      .trace(err, 'clients.sftp.uploadFile(2)');
+                    const BEFORE_UPLOAD = this.options.beforeUpload;
+                    if (BEFORE_UPLOAD) {
+                        const BEFORE_UPLOAD_RESULT = deploy_helpers.toBooleanSafe(await Promise.resolve(
+                            BEFORE_UPLOAD( BEFORE_UPLOAD_ARGS )
+                        ), true);
+
+                        doUpload = false !== BEFORE_UPLOAD_RESULT;
+                    }
+
+                    if (doUpload) {
+                        data = await deploy_helpers.asBuffer( BEFORE_UPLOAD_ARGS.data );
+                        if (!data) {
+                            data = Buffer.alloc(0);
                         }
 
-                        COMPLETED(err);
-                    });
+                        await this.client.put(
+                            data,
+                            path,
+                        );
+
+                        hasBeenUploaded = true;
+                    }
+                }
+                catch (e) {
+                    uploadError = e;
+                }
+                finally {
+                    let errorHandled = false;
+
+                    const UPLOAD_COMPLETED_ARGS: SFTPUploadCompletedArguments = {
+                        connection: this.client,
+                        data: data,
+                        error: uploadError,
+                        file: path,
+                        hasBeenUploaded: hasBeenUploaded,
+                        mode: modeToSet,
+                    };
+
+                    const UPLOAD_COMPLETED = this.options.uploadCompleted;
+                    if (UPLOAD_COMPLETED) {
+                        const UPLOAD_COMPLETED_RESULT = deploy_helpers.toBooleanSafe(await Promise.resolve(
+                            UPLOAD_COMPLETED( UPLOAD_COMPLETED_ARGS )
+                        ));
+
+                        errorHandled = false !== UPLOAD_COMPLETED_RESULT;
+                    }
+
+                    if (uploadError && !errorHandled) {
+                        throw uploadError;
+                    }
+                }
+
+                if (hasBeenUploaded) {
+                    if (false !== modeToSet) {
+                        deploy_log.CONSOLE
+                                  .info(`Setting mode for '${path}' to ${modeToSet.toString(8)} ...`, 'clients.sftp.uploadFile(1)');
+    
+                        this.client['sftp'].chmod(path, modeToSet, (err) => {
+                            if (err) {
+                                deploy_log.CONSOLE
+                                          .trace(err, 'clients.sftp.uploadFile(2)');
+                            }
+    
+                            COMPLETED(err);
+                        });
+                    }
+                    else {
+                        COMPLETED(null);
+                    }
                 }
                 else {
                     COMPLETED(null);
-                }
+                }                
             }
             catch (e) {
                 COMPLETED(e);

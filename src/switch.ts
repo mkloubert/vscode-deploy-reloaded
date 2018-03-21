@@ -69,8 +69,6 @@ export async function changeSwitch(workspaces: deploy_workspaces.Workspace | dep
     }
 
     if (selectedItem) {
-        await Promise.resolve(
-            selectedItem.action()
-        );
+        await selectedItem.action();
     }
 }

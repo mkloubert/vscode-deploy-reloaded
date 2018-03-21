@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.64.0",
+ "version": "0.65.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.21.0"
@@ -24638,6 +24638,13 @@
              ]
             }
            },
+           "beforeUpload": {
+            "type": "string",
+            "description": "The path to an (event) script, which is executed BEFORE a file is going to be uploaded."
+           },
+           "beforeUploadOptions": {
+            "description": "Options for the script defined in 'beforeUpload'."
+           },
            "checkBeforeDeploy": {
             "description": "Check for newer files before a deploy operation starts or not.",
             "type": "boolean",
@@ -26845,6 +26852,13 @@
             ],
             "type": "string",
             "description": "Deploys to a FTP server."
+           },
+           "uploaded": {
+            "type": "string",
+            "description": "The path to an (event) script, which is executed AFTER a file has been uploaded or tried to be uploaded."
+           },
+           "uploadedOptions": {
+            "description": "Options for the script defined in 'uploaded'."
            },
            "user": {
             "type": "string",
@@ -53901,6 +53915,13 @@
              ]
             }
            },
+           "beforeUpload": {
+            "type": "string",
+            "description": "The path to an (event) script, which is executed BEFORE a file is going to be uploaded."
+           },
+           "beforeUploadOptions": {
+            "description": "Options for the script defined in 'beforeUpload'."
+           },
            "checkBeforeDeploy": {
             "description": "Check for newer files before a deploy operation starts or not.",
             "type": "boolean",
@@ -56159,6 +56180,13 @@
             ],
             "type": "string",
             "description": "Deploys to a SFTP server."
+           },
+           "uploaded": {
+            "type": "string",
+            "description": "The path to an (event) script, which is executed AFTER a file has been uploaded or tried to be uploaded."
+           },
+           "uploadedOptions": {
+            "description": "Options for the script defined in 'uploaded'."
            },
            "user": {
             "type": "string",

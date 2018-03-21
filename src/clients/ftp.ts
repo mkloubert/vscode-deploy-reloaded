@@ -28,9 +28,45 @@ import * as Path from 'path';
 
 
 /**
+ * An action that is invoked BEFORE an upload process starts.
+ * 
+ * @param {FTPBeforeUploadArguments} args The arguments.
+ * 
+ * @return {FTPBeforeUploadResult|PromiseLike<FTPBeforeUploadResult>} The result.
+ */
+export type FTPBeforeUpload = (args: FTPBeforeUploadArguments) => FTPBeforeUploadResult | PromiseLike<FTPBeforeUploadResult>;
+
+/**
+ * Arguments for an action that is invoked BEFORE an upload process starts.
+ */
+export interface FTPBeforeUploadArguments {
+    /**
+     * The underlying (raw) connection.
+     */
+    readonly connection: any;
+    /**
+     * The data to upload.
+     */
+    data: Buffer;
+    /**
+     * The path of the remote file.
+     */
+    readonly file: string;
+}
+
+/**
+ * A possible file for an action that is invoked BEFORE an upload process starts.
+ */
+export type FTPBeforeUploadResult = void | false;
+
+/**
  * Options for a FTP connection.
  */
 export interface FTPConnectionOptions {
+    /**
+     * Is invoked BEFORE an upload process starts.
+     */
+    readonly beforeUpload?: FTPBeforeUpload;
     /**
      * The engine.
      */
@@ -48,10 +84,54 @@ export interface FTPConnectionOptions {
      */
     readonly port?: number;
     /**
+     * Is invoked AFTER an upload process.
+     */
+    readonly uploadCompleted?: FTPUploadCompleted;
+    /**
      * The username.
      */
     readonly user?: string;
 }
+
+/**
+ * An action that is invoked AFTER an upload process.
+ * 
+ * @param {FTPUploadCompletedArguments} args The arguments.
+ * 
+ * @return {FTPUploadCompletedResult|PromiseLike<FTPUploadCompletedResult>} The result.
+ */
+export type FTPUploadCompleted = (args: FTPUploadCompletedArguments) => FTPUploadCompletedResult | PromiseLike<FTPUploadCompletedResult>;
+
+/**
+ * Arguments for an action that is invoked AFTER an upload process.
+ */
+export interface FTPUploadCompletedArguments {
+    /**
+     * The underlying (raw) connection.
+     */
+    readonly connection: any;
+    /**
+     * The data.
+     */
+    readonly data: Buffer;
+    /**
+     * The error (if occurred).
+     */
+    readonly error?: any;
+    /**
+     * The path of the remote file.
+     */
+    readonly file: string;
+    /**
+     * Indicates if file has been uploaded or not.
+     */
+    readonly hasBeenUploaded: boolean;
+}
+
+/**
+ * A possible file for an action that is invoked AFTER an upload process.
+ */
+export type FTPUploadCompletedResult = void | boolean;
 
 
 /**
@@ -194,11 +274,75 @@ export abstract class FTPClientBase extends deploy_clients.AsyncFileListBase {
      */
     public abstract mkdir(dir: string): Promise<void>;
 
+    /**
+     * Invokes the event for an 'before upload' operation.
+     * 
+     * @param {string} path The path of the remote file.
+     * @param {Buffer} data The data to upload.
+     * 
+     * @param {Promise<Buffer|false>} The promise with the data to upload or (false)
+     *                                if the file should NOT be uploaded.
+     */
+    protected async onBeforeUpload(path: string, data: Buffer): Promise<Buffer | false> {
+        let doUpload = true;
+
+        const BEFORE_UPLOAD_ARGS: FTPBeforeUploadArguments = {
+            connection: this.connection,
+            data: data,
+            file: path,
+        };
+
+        const BEFORE_UPLOAD = this.options.beforeUpload;
+        if (BEFORE_UPLOAD) {
+            const BEFORE_UPLOAD_RESULT = deploy_helpers.toBooleanSafe(await Promise.resolve(
+                BEFORE_UPLOAD( BEFORE_UPLOAD_ARGS )
+            ), true);
+
+            doUpload = false !== BEFORE_UPLOAD_RESULT;
+        }
+
+        return doUpload ? BEFORE_UPLOAD_ARGS.data
+                        : false;
+    }
+
     /** @inheritdoc */
     protected onDispose() {
         this.end().then(() => {
         }).catch((err) => {
         });
+    }
+
+    /**
+     * Invokes the event for an 'upload completed' operation.
+     * 
+     * @param {any} err The error (if occurred).
+     * @param {string} path The path of the remote file.
+     * @param {Buffer} data The uploaded data.
+     * @param {boolean} hasBeenUploaded Indicates if file has been uploaded or not.
+     */
+    protected async onUploadCompleted(err: any, path: string, data: Buffer, hasBeenUploaded: boolean) {
+        let errorHandled = false;
+
+        const UPLOAD_COMPLETED_ARGS: FTPUploadCompletedArguments = {
+            connection: this.connection,
+            data: data,
+            error: err,
+            file: path,
+            hasBeenUploaded: hasBeenUploaded,
+        };
+
+        const UPLOAD_COMPLETED = this.options.uploadCompleted;
+        if (UPLOAD_COMPLETED) {
+            const UPLOAD_COMPLETED_RESULT = deploy_helpers.toBooleanSafe(await Promise.resolve(
+                UPLOAD_COMPLETED( UPLOAD_COMPLETED_ARGS )
+            ));
+
+            errorHandled = false !== UPLOAD_COMPLETED_RESULT;
+        }
+
+        if (err && !errorHandled) {
+            throw err;
+        }
     }
 
     /**
@@ -228,7 +372,34 @@ export abstract class FTPClientBase extends deploy_clients.AsyncFileListBase {
 
     /** @inheritdoc */
     public async uploadFile(path: string, data: Buffer): Promise<void> {
-        await this.put(path, data);
+        const BEFORE_UPLOAD_RESULT = await await this.onBeforeUpload(path, data);
+        
+        let hasBeenUploaded = false;
+        let uploadError: any;
+        try {
+            if (false === BEFORE_UPLOAD_RESULT) {
+                return;
+            }
+    
+            data = await deploy_helpers.asBuffer( BEFORE_UPLOAD_RESULT );
+            if (!data) {
+                data = Buffer.alloc(0);
+            }
+    
+            await this.put(path, data);
+
+            hasBeenUploaded = true;
+        }
+        catch (e) {
+            uploadError = e;
+        }
+        finally {
+            await this.onUploadCompleted(
+                uploadError,
+                path, data,
+                hasBeenUploaded,
+            );
+        }
     }
 }
 
