@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.65.0",
+ "version": "0.66.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.21.0"
@@ -24654,6 +24654,226 @@
             "description": "Check for older files before a pull operation starts or not.",
             "type": "boolean",
             "default": false
+           },
+           "commands": {
+            "description": "Command settings.",
+            "type": "object",
+            "properties": {
+             "beforeDelete": {
+              "description": "One or more commands to execute BEFORE a file is going to be deleted.",
+              "type": "array",
+              "items": {
+               "oneOf": [
+                {
+                 "description": "The command to execute.",
+                 "type": "string"
+                },
+                {
+                 "description": "Settings for the command to execute.",
+                 "type": "object",
+                 "properties": {
+                  "command": {
+                   "description": "The command to execute.",
+                   "type": "string"
+                  },
+                  "executeBeforeWriteOutputTo": {
+                   "description": "The code to execute before output is written via 'writeOutputTo' setting. The result of the execution will be used as value to write.",
+                   "type": "string"
+                  },
+                  "writeOutputTo": {
+                   "description": "The name of the placeholder where to write the output to. The placeholder will be available for all upcoming executions.",
+                   "type": "string"
+                  }
+                 }
+                }
+               ]
+              }
+             },
+             "beforeDownload": {
+              "description": "One or more commands to execute BEFORE a file is going to be downloaded.",
+              "type": "array",
+              "items": {
+               "oneOf": [
+                {
+                 "description": "The command to execute.",
+                 "type": "string"
+                },
+                {
+                 "description": "Settings for the command to execute.",
+                 "type": "object",
+                 "properties": {
+                  "command": {
+                   "description": "The command to execute.",
+                   "type": "string"
+                  },
+                  "executeBeforeWriteOutputTo": {
+                   "description": "The code to execute before output is written via 'writeOutputTo' setting. The result of the execution will be used as value to write.",
+                   "type": "string"
+                  },
+                  "writeOutputTo": {
+                   "description": "The name of the placeholder where to write the output to. The placeholder will be available for all upcoming executions.",
+                   "type": "string"
+                  }
+                 }
+                }
+               ]
+              }
+             },
+             "beforeUpload": {
+              "description": "One or more commands to execute BEFORE a file is going to be uploaded.",
+              "type": "array",
+              "items": {
+               "oneOf": [
+                {
+                 "description": "The command to execute.",
+                 "type": "string"
+                },
+                {
+                 "description": "Settings for the command to execute.",
+                 "type": "object",
+                 "properties": {
+                  "command": {
+                   "description": "The command to execute.",
+                   "type": "string"
+                  },
+                  "executeBeforeWriteOutputTo": {
+                   "description": "The code to execute before output is written via 'writeOutputTo' setting. The result of the execution will be used as value to write.",
+                   "type": "string"
+                  },
+                  "writeOutputTo": {
+                   "description": "The name of the placeholder where to write the output to. The placeholder will be available for all upcoming executions.",
+                   "type": "string"
+                  }
+                 }
+                }
+               ]
+              }
+             },
+             "connected": {
+              "description": "Commands to invoke AFTER a connection has been established.",
+              "type": "array",
+              "items": {
+               "oneOf": [
+                {
+                 "description": "The command to execute.",
+                 "type": "string"
+                },
+                {
+                 "description": "Settings for the command to execute.",
+                 "type": "object",
+                 "properties": {
+                  "command": {
+                   "description": "The command to execute.",
+                   "type": "string"
+                  },
+                  "executeBeforeWriteOutputTo": {
+                   "description": "The code to execute before output is written via 'writeOutputTo' setting. The result of the execution will be used as value to write.",
+                   "type": "string"
+                  },
+                  "writeOutputTo": {
+                   "description": "The name of the placeholder where to write the output to. The placeholder will be available for all upcoming executions.",
+                   "type": "string"
+                  }
+                 }
+                }
+               ]
+              }
+             },
+             "deleted": {
+              "description": "One or more commands to execute AFTER a file has been deleted.",
+              "type": "array",
+              "items": {
+               "oneOf": [
+                {
+                 "description": "The command to execute.",
+                 "type": "string"
+                },
+                {
+                 "description": "Settings for the command to execute.",
+                 "type": "object",
+                 "properties": {
+                  "command": {
+                   "description": "The command to execute.",
+                   "type": "string"
+                  },
+                  "executeBeforeWriteOutputTo": {
+                   "description": "The code to execute before output is written via 'writeOutputTo' setting. The result of the execution will be used as value to write.",
+                   "type": "string"
+                  },
+                  "writeOutputTo": {
+                   "description": "The name of the placeholder where to write the output to. The placeholder will be available for all upcoming executions.",
+                   "type": "string"
+                  }
+                 }
+                }
+               ]
+              }
+             },
+             "downloaded": {
+              "description": "One or more commands to execute AFTER a file has been downloaded.",
+              "type": "array",
+              "items": {
+               "oneOf": [
+                {
+                 "description": "The command to execute.",
+                 "type": "string"
+                },
+                {
+                 "description": "Settings for the command to execute.",
+                 "type": "object",
+                 "properties": {
+                  "command": {
+                   "description": "The command to execute.",
+                   "type": "string"
+                  },
+                  "executeBeforeWriteOutputTo": {
+                   "description": "The code to execute before output is written via 'writeOutputTo' setting. The result of the execution will be used as value to write.",
+                   "type": "string"
+                  },
+                  "writeOutputTo": {
+                   "description": "The name of the placeholder where to write the output to. The placeholder will be available for all upcoming executions.",
+                   "type": "string"
+                  }
+                 }
+                }
+               ]
+              }
+             },
+             "encoding": {
+              "description": "The (output) encoding of the commands.",
+              "type": "string"
+             },
+             "uploaded": {
+              "description": "One or more commands to execute AFTER a file has been uploaded.",
+              "type": "array",
+              "items": {
+               "oneOf": [
+                {
+                 "description": "The command to execute.",
+                 "type": "string"
+                },
+                {
+                 "description": "Settings for the command to execute.",
+                 "type": "object",
+                 "properties": {
+                  "command": {
+                   "description": "The command to execute.",
+                   "type": "string"
+                  },
+                  "executeBeforeWriteOutputTo": {
+                   "description": "The code to execute before output is written via 'writeOutputTo' setting. The result of the execution will be used as value to write.",
+                   "type": "string"
+                  },
+                  "writeOutputTo": {
+                   "description": "The name of the placeholder where to write the output to. The placeholder will be available for all upcoming executions.",
+                   "type": "string"
+                  }
+                 }
+                }
+               ]
+              }
+             }
+            }
            },
            "deleted": {
             "description": "One or more operations that should be invoked AFTER a delete operation has been finished.",
@@ -53931,6 +54151,226 @@
             "description": "Check for older files before a pull operation starts or not.",
             "type": "boolean",
             "default": false
+           },
+           "commands": {
+            "description": "Command settings.",
+            "type": "object",
+            "properties": {
+             "beforeDelete": {
+              "description": "One or more commands to execute BEFORE a file is going to be deleted.",
+              "type": "array",
+              "items": {
+               "oneOf": [
+                {
+                 "description": "The command to execute.",
+                 "type": "string"
+                },
+                {
+                 "description": "Settings for the command to execute.",
+                 "type": "object",
+                 "properties": {
+                  "command": {
+                   "description": "The command to execute.",
+                   "type": "string"
+                  },
+                  "executeBeforeWriteOutputTo": {
+                   "description": "The code to execute before output is written via 'writeOutputTo' setting. The result of the execution will be used as value to write.",
+                   "type": "string"
+                  },
+                  "writeOutputTo": {
+                   "description": "The name of the placeholder where to write the output to. The placeholder will be available for all upcoming executions.",
+                   "type": "string"
+                  }
+                 }
+                }
+               ]
+              }
+             },
+             "beforeDownload": {
+              "description": "One or more commands to execute BEFORE a file is going to be downloaded.",
+              "type": "array",
+              "items": {
+               "oneOf": [
+                {
+                 "description": "The command to execute.",
+                 "type": "string"
+                },
+                {
+                 "description": "Settings for the command to execute.",
+                 "type": "object",
+                 "properties": {
+                  "command": {
+                   "description": "The command to execute.",
+                   "type": "string"
+                  },
+                  "executeBeforeWriteOutputTo": {
+                   "description": "The code to execute before output is written via 'writeOutputTo' setting. The result of the execution will be used as value to write.",
+                   "type": "string"
+                  },
+                  "writeOutputTo": {
+                   "description": "The name of the placeholder where to write the output to. The placeholder will be available for all upcoming executions.",
+                   "type": "string"
+                  }
+                 }
+                }
+               ]
+              }
+             },
+             "beforeUpload": {
+              "description": "One or more commands to execute BEFORE a file is going to be uploaded.",
+              "type": "array",
+              "items": {
+               "oneOf": [
+                {
+                 "description": "The command to execute.",
+                 "type": "string"
+                },
+                {
+                 "description": "Settings for the command to execute.",
+                 "type": "object",
+                 "properties": {
+                  "command": {
+                   "description": "The command to execute.",
+                   "type": "string"
+                  },
+                  "executeBeforeWriteOutputTo": {
+                   "description": "The code to execute before output is written via 'writeOutputTo' setting. The result of the execution will be used as value to write.",
+                   "type": "string"
+                  },
+                  "writeOutputTo": {
+                   "description": "The name of the placeholder where to write the output to. The placeholder will be available for all upcoming executions.",
+                   "type": "string"
+                  }
+                 }
+                }
+               ]
+              }
+             },
+             "connected": {
+              "description": "Commands to invoke AFTER a connection has been established.",
+              "type": "array",
+              "items": {
+               "oneOf": [
+                {
+                 "description": "The command to execute.",
+                 "type": "string"
+                },
+                {
+                 "description": "Settings for the command to execute.",
+                 "type": "object",
+                 "properties": {
+                  "command": {
+                   "description": "The command to execute.",
+                   "type": "string"
+                  },
+                  "executeBeforeWriteOutputTo": {
+                   "description": "The code to execute before output is written via 'writeOutputTo' setting. The result of the execution will be used as value to write.",
+                   "type": "string"
+                  },
+                  "writeOutputTo": {
+                   "description": "The name of the placeholder where to write the output to. The placeholder will be available for all upcoming executions.",
+                   "type": "string"
+                  }
+                 }
+                }
+               ]
+              }
+             },
+             "deleted": {
+              "description": "One or more commands to execute AFTER a file has been deleted.",
+              "type": "array",
+              "items": {
+               "oneOf": [
+                {
+                 "description": "The command to execute.",
+                 "type": "string"
+                },
+                {
+                 "description": "Settings for the command to execute.",
+                 "type": "object",
+                 "properties": {
+                  "command": {
+                   "description": "The command to execute.",
+                   "type": "string"
+                  },
+                  "executeBeforeWriteOutputTo": {
+                   "description": "The code to execute before output is written via 'writeOutputTo' setting. The result of the execution will be used as value to write.",
+                   "type": "string"
+                  },
+                  "writeOutputTo": {
+                   "description": "The name of the placeholder where to write the output to. The placeholder will be available for all upcoming executions.",
+                   "type": "string"
+                  }
+                 }
+                }
+               ]
+              }
+             },
+             "downloaded": {
+              "description": "One or more commands to execute AFTER a file has been downloaded.",
+              "type": "array",
+              "items": {
+               "oneOf": [
+                {
+                 "description": "The command to execute.",
+                 "type": "string"
+                },
+                {
+                 "description": "Settings for the command to execute.",
+                 "type": "object",
+                 "properties": {
+                  "command": {
+                   "description": "The command to execute.",
+                   "type": "string"
+                  },
+                  "executeBeforeWriteOutputTo": {
+                   "description": "The code to execute before output is written via 'writeOutputTo' setting. The result of the execution will be used as value to write.",
+                   "type": "string"
+                  },
+                  "writeOutputTo": {
+                   "description": "The name of the placeholder where to write the output to. The placeholder will be available for all upcoming executions.",
+                   "type": "string"
+                  }
+                 }
+                }
+               ]
+              }
+             },
+             "encoding": {
+              "description": "The (output) encoding of the commands.",
+              "type": "string"
+             },
+             "uploaded": {
+              "description": "One or more commands to execute AFTER a file has been uploaded.",
+              "type": "array",
+              "items": {
+               "oneOf": [
+                {
+                 "description": "The command to execute.",
+                 "type": "string"
+                },
+                {
+                 "description": "Settings for the command to execute.",
+                 "type": "object",
+                 "properties": {
+                  "command": {
+                   "description": "The command to execute.",
+                   "type": "string"
+                  },
+                  "executeBeforeWriteOutputTo": {
+                   "description": "The code to execute before output is written via 'writeOutputTo' setting. The result of the execution will be used as value to write.",
+                   "type": "string"
+                  },
+                  "writeOutputTo": {
+                   "description": "The name of the placeholder where to write the output to. The placeholder will be available for all upcoming executions.",
+                   "type": "string"
+                  }
+                 }
+                }
+               ]
+              }
+             }
+            }
            },
            "debug": {
             "type": "boolean",

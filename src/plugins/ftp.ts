@@ -81,6 +81,10 @@ export interface FTPTarget extends deploy_targets.Target {
      */
     readonly beforeUploadOptions?: any;
     /**
+     * Commands to execute.
+     */
+    readonly commands?: deploy_clients_ftp.FTPCommandSettings;
+    /**
      * The root directory.
      */
     readonly dir?: string;
@@ -430,6 +434,7 @@ class FTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<FTPTarget,
             const CTX = {
                 client: await deploy_clients_ftp.openConnection({
                     beforeUpload: beforeUpload,
+                    commands: target.commands,
                     engine: this.replaceWithValues(target, target.engine),
                     host: this.replaceWithValues(target, target.host),
                     password: pwd,
@@ -440,6 +445,7 @@ class FTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<FTPTarget,
                     ),
                     uploadCompleted: uploadCompleted,
                     user: user,
+                    valueProvider: () => WORKSPACE.getValues(),
                 }),
                 getDir: (subDir) => {
                     return deploy_helpers.normalizePath(

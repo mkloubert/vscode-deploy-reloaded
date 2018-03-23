@@ -15,10 +15,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as _ from 'lodash';
 import * as deploy_clients from '../clients';
+import * as deploy_code from '../code';
+import * as deploy_contracts from '../contracts';
 import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
 import * as deploy_log from '../log';
+import * as deploy_values from '../values';
 import * as FTP from 'ftp';
 import * as i18 from '../i18';
 const jsFTP = require('jsftp');
@@ -60,6 +64,67 @@ export interface FTPBeforeUploadArguments {
 export type FTPBeforeUploadResult = void | false;
 
 /**
+ * A possible value for a FTP command.
+ */
+export type FTPCommand = FTPCommandEntry | string;
+
+/**
+ * A FTP command entry.
+ */
+export interface FTPCommandEntry {
+    /**
+     * The command to execute.
+     */
+    readonly command: string;
+    /**
+     * The code to execute before output is written via 'writeOutputTo' setting. The result of the execution will be used as value to write.
+     */
+    readonly executeBeforeWriteOutputTo?: string;
+    /**
+     * The name of the placeholder where to write the output to.
+     */
+    readonly writeOutputTo?: string;
+}
+
+/**
+ * FTP command settings.
+ */
+export interface FTPCommandSettings {
+    /**
+     * Commands to invoke BEFORE a file is going to be deleted.
+     */
+    readonly beforeDelete?: FTPCommand | FTPCommand[];
+    /**
+     * Commands to invoke BEFORE a file is going to be downloaded.
+     */
+    readonly beforeDownload?: FTPCommand | FTPCommand[];
+    /**
+     * Commands to invoke BEFORE a file is going to be uploaed.
+     */
+    readonly beforeUpload?: FTPCommand | FTPCommand[];
+    /**
+     * Commands to invoke AFTER a connection has been established.
+     */
+    readonly connected?: FTPCommand | FTPCommand[];
+    /**
+     * Commands to invoke AFTER a file has been deleted.
+     */
+    readonly deleted?: FTPCommand | FTPCommand[];
+    /**
+     * Commands to invoke AFTER a file has been downloaded.
+     */
+    readonly downloaded?: FTPCommand | FTPCommand[];
+    /**
+     * The (output) encoding of the commands.
+     */
+    readonly encoding?: string;
+    /**
+     * Commands to invoke AFTER a file has been uploaded.
+     */
+    readonly uploaded?: FTPCommand | FTPCommand[];    
+}
+
+/**
  * Options for a FTP connection.
  */
 export interface FTPConnectionOptions {
@@ -67,6 +132,10 @@ export interface FTPConnectionOptions {
      * Is invoked BEFORE an upload process starts.
      */
     readonly beforeUpload?: FTPBeforeUpload;
+    /**
+     * FTP commands.
+     */
+    readonly commands?: FTPCommandSettings;
     /**
      * The engine.
      */
@@ -91,6 +160,10 @@ export interface FTPConnectionOptions {
      * The username.
      */
     readonly user?: string;
+    /**
+     * A function that provides values for the connection.
+     */
+    readonly valueProvider?: deploy_values.ValuesProvider;  
 }
 
 /**
@@ -149,6 +222,7 @@ export abstract class FTPClientBase extends deploy_clients.AsyncFileListBase {
      */
     protected _connection: any;
     private _existingRemoteDirs: { [ path: string ]: boolean } = {};
+    private readonly _CONNECTION_VALUES: deploy_contracts.KeyValuePairs = {};
 
     /**
      * Initializes a new instance of that class.
@@ -217,8 +291,17 @@ export abstract class FTPClientBase extends deploy_clients.AsyncFileListBase {
 
     /** @inheritdoc */
     public async deleteFile(path: string): Promise<boolean> {
+        const VALUES: deploy_values.Value[] = [            
+        ].concat( this.getValuesForFile(path) );
+
         try {
+            await this.executeCommandsBy((opts) => opts.commands.beforeDelete,
+                                         VALUES);
+            
             await this.unlink(path);
+
+            await this.executeCommandsBy((opts) => opts.commands.deleted,
+                                         VALUES);
             
             return true;
         }
@@ -229,7 +312,20 @@ export abstract class FTPClientBase extends deploy_clients.AsyncFileListBase {
 
     /** @inheritdoc */
     public async downloadFile(path: string): Promise<Buffer> {
-        return await this.get(path);
+        const VALUES: deploy_values.Value[] = [            
+        ].concat( this.getValuesForFile(path) );
+
+        let data: Buffer;
+
+        await this.executeCommandsBy((opts) => opts.commands.beforeDownload,
+                                     VALUES);
+        
+        data = await this.get(path);
+
+        await this.executeCommandsBy((opts) => opts.commands.downloaded,
+                                     VALUES);
+
+        return data;
     }
 
     /**
@@ -240,6 +336,109 @@ export abstract class FTPClientBase extends deploy_clients.AsyncFileListBase {
     public abstract end(): Promise<boolean>;
 
     /**
+     * Executes a FTP command.
+     * 
+     * @param {string} cmd The command to execute.
+     * 
+     * @return {Promise<Buffer>} The promise with the result.
+     */
+    public abstract execute(cmd: string): Promise<Buffer>;
+
+    /**
+     * Executes commands by using a provider.
+     * 
+     * @param {Function} provider The provider.
+     * @param {deploy_values.Value|deploy_values.Value[]} [additionalValues] One or more additional values.
+     * 
+     * @return {Promise<Buffer[]>} The promise with the execution results.
+     */
+    public async executeCommandsBy(
+        provider: (opts: FTPConnectionOptions) => FTPCommand | FTPCommand[],
+        additionalValues?: deploy_values.Value | deploy_values.Value[],
+    ): Promise<Buffer[]> {
+        if (!this.options.commands) {
+            return [];
+        }
+
+        let commandValues: deploy_values.Value[];
+        if (this.options.valueProvider) {
+            commandValues = deploy_helpers.asArray( this.options.valueProvider() );
+        }
+        else {
+            commandValues = [];
+        }
+
+        let enc = deploy_helpers.normalizeString( this.options.commands.encoding );
+        if ('' === enc) {
+            enc = undefined;
+        }
+
+        const RESULTS: Buffer[] = [];        
+
+        const COMMANDS = deploy_helpers.asArray( provider(this.options) );
+
+        for (const C of COMMANDS) {
+            let entry: FTPCommandEntry;
+            if (deploy_helpers.isObject<FTPCommandEntry>(C)) {
+                entry = C;
+            }
+            else {
+                entry = {
+                    command: deploy_helpers.toStringSafe( C )
+                };
+            }
+
+            const ADDITIONAL_COMMAND_VALUES: deploy_values.Value[] = [
+            ].concat( deploy_helpers.asArray(additionalValues) );
+
+            const ALL_COMMAND_VALUES = commandValues.concat( ADDITIONAL_COMMAND_VALUES )
+                                                    .concat( this.values );
+
+            const COMMAND_TO_EXECUTE = deploy_values.replaceWithValues(
+                ALL_COMMAND_VALUES,
+                entry.command,
+            );
+
+            let res: Buffer;
+
+            if (!deploy_helpers.isEmptyString(COMMAND_TO_EXECUTE)) {
+                res = await this.execute( COMMAND_TO_EXECUTE );
+            }
+
+            RESULTS.push( res );
+
+            const WRITE_TO = deploy_helpers.normalizeString(entry.writeOutputTo);
+            if ('' !== WRITE_TO) {
+                let outputToWrite: any = _.isNil(res) ? res
+                                                      : res.toString(enc);
+
+                const EXECUTE_BEFORE_WRITE = deploy_helpers.toStringSafe( entry.executeBeforeWriteOutputTo );
+                if (!deploy_helpers.isEmptyString(EXECUTE_BEFORE_WRITE)) {
+                    const EXECUTE_BEFORE_WRITE_VALUES: deploy_values.Value[] = [
+                        new deploy_values.StaticValue({
+                            value: outputToWrite,
+                        }, WRITE_TO),
+                    ];
+
+                    outputToWrite = deploy_code.exec({
+                        code: EXECUTE_BEFORE_WRITE,
+                        context: {
+                            command: entry,
+                            output: res,
+                        },
+                        values: ALL_COMMAND_VALUES.concat( EXECUTE_BEFORE_WRITE_VALUES ),
+                    });
+                }
+
+                this.setValue(WRITE_TO,
+                              deploy_helpers.toStringSafe( outputToWrite ));
+            }
+        }
+
+        return RESULTS;
+    }
+
+    /**
      * Downloads a file.
      * 
      * @param {string} file The path of the file.
@@ -247,6 +446,27 @@ export abstract class FTPClientBase extends deploy_clients.AsyncFileListBase {
      * @return {Promise<Buffer>} The promise with the downloaded data.
      */
     public abstract get(file: string): Promise<Buffer>;
+
+    /**
+     * Returns a list of values for a file.
+     * 
+     * @param {string} file The path of the remote file.
+     * 
+     * @return {deploy_values.Value[]} The values.
+     */
+    protected getValuesForFile(file: string): deploy_values.Value[] {
+        return [
+            new deploy_values.StaticValue({
+                value: Path.dirname(file),
+            }, 'remote_dir'),
+            new deploy_values.StaticValue({
+                value: file,
+            }, 'remote_file'),
+            new deploy_values.StaticValue({
+                value: Path.basename(file),
+            }, 'remote_name'),
+        ];
+    }
 
     /**
      * Gets if the client is currently connected or not.
@@ -309,6 +529,8 @@ export abstract class FTPClientBase extends deploy_clients.AsyncFileListBase {
     protected onDispose() {
         this.end().then(() => {
         }).catch((err) => {
+            deploy_log.CONSOLE
+                      .trace(err, 'clients.ftp.FTPClientBase.onDispose(1)');
         });
     }
 
@@ -358,6 +580,36 @@ export abstract class FTPClientBase extends deploy_clients.AsyncFileListBase {
      */
     public abstract put(file: string, data: Buffer): Promise<void>;
 
+    /**
+     * Sets a connection value.
+     * 
+     * @param {string} name The name of the value.
+     * @param {any} val The value to set.
+     * 
+     * @return this
+     * 
+     * @chainable
+     */
+    public setValue(name: string, val: any): this {
+        name = deploy_helpers.normalizeString( name );
+
+        let existingValue = deploy_helpers.from(
+            this.values
+        ).singleOrDefault(v => v.name === name);
+        if (_.isSymbol(existingValue)) {
+            existingValue = new deploy_values.FunctionValue(() => {
+                return this._CONNECTION_VALUES[ name ];
+            }, name);
+
+            this.values
+                .push( existingValue );
+        }
+
+        this._CONNECTION_VALUES[ name ] = val;
+
+        return this;
+    }
+
     /** @inheritdoc */
     public get type() {
         return 'ftp';
@@ -372,7 +624,13 @@ export abstract class FTPClientBase extends deploy_clients.AsyncFileListBase {
 
     /** @inheritdoc */
     public async uploadFile(path: string, data: Buffer): Promise<void> {
-        const BEFORE_UPLOAD_RESULT = await await this.onBeforeUpload(path, data);
+        const VALUES: deploy_values.Value[] = [            
+        ].concat( this.getValuesForFile(path) );
+
+        await this.executeCommandsBy(opts => opts.commands.beforeUpload,
+                                     VALUES);
+
+        const BEFORE_UPLOAD_RESULT = await this.onBeforeUpload(path, data);
         
         let hasBeenUploaded = false;
         let uploadError: any;
@@ -389,6 +647,9 @@ export abstract class FTPClientBase extends deploy_clients.AsyncFileListBase {
             await this.put(path, data);
 
             hasBeenUploaded = true;
+
+            await this.executeCommandsBy(opts => opts.commands.uploaded,
+                                         VALUES);
         }
         catch (e) {
             uploadError = e;
@@ -401,6 +662,11 @@ export abstract class FTPClientBase extends deploy_clients.AsyncFileListBase {
             );
         }
     }
+
+    /**
+     * Stores the list of connection values.
+     */
+    public readonly values: deploy_values.Value[] = [];
 }
 
 class FtpClient extends FTPClientBase {
@@ -521,6 +787,39 @@ class FtpClient extends FTPClientBase {
                 else {
                     COMPLETED(null, false);
                 }
+            }
+            catch (e) {
+                COMPLETED(e);
+            }
+        });
+    }
+
+    public execute(cmd: string): Promise<Buffer> {
+        cmd = deploy_helpers.toStringSafe( cmd );
+
+        const ME = this;
+        
+        return new Promise<any>((resolve, reject) => {
+            const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
+
+            try {
+                const SEND_FUNC: Function = ME.connection['_send'];
+
+                const ARGS = [
+                    cmd,
+                    (err, respTxt, respCode) => {
+                        if (err) {
+                            COMPLETED( err );
+                        }
+                        else {
+                            COMPLETED(null,
+                                      new Buffer(`${respCode} ${deploy_helpers.toStringSafe(respTxt)}`, 'ascii'));
+                        }
+                    }
+                ];
+
+                SEND_FUNC.apply(ME.connection,
+                                ARGS);
             }
             catch (e) {
                 COMPLETED(e);
@@ -760,7 +1059,7 @@ class JsFTPClient extends FTPClientBase {
         
         let host = deploy_helpers.normalizeString(ME.options.host);
         if ('' === host) {
-            host = '127.0.0.1';
+            host = deploy_contracts.DEFAULT_HOST;
         }
 
         let port = parseInt(deploy_helpers.toStringSafe(ME.options.port).trim());
@@ -860,6 +1159,41 @@ class JsFTPClient extends FTPClientBase {
             }
             catch (e) {
                 COMPLETED(e);
+            }
+        });
+    }
+
+    public execute(cmd: string): Promise<any> {
+        cmd = deploy_helpers.toStringSafe(cmd);
+
+        const ME = this;
+        
+        return new Promise<any>((resolve, reject) => {
+            const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
+
+            try {
+                const PARTS = cmd.split(' ')
+                                 .filter(x => '' !== x.trim());
+
+                let c: string;
+                if (PARTS.length > 0) {
+                    c = PARTS[0].trim();
+                }
+
+                const ARGS = PARTS.filter((a, i) => i > 0);
+
+                ME.connection.raw(c, ARGS, (err, result) => {
+                    if (err) {
+                        COMPLETED( err );
+                    }
+                    else {
+                        COMPLETED(null,
+                                  _.isNil(result.text) ? result.text : new Buffer(result.text, 'ascii'));
+                    }
+                });
+            }
+            catch (e) {
+                COMPLETED( e );
             }
         });
     }
@@ -1162,6 +1496,8 @@ export async function openConnection(opts: FTPConnectionOptions): Promise<FTPCli
     if (!(await CLIENT.connect())) {
         throw new Error(i18.t('ftp.couldNotConnect'));
     }
+    
+    await CLIENT.executeCommandsBy(opts => opts.commands.connected);
 
     return CLIENT;
 }

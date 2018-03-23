@@ -15,10 +15,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as _ from 'lodash';
 import * as deploy_clients from '../clients';
+import * as deploy_code from '../code';
+import * as deploy_contracts from '../contracts';
 import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
 import * as deploy_log from '../log';
+import * as deploy_values from '../values';
 import * as FS from 'fs';
 import * as Minimatch from 'minimatch';
 import * as Moment from 'moment';
@@ -63,6 +67,67 @@ export interface SFTPBeforeUploadArguments {
 export type SFTPBeforeUploadResult = void | false;
 
 /**
+ * A possible value for a SFTP command.
+ */
+export type SFTPCommand = SFTPCommandEntry | string;
+
+/**
+ * SFTP command settings.
+ */
+export interface SFTPCommandSettings {
+    /**
+     * Commands to invoke BEFORE a file is going to be deleted.
+     */
+    readonly beforeDelete?: SFTPCommand | SFTPCommand[];
+    /**
+     * Commands to invoke BEFORE a file is going to be downloaded.
+     */
+    readonly beforeDownload?: SFTPCommand | SFTPCommand[];
+    /**
+     * Commands to invoke BEFORE a file is going to be uploaed.
+     */
+    readonly beforeUpload?: SFTPCommand | SFTPCommand[];
+    /**
+     * Commands to invoke AFTER a connection has been establied.
+     */
+    readonly connected?: SFTPCommand | SFTPCommand[];
+    /**
+     * Commands to invoke AFTER a file has been deleted.
+     */
+    readonly deleted?: SFTPCommand | SFTPCommand[];
+    /**
+     * Commands to invoke AFTER a file has been downloaded.
+     */
+    readonly downloaded?: SFTPCommand | SFTPCommand[];
+    /**
+     * The (output) encoding of the commands.
+     */
+    readonly encoding?: string;
+    /**
+     * Commands to invoke AFTER a file has been uploaded.
+     */
+    readonly uploaded?: SFTPCommand | SFTPCommand[];    
+}
+
+/**
+ * A SFTP command entry.
+ */
+export interface SFTPCommandEntry {
+    /**
+     * The command to execute.
+     */
+    readonly command: string;
+    /**
+     * The code to execute before output is written via 'writeOutputTo' setting. The result of the execution will be used as value to write.
+     */
+    readonly executeBeforeWriteOutputTo?: string;
+    /**
+     * The name of the placeholder where to write the output to.
+     */
+    readonly writeOutputTo?: string;
+}
+
+/**
  * Options for a SFTP connection.
  */
 export interface SFTPConnectionOptions {
@@ -79,6 +144,10 @@ export interface SFTPConnectionOptions {
      * Is invoked BEFORE an upload process starts.
      */
     readonly beforeUpload?: SFTPBeforeUpload;
+    /**
+     * SFTP commands.
+     */
+    readonly commands?: SFTPCommandSettings;
     /**
      * Show debug output or not.
      */
@@ -131,6 +200,10 @@ export interface SFTPConnectionOptions {
      * Is invoked AFTER an upload process.
      */
     readonly uploadCompleted?: SFTPUploadCompleted;
+    /**
+     * A function that provides values for the connection.
+     */
+    readonly valueProvider?: deploy_values.ValuesProvider;    
 }
 
 /**
@@ -208,6 +281,7 @@ export const DEFAULT_HOST = '127.0.0.1';
  */
 export class SFTPClient extends deploy_clients.AsyncFileListBase {
     private _checkedRemoteDirs: { [ path: string ]: boolean } = {};
+    private readonly _CONNECTION_VALUES: deploy_contracts.KeyValuePairs = {};
 
     /**
      * Initializes a new instance of that class.
@@ -243,8 +317,21 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
     public async deleteFile(path: string): Promise<boolean> {
         path = toSFTPPath(path);
 
+        const VALUES: deploy_values.Value[] = [            
+        ].concat( this.getValuesForFile(path) );
+
         try {
+            await this.executeCommandsBy(
+                (o) => o.commands.beforeDelete,
+                VALUES,
+            );
+
             await this.client.delete(path);
+
+            await this.executeCommandsBy(
+                (o) => o.commands.deleted,
+                VALUES,
+            );
 
             return true;
         }
@@ -259,10 +346,18 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
 
         path = toSFTPPath(path);
 
+        const VALUES: deploy_values.Value[] = [            
+        ].concat( this.getValuesForFile(path) );
+
         return new Promise<Buffer>(async (resolve, reject) => {
             const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
 
             try {
+                await this.executeCommandsBy(
+                    (o) => o.commands.beforeDownload,
+                    VALUES,
+                );
+
                 const STREAM = await ME.client.get(path, null, null);
 
                 STREAM.once('error', (err) => {
@@ -295,6 +390,11 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
                         }
                     });
                 });
+
+                await this.executeCommandsBy(
+                    (o) => o.commands.downloaded,
+                    VALUES,
+                );
         
                 COMPLETED(null, DOWNLOADED_DATA);
             }
@@ -302,6 +402,216 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
                 COMPLETED(e);
             }
         });
+    }
+
+    /**
+     * Executes commands by using a provider.
+     * 
+     * @param {Function} provider The provider.
+     * @param {deploy_values.Value|deploy_values.Value[]} [additionalValues] One or more additional values.
+     * 
+     * @return {Promise<Buffer[]>} The promise with the execution results.
+     */
+    public executeCommandsBy(
+        provider: (opts: SFTPConnectionOptions) => SFTPCommand | SFTPCommand[],
+        additionalValues?: deploy_values.Value | deploy_values.Value[],
+    ): Promise<Buffer[]> {
+        return new Promise<Buffer[]>(async (resolve, reject) => {
+            const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
+
+            if (!this.options.commands) {
+                COMPLETED(null, []);
+                return;
+            }
+
+            try {
+                const COMMANDS = deploy_helpers.asArray( provider(this.options) );
+
+                let connectionValues: deploy_values.Value[];
+                if (this.options.valueProvider) {
+                    connectionValues = deploy_helpers.asArray( this.options.valueProvider() );
+                }
+                else {
+                    connectionValues = [];
+                }
+
+                let enc = deploy_helpers.normalizeString( this.options.commands.encoding );
+                if ('' === enc) {
+                    enc = undefined;
+                }
+
+                const EXECUTE_COMMAND = (entry: SFTPCommandEntry) => {
+                    return new Promise<Buffer>((res, rej) => {
+                        const ADDITIONAL_COMMAND_VALUES: deploy_values.Value[] = [
+                        ].concat( deploy_helpers.asArray(additionalValues) );
+
+                        const ALL_COMMAND_VALUES = connectionValues.concat( ADDITIONAL_COMMAND_VALUES )
+                                                                   .concat( this.values );
+
+                        let output: Buffer;
+                        const COMP = (err: any) => {
+                            if (err) {
+                                rej( err );
+                            }
+                            else {
+                                try {
+                                    const WRITE_TO = deploy_helpers.normalizeString(entry.writeOutputTo);
+                                    if ('' !== WRITE_TO) {
+                                        let outputToWrite: any = _.isNil(output) ? output
+                                                                                 : output.toString(enc);
+
+                                        const EXECUTE_BEFORE_WRITE = deploy_helpers.toStringSafe( entry.executeBeforeWriteOutputTo );
+                                        if (!deploy_helpers.isEmptyString(EXECUTE_BEFORE_WRITE)) {
+                                            const EXECUTE_BEFORE_WRITE_VALUES: deploy_values.Value[] = [
+                                                new deploy_values.StaticValue({
+                                                    value: outputToWrite,
+                                                }, WRITE_TO),
+                                            ];
+
+                                            outputToWrite = deploy_code.exec({
+                                                code: EXECUTE_BEFORE_WRITE,
+                                                context: {
+                                                    command: entry,
+                                                    output: res,
+                                                },
+                                                values: ALL_COMMAND_VALUES.concat( EXECUTE_BEFORE_WRITE_VALUES ),
+                                            });
+                                        }
+
+                                        this.setValue(WRITE_TO,
+                                                      deploy_helpers.toStringSafe( outputToWrite ));
+                                    }
+
+                                    res( output );
+                                }
+                                catch (e) {
+                                    rej( e );
+                                }
+                            }
+                        };
+
+                        try {
+                            const COMMAND_TO_EXECUTE = deploy_values.replaceWithValues(
+                                ALL_COMMAND_VALUES,
+                                entry.command,
+                            );
+
+                            if (deploy_helpers.isEmptyString(COMMAND_TO_EXECUTE)) {
+                                COMP(null);                                
+                                return;
+                            }
+
+                            output = Buffer.alloc(0);
+
+                            this.client['client'].exec(entry.command, (err, stream) => {
+                                if (err) {
+                                    COMP(err);
+                                    return;
+                                }
+
+                                let dataListener: (chunk: any) => void;
+                                let endListener: (chunk: any) => void;
+                                let errorListener: (err: any) => void;
+
+                                const CLOSE_STREAM = (err: any) => {
+                                    deploy_helpers.tryRemoveListener(stream, 'end', endListener);
+                                    deploy_helpers.tryRemoveListener(stream, 'error', errorListener);
+                                    deploy_helpers.tryRemoveListener(stream, 'data', dataListener);
+
+                                    if (err) {
+                                        COMP(err);
+                                    }
+                                    else {
+                                        COMP(null);
+                                    }
+                                };
+
+                                errorListener = (streamErr) => {
+                                    CLOSE_STREAM( streamErr );
+                                };
+
+                                endListener = () => {
+                                    CLOSE_STREAM( null );
+                                };
+                                
+                                dataListener = (chunk) => {
+                                    if (!chunk) {
+                                        return;
+                                    }
+
+                                    try {
+                                        if (!Buffer.isBuffer(chunk)) {
+                                            chunk = new Buffer(deploy_helpers.toStringSafe(chunk), enc);
+                                        }
+
+                                        output = Buffer.concat([ output, chunk ]);
+                                    }
+                                    catch (e) {
+                                        CLOSE_STREAM( e );
+                                    }
+                                };
+
+                                try {
+                                    stream.once('error', endListener);                        
+                                    stream.once('end', endListener);                        
+                                    stream.on('data', dataListener);
+                                }
+                                catch (e) {
+                                    CLOSE_STREAM(err);
+                                }
+                            });
+                        }
+                        catch (e) {
+                            COMP(e);
+                        }
+                    });
+                };
+
+                const OUTPUTS: Buffer[] = [];
+
+                for (const C of COMMANDS) {
+                    let entry: SFTPCommandEntry;
+                    if (deploy_helpers.isObject<SFTPCommandEntry>(C)) {
+                        entry = C;
+                    }
+                    else {
+                        entry = {
+                            command: deploy_helpers.toStringSafe(C),
+                        };
+                    }
+
+                    OUTPUTS.push(
+                        await EXECUTE_COMMAND( entry )
+                    );
+                }
+
+                COMPLETED(null, OUTPUTS);
+            }
+            catch (e) {
+                COMPLETED(e);
+            }
+        });
+    }
+
+    /**
+     * Returns a list of values for a file.
+     * 
+     * @param {string} file The path of the remote file.
+     * 
+     * @return {deploy_values.Value[]} The values.
+     */
+    protected getValuesForFile(file: string): deploy_values.Value[] {
+        return [
+            new deploy_values.StaticValue({
+                value: Path.dirname(file),
+            }, 'remote_dir'),
+            new deploy_values.StaticValue({
+                value: file,
+            }, 'remote_file'),
+            new deploy_values.StaticValue({
+                value: Path.basename(file),
+            }, 'remote_name'),
+        ];
     }
 
     /** @inheritdoc */
@@ -339,13 +649,7 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
                             );
                         }
                         finally {
-                            try {
-                                await CLIENT.client.end();
-                            }
-                            catch (e) {
-                                deploy_log.CONSOLE
-                                          .trace(e, 'clients.sftp.SFTPClient.listDirectory().FI.download()');
-                            }
+                            deploy_helpers.tryDispose( CLIENT );
                         }
                     },
                     //TODO: exportPath: false,
@@ -372,6 +676,45 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
         }
 
         return RESULT;
+    }
+
+    /** @inheritdoc */
+    protected onDispose() {
+        this.client.end().then(() => {
+        }).catch((err) => {
+            deploy_log.CONSOLE
+                      .trace(err, 'clients.sftp.SFTPClient.onDispose(1)');
+        });
+    }
+
+    /**
+     * Sets a connection value.
+     * 
+     * @param {string} name The name of the value.
+     * @param {any} val The value to set.
+     * 
+     * @return this
+     * 
+     * @chainable
+     */
+    public setValue(name: string, val: any): this {
+        name = deploy_helpers.normalizeString( name );
+
+        let existingValue = deploy_helpers.from(
+            this.values
+        ).singleOrDefault(v => v.name === name);
+        if (_.isSymbol(existingValue)) {
+            existingValue = new deploy_values.FunctionValue(() => {
+                return this._CONNECTION_VALUES[ name ];
+            }, name);
+
+            this.values
+                .push( existingValue );
+        }
+
+        this._CONNECTION_VALUES[ name ] = val;
+
+        return this;
     }
 
     /** @inheritdoc */
@@ -452,9 +795,17 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
                     }
                 }
 
+                const VALUES: deploy_values.Value[] = [            
+                ].concat( this.getValuesForFile(path) );        
+
                 let uploadError: any;
                 let hasBeenUploaded = false;
                 try {
+                    await this.executeCommandsBy(
+                        (o) => o.commands.beforeUpload,
+                        VALUES,
+                    );
+
                     let doUpload = true;
 
                     const BEFORE_UPLOAD_ARGS: SFTPBeforeUploadArguments = {
@@ -485,6 +836,11 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
                         );
 
                         hasBeenUploaded = true;
+
+                        await this.executeCommandsBy(
+                            (o) => o.commands.uploaded,
+                            VALUES,
+                        );
                     }
                 }
                 catch (e) {
@@ -543,6 +899,11 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
             }
         });
     }
+
+    /**
+     * Stores the list of connection values.
+     */
+    public readonly values: deploy_values.Value[] = [];
 }
 
 
@@ -573,7 +934,7 @@ export async function openConnection(opts: SFTPConnectionOptions): Promise<SFTPC
 
     let host = deploy_helpers.normalizeString(opts.host);
     if ('' === host) {
-        host = '127.0.0.1';
+        host = deploy_contracts.DEFAULT_HOST;
     }
 
     let port = parseInt(
@@ -660,6 +1021,10 @@ export async function openConnection(opts: SFTPConnectionOptions): Promise<SFTPC
                       .debug(info, `clients.sftp`);
         }
     });
+
+    await CLIENT.executeCommandsBy(
+        (o) => o.commands.connected,
+    );
 
     return CLIENT;
 }

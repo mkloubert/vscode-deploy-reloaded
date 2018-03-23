@@ -91,6 +91,10 @@ export interface SFTPTarget extends deploy_targets.Target {
      */
     readonly beforeUploadOptions?: any;
     /**
+     * Commands to execute.
+     */
+    readonly commands?: deploy_clients_sftp.SFTPCommandSettings;
+    /**
      * Show debug output or not.
      */
     readonly debug?: boolean;
@@ -495,6 +499,7 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
                 client: await deploy_clients_sftp.openConnection({
                     agent: agent,
                     beforeUpload: beforeUpload,
+                    commands: target.commands,
                     debug: target.debug,
                     hashAlgorithm: this.replaceWithValues(target, target.hashAlgorithm),
                     hashes: target.hashes,
@@ -515,6 +520,7 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
                     ),                    
                     uploadCompleted: uploadCompleted,
                     user: user,
+                    valueProvider: () => WORKSPACE.getValues(),
                 }),
                 getDir: (subDir) => {
                     return deploy_helpers.normalizePath(
