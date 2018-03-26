@@ -293,6 +293,20 @@ export interface Configuration extends deploy_packages.WithFastFileCheckSettings
 }
 
 /**
+ * List of deploy events.
+ */
+export enum DeployEvent {
+    /**
+     * Before deploy a file.
+     */
+    BeforeDeployFile = 1,
+    /**
+     * After file has been deployed (successfully).
+     */
+    FileDeployed = 2,
+}
+
+/**
  * List of deploy operations.
  */
 export enum DeployOperation {

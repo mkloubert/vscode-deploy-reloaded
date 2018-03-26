@@ -23,7 +23,6 @@ import * as deploy_helpers from './helpers';
 import * as deploy_html from './html';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
-import * as deploy_session from './session';
 import * as deploy_targets from './targets';
 import * as deploy_transformers from './transformers';
 import * as deploy_workspaces from './workspaces';
@@ -719,7 +718,7 @@ export async function pullFilesFrom(files: string[],
                                         require: (id) => {
                                             return deploy_helpers.requireFromExtension(id);
                                         },
-                                        sessionState: deploy_session.SESSION_STATE,
+                                        sessionState: deploy_helpers.SESSION,
                                         settingFolder: ME.settingFolder,
                                         state: undefined,
                                         workspaceRoot: ME.rootPath,

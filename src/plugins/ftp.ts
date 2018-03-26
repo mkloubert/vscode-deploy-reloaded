@@ -20,7 +20,6 @@ import * as deploy_clients_ftp from '../clients/ftp';
 import * as deploy_contracts from '../contracts';
 import * as deploy_helpers from '../helpers';
 import * as deploy_plugins from '../plugins';
-import * as deploy_session from '../session';
 import * as deploy_targets from '../targets';
 import * as deploy_workspaces from '../workspaces';
 import * as Events from 'events';
@@ -58,6 +57,28 @@ export interface FTPBeforeUploadModuleExecutorArguments extends FTPUploadScriptA
 
 interface FTPContext extends deploy_plugins.AsyncFileClientPluginContext<FTPTarget,
                                                                          deploy_clients_ftp.FTPClientBase> {
+}
+
+/**
+ * Script arguments for a deploy event.
+ */
+export interface FTPDeployEventScriptArguments extends deploy_contracts.ScriptArguments {
+    /**
+     * The kind of deploy event.
+     */
+    readonly deployEvent: deploy_contracts.DeployEvent;
+    /**
+     * The kind of operation.
+     */
+    readonly deployOperation: deploy_contracts.DeployOperation;
+    /**
+     * The underlying target.
+     */
+    readonly target: FTPTarget;
+    /**
+     * The underlying workspace.
+     */
+    readonly workspace: deploy_workspaces.Workspace;
 }
 
 /**
@@ -121,15 +142,7 @@ export interface FTPTarget extends deploy_targets.Target {
 /**
  * Arguments for an upload based event.
  */
-export interface FTPUploadScriptArguments extends deploy_contracts.ScriptArguments {
-    /**
-     * The underlying target.
-     */
-    readonly target: FTPTarget;
-    /**
-     * The underlying workspace.
-     */
-    readonly workspace: deploy_workspaces.Workspace;
+export interface FTPUploadScriptArguments extends FTPDeployEventScriptArguments {
 }
 
 /**
@@ -250,6 +263,8 @@ class FTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<FTPTarget,
                         const ARGS: FTPBeforeUploadModuleExecutorArguments = {
                             _: require('lodash'),
                             context: args,
+                            deployEvent: deploy_contracts.DeployEvent.BeforeDeployFile,
+                            deployOperation: deploy_contracts.DeployOperation.Deploy,
                             events: this._EVENTS,
                             extension: target.__workspace.context.extension,
                             folder: target.__workspace.folder,
@@ -267,7 +282,7 @@ class FTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<FTPTarget,
                             require: (id) => {
                                 return deploy_helpers.requireFromExtension(id);
                             },
-                            sessionState: deploy_session.SESSION_STATE,
+                            sessionState: deploy_helpers.SESSION,
                             settingFolder: undefined,
                             state: undefined,
                             target: target,
@@ -346,6 +361,8 @@ class FTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<FTPTarget,
                         const ARGS: FTPUploadedModuleExecutorArguments = {
                             _: require('lodash'),
                             context: args,
+                            deployEvent: deploy_contracts.DeployEvent.FileDeployed,
+                            deployOperation: deploy_contracts.DeployOperation.Deploy,
                             events: this._EVENTS,
                             extension: target.__workspace.context.extension,
                             folder: target.__workspace.folder,
@@ -363,7 +380,7 @@ class FTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<FTPTarget,
                             require: (id) => {
                                 return deploy_helpers.requireFromExtension(id);
                             },
-                            sessionState: deploy_session.SESSION_STATE,
+                            sessionState: deploy_helpers.SESSION,
                             settingFolder: undefined,
                             state: undefined,
                             target: target,

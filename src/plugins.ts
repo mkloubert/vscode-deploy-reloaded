@@ -19,7 +19,6 @@ import * as deploy_clients from './clients';
 import * as deploy_contracts from './contracts';
 import * as deploy_files from './files';
 import * as deploy_helpers from './helpers';
-import * as deploy_session from './session';
 import * as deploy_targets from './targets';
 import * as deploy_transformers from './transformers';
 import * as deploy_values from './values';
@@ -549,7 +548,7 @@ export abstract class FileToUploadBase implements FileToUpload {
                 require: (id) => {
                     return deploy_helpers.requireFromExtension(id);
                 },
-                sessionState: deploy_session.SESSION_STATE,
+                sessionState: deploy_helpers.SESSION,
                 settingFolder: ME.workspace.settingFolder,
                 state: undefined,
                 workspaceRoot: ME.workspace.rootPath,

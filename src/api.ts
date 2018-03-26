@@ -22,6 +22,7 @@ import * as deploy_html from './html';
 import * as deploy_values from './values';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
+import * as Events from 'events';
 import * as Express from 'express';
 import * as HTTP from 'http';
 import * as HTTPs from 'https';
@@ -32,6 +33,45 @@ import * as OS from 'os';
 import * as Path from 'path';
 import * as vscode from 'vscode';
 
+
+/**
+ * A value for an API endpoint.
+ */
+export type ApiEndpoint = ApiEndpointSettings | string;
+
+/**
+ * Settings for an API endpoint.
+ */
+export interface ApiEndpointSettings {
+    /**
+     * A list of one or more HTTP methods, which are allowed.
+     */
+    readonly methods?: string | string[];
+    /**
+     * Options for the script.
+     */
+    readonly options?: any;
+    /**
+     * The script to execute.
+     */
+    readonly script: string;    
+}
+
+/**
+ * Arguments for an API endpoint script.
+ */
+export interface ApiEndpointArguments extends deploy_contracts.ScriptArguments {
+    /**
+     * The underlying workspace.
+     */
+    readonly workspace: deploy_workspaces.Workspace;
+}
+
+/**
+ * An API endpoint module.
+ */
+export interface ApiEndpointModule {
+}
 
 /**
  * Stores the name and description of an API host.
@@ -69,6 +109,10 @@ export interface ApiSettings extends deploy_contracts.WithOptionalName {
      */
     readonly description?: string;
     /**
+     * One or more custom endpoints.
+     */
+    readonly endpoints?: deploy_contracts.KeyValuePairs<ApiEndpoint>;
+    /**
      * The custom name of the real for basic authentification.
      */
     readonly realm?: string;
@@ -97,6 +141,10 @@ export interface ApiSettings extends deploy_contracts.WithOptionalName {
          */
         readonly rejectUnauthorized?: boolean;
     };
+    /**
+     * Use build-in endpoints or not.
+     */
+    readonly useBuildIn?: boolean;
     /**
      * One or more users to define.
      */
@@ -191,6 +239,9 @@ export const X_HEADER_EDITOR_LANG = 'X-Vscode-Deploy-Reloaded-Lang';
  * An API host.
  */
 export class ApiHost extends deploy_helpers.DisposableBase {
+    private readonly _EVENTS: NodeJS.EventEmitter = new Events.EventEmitter();
+    private readonly _GLOBAL_STATE: deploy_contracts.KeyValuePairs = {};
+    private readonly _SCRIPT_STATES: deploy_contracts.KeyValuePairs = {};
     private _server: HTTP.Server | HTTPs.Server;
 
     /**
@@ -291,6 +342,7 @@ export class ApiHost extends deploy_helpers.DisposableBase {
             }
         }
 
+        // IP check
         APP.use(function (req: Express.Request, resp: Express.Response, next: Function) {
             let canConnect = ALLOWED_IPS.length < 1;
             if (!canConnect) {
@@ -359,7 +411,11 @@ export class ApiHost extends deploy_helpers.DisposableBase {
                        .send();
         });
 
-        await this.setupEndPoints(APP);
+        if (deploy_helpers.toBooleanSafe(this.settings.useBuildIn, true)) {
+            await this.setupEndPoints(APP);
+        }
+
+        await this.setupCustomEndpoints(APP);
 
         // error handler
         APP.use(function(err: any, req: Express.Request, resp: Express.Response, next: Function) {
@@ -369,7 +425,7 @@ export class ApiHost extends deploy_helpers.DisposableBase {
 
             resp.setHeader('Content-type', 'application/json; charset=utf-8');
 
-            resp.status(500).send(
+            return resp.status(500).send(
                 new Buffer(
                     JSON.stringify({
                         success: false,
@@ -464,6 +520,8 @@ export class ApiHost extends deploy_helpers.DisposableBase {
 
             this._server = null;
         }
+
+        this._EVENTS.removeAllListeners();
     }
 
     /**
@@ -484,6 +542,144 @@ export class ApiHost extends deploy_helpers.DisposableBase {
 
         return ME.workspace
                  .replaceWithValues(val, ADDITIONAL_VALUES);
+    }
+
+    private async setupCustomEndpoints(app: Express.Express) {
+        const ME = this;        
+
+        const ENDPOINTS = ME.settings.endpoints;
+        if (!ENDPOINTS) {
+            return;
+        }
+
+        const NORMALIZER = (str: string) => str.toUpperCase().trim();        
+
+        _.forIn(ENDPOINTS, (ep, route) => {
+            if (_.isNil(ep)) {
+                return;
+            }
+
+            let endpoint: ApiEndpointSettings;
+            if (deploy_helpers.isObject<ApiEndpointSettings>(ep)) {
+                endpoint = ep; 
+            }
+            else {
+                endpoint = {
+                    script: deploy_helpers.toStringSafe(ep),
+                };
+            }
+
+            route = deploy_helpers.toStringSafe(route).trim();
+            if (!route.startsWith('/')) {
+                route = '/' + route;
+            }
+            route = '/api' + route;
+
+            app.all(route, async function(req, resp) {
+                const METHOD = deploy_helpers.normalizeString(req.method, NORMALIZER);
+                const ALLOWED_METHODS = deploy_helpers.asArray(endpoint.methods).map(m => {
+                    return deploy_helpers.normalizeString(m, NORMALIZER);
+                }).filter(m => '' !== m);
+
+                if (ALLOWED_METHODS.length > 0) {
+                    if (ALLOWED_METHODS.indexOf(METHOD) < 0) {
+                        return resp.status(405)
+                                   .send();
+                    }
+                }
+
+                const SCRIPT_FILE = await ME.workspace.getExistingSettingPath( endpoint.script );
+                if (false !== SCRIPT_FILE) {
+                    const SCRIPT_MODULE = deploy_helpers.loadModule<ApiEndpointModule>(SCRIPT_FILE);
+                    if (SCRIPT_MODULE) {
+                        let requestFunc: Function = SCRIPT_MODULE[ METHOD ];
+                        if (!_.isFunction(requestFunc)) {
+                            requestFunc = SCRIPT_MODULE['request'];
+                        }
+
+                        if (_.isFunction(requestFunc)) {
+                            const SCRIPT_STATE_KEY = SCRIPT_FILE;
+                            const WORKSPACE = ME.workspace;
+
+                            const ARGS: ApiEndpointArguments = {
+                                _: require('lodash'),
+                                events: ME._EVENTS,
+                                extension: WORKSPACE.context.extension,
+                                folder: WORKSPACE.folder,
+                                globalEvents: deploy_helpers.EVENTS,
+                                globals: WORKSPACE.globals,
+                                globalState: ME._GLOBAL_STATE,  //TODO
+                                homeDir: deploy_helpers.getExtensionDirInHome(),
+                                logger: WORKSPACE.createLogger(),
+                                options: deploy_helpers.cloneObject(endpoint.options),
+                                output: undefined,
+                                replaceWithValues: function (val) {
+                                    return this.workspace
+                                               .replaceWithValues(val);
+                                },
+                                require: (id) => {
+                                    return deploy_helpers.requireFromExtension(id);
+                                },
+                                sessionState: deploy_helpers.SESSION,
+                                settingFolder: undefined,
+                                state: undefined,
+                                workspace: WORKSPACE,
+                                workspaceRoot: undefined,
+                            };
+
+                            // ARGS.output
+                            Object.defineProperty(ARGS, 'output', {
+                                enumerable: true,
+
+                                get: function () {
+                                    return this.workspace.output;
+                                }
+                            });
+
+                            // ARGS.settingFolder
+                            Object.defineProperty(ARGS, 'settingFolder', {
+                                enumerable: true,
+
+                                get: function () {
+                                    return this.workspace.settingFolder;
+                                }
+                            });
+
+                            // ARGS.state
+                            Object.defineProperty(ARGS, 'state', {
+                                enumerable: true,
+
+                                get: () => {
+                                    return ME._SCRIPT_STATES[ SCRIPT_STATE_KEY ];
+                                },
+
+                                set: (newValue) => {
+                                    ME._SCRIPT_STATES[ SCRIPT_STATE_KEY ] = newValue;
+                                }
+                            });
+
+                            // ARGS.workspaceRoot
+                            Object.defineProperty(ARGS, 'workspaceRoot', {
+                                enumerable: true,
+
+                                get: function () {
+                                    return this.workspace.rootPath;
+                                }
+                            });
+
+                            const FUNC_ARGS = [ ARGS ].concat( deploy_helpers.toArray(arguments) );
+
+                            return Promise.resolve(
+                                requestFunc.apply(SCRIPT_MODULE, FUNC_ARGS)
+                            );
+                        }
+                    }
+                }
+
+                return resp.status(501)
+                           .send();
+            });
+        });
     }
 
     private async setupEndPoints(app: Express.Express) {

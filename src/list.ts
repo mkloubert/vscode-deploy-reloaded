@@ -21,7 +21,6 @@ import * as deploy_files from './files';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
 import * as deploy_plugins from './plugins';
-import * as deploy_session from './session';
 import * as deploy_targets from './targets';
 import * as deploy_transformers from './transformers';
 import * as deploy_workspaces from './workspaces';
@@ -120,7 +119,7 @@ function createPullDataTransformerContext(file: deploy_contracts.WithNameAndPath
         require: (id) => {
             return deploy_helpers.requireFromExtension(id);
         },
-        sessionState: deploy_session.SESSION_STATE,
+        sessionState: deploy_helpers.SESSION,
         settingFolder: WORKSPACE.settingFolder,
         state: undefined,
         workspaceRoot: WORKSPACE.rootPath,

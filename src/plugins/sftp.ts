@@ -20,7 +20,6 @@ import * as deploy_clients_sftp from '../clients/sftp';
 import * as deploy_contracts from '../contracts';
 import * as deploy_helpers from '../helpers';
 import * as deploy_plugins from '../plugins';
-import * as deploy_session from '../session';
 import * as deploy_targets from '../targets';
 import * as deploy_workspaces from '../workspaces';
 import * as Events from 'events';
@@ -59,6 +58,28 @@ export interface SFTPBeforeUploadModuleExecutorArguments extends SFTPUploadScrip
 
 interface SFTPContext extends deploy_plugins.AsyncFileClientPluginContext<SFTPTarget,
                                                                           deploy_clients_sftp.SFTPClient> {
+}
+
+/**
+ * Script arguments for a deploy event.
+ */
+export interface SFTPDeployEventScriptArguments extends deploy_contracts.ScriptArguments {
+    /**
+     * The kind of deploy event.
+     */
+    readonly deployEvent: deploy_contracts.DeployEvent;
+    /**
+     * The kind of operation.
+     */
+    readonly deployOperation: deploy_contracts.DeployOperation;
+    /**
+     * The underlying target.
+     */
+    readonly target: SFTPTarget;
+    /**
+     * The underlying workspace.
+     */
+    readonly workspace: deploy_workspaces.Workspace;
 }
 
 /**
@@ -159,7 +180,7 @@ export interface SFTPTarget extends deploy_targets.Target {
 /**
  * Arguments for an upload based event.
  */
-export interface SFTPUploadScriptArguments extends deploy_contracts.ScriptArguments {
+export interface SFTPUploadScriptArguments extends SFTPDeployEventScriptArguments {
     /**
      * The underlying target.
      */
@@ -314,6 +335,8 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
                         const ARGS: SFTPBeforeUploadModuleExecutorArguments = {
                             _: require('lodash'),
                             context: args,
+                            deployEvent: deploy_contracts.DeployEvent.BeforeDeployFile,
+                            deployOperation: deploy_contracts.DeployOperation.Deploy,
                             events: this._EVENTS,
                             extension: target.__workspace.context.extension,
                             folder: target.__workspace.folder,
@@ -331,7 +354,7 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
                             require: (id) => {
                                 return deploy_helpers.requireFromExtension(id);
                             },
-                            sessionState: deploy_session.SESSION_STATE,
+                            sessionState: deploy_helpers.SESSION,
                             settingFolder: undefined,
                             state: undefined,
                             target: target,
@@ -410,6 +433,8 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
                         const ARGS: SFTPUploadedModuleExecutorArguments = {
                             _: require('lodash'),
                             context: args,
+                            deployEvent: deploy_contracts.DeployEvent.FileDeployed,
+                            deployOperation: deploy_contracts.DeployOperation.Deploy,
                             events: this._EVENTS,
                             extension: target.__workspace.context.extension,
                             folder: target.__workspace.folder,
@@ -427,7 +452,7 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
                             require: (id) => {
                                 return deploy_helpers.requireFromExtension(id);
                             },
-                            sessionState: deploy_session.SESSION_STATE,
+                            sessionState: deploy_helpers.SESSION,
                             settingFolder: undefined,
                             state: undefined,
                             target: target,

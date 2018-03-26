@@ -21,7 +21,6 @@ import * as deploy_deploy from './deploy';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
 import * as deploy_pull from './pull';
-import * as deploy_session from './session';
 import * as deploy_targets from './targets';
 import * as deploy_values from './values';
 import * as deploy_workspaces from './workspaces';
@@ -261,7 +260,7 @@ export async function reloadCommands(newCfg: deploy_contracts.Configuration) {
                         require: (moduleId) => {
                             return deploy_helpers.requireFromExtension(moduleId);
                         },
-                        sessionState: deploy_session.SESSION_STATE,
+                        sessionState: deploy_helpers.SESSION,
                         settingFolder: ME.settingFolder,
                         state: undefined,
                         workspaceRoot: ME.rootPath,

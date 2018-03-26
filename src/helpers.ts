@@ -668,33 +668,6 @@ export function isSymbol(val: any): val is symbol {
 }
 
 /**
- * Loads a module from a script.
- * 
- * @param {string} file The path to the script. 
- * @param {boolean} [fromCache] Cache module or not.
- * 
- * @return {TModule} The loaded module.
- */
-export function loadModule<TModule = any>(file: string, fromCache = false): TModule {
-    file = toStringSafe(file);
-    if (isEmptyString(file)) {
-        file = './module.js';
-    }
-    if (!Path.isAbsolute(file)) {
-        file = Path.join(process.cwd(), file);
-    }
-    file = Path.resolve(file);
-
-    fromCache = toBooleanSafe(fromCache);
-
-    if (!fromCache) {
-        delete require.cache[file];
-    }
-
-    return require(file);
-}
-
-/**
  * Promise version of 'FS.lstat()' function.
  * 
  * @param {string|Buffer} path The path.

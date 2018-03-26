@@ -222,7 +222,6 @@ export abstract class FTPClientBase extends deploy_clients.AsyncFileListBase {
      */
     protected _connection: any;
     private _existingRemoteDirs: { [ path: string ]: boolean } = {};
-    private readonly _CONNECTION_VALUES: deploy_contracts.KeyValuePairs = {};
 
     /**
      * Initializes a new instance of that class.
@@ -580,36 +579,6 @@ export abstract class FTPClientBase extends deploy_clients.AsyncFileListBase {
      */
     public abstract put(file: string, data: Buffer): Promise<void>;
 
-    /**
-     * Sets a connection value.
-     * 
-     * @param {string} name The name of the value.
-     * @param {any} val The value to set.
-     * 
-     * @return this
-     * 
-     * @chainable
-     */
-    public setValue(name: string, val: any): this {
-        name = deploy_helpers.normalizeString( name );
-
-        let existingValue = deploy_helpers.from(
-            this.values
-        ).singleOrDefault(v => v.name === name);
-        if (_.isSymbol(existingValue)) {
-            existingValue = new deploy_values.FunctionValue(() => {
-                return this._CONNECTION_VALUES[ name ];
-            }, name);
-
-            this.values
-                .push( existingValue );
-        }
-
-        this._CONNECTION_VALUES[ name ] = val;
-
-        return this;
-    }
-
     /** @inheritdoc */
     public get type() {
         return 'ftp';
@@ -663,10 +632,7 @@ export abstract class FTPClientBase extends deploy_clients.AsyncFileListBase {
         }
     }
 
-    /**
-     * Stores the list of connection values.
-     */
-    public readonly values: deploy_values.Value[] = [];
+    
 }
 
 class FtpClient extends FTPClientBase {

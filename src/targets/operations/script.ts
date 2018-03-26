@@ -17,7 +17,6 @@
 
 import * as deploy_contracts from '../../contracts';
 import * as deploy_helpers from '../../helpers';
-import * as deploy_session from '../../session';
 import * as deploy_targets from '../../targets';
 import * as i18 from '../../i18';
 
@@ -117,7 +116,7 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
                 require: (id) => {
                     return deploy_helpers.requireFromExtension(id);
                 },
-                sessionState: deploy_session.SESSION_STATE,
+                sessionState: deploy_helpers.SESSION,
                 settingFolder: WORKSPACE.settingFolder,
                 state: undefined,
                 workspaceRoot: WORKSPACE.rootPath,

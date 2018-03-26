@@ -589,12 +589,9 @@ async function activateExtension(context: vscode.ExtensionContext) {
 
     // events
     WF.next(() => {
-        context.subscriptions.push({
-            dispose: () => {
-                deploy_helpers.EVENTS
-                              .removeAllListeners();
-            }
-        });
+        context.subscriptions.push(
+            deploy_helpers.EVENT_DISPOSER
+        );
     });
 
     // output channel
