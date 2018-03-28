@@ -161,6 +161,28 @@ export async function deleteFilesIn(files: string[],
                                     target: deploy_targets.Target,
                                     fileListReloader: deploy_contracts.Reloader<string>,
                                     deleteLocalFiles?: boolean) {
+    const THIS_ARG = this;
+
+    await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        cancellable: true,
+    }, async (progress, cancelToken) => {
+        await deploy_helpers.applyFuncFor(
+            deleteFilesInWithProgress,
+            THIS_ARG,
+        )(progress, cancelToken,
+          files,
+          target,
+          fileListReloader,
+          deleteLocalFiles);
+    });
+}
+
+async function deleteFilesInWithProgress(progress: vscode.Progress<deploy_contracts.VSCodeProgress>, progressCancelToken: vscode.CancellationToken,
+                                         files: string[],
+                                         target: deploy_targets.Target,
+                                         fileListReloader: deploy_contracts.Reloader<string>,
+                                         deleteLocalFiles: boolean) {
     const ME: deploy_workspaces.Workspace = this;
 
     target = ME.prepareTarget(target);
@@ -243,6 +265,20 @@ export async function deleteFilesIn(files: string[],
     const MAPPING_SCOPE_DIRS = await deploy_targets.getScopeDirectoriesForTargetFolderMappings(target);
 
     const CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
+
+    progressCancelToken.onCancellationRequested(() => {
+        try {
+            CANCELLATION_SOURCE.cancel();
+        }
+        catch (e) {
+            ME.logger
+              .trace(e, 'delete.deleteFilesInWithProgress().progressCancelToken.onCancellationRequested()');
+        }
+    });    
+    if (progressCancelToken.isCancellationRequested) {
+        CANCELLATION_SOURCE.cancel();
+    }
+
     let targetSession: symbol | false = false;
     try {
         // cancel button
@@ -327,12 +363,26 @@ export async function deleteFilesIn(files: string[],
             try {                
                 ME.output.appendLine('');
 
+                const UPDATE_PROGRESS = (message: string) => {
+                    progress.report({
+                        increment: Math.ceil(
+                            (POPUP_STATS.succeeded.length + POPUP_STATS.failed.length) / files.length
+                        ) * 100,
+                        message: message,
+                    });
+                };
+
                 if (files.length > 1) {
                     ME.output.appendLine(
                         ME.t('DELETE.startOperation',
                              TARGET_NAME)
                     );
                 }
+
+                UPDATE_PROGRESS(
+                    ME.t('DELETE.startOperation',
+                         TARGET_NAME)
+                );
 
                 const FILES_TO_DELETE = files.map(f => {
                     const NAME_AND_PATH = deploy_targets.getNameAndPathForFileDeployment(target, f,
@@ -353,6 +403,11 @@ export async function deleteFilesIn(files: string[],
                                  f, destination) + ' '
                         );
 
+                        UPDATE_PROGRESS(
+                            ME.t('DELETE.deletingFile',
+                                 f, destination) + ' ...'
+                        );
+
                         await WAIT_WHILE_CANCELLING();
 
                         if (CANCELLATION_SOURCE.token.isCancellationRequested) {
@@ -364,8 +419,12 @@ export async function deleteFilesIn(files: string[],
                             ME.output.appendLine(`[${ME.t('error', err)}]`);
 
                             POPUP_STATS.failed.push( f );
+                            
+                            UPDATE_PROGRESS( ME.t('error', err) );
                         }
                         else {
+                            POPUP_STATS.succeeded.push( f );
+
                             try {
                                 let doDeleteLocalFiles = deploy_helpers.toBooleanSafe(deleteLocalFiles);
                                 if (doDeleteLocalFiles) {
@@ -379,12 +438,14 @@ export async function deleteFilesIn(files: string[],
                                 }
 
                                 ME.output.appendLine(`[${ME.t('ok')}]`);
+
+                                UPDATE_PROGRESS( ME.t('ok') );
                             }
                             catch (e) {
                                 ME.output.appendLine(`[${ME.t('warning')}: ${deploy_helpers.toStringSafe(e)}]`);
-                            }
-                            
-                            POPUP_STATS.succeeded.push( f );
+
+                                UPDATE_PROGRESS( `${ME.t('warning')}: ${deploy_helpers.toStringSafe(e)}` );
+                            }                            
                         }
                     };
 

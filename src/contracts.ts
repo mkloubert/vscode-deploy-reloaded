@@ -620,6 +620,14 @@ export interface Translator {
 }
 
 /**
+ * Interface for objects used by 'vscode.window.withProgress()' function, e.g.
+ */
+export interface VSCodeProgress {    
+    increment?: number;
+    message?: string;
+}
+
+/**
  * An object that stores a name and a path.
  */
 export interface WithNameAndPath {

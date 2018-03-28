@@ -45,11 +45,6 @@ interface ScmFileFilter {
 
 type ScmFileFilterStorage = { [ branch: string ]: ScmFileFilter };
 
-interface VSCodeProgress {
-    message?: string;
-    increment?: number;
-}
-
 const KEY_SCM_COMMIT_FILE_FILTERS = 'vscdrScmCommitFileFilters';
 let nextCancelBtnCommandId = Number.MIN_SAFE_INTEGER;
 
@@ -438,7 +433,7 @@ export async function deployFilesTo(files: string[],
     });
 }
 
-async function deployFilesToWithProgress(progress: vscode.Progress<VSCodeProgress>, progressCancelToken: vscode.CancellationToken,
+async function deployFilesToWithProgress(progress: vscode.Progress<deploy_contracts.VSCodeProgress>, progressCancelToken: vscode.CancellationToken,
                                          files: string[],
                                          target: deploy_targets.Target,
                                          fileListReloader: deploy_contracts.Reloader<string>) {
@@ -555,13 +550,7 @@ async function deployFilesToWithProgress(progress: vscode.Progress<VSCodeProgres
         }
     });
     if (progressCancelToken.isCancellationRequested) {
-        try {
-            CANCELLATION_SOURCE.cancel();
-        }
-        catch (e) {
-            ME.logger
-              .trace(e, 'deploy.deployFilesToWithProgress().progressCancelToken.isCancellationRequested');
-        }
+        CANCELLATION_SOURCE.cancel();
     }
 
     let targetSession: symbol | false = false;
@@ -658,7 +647,7 @@ async function deployFilesToWithProgress(progress: vscode.Progress<VSCodeProgres
                             (POPUP_STATS.succeeded.length + POPUP_STATS.failed.length) / files.length
                         ) * 100,
                         message: message,
-                    });
+                    });                    
                 };
 
                 if (files.length > 1) {
@@ -707,9 +696,9 @@ async function deployFilesToWithProgress(progress: vscode.Progress<VSCodeProgres
                         if (err) {
                             ME.output.appendLine(`[${ME.t('error', err)}]`);
 
-                            UPDATE_PROGRESS( ME.t('error', err) );
-
                             POPUP_STATS.failed.push( f );
+                            
+                            UPDATE_PROGRESS( ME.t('error', err) );
                         }
                         else {
                             const SYNC_WHEN_OPEN_ID = ME.getSyncWhenOpenKey(target);
@@ -720,12 +709,10 @@ async function deployFilesToWithProgress(progress: vscode.Progress<VSCodeProgres
 
                             ME.output.appendLine(`[${ME.t('ok')}]`);
 
-                            UPDATE_PROGRESS( ME.t('ok') );
-
                             POPUP_STATS.succeeded.push( f );
+                            
+                            UPDATE_PROGRESS( ME.t('ok') );
                         }
-
-                        await deploy_helpers.sleep(1000);
                     };
 
                     LF.transformer = <deploy_transformers.DataTransformer>transformer;
