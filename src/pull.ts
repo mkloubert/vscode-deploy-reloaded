@@ -34,16 +34,12 @@ import * as Path from 'path';
 import * as vscode from 'vscode';
 
 
-let nextCancelBtnCommandId = Number.MIN_SAFE_INTEGER;
-
-
 async function checkBeforePull(
     target: deploy_targets.Target,
     plugin: deploy_plugins.Plugin,
     files: string[],
     mappingScopeDirs: string[],
     cancelToken: vscode.CancellationToken,
-    isCancelling: () => boolean,
 ): Promise<boolean> {
     const TARGET_NAME = deploy_targets.getTargetName(target);
     const WORKSPACE = target.__workspace;
@@ -76,12 +72,6 @@ async function checkBeforePull(
         }
     }
 
-    const WAIT_WHILE_CANCELLING = async () => {
-        await deploy_helpers.waitWhile(() => isCancelling(), {
-            timeUntilNextCheck: 1000,
-        });
-    };
-
     WORKSPACE.output
              .append( WORKSPACE.t('pull.checkBeforePull.beginOperation', TARGET_NAME) + ' ');
     try {
@@ -97,8 +87,6 @@ async function checkBeforePull(
         }
 
         for (const F in FILES_AND_PATHS) {            
-            await WAIT_WHILE_CANCELLING();
-
             if (cancelToken.isCancellationRequested) {
                 return false;
             }
@@ -434,15 +422,16 @@ export async function pullFileList(context: vscode.ExtensionContext) {
 export async function pullFilesFrom(files: string[],
                                     target: deploy_targets.Target,
                                     fileListReloader: deploy_contracts.Reloader<string>) {
-    const THIS_ARG = this;
+    const ME: deploy_workspaces.Workspace = this;
 
     await vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
         cancellable: true,
+        title: ME.t('pull.pullingFiles'),
     }, async (progress, cancelToken) => {
         await deploy_helpers.applyFuncFor(
             pullFilesFromWithProgress,
-            THIS_ARG,
+            ME,
         )(progress, cancelToken,
           files,
           target,
@@ -537,13 +526,6 @@ async function pullFilesFromWithProgress(progress: vscode.Progress<deploy_contra
 
     const TRANSFORMER_OPTIONS = deploy_helpers.cloneObject(target.transformerOptions);
 
-    let cancelBtn: vscode.StatusBarItem;
-    let cancelBtnCommand: vscode.Disposable;
-    const DISPOSE_CANCEL_BTN = () => {
-        deploy_helpers.tryDispose(cancelBtn);
-        deploy_helpers.tryDispose(cancelBtnCommand);
-    };
-
     const MAPPING_SCOPE_DIRS = await deploy_targets.getScopeDirectoriesForTargetFolderMappings(target);
 
     const CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
@@ -561,88 +543,9 @@ async function pullFilesFromWithProgress(progress: vscode.Progress<deploy_contra
         CANCELLATION_SOURCE.cancel();
     }
 
-    let targetSession: symbol | false = false;
+    const TARGET_SESSION = await deploy_targets.waitForOtherTargets(target);
     try {
-        // cancel button
-        let isCancelling = false;
-        {
-            cancelBtn = vscode.window.createStatusBarItem();
-            const RESTORE_CANCEL_BTN_TEXT = () => {
-                cancelBtn.text = ME.t('pull.buttons.cancel.text',
-                                      TARGET_NAME);
-                cancelBtn.tooltip = ME.t('pull.buttons.cancel.tooltip');
-            };
-
-            const CANCEL_BTN_COMMAND_ID = `extension.deploy.reloaded.buttons.cancelPullFilesFrom${nextCancelBtnCommandId++}`;
-            
-            cancelBtnCommand = vscode.commands.registerCommand(CANCEL_BTN_COMMAND_ID, async () => {
-                try {
-                    isCancelling = true;
-
-                    cancelBtn.command = undefined;
-                    cancelBtn.text = ME.t('pull.cancelling');
-
-                    const POPUP_BTNS: deploy_contracts.MessageItemWithValue[] = [
-                        {
-                            isCloseAffordance: true,
-                            title: ME.t('no'),
-                            value: 0,
-                        },
-                        {
-                            title: ME.t('yes'),
-                            value: 1,
-                        }
-                    ];
-
-                    const PRESSED_BTN: deploy_contracts.MessageItemWithValue<number> = await ME.showWarningMessage(
-                        ME.t('pull.askForCancelOperation', TARGET_NAME),
-                        {
-                            isCloseAffordance: true,
-                            title: ME.t('no'),
-                            value: 0,
-                        },
-                        {
-                            title: ME.t('yes'),
-                            value: 1,
-                        }
-                    );
-
-                    if (PRESSED_BTN) {
-                        if (1 === PRESSED_BTN.value) {
-                            CANCELLATION_SOURCE.cancel();
-                        }
-                    }
-                }
-                finally {
-                    if (!CANCELLATION_SOURCE.token.isCancellationRequested) {
-                        cancelBtn.command = CANCEL_BTN_COMMAND_ID;
-
-                        RESTORE_CANCEL_BTN_TEXT();
-                    }
-
-                    isCancelling = false;
-                }
-            });
-            
-            cancelBtn.command = CANCEL_BTN_COMMAND_ID;
-
-            cancelBtn.show();
-
-            targetSession = await deploy_targets.waitForOtherTargets(
-                target, cancelBtn,
-            );
-            RESTORE_CANCEL_BTN_TEXT();
-        }
-
-        const WAIT_WHILE_CANCELLING = async () => {
-            await deploy_helpers.waitWhile(() => isCancelling, {
-                timeUntilNextCheck: 1000,
-            });
-        };
-
         while (PLUGINS.length > 0) {
-            await WAIT_WHILE_CANCELLING();            
-            
             if (CANCELLATION_SOURCE.token.isCancellationRequested) {
                 break;
             }    
@@ -655,18 +558,23 @@ async function pullFilesFromWithProgress(progress: vscode.Progress<deploy_contra
                 succeeded: [],
             };
             try {
-                if (!(await checkBeforePull(target, PI, files, MAPPING_SCOPE_DIRS, CANCELLATION_SOURCE.token, () => isCancelling))) {
+                if (!(await checkBeforePull(target, PI, files, MAPPING_SCOPE_DIRS, CANCELLATION_SOURCE.token))) {
                     continue;
                 }
+
+                progress.report({ /* increment: 0, */ percentage: 0 });
                 
                 ME.output.appendLine('');
-
+                
                 const UPDATE_PROGRESS = (message: string) => {
+                    const PERCENTAGE = Math.floor(
+                        (POPUP_STATS.succeeded.length + POPUP_STATS.failed.length) / files.length * 100.0
+                    );
+
                     progress.report({
-                        increment: Math.ceil(
-                            (POPUP_STATS.succeeded.length + POPUP_STATS.failed.length) / files.length
-                        ) * 100,
+                        // increment: PERCENTAGE,
                         message: message,
+                        percentage: PERCENTAGE,
                     });
                 };
 
@@ -698,10 +606,8 @@ async function pullFilesFromWithProgress(progress: vscode.Progress<deploy_contra
 
                         UPDATE_PROGRESS(
                             ME.t('pull.pullingFile',
-                                 f, source) + ' ...'
+                                 f, source)
                         );
-
-                        await WAIT_WHILE_CANCELLING();
 
                         if (CANCELLATION_SOURCE.token.isCancellationRequested) {
                             ME.output.appendLine(`[${ME.t('canceled')}]`);
@@ -799,8 +705,6 @@ async function pullFilesFromWithProgress(progress: vscode.Progress<deploy_contra
                                 ME.output.appendLine(`[${ME.t('ok')}]`);
                                 
                                 POPUP_STATS.succeeded.push( f );
-                                
-                                UPDATE_PROGRESS( ME.t('ok') );
                             }
                         }
                         catch (e) {
@@ -953,12 +857,10 @@ async function pullFilesFromWithProgress(progress: vscode.Progress<deploy_contra
         }
     }
     finally {
-        DISPOSE_CANCEL_BTN();
-        
         deploy_helpers.tryDispose(CANCELLATION_SOURCE);
 
         deploy_targets.unmarkTargetAsInProgress(
-            target, targetSession
+            target, TARGET_SESSION
         );
     }
 }

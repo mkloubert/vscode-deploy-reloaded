@@ -66,17 +66,9 @@ export const translation: Translation = {
         noneSelected: "Es ist weder eine aktive Datei, noch ein aktives Verzeichnis ausgewählt!",
     },
     DELETE: {
-        askForCancelOperation: "Sind Sie sicher, dass Sie das Löschen der Datei(en) in{0:trim,surround,leading_space} abbrechen wollen?",
         askIfDeleteLocalFile: "Auch die lokale Datei löschen?",
         askIfDeleteLocalFiles: "Auch die lokale Dateien löschen?",
-        buttons: {
-            cancel: {
-                text: "Lösche Dateien in{0:trim,surround,leading_space} ...",
-                tooltip: "Hier klicken, um abzubrechen ...",
-            },
-        },
         canceledByOperation: "Das Löschen der Dateien in{0:trim,surround,leading_space} wurde durch eine Operation abgebrochen.",
-        cancelling: "Breche das Löschen ab ...",
         currentFile: {
             description: "Löscht die aktuelle Datei",
             label: "Aktuelle Datei ...",
@@ -96,6 +88,7 @@ export const translation: Translation = {
             }
         },
         deletingFile: "Lösche Datei{0:trim,surround,leading_space} in{1:trim,surround,leading_space} ...",
+        deletingFiles: "Lösche Dateien ...",
         errors: {
             invalidWorkspace: "Die Datei{0:trim,surround,leading_space} is nicht Teil des Arbeitsbereiches{1:trim,surround,leading_space}!",
             invalidWorkspaceForPackage: "Das Paket{0:trim,surround,leading_space} ist nicht Teil des Arbeitsbereiches{1:trim,surround,leading_space}!",
@@ -133,14 +126,7 @@ export const translation: Translation = {
             label: "Alle geöffneten Dateien ...",
         },
         askForCancelOperation: "Sind Sie sicher, dass Sie das Bereitstellen der Datei(en) in{0:trim,surround,leading_space} abbrechen wollen?",
-        buttons: {
-            cancel: {
-                text: "Stelle Dateien in{0:trim,surround,leading_space} breit ...",
-                tooltip: "Hier klicken, um abzubrechen ...",
-            },
-        },
         canceledByOperation: "Das Bereitstellen der Dateien in{0:trim,surround,leading_space} wurde durch eine Operation abgebrochen.",
-        cancelling: "Breche das Bereitstellen ab ...",
         checkBeforeDeploy: {
             beginOperation: "Suche nach neueren Dateien in{0:trim,surround,leading_space} ...",
             newerFilesFound: "{0:trim,ending_space}Datei(en) wurde(n) gefunden, die neuer sind. Forfahren?",
@@ -172,6 +158,7 @@ export const translation: Translation = {
             }
         },
         deployingFile: "Stelle Datei{0:trim,surround,leading_space} in{1:trim,surround,leading_space} bereit ...",
+        deployingFiles: "Stelle Dateien bereit ...",
         errors: {
             invalidWorkspace: "Die Datei{0:trim,surround,leading_space} kann nicht über den Arbeitsbereich{1:trim,surround,leading_space} bereitgestellt werden!",
             invalidWorkspaceForPackage: "Das Paket{0:trim,surround,leading_space} kann nicht über den Arbeitsbereich{1:trim,surround,leading_space} bereitgestellt werden!",
@@ -432,14 +419,7 @@ export const translation: Translation = {
             label: "Alle geöffneten Dateien ...",
         },
         askForCancelOperation: "Sind Sie sicher, dass Sie das Laden der Datei(en) von{0:trim,surround,leading_space} abbrechen wollen?",
-        buttons: {
-            cancel: {
-                text: "Lade Dateien von{0:trim,surround,leading_space} ...",
-                tooltip: "Hier klicken, um abzubrechen ...",
-            },
-        },
         canceledByOperation: "Das Laden der Dateien von{0:trim,surround,leading_space} wurde durch eine Operation abgebrochen.",
-        cancelling: "Breche das Laden ab ...",
         checkBeforePull: {
             beginOperation: "Suche nach älteren Dateien in{0:trim,surround,leading_space} ...",
             notSupported: "Die Funktion 'checkBeforePull' steht für die Quelle{0:trim,surround,leading_space} nicht zur Verfügung! Forfahren?",
@@ -494,6 +474,7 @@ export const translation: Translation = {
             succeeded: "Alle {0:trim,ending_space}Dateien wurden erfolgreich geladen.",
         },
         pullingFile: "Lade Datei{0:trim,surround,leading_space} von {1:trim,surround,leading_space} ...",
+        pullingFiles: "Lade Dateien ...",
         selectSource: "Wählen Sie die Quelle von der Sie die Datei(en) laden wollen ...",
         startOperation: "Beginne Ladevorgang von{0:trim,surround,leading_space} ...",
     },

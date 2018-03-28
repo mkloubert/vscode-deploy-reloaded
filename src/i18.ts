@@ -71,17 +71,9 @@ export interface Translation {
         noneSelected?: string;
     };
     DELETE?: {
-        askForCancelOperation?: string;
         askIfDeleteLocalFile?: string;
         askIfDeleteLocalFiles?: string;
-        buttons?: {
-            cancel?: {
-                text?: string;
-                tooltip?: string;
-            };
-        };
         canceledByOperation?: string;
-        cancelling?: string;
         currentFile?: {
             description?: string;
             label?: string;
@@ -101,6 +93,7 @@ export interface Translation {
             }
         };
         deletingFile?: string;
+        deletingFiles?: string;
         errors?: {
             invalidWorkspace?: string;
             invalidWorkspaceForPackage?: string;
@@ -138,14 +131,7 @@ export interface Translation {
             label?: string;
         };
         askForCancelOperation?: string;
-        buttons?: {
-            cancel?: {
-                text?: string;
-                tooltip?: string;
-            };
-        };
         canceledByOperation?: string;
-        cancelling?: string;
         checkBeforeDeploy?: {
             beginOperation?: string;
             newerFilesFound?: string;
@@ -177,6 +163,7 @@ export interface Translation {
             }
         };
         deployingFile?: string;
+        deployingFiles?: string;
         errors?: {
             invalidWorkspace?: string;
             invalidWorkspaceForPackage?: string;
@@ -436,14 +423,7 @@ export interface Translation {
             label?: string;
         };
         askForCancelOperation?: string;
-        buttons?: {
-            cancel?: {
-                text?: string;
-                tooltip?: string;
-            };
-        };
         canceledByOperation?: string;
-        cancelling?: string;
         checkBeforePull?: {
             beginOperation?: string;
             notSupported?: string;
@@ -498,6 +478,7 @@ export interface Translation {
             succeeded?: string;
         };
         pullingFile?: string;
+        pullingFiles?: string;
         selectSource?: string;
         startOperation?: string;
     };

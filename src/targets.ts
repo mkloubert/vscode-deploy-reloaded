@@ -1109,9 +1109,7 @@ export function markTargetAsInProgress(target: Target, valueToSave?: any): boole
         return;
     }
 
-    const TARGET_KEY = getTargetIdHash(target);
-    TARGET_STORAGE[ TARGET_KEY ] = valueToSave;
-
+    TARGET_STORAGE[ getTargetIdHash(target) ] = valueToSave;
     return true;
 }
 

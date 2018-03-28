@@ -27,8 +27,6 @@ import * as i18 from './i18';
 import * as vscode from 'vscode';
 
 
-let nextCancelBtnCommandId = Number.MIN_SAFE_INTEGER;
-
 /**
  * Deletes a file in a target.
  * 
@@ -161,15 +159,16 @@ export async function deleteFilesIn(files: string[],
                                     target: deploy_targets.Target,
                                     fileListReloader: deploy_contracts.Reloader<string>,
                                     deleteLocalFiles?: boolean) {
-    const THIS_ARG = this;
+    const ME: deploy_workspaces.Workspace = this;
 
     await vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
         cancellable: true,
+        title: ME.t('delete.deletingFiles'),
     }, async (progress, cancelToken) => {
         await deploy_helpers.applyFuncFor(
             deleteFilesInWithProgress,
-            THIS_ARG,
+            ME,
         )(progress, cancelToken,
           files,
           target,
@@ -255,13 +254,6 @@ async function deleteFilesInWithProgress(progress: vscode.Progress<deploy_contra
         return;
     }
 
-    let cancelBtn: vscode.StatusBarItem;
-    let cancelBtnCommand: vscode.Disposable;
-    const DISPOSE_CANCEL_BTN = () => {
-        deploy_helpers.tryDispose(cancelBtn);
-        deploy_helpers.tryDispose(cancelBtnCommand);
-    };
-
     const MAPPING_SCOPE_DIRS = await deploy_targets.getScopeDirectoriesForTargetFolderMappings(target);
 
     const CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
@@ -279,76 +271,9 @@ async function deleteFilesInWithProgress(progress: vscode.Progress<deploy_contra
         CANCELLATION_SOURCE.cancel();
     }
 
-    let targetSession: symbol | false = false;
+    const TARGET_SESSION = await deploy_targets.waitForOtherTargets(target);
     try {
-        // cancel button
-        let isCancelling = false;
-        {
-            cancelBtn = vscode.window.createStatusBarItem();
-            const RESTORE_CANCEL_BTN_TEXT = () => {
-                cancelBtn.text = ME.t('DELETE.buttons.cancel.text',
-                                      TARGET_NAME);
-                cancelBtn.tooltip = ME.t('DELETE.buttons.cancel.tooltip');
-            };
-
-            const CANCEL_BTN_COMMAND_ID = `extension.deploy.reloaded.buttons.cancelDeleteFilesIn${nextCancelBtnCommandId++}`;
-
-            cancelBtnCommand = vscode.commands.registerCommand(CANCEL_BTN_COMMAND_ID, async () => {
-                try {
-                    isCancelling = true;
-
-                    cancelBtn.command = undefined;
-                    cancelBtn.text = ME.t('DELETE.cancelling');
-
-                    const PRESSED_BTN: deploy_contracts.MessageItemWithValue<number> = await ME.showWarningMessage(
-                        ME.t('DELETE.askForCancelOperation', TARGET_NAME),
-                        {
-                            isCloseAffordance: true,
-                            title: ME.t('no'),
-                            value: 0,
-                        },
-                        {
-                            title: ME.t('yes'),
-                            value: 1,
-                        }
-                    );
-
-                    if (PRESSED_BTN) {
-                        if (1 === PRESSED_BTN.value) {
-                            CANCELLATION_SOURCE.cancel();
-                        }
-                    }
-                }
-                finally {
-                    if (!CANCELLATION_SOURCE.token.isCancellationRequested) {
-                        cancelBtn.command = CANCEL_BTN_COMMAND_ID;
-
-                        RESTORE_CANCEL_BTN_TEXT();
-                    }
-
-                    isCancelling = false;
-                }
-            });
-            
-            cancelBtn.command = CANCEL_BTN_COMMAND_ID;
-
-            cancelBtn.show();
-
-            targetSession = await deploy_targets.waitForOtherTargets(
-                target, cancelBtn,
-            );
-            RESTORE_CANCEL_BTN_TEXT();
-        }
-
-        const WAIT_WHILE_CANCELLING = async () => {
-            await deploy_helpers.waitWhile(() => isCancelling, {
-                timeUntilNextCheck: 1000,
-            });
-        };
-
         while (PLUGINS.length > 0) {
-            await WAIT_WHILE_CANCELLING();
-            
             if (CANCELLATION_SOURCE.token.isCancellationRequested) {
                 break;
             }
@@ -361,14 +286,19 @@ async function deleteFilesInWithProgress(progress: vscode.Progress<deploy_contra
                 succeeded: [],
             };
             try {                
+                progress.report({ /* increment: 0, */ percentage: 0 });
+                
                 ME.output.appendLine('');
-
+                
                 const UPDATE_PROGRESS = (message: string) => {
+                    const PERCENTAGE = Math.floor(
+                        (POPUP_STATS.succeeded.length + POPUP_STATS.failed.length) / files.length * 100.0
+                    );
+
                     progress.report({
-                        increment: Math.ceil(
-                            (POPUP_STATS.succeeded.length + POPUP_STATS.failed.length) / files.length
-                        ) * 100,
+                        // increment: PERCENTAGE,
                         message: message,
+                        percentage: PERCENTAGE,
                     });
                 };
 
@@ -405,10 +335,8 @@ async function deleteFilesInWithProgress(progress: vscode.Progress<deploy_contra
 
                         UPDATE_PROGRESS(
                             ME.t('DELETE.deletingFile',
-                                 f, destination) + ' ...'
+                                 f, destination)
                         );
-
-                        await WAIT_WHILE_CANCELLING();
 
                         if (CANCELLATION_SOURCE.token.isCancellationRequested) {
                             ME.output.appendLine(`[${ME.t('canceled')}]`);
@@ -438,8 +366,6 @@ async function deleteFilesInWithProgress(progress: vscode.Progress<deploy_contra
                                 }
 
                                 ME.output.appendLine(`[${ME.t('ok')}]`);
-
-                                UPDATE_PROGRESS( ME.t('ok') );
                             }
                             catch (e) {
                                 ME.output.appendLine(`[${ME.t('warning')}: ${deploy_helpers.toStringSafe(e)}]`);
@@ -585,12 +511,10 @@ async function deleteFilesInWithProgress(progress: vscode.Progress<deploy_contra
         }
     }
     finally {
-        DISPOSE_CANCEL_BTN();
-
         deploy_helpers.tryDispose(CANCELLATION_SOURCE);
 
         deploy_targets.unmarkTargetAsInProgress(
-            target, targetSession
+            target, TARGET_SESSION
         );
     }
 }

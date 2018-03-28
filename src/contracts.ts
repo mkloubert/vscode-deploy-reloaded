@@ -625,6 +625,7 @@ export interface Translator {
 export interface VSCodeProgress {    
     increment?: number;
     message?: string;
+    percentage?: number;
 }
 
 /**

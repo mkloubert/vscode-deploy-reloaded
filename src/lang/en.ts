@@ -66,17 +66,9 @@ export const translation: Translation = {
         noneSelected: "There is current no active file or folder selected!",
     },
     DELETE: {
-        askForCancelOperation: "You are about to cancel the delete operation in{0:trim,surround,leading_space}. Are you sure?",
         askIfDeleteLocalFile: "Also delete local file?",
         askIfDeleteLocalFiles: "Also delete local files?",
-        buttons: {
-            cancel: {
-                text: "Deleting files in{0:trim,surround,leading_space} ...",
-                tooltip: "Click here to cancel ...",
-            },
-        },
         canceledByOperation: "Deleting files in{0:trim,surround,leading_space} has been cancelled by target operation.",
-        cancelling: "Cancelling delete operation ...",
         currentFile: {
             description: "Deletes the current file",
             label: "Current file ...",
@@ -96,6 +88,7 @@ export const translation: Translation = {
             }
         },
         deletingFile: "Deleting file{0:trim,surround,leading_space} in{1:trim,surround,leading_space} ...",
+        deletingFiles: "Deleting files ...",
         errors: {
             invalidWorkspace: "File{0:trim,surround,leading_space} is not part of workspace{1:trim,surround,leading_space}!",
             invalidWorkspaceForPackage: "Package{0:trim,surround,leading_space} is not part of workspace{1:trim,surround,leading_space}!",
@@ -133,14 +126,7 @@ export const translation: Translation = {
             label: "All open files ...",
         },
         askForCancelOperation: "You are about to cancel the deploy operation to{0:trim,surround,leading_space}. Are you sure?",
-        buttons: {
-            cancel: {
-                text: "Deploying files to{0:trim,surround,leading_space} ...",
-                tooltip: "Click here to cancel ...",
-            },
-        },
         canceledByOperation: "Deploying files to{0:trim,surround,leading_space} has been cancelled by target operation.",
-        cancelling: "Cancelling deploy operation ...",
         checkBeforeDeploy: {
             beginOperation: "Check for newer files in{0:trim,surround,leading_space} ...",
             newerFilesFound: "{0:trim,ending_space}files was/were found, which is/are newer. Continue?",
@@ -172,6 +158,7 @@ export const translation: Translation = {
             }
         },
         deployingFile: "Deploying file{0:trim,surround,leading_space} to{1:trim,surround,leading_space} ...",
+        deployingFiles: "Deploying files ...",
         fileList: {
             description: "Deploys files, which are defined as list in the active text editor",
             label: "File list",
@@ -433,14 +420,7 @@ export const translation: Translation = {
             label: "All open files ...",
         },
         askForCancelOperation: "You are about to cancel the pull operation from{0:trim,surround,leading_space}. Are you sure?",
-        buttons: {
-            cancel: {
-                text: "Pulling files from{0:trim,surround,leading_space} ...",
-                tooltip: "Click here to cancel ...",
-            },
-        },
         canceledByOperation: "Pulling files from{0:trim,surround,leading_space} has been cancelled by target operation.",
-        cancelling: "Cancelling pull operation ...",
         checkBeforePull: {
             beginOperation: "Check for older files in{0:trim,surround,leading_space} ...",
             notSupported: "'checkBeforePull' is not supported for source{0:trim,surround,leading_space}! Continue?",
@@ -484,6 +464,7 @@ export const translation: Translation = {
             label: "File list",
         },
         pullingFile: "Pulling file{0:trim,surround,leading_space} from {1:trim,surround,leading_space} ...",
+        pullingFiles: "Pulling files ...",
         package: {
             description: "Pulls the files of a package",
             label: "Package ...",
