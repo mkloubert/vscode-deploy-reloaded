@@ -45,6 +45,11 @@ interface ScmFileFilter {
 
 type ScmFileFilterStorage = { [ branch: string ]: ScmFileFilter };
 
+interface VSCodeProgress {
+    message?: string;
+    increment?: number;
+}
+
 const KEY_SCM_COMMIT_FILE_FILTERS = 'vscdrScmCommitFileFilters';
 let nextCancelBtnCommandId = Number.MIN_SAFE_INTEGER;
 
@@ -417,6 +422,26 @@ export async function deployFileList(context: vscode.ExtensionContext) {
 export async function deployFilesTo(files: string[],
                                     target: deploy_targets.Target,
                                     fileListReloader: deploy_contracts.Reloader<string>) {
+    const THIS_ARG = this;
+
+    await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        cancellable: true,
+    }, async (progress, cancelToken) => {
+        await deploy_helpers.applyFuncFor(
+            deployFilesToWithProgress,
+            THIS_ARG,
+        )(progress, cancelToken,
+          files,
+          target,
+          fileListReloader);
+    });
+}
+
+async function deployFilesToWithProgress(progress: vscode.Progress<VSCodeProgress>, progressCancelToken: vscode.CancellationToken,
+                                         files: string[],
+                                         target: deploy_targets.Target,
+                                         fileListReloader: deploy_contracts.Reloader<string>) {
     const ME: deploy_workspaces.Workspace = this;
 
     target = ME.prepareTarget(target);
@@ -519,6 +544,26 @@ export async function deployFilesTo(files: string[],
     const MAPPING_SCOPE_DIRS = await deploy_targets.getScopeDirectoriesForTargetFolderMappings(target);
 
     const CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
+    
+    progressCancelToken.onCancellationRequested(() => {
+        try {
+            CANCELLATION_SOURCE.cancel();
+        }
+        catch (e) {
+            ME.logger
+              .trace(e, 'deploy.deployFilesToWithProgress().progressCancelToken.onCancellationRequested()');
+        }
+    });
+    if (progressCancelToken.isCancellationRequested) {
+        try {
+            CANCELLATION_SOURCE.cancel();
+        }
+        catch (e) {
+            ME.logger
+              .trace(e, 'deploy.deployFilesToWithProgress().progressCancelToken.isCancellationRequested');
+        }
+    }
+
     let targetSession: symbol | false = false;
     try {
         // cancel button
@@ -607,12 +652,26 @@ export async function deployFilesTo(files: string[],
                 
                 ME.output.appendLine('');
 
+                const UPDATE_PROGRESS = (message: string) => {
+                    progress.report({
+                        increment: Math.ceil(
+                            (POPUP_STATS.succeeded.length + POPUP_STATS.failed.length) / files.length
+                        ) * 100,
+                        message: message,
+                    });
+                };
+
                 if (files.length > 1) {
                     ME.output.appendLine(
                         ME.t('deploy.startOperation',
                              TARGET_NAME)
                     );
                 }
+
+                UPDATE_PROGRESS(
+                    ME.t('deploy.startOperation',
+                         TARGET_NAME)
+                );
 
                 const FILES_TO_UPLOAD = files.map(f => {
                     const NAME_AND_PATH = deploy_targets.getNameAndPathForFileDeployment(target, f,
@@ -633,6 +692,11 @@ export async function deployFilesTo(files: string[],
                                  f, destination) + ' '
                         );
 
+                        UPDATE_PROGRESS(
+                            ME.t('deploy.deployingFile',
+                                 f, destination) + ' ...'
+                        );
+
                         await WAIT_WHILE_CANCELLING();
 
                         if (CANCELLATION_SOURCE.token.isCancellationRequested) {
@@ -642,6 +706,8 @@ export async function deployFilesTo(files: string[],
                     LF.onUploadCompleted = async (err?: any) => {
                         if (err) {
                             ME.output.appendLine(`[${ME.t('error', err)}]`);
+
+                            UPDATE_PROGRESS( ME.t('error', err) );
 
                             POPUP_STATS.failed.push( f );
                         }
@@ -654,8 +720,12 @@ export async function deployFilesTo(files: string[],
 
                             ME.output.appendLine(`[${ME.t('ok')}]`);
 
+                            UPDATE_PROGRESS( ME.t('ok') );
+
                             POPUP_STATS.succeeded.push( f );
                         }
+
+                        await deploy_helpers.sleep(1000);
                     };
 
                     LF.transformer = <deploy_transformers.DataTransformer>transformer;

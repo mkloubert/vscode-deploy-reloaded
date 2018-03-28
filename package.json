@@ -2,10 +2,10 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.67.0",
+ "version": "0.68.0",
  "publisher": "mkloubert",
  "engines": {
-  "vscode": "^1.21.0"
+  "vscode": "^1.22.0"
  },
  "license": "LGPL-3.0",
  "preview": true,
@@ -21999,7 +21999,7 @@
              },
              {
               "type": "string",
-              "description": "´The source from where to load the values."
+              "description": "The source from where to load the values."
              }
             ]
            },
@@ -71563,7 +71563,7 @@
   "@types/tmp": "0.0.33",
   "@types/uuid": "^3.4.3",
   "tslint": "^5.9.1",
-  "typescript": "^2.7.2",
+  "typescript": "^2.8.1",
   "vscode": "^1.1.14"
  },
  "icon": "icon.png",
@@ -71587,7 +71587,7 @@
  "readmeFilename": "README.md",
  "dependencies": {
   "@slack/client": "^3.16.0",
-  "aws-sdk": "^2.213.1",
+  "aws-sdk": "^2.215.1",
   "azure-storage": "^2.8.1",
   "coffeescript": "^2.2.3",
   "compare-versions": "^3.1.0",
@@ -71629,6 +71629,6 @@
   "tmp": "0.0.33",
   "uglify-js": "^3.3.16",
   "uuid": "^3.2.1",
-  "vscode-helpers": "^0.25.0"
+  "vscode-helpers": "^0.26.0"
  }
 }
