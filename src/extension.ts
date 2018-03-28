@@ -323,6 +323,25 @@ async function onDidSaveTextDocument(e: vscode.TextDocument) {
     }
 }
 
+async function refreshActiveWorkspaceList() {
+    try {
+        activeWorkspaces = [];
+
+        const ALL_WORKSPACES = deploy_workspaces.getAllWorkspaces();
+        if (ALL_WORKSPACES.length > 0) {
+            activeWorkspaces = [
+                ALL_WORKSPACES[0]
+            ];
+        }
+    }
+    catch (e) {
+        deploy_log.CONSOLE
+                  .log(e, 'extension.refreshActiveWorkspaces()');
+    }
+
+    await updateActiveWorkspaces();
+}
+
 async function reloadPlugins() {
     if (isDeactivating) {
         return;
@@ -609,15 +628,30 @@ async function activateExtension(context: vscode.ExtensionContext) {
             workspaceWatcher = deploy_helpers.registerWorkspaceWatcher<deploy_workspaces.Workspace>(
                 context,
                 async (ev, folder) => {
-                    let newWorkspace: deploy_workspaces.Workspace;
+                    if (ev === deploy_helpers.WorkspaceWatcherEvent.Added) {
+                        return await createNewWorkspace( folder );
+                    }
+                },
+                async (err, ev, folder, workspace) => {
+                    if (err) {
+                        deploy_log.CONSOLE
+                                  .trace(err, 'extension.activate.registerWorkspaceWatcher()');
 
-                    switch (ev) {
-                        case deploy_helpers.WorkspaceWatcherEvent.Added:
-                            newWorkspace = await createNewWorkspace( folder );
-                            break;
+                        return;
                     }
 
-                    return newWorkspace;
+                    if (ev === deploy_helpers.WorkspaceWatcherEvent.Removed) {
+                        const NEW_ACTIVE_WORKSPACES = deploy_helpers.asArray(
+                            activeWorkspaces
+                        ).filter(aws => aws !== workspace);
+                        
+                        if (NEW_ACTIVE_WORKSPACES.length < 1) {
+                            await refreshActiveWorkspaceList();                                
+                        }
+                        else {
+                            activeWorkspaces = NEW_ACTIVE_WORKSPACES;
+                        }
+                    }
                 }
             )
         );
@@ -1534,6 +1568,8 @@ async function activateExtension(context: vscode.ExtensionContext) {
     // reload workspace folders
     WF.next(async () => {
         await workspaceWatcher.reload();
+
+        await refreshActiveWorkspaceList();
     });
 
     // select workspace button

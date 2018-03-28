@@ -9,6 +9,12 @@
   * [aws-sdk](https://www.npmjs.com/package/aws-sdk) `2.215.0`
   * [vscode-helpers"](https://www.npmjs.com/package/vscode-helpers") `0.26.0`
 
+## 0.67.1 (March 28th, 2018; bugfixes)
+
+* bugfixes
+* updated the following [npm](https://www.npmjs.com/) modules:
+  * [vscode-helpers](https://www.npmjs.com/package/vscode-helpers) `0.26.0`
+
 ## 0.67.0 (March 26th, 2018; APIs)
 
 * can define [custom API endpoints](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/apis#custom-endpoints) now
@@ -24,7 +30,7 @@
   * [pug](https://www.npmjs.com/package/pug) `2.0.3`
   * [ssh2-sftp-client](https://www.npmjs.com/package/ssh2-sftp-client) `2.1.0`
   * [uglify-js](https://www.npmjs.com/package/uglify-js) `3.3.16`
-  * [vscode-helpers"](https://www.npmjs.com/package/vscode-helpers") `0.23.0`
+  * [vscode-helpers](https://www.npmjs.com/package/vscode-helpers) `0.23.0`
 * "outsourced" `loadModule()` function and `SESSION_STATE` constant to [vscode-helpers](https://www.npmjs.com/package/vscode-helpers) npm module
 * bugfixes
 * code cleanup and improvements
