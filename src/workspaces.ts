@@ -4536,7 +4536,7 @@ export class WorkspaceMemento implements vscode.Memento {
 export function getActiveWorkspaces(): Workspace[] {
     const PROVIDER = activeWorkspaceProvider;
     if (PROVIDER) {
-        return deploy_helpers.asArray( PROVIDER() );
+        return sortWorkspaces( PROVIDER() );
     }
 }
 
@@ -4548,7 +4548,7 @@ export function getActiveWorkspaces(): Workspace[] {
 export function getAllWorkspaces(): Workspace[] {
     const PROVIDER = allWorkspacesProvider;
     if (PROVIDER) {
-        return deploy_helpers.asArray( PROVIDER() );
+        return sortWorkspaces( PROVIDER() );
     }
 }
 
@@ -4658,4 +4658,12 @@ export async function showWorkspaceQuickPick(context: vscode.ExtensionContext,
     if (selectedItem) {
         return selectedItem.action();
     }
+}
+
+function sortWorkspaces(workspaces: Workspace | Workspace[]) {
+    return deploy_helpers.asArray(workspaces).sort((x, y) => {
+        return deploy_helpers.compareValuesBy(x, y, ws => {
+            return ws.folder.index;
+        });
+    });
 }
