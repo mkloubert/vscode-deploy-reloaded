@@ -268,7 +268,7 @@ export const translation: Translation = {
             operationFailed: "Konnte das Auflisten eines Verzeichnisses nicht durchführen (s. Debugkonsole 'STRG/CMD + SHIFT + Y')!",
         },
         lastModified: "Letzte Änderung:{0:trim,leading_space}",
-        loading: "Lade Verzeichnis{0:trim,surround,leading_space} ({1:trim} / {2:trim})...",
+        loading: "Lade Verzeichnis{0:trim,surround,leading_space} ...",
         noName: "<KEIN NAME>",
         parentDirectory: "(übergeordnetes Verzeichnis)",
         pull: {

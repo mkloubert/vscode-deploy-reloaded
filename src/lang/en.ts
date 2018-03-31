@@ -268,7 +268,7 @@ export const translation: Translation = {
             operationFailed: "List directory operation failed (s. debug console 'CTRL/CMD + SHIFT + Y')!",
         },
         lastModified: "Last modified:{0:trim,leading_space}",
-        loading: "Loading directory{0:trim,surround,leading_space} ({1:trim} / {2:trim})...",
+        loading: "Loading directory{0:trim,surround,leading_space} ...",
         noName: "<NO NAME>",
         parentDirectory: "(parent)",
         pull: {

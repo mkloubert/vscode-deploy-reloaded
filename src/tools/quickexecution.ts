@@ -76,6 +76,12 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
     const $w: any[] = $h.asArray(allWorkspaces).map(ws => {
         const CLONED_WS = $h.makeNonDisposable(ws);
 
+        // CLONED_AWS.editorRootPath
+        Object.defineProperty(CLONED_WS, 'editorRootPath', {
+            enumerable: true,
+            
+            get: () => ws.editorRootPath,
+        });
         // CLONED_WS.name
         Object.defineProperty(CLONED_WS, 'name', {
             enumerable: true,
@@ -96,6 +102,12 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
     const $aw: any[] = $h.asArray(activeWorkspaces).map(aws => {
         const CLONED_AWS = $h.makeNonDisposable(aws);
 
+        // CLONED_AWS.editorRootPath
+        Object.defineProperty(CLONED_AWS, 'editorRootPath', {
+            enumerable: true,
+            
+            get: () => aws.editorRootPath,
+        });
         // CLONED_AWS.name
         Object.defineProperty(CLONED_AWS, 'name', {
             enumerable: true,
@@ -500,6 +512,71 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
                           : PublicIP.v4;
 
         return await GET_IP(OPTS);
+    };    
+
+    // tslint:disable-next-line:no-unused-variable    
+    const $lines = async (patterns?: string | string[], exclude?: string | string[]) => {
+        const WORKSPACE = $aw[0];
+
+        patterns = $h.asArray( await $unwrap(patterns) ).map(p => {
+            return $h.toStringSafe(p);
+        }).filter(p => !$h.isEmptyString(p));
+        if (patterns.length < 1) {
+            patterns = [ '**' ];
+        }
+
+        exclude = $h.asArray( await $unwrap(exclude) ).map(e => {
+            return $h.toStringSafe(e);
+        }).filter(e => !$h.isEmptyString(e));
+
+        await $vs.window.withProgress({
+            location: $vs.ProgressLocation.Notification,
+            cancellable: true,
+            title: 'Counting lines in files ...',   
+        }, async (progress, progressCancelToken) => {
+            progress.report({
+                message: 'Detecting files ...',
+            });
+
+            const FILES = await $h.glob(patterns, {
+                cwd: WORKSPACE.editorRootPath,
+                root: WORKSPACE.editorRootPath,
+                dot: true,
+                nodir: true,
+                nocase: true,
+                ignore: exclude,
+                nosort: true,
+            });
+    
+            if (FILES.length > 0) {
+                let lineCount = 0;
+                for (let i = 0; i < FILES.length; i++) {
+                    if (progressCancelToken.isCancellationRequested) {
+                        return;
+                    }
+
+                    const F = FILES[i];
+                    const PERCENTAGE = Math.floor(
+                        (i + 1) / FILES.length * 100.0
+                    );
+
+                    progress.report({
+                        // increment: PERCENTAGE,
+                        message: `Scanning file '${F}' (${lineCount}) ...`,
+                        percentage: PERCENTAGE,
+                    });        
+
+                    lineCount += (await $h.readFile(F)).toString('binary')
+                                                       .split("\n")
+                                                       .length;
+                }    
+    
+                $vs.window.showInformationMessage(`${lineCount} lines in ${FILES.length} files.`);
+            }
+            else {
+                $vs.window.showWarningMessage('No files found!');
+            }    
+        });
     };
 
     // tslint:disable-next-line:no-unused-variable
@@ -539,14 +616,12 @@ $exec(() => {
     // Action_1 (sync)
 
     return 5979;
-}, (result_from_Action_1) => {
+}, async (result_from_Action_1) => {
     // Action_2 (async)
 
-    return new Promise((resolve, reject) => {
-        resolve(result_from_Action_1 + 23979);
-    });
+    return result_from_Action_1 + 23979;
 }, (result_from_Action_2) => {
-    // Action3 (sync)
+    // Action_3 (sync)
     
     $vs.window.showInformationMessage('result_from_Action_2: ' + result_from_Action_2);
 
@@ -1032,13 +1107,22 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "$ip(false, 2000)  // IPv4 and 2000ms timeout\n";
     help += "```\n";
     help += "\n";
+    // $lines
+    help += "### $lines\n";
+    help += "Counts lines of text files inside the active workspace.\n";
+    help += "```javascript\n";
+    help += "$lines  // all files\n";
+    help += "$lines('**/*.ts')  // all TypeScript files\n";
+    help += "$lines(['**/*.*'], ['**/*.js'])  // all files, but no JavaScript files\n";
+    help += "```\n";
+    help += "\n";
     // $ltrim
     help += "### $ltrim\n";
     help += "Handles a value as string and removes whitespaces from the beginning.\n";
     help += "```javascript\n";
     help += "$ltrim('  \"abc e\" ')\n";
     help += "```\n";
-    help += "\n";        
+    help += "\n";
     // $lower
     help += "### $lower\n";
     help += "Handles a value as string and converts all characters to lower case.\n";

@@ -17,13 +17,11 @@
 
 import * as _ from 'lodash';
 import * as deploy_helpers from './helpers';
-import * as Events from 'events';
 import * as FS from 'fs';
 import * as FSExtra from 'fs-extra';
 import * as Moment from 'moment';
 import * as OS from 'os';
 import * as Path from 'path';
-import * as vscode from 'vscode';
 import * as vscode_helpers from 'vscode-helpers';
 
 export { ActionLogger, Logger } from 'vscode-helpers';

@@ -20,7 +20,6 @@ import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
 const Dropbox = require('dropbox');
 import * as Moment from 'moment';
-import * as Path from 'path';
 
 
 /**

@@ -20,7 +20,6 @@ import * as ChildProcess from 'child_process';
 import * as deploy_code from './code';
 import * as deploy_contracts from './contracts';
 import * as deploy_log from './log';
-import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
 import * as FS from 'fs';
 import * as FSExtra from 'fs-extra';
@@ -32,13 +31,12 @@ import * as TMP from 'tmp';
 import * as URL from 'url';
 import * as vscode from 'vscode';
 import {
-    applyFuncFor, asArray,
+    asArray,
     buildWorkflow,
     cloneObject, cloneObjectFlat, compareValuesBy, createCompletedAction,
     doesMatch,
     isEmptyString,
     normalizeString,
-    readAll,
     toBooleanSafe, toStringSafe, tryDispose
 } from 'vscode-helpers';
 

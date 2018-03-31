@@ -249,24 +249,48 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
         }
 
         let selfInfo: deploy_files.DirectoryInfo;
-        const FILES_AND_FOLDERS = await deploy_helpers.withProgress(async (ctx) => {
+        const FILES_AND_FOLDERS = await vscode.window.withProgress({
+            cancellable: true,
+            location: vscode.ProgressLocation.Notification,
+            title: `[${TARGET_NAME}]`,
+        }, async (progress: vscode.Progress<deploy_contracts.VSCodeProgress>, progressCancelToken) => {
             const CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
+
+            progressCancelToken.onCancellationRequested(() => {
+                try {
+                    CANCELLATION_SOURCE.cancel();
+                }
+                catch (e) {
+                    ME.logger
+                      .trace(e, 'list.listDirectory(3)');
+                }
+            });
+            if (progressCancelToken.isCancellationRequested) {
+                CANCELLATION_SOURCE.cancel();
+            }
+
             try {
                 const LOADED_FILES_AND_FILES: deploy_files.FileSystemInfo[] = [];
 
                 let index = -1;
                 const TOTAL_COUNT = PLUGINS.length;
                 while (PLUGINS.length > 0) {
-                    ++index;
-
                     if (CANCELLATION_SOURCE.token.isCancellationRequested) {
                         return false;
                     }
 
                     const PI = PLUGINS.shift();
 
-                    ctx.message = ME.t('listDirectory.loading',
-                                       displayDir, index + 1, TOTAL_COUNT);
+                    const PERCENTAGE = Math.floor(
+                        index / TOTAL_COUNT * 100.0
+                    );
+
+                    progress.report({
+                        // increment: PERCENTAGE,
+                        message: ME.t('listDirectory.loading',
+                                      displayDir),
+                        percentage: PERCENTAGE,
+                    });
 
                     const CTX: deploy_plugins.ListDirectoryContext = {
                         cancellationToken: CANCELLATION_SOURCE.token,
@@ -280,8 +304,8 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
                     Object.defineProperty(CTX, 'isCancelling', {
                         enumerable: true,
 
-                        get: () => {
-                            return CTX.cancellationToken.isCancellationRequested;
+                        get: function () {
+                            return this.cancellationToken.isCancellationRequested;
                         }
                     });
 
@@ -311,8 +335,6 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
             finally {
                 deploy_helpers.tryDispose(CANCELLATION_SOURCE);
             }
-        }, {
-            title: `[${TARGET_NAME}]`,
         });
 
         if (false === FILES_AND_FOLDERS) {
@@ -958,8 +980,8 @@ async function pullAllFilesFromDir(
                                 );
 
                                 if (transformer) {
-                                    dataToWrite = await (<deploy_transformers.DataTransformer>transformer)(
-                                        dataToWrite, CONTEXT
+                                    dataToWrite = await Promise.resolve(
+                                        transformer(dataToWrite, CONTEXT)
                                     );
                                 }
                             }
