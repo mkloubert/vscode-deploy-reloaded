@@ -326,6 +326,10 @@ export enum DeployOperation {
      * Pull / download
      */
     Pull = 3,
+    /**
+     * Remove folder(s)
+     */
+    RemoveFolders = 4,
 }
 
 /**

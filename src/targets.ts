@@ -1146,6 +1146,21 @@ export async function mapFilesForTarget<TFile extends deploy_contracts.WithNameA
 }
 
 /**
+ * Maps folder objects for a specific target.
+ * 
+ * @param {Target} target The underlying target.
+ * @param {TFolder|TFolder[]} folders The folder targets to (re)map.
+ * 
+ * @return {Promise<TFolder[]>} The promise with the new, mapped objects.
+ */
+export async function mapFoldersForTarget<TFolder extends deploy_contracts.WithNameAndPath = deploy_contracts.WithNameAndPath>(
+    target: Target,
+    folders: TFolder | TFolder[]
+) {
+    return mapFilesForTarget<TFolder>(target, folders);
+}
+
+/**
  * Mark a target as 'in progress'.
  * 
  * @param {Target} target The target to mark.
@@ -1415,4 +1430,23 @@ export function wrapOnBeforeFileCallbackForTarget<TFile extends deploy_contracts
     };
 
     return file;
+}
+
+/**
+ * Wraps a 'before' callback of a folder (context) object for a target.
+ * 
+ * @param {TFolder} folder The folder (context).
+ * @param {Target} target The underlying target.
+ * @param {string|symbol} property The property (key) of the callback.
+ * 
+ * @return {TFile} The new object. 
+ */
+export function wrapOnBeforeFolderCallbackForTarget<TFolder extends deploy_contracts.WithNameAndPath = deploy_contracts.WithNameAndPath>(
+    folder: TFolder,
+    target: Target,
+    property: string | symbol
+) {
+    return wrapOnBeforeFileCallbackForTarget(
+        folder, target, property
+    );
 }

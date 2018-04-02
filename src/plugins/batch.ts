@@ -25,7 +25,6 @@ import * as deploy_targets from '../targets';
 export interface BatchTarget extends deploy_targets.Target, deploy_targets.TargetProvider {
 }
 
-//TODO: implement removeFolders()
 class BatchPlugin extends deploy_plugins.IterablePluginBase<BatchTarget> {
 }
 

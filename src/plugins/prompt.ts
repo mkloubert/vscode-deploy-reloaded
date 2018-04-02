@@ -66,7 +66,6 @@ export interface PromptEntry {
 
 type ValueValidatorResult = string | undefined | null;
 
-//TODO: implement removeFolders()
 class PromptPlugin extends deploy_plugins.IterablePluginBase<PromptTarget> {
     protected async prepareTargetsMany(promptTarget: PromptTarget, targets: deploy_targets.Target | deploy_targets.Target[]): Promise<deploy_targets.Target[] | false> {
         const ME = this;

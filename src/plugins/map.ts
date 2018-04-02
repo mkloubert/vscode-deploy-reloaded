@@ -42,7 +42,6 @@ export type MapItem = string | Object;
  */
 export type TargetMappings = { [name: string]: any };
 
-//TODO: implement removeFolders()
 class MapPlugin extends deploy_plugins.IterablePluginBase<MapTarget> {
     protected async prepareTarget(mapTarget: MapTarget, target: deploy_targets.Target): Promise<deploy_targets.Target[]> {
         const ME = this;

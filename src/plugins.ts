@@ -1236,14 +1236,16 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
     public get canDelete() {
         return true;
     }
-
     /** @inheritdoc */
     public get canDownload() {
         return true;
     }
-
     /** @inheritdoc */
     public get canList() {
+        return true;
+    }
+    /** @inheritdoc */
+    public get canRemoveFolders() {
         return true;
     }
 
@@ -1409,20 +1411,6 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
         return deploy_helpers.asArray(<any>PREPARED_TARGETS);
     }
 
-    /**
-     * Prepares targets.
-     * 
-     * @param {TTarget} myTarget The base target.
-     * @param {deploy_targets.Target|deploy_targets.Target[]} targets The input targets.
-     * @param {deploy_contracts.DeployOperation} operation The underlying operation.
-     * 
-     * @return {PrepareTargetsResult|PromiseLike<PrepareTargetsResult>} The target(s) to use.
-     */
-    protected prepareTargetsMany(myTarget: TTarget, targets: deploy_targets.Target | deploy_targets.Target[], operation: deploy_contracts.DeployOperation)
-        : PrepareTargetsResult | PromiseLike<PrepareTargetsResult> {
-        return deploy_helpers.asArray(targets);
-    }
-
     private async invokeForEachTarget(
         myTarget: TTarget | false,
         targets: deploy_targets.Target | deploy_targets.Target[] | false,
@@ -1569,6 +1557,24 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
     }
 
     /**
+     * Maps folder objects for a specific target.
+     * 
+     * @param {TTarget} baseTarget The base target, using by that plugin.
+     * @param {Target} target The underlying target.
+     * @param {TFolder|TFolder[]} folders The folder targets to (re)map.
+     * 
+     * @return {Promise<TFolder[]>} The promise with the new, mapped objects.
+     */
+    protected async mapFoldersForTarget<TFolder extends deploy_contracts.WithNameAndPath = deploy_contracts.WithNameAndPath>(
+        baseTarget: TTarget,
+        target: deploy_targets.Target,
+        folders: TFolder | TFolder[]
+    )
+    {
+        return await deploy_targets.mapFoldersForTarget(target, folders);
+    }
+
+    /**
      * Prepares a base target.
      * 
      * @param {TTarget} baseTarget The base target.
@@ -1593,6 +1599,74 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
     protected prepareTarget(myTarget: TTarget, target: deploy_targets.Target, operation: deploy_contracts.DeployOperation)
         : PrepareTargetsResult | PromiseLike<PrepareTargetsResult> {
         return target;
+    }
+    
+    /**
+     * Prepares targets.
+     * 
+     * @param {TTarget} myTarget The base target.
+     * @param {deploy_targets.Target|deploy_targets.Target[]} targets The input targets.
+     * @param {deploy_contracts.DeployOperation} operation The underlying operation.
+     * 
+     * @return {PrepareTargetsResult|PromiseLike<PrepareTargetsResult>} The target(s) to use.
+     */
+    protected prepareTargetsMany(myTarget: TTarget, targets: deploy_targets.Target | deploy_targets.Target[], operation: deploy_contracts.DeployOperation)
+        : PrepareTargetsResult | PromiseLike<PrepareTargetsResult> {
+        return deploy_helpers.asArray(targets);
+    }
+
+    /** @inheritdoc */
+    public async removeFolders(context: RemoveFoldersContext<TTarget>): Promise<void> {
+        const ME = this;
+
+        await ME.invokeForEachTarget(
+            <any>await Promise.resolve(
+                ME.prepareBaseTarget(context.target)
+            ),
+            await ME.getTargets(context.target, deploy_contracts.DeployOperation.RemoveFolders),
+            deploy_contracts.DeployOperation.RemoveFolders,
+            () => context.isCancelling,
+            async (target, plugin) => {
+                const CTX: RemoveFoldersContext = {
+                    cancellationToken: undefined,
+                    folders: (await ME.mapFoldersForTarget(
+                        context.target,
+                        target,
+                        context.folders
+                    )).map(f => {
+                        return deploy_targets.wrapOnBeforeFolderCallbackForTarget(
+                            f,
+                            target,
+                            'onBeforeRemove'
+                        );
+                    }),
+                    isCancelling: undefined,
+                    target: target,                    
+                };
+
+                // CTX.cancellationToken
+                Object.defineProperty(CTX, 'cancellationToken', {
+                    enumerable: true,
+
+                    get: () => {
+                        return context.cancellationToken;
+                    }
+                });
+
+                // CTX.isCancelling
+                Object.defineProperty(CTX, 'isCancelling', {
+                    enumerable: true,
+
+                    get: () => {
+                        return context.isCancelling;
+                    }
+                });
+
+                await Promise.resolve(
+                    plugin.removeFolders(CTX)
+                );
+            }
+        );
     }
 
     /** @inheritdoc */

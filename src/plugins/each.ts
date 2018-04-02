@@ -40,7 +40,6 @@ export interface EachTarget extends deploy_targets.Target, deploy_targets.Target
     readonly usePlaceholders?: boolean;
 }
 
-//TODO: implement removeFolders()
 class EachPlugin extends deploy_plugins.IterablePluginBase<EachTarget> {
     protected async prepareTarget(eachTarget: EachTarget, target: deploy_targets.Target): Promise<deploy_targets.Target[]> {
         const ME = this;
