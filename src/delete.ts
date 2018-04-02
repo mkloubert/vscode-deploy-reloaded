@@ -19,6 +19,7 @@ import * as _ from 'lodash';
 import * as deploy_contracts from './contracts';
 import * as deploy_gui from './gui';
 import * as deploy_helpers from './helpers';
+import * as deploy_log from './log';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
 import * as deploy_targets from './targets';
@@ -628,4 +629,119 @@ export async function deletePackage(pkg: deploy_packages.Package, targetResolver
       SELECTED_TARGET,
       RELOADER,
       deleteLocalFiles);
+}
+
+/**
+ * Registers commands for delete operations.
+ * 
+ * @param {vscode.ExtensionContext} context The extension context.
+ */
+export function registerDeleteCommands(context: vscode.ExtensionContext) {
+    context.subscriptions.push(
+        // delete
+        vscode.commands.registerCommand('extension.deploy.reloaded.delete', async () => {
+            try {
+                const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = [
+                    {
+                        action: async () => {
+                            await vscode.commands.executeCommand('extension.deploy.reloaded.deleteFile');
+                        },
+                        label: '$(trashcan)  ' + i18.t('DELETE.currentFile.label'),
+                        description: i18.t('DELETE.currentFile.description'),
+                    },
+                    {
+                        action: async () => {
+                            await vscode.commands.executeCommand('extension.deploy.reloaded.deletePackage');
+                        },
+                        label: '$(trashcan)  ' + i18.t('DELETE.package.label'),
+                        description: i18.t('DELETE.package.description'),
+                    },
+                    {
+                        action: async () => {
+                            await vscode.commands.executeCommand('extension.deploy.reloaded.deleteFileList');
+                        },
+                        label: '$(list-ordered)  ' + i18.t('DELETE.fileList.label'),
+                        description: i18.t('DELETE.fileList.description'),
+                    }
+                ];
+
+                const SELECTED_ITEM = await vscode.window.showQuickPick(QUICK_PICKS);
+                if (SELECTED_ITEM) {
+                    await Promise.resolve(
+                        SELECTED_ITEM.action()
+                    );
+                }
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .trace(e, 'extension.deploy.reloaded.delete');
+
+                deploy_helpers.showErrorMessage(
+                    i18.t('DELETE.errors.operationFailed')
+                );
+            }
+        }),
+
+        // delete file list
+        vscode.commands.registerCommand('extension.deploy.reloaded.deleteFileList', async () => {
+            try {
+                await deleteFileList(context);
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .trace(e, 'extension.deploy.reloaded.deleteFileList');
+                
+                deploy_helpers.showErrorMessage(
+                    i18.t('DELETE.errors.operationFailed')
+                );
+            }
+        }),
+
+        // delete package
+        vscode.commands.registerCommand('extension.deploy.reloaded.deletePackage', async () => {
+            try {
+                const PKG = await deploy_packages.showPackageQuickPick(
+                    context,
+                    deploy_packages.getAllPackagesSorted(),
+                    {
+                        placeHolder: i18.t('packages.selectPackage'),
+                    }
+                );
+
+                if (PKG) {
+                    await PKG.__workspace
+                             .deletePackage(PKG);
+                }
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .trace(e, 'extension.deploy.reloaded.deletePackage');
+
+                deploy_helpers.showErrorMessage(
+                    i18.t('DELETE.errors.operationFailed')
+                );
+            }
+        }),
+
+        // delete current file
+        vscode.commands.registerCommand('extension.deploy.reloaded.deleteFile', async () => {
+            try {
+                await deploy_targets.invokeForActiveEditorAndTarget(
+                    i18.t('targets.selectTarget'),
+                    async (file, target) => {
+                        await target.__workspace
+                                    .deleteFileIn(file, target);
+                    }
+                );
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .trace(e, 'extension.deploy.reloaded.deleteFile');
+                
+                deploy_helpers.showErrorMessage(
+                    i18.t('DELETE.errors.operationFailed')
+                );
+            }
+        }),
+    );
 }

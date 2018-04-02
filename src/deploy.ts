@@ -1159,6 +1159,223 @@ export async function deployUncommitedScmChanges(client: deploy_scm.SourceContro
     }
 }
 
+/**
+ * Registers commands for deploy operations.
+ * 
+ * @param {vscode.ExtensionContext} context The extension context.
+ */
+export function registerDeployCommands(context: vscode.ExtensionContext) {
+    context.subscriptions.push(
+        // deploy
+        vscode.commands.registerCommand('extension.deploy.reloaded.deploy', async () => {
+            try {
+                const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = [
+                    {
+                        action: async () => {
+                            await vscode.commands.executeCommand('extension.deploy.reloaded.deployFile');
+                        },
+                        label: '$(rocket)  ' + i18.t('deploy.currentFile.label'),
+                        description: i18.t('deploy.currentFile.description'),
+                    },
+                    {
+                        action: async () => {
+                            await vscode.commands.executeCommand('extension.deploy.reloaded.deployWorkspace');
+                        },
+                        label: '$(rocket)  ' + i18.t('deploy.package.label'),
+                        description: i18.t('deploy.package.description'),
+                    },
+                    {
+                        action: async () => {
+                            await vscode.commands.executeCommand('extension.deploy.reloaded.deployAllOpenFiles');
+                        },
+                        label: '$(rocket)  ' + i18.t('deploy.allOpenFiles.label'),
+                        description: i18.t('deploy.allOpenFiles.description'),
+                    },
+                    {
+                        action: async () => {
+                            await vscode.commands.executeCommand('extension.deploy.reloaded.deployGitCommit');
+                        },
+                        label: '$(git-commit)  ' + i18.t('deploy.gitCommit.label'),
+                        description: i18.t('deploy.gitCommit.description'),
+                    },
+                    {
+                        action: async () => {
+                            await vscode.commands.executeCommand('extension.deploy.reloaded.deployUncomittedGitFiles');
+                        },
+                        label: '$(git-commit)  ' + i18.t('deploy.uncomittedGitFiles.label'),
+                        description: i18.t('deploy.uncomittedGitFiles.description'),
+                    },
+                    {
+                        action: async () => {
+                            await vscode.commands.executeCommand('extension.deploy.reloaded.deployFileList');
+                        },
+                        label: '$(list-ordered)  ' + i18.t('deploy.fileList.label'),
+                        description: i18.t('deploy.fileList.description'),
+                    }
+                ];
+
+                const SELECTED_ITEM = await vscode.window.showQuickPick(QUICK_PICKS);
+                if (SELECTED_ITEM) {
+                    await Promise.resolve(
+                        SELECTED_ITEM.action()
+                    );
+                }
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .trace(e, 'extension.deploy.reloaded.deploy');
+
+                deploy_helpers.showErrorMessage(
+                    i18.t('deploy.errors.operationFailed')
+                );
+            }
+        }),
+
+        // deploy file list
+        vscode.commands.registerCommand('extension.deploy.reloaded.deployFileList', async () => {
+            try {
+                await deployFileList(context);
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .trace(e, 'extension.deploy.reloaded.deployFileList');
+                
+                deploy_helpers.showErrorMessage(
+                    i18.t('deploy.errors.operationFailed')
+                );
+            }
+        }),
+
+        // deploy workspace
+        vscode.commands.registerCommand('extension.deploy.reloaded.deployWorkspace', async () => {
+            try {
+                const PKG = await deploy_packages.showPackageQuickPick(
+                    context,
+                    deploy_packages.getAllPackagesSorted(),
+                    {
+                        placeHolder: i18.t('packages.selectPackage'),
+                    }
+                );
+
+                if (PKG) {
+                    await PKG.__workspace
+                             .deployPackage(PKG);
+                }
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .trace(e, 'extension.deploy.reloaded.deployWorkspace');
+                
+                deploy_helpers.showErrorMessage(
+                    i18.t('deploy.errors.operationFailed')
+                );
+            }
+        }),
+
+        // deploy current file
+        vscode.commands.registerCommand('extension.deploy.reloaded.deployFile', async () => {
+            try {
+                await deploy_targets.invokeForActiveEditorAndTarget(
+                    i18.t('targets.selectTarget'),
+                    async (file, target) => {
+                        await target.__workspace
+                                    .deployFileTo(file, target);
+                    }
+                );
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .trace(e, 'extension.deploy.reloaded.deployFile');
+                
+                deploy_helpers.showErrorMessage(
+                    i18.t('deploy.errors.operationFailed')
+                );
+            }
+        }),
+
+        // deploy all open files
+        vscode.commands.registerCommand('extension.deploy.reloaded.deployAllOpenFiles', async () => {
+            try {
+                await deployAllOpenFiles(
+                    deploy_workspaces.getActiveWorkspaces()
+                );
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .trace(e, 'extension.deploy.reloaded.deployAllOpenFiles');
+                
+                deploy_helpers.showErrorMessage(
+                    i18.t('deploy.errors.operationFailed')
+                );
+            }
+        }),
+
+        // deploy git commit
+        vscode.commands.registerCommand('extension.deploy.reloaded.deployGitCommit', async () => {
+            try {
+                const WORKSPACE = await deploy_workspaces.showWorkspaceQuickPick(
+                    context,
+                    deploy_workspaces.getActiveWorkspaces(),
+                    {
+                        placeHolder: i18.t('workspaces.selectWorkspace')
+                    }
+                );
+
+                if (!WORKSPACE) {
+                    return;
+                }
+
+                const TARGET = await WORKSPACE.showTargetQuickPick();
+                if (!TARGET) {
+                    return;
+                }
+
+                await WORKSPACE.deployGitCommit(TARGET);
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .trace(e, 'extension.deploy.reloaded.deployGitCommit');
+                
+                deploy_helpers.showErrorMessage(
+                    i18.t('deploy.errors.operationFailed')
+                );
+            }
+        }),
+
+        // deploy uncommited git files
+        vscode.commands.registerCommand('extension.deploy.reloaded.deployUncomittedGitFiles', async () => {
+            try {
+                const WORKSPACE = await deploy_workspaces.showWorkspaceQuickPick(
+                    context,
+                    deploy_workspaces.getActiveWorkspaces(),
+                    {
+                        placeHolder: i18.t('workspaces.selectWorkspace')
+                    }
+                );
+
+                if (!WORKSPACE) {
+                    return;
+                }
+
+                const TARGET = await WORKSPACE.showTargetQuickPick();
+                if (!TARGET) {
+                    return;
+                }
+
+                await WORKSPACE.deployUncomittedGitChanges(TARGET);
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .trace(e, 'extension.deploy.reloaded.deployUncomittedGitFiles');
+                
+                deploy_helpers.showErrorMessage(
+                    i18.t('deploy.errors.operationFailed')
+                );
+            }
+        }),
+    );
+}
+
 async function saveBeforeDeploy(target: deploy_targets.Target, files: string[]) {
     const ME: deploy_workspaces.Workspace = this;
 
