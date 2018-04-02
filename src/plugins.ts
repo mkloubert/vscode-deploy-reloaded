@@ -908,14 +908,16 @@ export abstract class AsyncFileClientPluginBase<TTarget extends deploy_targets.T
     public get canDelete() {
         return true;
     }
-
     /** @inheritdoc */
     public get canDownload() {
         return true;
     }
-
     /** @inheritdoc */
     public get canList() {
+        return true;
+    }
+    /** @inheritdoc */
+    public get canRemoveFolders() {
         return true;
     }
 
@@ -1051,6 +1053,30 @@ export abstract class AsyncFileClientPluginBase<TTarget extends deploy_targets.T
             }
 
             return RESULT;
+        });
+    }
+
+    /** @inheritdoc */
+    public async removeFolders(context: RemoveFoldersContext<TTarget>) {
+        const ME = this;
+
+        await ME.invokeForConnection(context.target, async (conn) => {
+            for (const FOLDER of context.folders) {
+                try {
+                    const REMOTE_DIR = '/' + FOLDER.path;
+
+                    await FOLDER.onBeforeRemove(REMOTE_DIR);
+
+                    await conn.client.removeFolder(
+                        conn.getDir(FOLDER.path) + '/' + FOLDER.name
+                    );
+
+                    await FOLDER.onRemoveCompleted();
+                }
+                catch (e) {
+                    await FOLDER.onRemoveCompleted(e);
+                }
+            }
         });
     }
 

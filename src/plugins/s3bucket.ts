@@ -64,7 +64,6 @@ export interface S3BucketTarget extends deploy_targets.Target {
     readonly dir?: string;
 }
 
-//TODO: implement removeFolders()
 class S3BucketPlugin extends deploy_plugins.AsyncFileClientPluginBase<S3BucketTarget,
                                                                       deploy_clients_s3bucket.S3BucketClient,
                                                                       S3BucketContext> {

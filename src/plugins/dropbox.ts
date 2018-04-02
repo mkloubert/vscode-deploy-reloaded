@@ -39,7 +39,6 @@ export interface DropboxTarget extends deploy_targets.Target {
     readonly token: string;
 }
 
-//TODO: implement removeFolders()
 class DropboxPlugin extends deploy_plugins.AsyncFileClientPluginBase<DropboxTarget,
                                                                      deploy_clients_dropbox.DropBoxClient,
                                                                      DropboxContext> {

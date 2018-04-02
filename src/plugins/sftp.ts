@@ -224,7 +224,6 @@ export interface SFTPUploadedModuleExecutorArguments extends SFTPUploadScriptArg
 const CACHE_PASSWORD = 'password';
 const CACHE_USER = 'user';
 
-//TODO: implement removeFolders()
 class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
                                                                   deploy_clients_sftp.SFTPClient,
                                                                   SFTPContext> {

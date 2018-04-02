@@ -55,6 +55,15 @@ export interface IAsyncFileClient extends NodeJS.EventEmitter, vscode.Disposable
     readonly listDirectory: (path: string) => PromiseLike<deploy_files.FileSystemInfo[]>;
 
     /**
+     * Deletes a folder.
+     * 
+     * @param {string} path The path of the folder on the remote.
+     * 
+     * @return {PromiseLike<boolean>} A promise that indicates if operation was successful or not.
+     */
+    readonly removeFolder: (path: string) => PromiseLike<boolean>;
+
+    /**
      * The type.
      */
     readonly type: string;
@@ -98,6 +107,60 @@ export abstract class AsyncFileListBase extends deploy_helpers.DisposableBase im
      */
     protected normalizeValueName(name: any): string {
         return deploy_helpers.normalizeString( name );
+    }
+
+    /** @inheritdoc */
+    public async removeFolder(path: string) {
+        path = deploy_helpers.toStringSafe(path);
+
+        try {
+            const FILES_AND_FOLDERS = deploy_helpers.asArray(await this.listDirectory(path));
+
+            const OTHERS = FILES_AND_FOLDERS.filter(ff => {
+                switch (ff.type) {
+                    case deploy_files.FileSystemType.Directory:
+                    case deploy_files.FileSystemType.File:
+                        return true;
+                }
+
+                return false;
+            });
+            if (OTHERS.length > 0) {
+                return false;
+            }
+
+            const TO_PATH = (wnp: deploy_contracts.WithNameAndPath) => {
+                return '/' + deploy_helpers.normalizePath(
+                    deploy_helpers.normalizePath(wnp.path) + 
+                    '/' + 
+                    deploy_helpers.normalizePath(wnp.name),
+                );
+            };
+
+            const FOLDERS = FILES_AND_FOLDERS.filter(ff => {
+                return ff.type == deploy_files.FileSystemType.Directory;
+            }).map(ff => TO_PATH(ff));
+            const FILES = FILES_AND_FOLDERS.filter(ff => {
+                return ff.type == deploy_files.FileSystemType.File;
+            }).map(ff => TO_PATH(ff));
+
+            // first delete the sub folders
+            for (const F of FOLDERS) {
+                if (!(await this.removeFolder(F))) {
+                    return false;
+                }
+            }
+
+            // then the files
+            for (const F of FILES) {
+                await this.deleteFile(F);
+            }
+
+            return true;
+        }
+        catch (e) {
+            return false;
+        }
     }
 
     /**

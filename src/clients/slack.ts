@@ -393,6 +393,11 @@ export class SlackClient extends deploy_clients.AsyncFileListBase {
     }
 
     /** @inheritdoc */
+    public async removeFolder(path: string): Promise<boolean> {
+        throw new Error('Not supported!');
+    }
+
+    /** @inheritdoc */
     public get type(): string {
         return 'slack';
     }

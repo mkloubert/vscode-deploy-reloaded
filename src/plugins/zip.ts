@@ -43,7 +43,6 @@ export interface ZipTarget extends deploy_targets.Target {
     readonly open?: boolean;
 }
 
-//TODO: implement removeFolders()
 class ZipPlugin extends deploy_plugins.PluginBase<ZipTarget> {
     public get canDelete() {
         return true;
@@ -397,6 +396,118 @@ class ZipPlugin extends deploy_plugins.PluginBase<ZipTarget> {
         }
 
         return RESULT;
+    }
+
+    public async removeFolders(context: deploy_plugins.RemoveFoldersContext<ZipTarget>) {
+        const TARGET = context.target;
+
+        const ZIP_FILENAME = this.getZipFileNameWithDetails(TARGET);
+
+        const ZIP_FILE_PATH = Path.join(await this.getTargetDirectory(TARGET, true),
+                                        ZIP_FILENAME.name);
+
+        const TO_PATH = (ff: deploy_contracts.WithNameAndPath) => {
+            return deploy_helpers.normalizePath(
+                deploy_helpers.normalizePath(ff.path) + 
+                '/' + 
+                deploy_helpers.normalizePath(ff.name)
+            );
+        };
+
+        for (const F of context.folders) {
+            if (context.isCancelling) {
+                return;
+            }
+
+            try {
+                await F.onBeforeRemove( ZIP_FILE_PATH );
+
+                const TARGET_DIR = TO_PATH(F);
+
+                const LIST_CTX: deploy_plugins.ListDirectoryContext<ZipTarget> = {
+                    cancellationToken: undefined,
+                    dir: TARGET_DIR,
+                    isCancelling: undefined,
+                    target: TARGET,
+                    workspace: undefined,
+                };
+
+                // LIST_CTX.cancellationToken
+                Object.defineProperty(LIST_CTX, 'cancellationToken', {
+                    enumerable: true,
+
+                    get: function () {
+                        return context.cancellationToken;
+                    }
+                });
+
+                // LIST_CTX.isCancelling
+                Object.defineProperty(LIST_CTX, 'isCancelling', {
+                    enumerable: true,
+
+                    get: function () {
+                        return context.isCancelling;
+                    }
+                });
+
+                // LIST_CTX.workspace
+                Object.defineProperty(LIST_CTX, 'workspace', {
+                    enumerable: true,
+
+                    get: function () {
+                        return this.target.__workspace;
+                    }
+                });
+
+                if (LIST_CTX.isCancelling) {
+                    return;
+                }
+
+                const LIST = await this.listDirectory(LIST_CTX);
+
+                const DELETE_CTX: deploy_plugins.DeleteContext<ZipTarget> = {
+                    cancellationToken: undefined, //TODO
+                    isCancelling: undefined,
+                    files: LIST.files.map(f => {
+                        return new deploy_plugins.SimpleFileToDelete(
+                            TARGET.__workspace,
+                            undefined,
+                            f,
+                        );
+                    }),
+                    target: TARGET,
+                };
+
+                // DELETE_CTX.cancellationToken
+                Object.defineProperty(DELETE_CTX, 'cancellationToken', {
+                    enumerable: true,
+
+                    get: function () {
+                        return context.cancellationToken;
+                    }
+                });
+
+                // DELETE_CTX.isCancelling
+                Object.defineProperty(DELETE_CTX, 'isCancelling', {
+                    enumerable: true,
+
+                    get: function () {
+                        return context.isCancelling;
+                    }
+                });
+
+                if (DELETE_CTX.isCancelling) {
+                    return;
+                }
+
+                await this.deleteFiles( DELETE_CTX );
+
+                await F.onRemoveCompleted();
+            }
+            catch (e) {
+                await F.onRemoveCompleted(e);
+            }
+        }
     }
 
     public async uploadFiles(context: deploy_plugins.UploadContext<ZipTarget>) {
