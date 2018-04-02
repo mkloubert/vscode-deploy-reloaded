@@ -44,7 +44,6 @@ interface TargetSettings {
     readonly empty?: boolean;
 }
 
-//TODO: implement removeFolders()
 class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
     public get canDelete() {
         return true;
@@ -55,6 +54,10 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
     public get canList() {
         return true;
     }
+    public get canRemoveFolders() {
+        return true;
+    }
+    
 
     public async deleteFiles(context: deploy_plugins.DeleteContext<LocalTarget>) {
         const ME = this;
@@ -133,10 +136,10 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
     }
 
     private async getTargetSettings(context: deploy_plugins.FilesContext<LocalTarget>,
-                                    file: deploy_workspaces.WorkspaceFile): Promise<TargetSettings> {
+                                    item: deploy_workspaces.WorkspaceItem): Promise<TargetSettings> {
         const ME = this;
 
-        const DIR = ME.normalizeDir(context.target, file);
+        const DIR = ME.normalizeDir(context.target, item);
 
         if (await deploy_helpers.exists(DIR)) {
             if (!(await deploy_helpers.lstat(DIR)).isDirectory()) {
@@ -281,6 +284,47 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
         dir = Path.resolve(dir);
 
         return dir;
+    }
+
+    public async removeFolders(context: deploy_plugins.RemoveFoldersContext<LocalTarget>) {
+        const TARGET = context.target;
+
+        for (const F of context.folders) {
+            try {
+                await F.onBeforeRemove(
+                    deploy_helpers.toDisplayablePath(F.path)
+                );
+
+                const SETTINGS = await this.getTargetSettings(context, F);
+
+                const TARGET_DIR = Path.resolve(
+                    Path.join(
+                        SETTINGS.dir, F.path
+                    )
+                );
+        
+                if (!this.isPathOf(TARGET, TARGET_DIR) || (SETTINGS.dir === TARGET_DIR)) {
+                    throw new Error(
+                        this.t(TARGET,
+                               'plugins.local.invalidDirectory', F.path)
+                    );
+                }
+
+                if (!(await deploy_helpers.isDirectory(TARGET_DIR))) {
+                    throw new Error(
+                        this.t(TARGET,
+                               'isNo.directory', TARGET_DIR)
+                    );
+                }
+
+                await FSExtra.remove(TARGET_DIR);
+
+                await F.onRemoveCompleted();
+            }
+            catch (e) {
+                await F.onRemoveCompleted(e);
+            }
+        }
     }
 
     public async uploadFiles(context: deploy_plugins.UploadContext<LocalTarget>) {

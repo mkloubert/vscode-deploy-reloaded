@@ -520,7 +520,6 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
 
     public async removeFolders(context: deploy_plugins.RemoveFoldersContext<AppTarget>) {
         const TARGET = context.target;
-        const WORKSPACE = TARGET.__workspace;
         const OUT_DIR = this.getOutDirectory(TARGET);
 
         for (const F of context.folders) {
@@ -535,7 +534,7 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
                     )
                 );
         
-                if (!WORKSPACE.isPathOf(TARGET_DIR)) {
+                if (!this.isPathOf(TARGET, TARGET_DIR) || (OUT_DIR === TARGET_DIR)) {
                     throw new Error(
                         this.t(TARGET,
                                'plugins.app.invalidDirectory', F.path)

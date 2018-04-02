@@ -788,6 +788,23 @@ export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_
     public async initialize() {
     }
 
+    /**
+     * Checks if a path is part of the workspace of a target.
+     * 
+     * @param {deploy_targets.Target} target The underlying target.
+     * @param {string} path The path to check.
+     * 
+     * @return {boolean} Is part of workspace or not. 
+     */
+    protected isPathOf(target: deploy_targets.Target, path: string) {
+        const WORKSPACE = this.getWorkspaceOfTarget(target);
+        if (WORKSPACE) {
+            return WORKSPACE.isPathOf(path);
+        }
+
+        return false;
+    }
+
     /** @inheritdoc */
     public async listDirectory(context: ListDirectoryContext<TTarget>): Promise<ListDirectoryResult<TTarget>> {
         throw new Error(`'listDirectory()' is NOT implemented!`);
