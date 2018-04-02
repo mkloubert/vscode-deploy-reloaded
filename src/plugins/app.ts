@@ -95,7 +95,11 @@ export interface AppScriptArguments extends deploy_contracts.ScriptArguments {
     /**
      * The list of files to handle.
      */
-    readonly files: string[];
+    readonly files?: string[];
+    /**
+     * The list of folders to handle.
+     */
+    readonly folders?: string[];
     /**
      * The kind of deploy operaton.
      */
@@ -336,9 +340,9 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
         return Path.resolve(cwd);
     }
 
-    private getFiles(target: AppTarget,
-                     files: deploy_contracts.WithNameAndPath | deploy_contracts.WithNameAndPath[]) {
-        files = deploy_helpers.asArray(files);
+    private getFilesOrFolders(target: AppTarget,
+                              filesOrFolders: deploy_contracts.WithNameAndPath | deploy_contracts.WithNameAndPath[]) {
+        filesOrFolders = deploy_helpers.asArray(filesOrFolders);
 
         const CWD = this.getCwd(target);
         const USE_RELATIVE_PATHS = deploy_helpers.toBooleanSafe(target.useRelativePaths);
@@ -351,7 +355,7 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
             pathSeparator = Path.sep;
         }
 
-        return files.map(f => {
+        return filesOrFolders.map(f => {
             return Path.resolve(
                 Path.join(
                     CWD,
@@ -379,6 +383,10 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
 
     private getFileDestination(target: AppTarget, file: deploy_contracts.WithNameAndPath): string {
         return deploy_helpers.toStringSafe(target.app);
+    }
+
+    private getFolderDestination(target: AppTarget, folder: deploy_contracts.WithNameAndPath): string {
+        return this.getFileDestination(target, folder);
     }
 
     private getOutDirectory(target: AppTarget) {
@@ -519,60 +527,55 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
     }
 
     public async removeFolders(context: deploy_plugins.RemoveFoldersContext<AppTarget>) {
-        const TARGET = context.target;
-        const OUT_DIR = this.getOutDirectory(TARGET);
+        const FIRST_FOLDER = Enumerable.from(context.folders).firstOrDefault();
+        const OTHER_FOLDERS = Enumerable.from(context.folders).skip(1).toArray();
 
-        for (const F of context.folders) {
-            try {
-                await F.onBeforeRemove(
-                    deploy_helpers.toDisplayablePath(F.path)
-                );
+        if (!deploy_helpers.isSymbol(FIRST_FOLDER)) {
+            await FIRST_FOLDER.onBeforeRemove(
+                this.getFolderDestination(context.target, FIRST_FOLDER)
+            );
+        }
 
-                const TARGET_DIR = Path.resolve(
-                    Path.join(
-                        OUT_DIR, F.path
-                    )
-                );
-
-                const TARGET_FOLDER = Path.resolve(
-                    Path.join(
-                        TARGET_DIR, F.name,
-                    )
-                );
-        
-                if (!this.isPathOf(TARGET, TARGET_FOLDER) || (OUT_DIR === TARGET_FOLDER)) {
-                    throw new Error(
-                        this.t(TARGET,
-                               'plugins.app.invalidDirectory', TARGET_FOLDER)
-                    );
-                }
-
-                if (!(await deploy_helpers.isDirectory(TARGET_FOLDER))) {
-                    throw new Error(
-                        this.t(TARGET,
-                               'isNo.directory', TARGET_FOLDER)
-                    );
-                }
-
-                await FSExtra.remove(TARGET_FOLDER);
-
-                await F.onRemoveCompleted();
+        let err: any;
+        try {
+            await this.runApp(
+                context.target,
+                context.folders,
+                deploy_contracts.DeployOperation.RemoveFolders,
+                () => context.isCancelling,
+            );
+        }
+        catch (e) {
+            err = e;
+        }
+        finally {
+            if (!deploy_helpers.isSymbol(FIRST_FOLDER)) {
+                await FIRST_FOLDER.onRemoveCompleted(err);
             }
-            catch (e) {
-                await F.onRemoveCompleted(e);
+        }
+
+        for (const F of OTHER_FOLDERS) {
+            if (context.isCancelling) {
+                break;
             }
+
+            await F.onBeforeRemove(
+                deploy_helpers.toDisplayablePath(F.path)
+            );
+
+            await F.onRemoveCompleted(err);
         }
     }
 
     private runApp(target: AppTarget,
-                   filesWithPath: deploy_contracts.WithNameAndPath | deploy_contracts.WithNameAndPath[],
+                   filesOrFoldersWithPath: deploy_contracts.WithNameAndPath | deploy_contracts.WithNameAndPath[],
                    operation: deploy_contracts.DeployOperation,
                    isCancelling: () => boolean) {
         const ME = this;
         const TARGET_NAME = deploy_targets.getTargetName(target);
         const WORKSPACE = target.__workspace;
 
-        const FILES = ME.getFiles(target, filesWithPath);
+        const FILES_OR_FOLDERS = ME.getFilesOrFolders(target, filesOrFoldersWithPath);
 
         return new Promise<void>(async (resolve, reject) => {
             const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
@@ -626,8 +629,8 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
                         return CWD;
                     }, 'cwd'),
                     new deploy_values.FunctionValue(() => {
-                        return FILES.join(fileSeparator);
-                    }, 'filesToDeploy'),
+                        return FILES_OR_FOLDERS.join(fileSeparator);
+                    }, deploy_contracts.DeployOperation.RemoveFolders !== operation ? 'filesToDeploy' : 'foldersToHandle'),
                     new deploy_values.FunctionValue(() => {
                         return false === operationFlag ? '' : operationFlag;
                     }, 'operationFlag'),
@@ -687,8 +690,11 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
                                     cwd: CWD,
                                     events: ME._ARGS_SCRIPT_EVENTS,
                                     extension: WORKSPACE.context.extension,
-                                    files: FILES.map(f => f),
+                                    files: deploy_contracts.DeployOperation.RemoveFolders !== operation ? FILES_OR_FOLDERS.map(f => f)
+                                                                                                        : undefined,
                                     folder: WORKSPACE.folder,
+                                    folders: deploy_contracts.DeployOperation.RemoveFolders === operation ? FILES_OR_FOLDERS.map(f => f)
+                                                                                                          : undefined,
                                     globalEvents: deploy_helpers.EVENTS,
                                     globals: WORKSPACE.globals,
                                     globalState: ME._GLOBAL_STATE,
@@ -789,21 +795,21 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
                 }
 
                 if (SUBMIT_FILELIST) {
-                    let fileArgs: any[];
+                    let fileOrFolderArgs: any[];
                     if (deploy_helpers.toBooleanSafe(target.asOneArgument)) {
-                        fileArgs = [
-                            FILES.join(fileSeparator)
+                        fileOrFolderArgs = [
+                            FILES_OR_FOLDERS.join(fileSeparator)
                         ];
                     }
                     else {
-                        fileArgs = FILES;
+                        fileOrFolderArgs = FILES_OR_FOLDERS;
                     }
 
                     if (deploy_helpers.toBooleanSafe(target.prependFileList)) {
-                        args = fileArgs.concat( args );
+                        args = fileOrFolderArgs.concat( args );
                     }
                     else {
-                        args = args.concat( fileArgs );
+                        args = args.concat( fileOrFolderArgs );
                     }
                 }
 
@@ -868,8 +874,11 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
                                     cwd: CWD,
                                     events: ME._INPUT_SCRIPT_EVENTS,
                                     extension: WORKSPACE.context.extension,
-                                    files: FILES.map(f => f),
+                                    files: deploy_contracts.DeployOperation.RemoveFolders !== operation ? FILES_OR_FOLDERS.map(f => f)
+                                                                                                        : undefined,
                                     folder: WORKSPACE.folder,
+                                    folders: deploy_contracts.DeployOperation.RemoveFolders === operation ? FILES_OR_FOLDERS.map(f => f)
+                                                                                                          : undefined,
                                     globalEvents: deploy_helpers.EVENTS,
                                     globals: WORKSPACE.globals,
                                     globalState: ME._GLOBAL_STATE,

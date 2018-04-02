@@ -33,9 +33,13 @@ export interface ScriptArguments extends deploy_contracts.ScriptArguments, deplo
      */
     readonly dir?: string;
     /**
-     * The files to delete / download or upload. 
+     * The files to handle. 
      */
     readonly files?: deploy_workspaces.WorkspaceFile[];
+    /**
+     * The folders to handle.
+     */
+    readonly folders?: deploy_workspaces.WorkspaceDirectory[];
     /**
      * The operation (type).
      */
@@ -92,7 +96,6 @@ export interface ScriptTarget extends deploy_targets.Target {
     readonly script: string;
 }
 
-//TODO: implement removeFolders()
 class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
     private readonly _EVENTS = new Events.EventEmitter();
     private readonly _GLOBAL_STATE: deploy_contracts.KeyValuePairs = {};
@@ -101,12 +104,13 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
     public get canDelete() {
         return true;
     }
-
     public get canDownload() {
         return true;
     }
-
     public get canList() {
+        return true;
+    }
+    public get canRemoveFolders() {
         return true;
     }
 
@@ -124,6 +128,7 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
             extension: context.target.__workspace.context.extension,
             files: context['files'],
             folder: context.target.__workspace.folder,
+            folders: context['folders'],
             globalEvents: deploy_helpers.EVENTS,
             globals: context.target.__workspace.globals,
             globalState: ME._GLOBAL_STATE,
@@ -308,6 +313,13 @@ class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
 
     protected onDispose() {
         this._EVENTS.removeAllListeners();
+    }
+
+    public async removeFolders(context: deploy_plugins.RemoveFoldersContext<ScriptTarget>): Promise<void> {
+        const ARGS = await this.createScriptArgsFromContext(context,
+                                                            deploy_contracts.DeployOperation.RemoveFolders);
+
+        await this.executeScript(ARGS);
     }
 
     public async uploadFiles(context: deploy_plugins.UploadContext<ScriptTarget>): Promise<void> {
