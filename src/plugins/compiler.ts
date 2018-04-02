@@ -21,6 +21,7 @@ import * as deploy_helpers from '../helpers';
 import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
 import * as deploy_workspaces from '../workspaces';
+import * as FSExtra from 'fs-extra';
 const MergeDeep = require('merge-deep');
 import * as Moment from 'moment';
 import * as Path from 'path';
@@ -53,12 +54,14 @@ export interface CompilerTarget extends deploy_targets.Target {
     readonly options?: Object;
 }
 
-//TODO: implement removeFolders()
 class CompilerPlugin extends deploy_plugins.PluginBase<CompilerTarget> {
     public get canDelete() {
         return true;
     }
     public get canList() {
+        return true;
+    }
+    public get canRemoveFolders() {
         return true;
     }
 
@@ -298,6 +301,55 @@ class CompilerPlugin extends deploy_plugins.PluginBase<CompilerTarget> {
         }
 
         return RESULT;
+    }
+
+    public async removeFolders(context: deploy_plugins.RemoveFoldersContext<CompilerTarget>) {
+        const TARGET = context.target;
+
+        const OUT_DIR = Path.resolve(
+            (await this.createCompilerContext(TARGET)).outputDirectory
+        );
+
+        for (const F of context.folders) {
+            try {
+                await F.onBeforeRemove(
+                    deploy_helpers.toDisplayablePath(F.path)
+                );
+
+                const TARGET_DIR = Path.resolve(
+                    Path.join(
+                        OUT_DIR, F.path,
+                    )
+                );
+
+                const TARGET_FOLDER = Path.resolve(
+                    Path.join(
+                        TARGET_DIR, F.name,
+                    )
+                );
+        
+                if (!this.isPathOf(TARGET, TARGET_FOLDER) || (OUT_DIR === TARGET_FOLDER)) {
+                    throw new Error(
+                        this.t(TARGET,
+                               'plugins.compiler.invalidDirectory', TARGET_FOLDER)
+                    );
+                }
+
+                if (!(await deploy_helpers.isDirectory(TARGET_FOLDER))) {
+                    throw new Error(
+                        this.t(TARGET,
+                               'isNo.directory', TARGET_FOLDER)
+                    );
+                }
+
+                await FSExtra.remove(TARGET_FOLDER);
+
+                await F.onRemoveCompleted();
+            }
+            catch (e) {
+                await F.onRemoveCompleted(e);
+            }
+        }
     }
 
     public async uploadFiles(context: deploy_plugins.UploadContext<CompilerTarget>) {

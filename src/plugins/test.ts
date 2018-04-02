@@ -29,7 +29,6 @@ import * as Path from 'path';
 export interface TestTarget extends deploy_targets.Target {
 }
 
-//TODO: implement removeFolders()
 class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
     public get canDelete() {
         return true;

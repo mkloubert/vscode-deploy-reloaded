@@ -70,7 +70,6 @@ export interface MailTarget extends deploy_targets.Target {
     readonly user?: string;
 }
 
-//TODO: implement removeFolders()
 class MailPlugin extends deploy_plugins.PluginBase<MailTarget> {
     private sendMail(transporter: Mailer.Transporter, opts: Mailer.SendMailOptions): Promise<any> {
         return new Promise<any>((resolve, reject) => {
