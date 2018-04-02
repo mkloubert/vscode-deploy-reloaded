@@ -21,6 +21,7 @@ import * as deploy_files from './files';
 import * as deploy_gui from './gui';
 import * as deploy_helpers from './helpers';
 import * as deploy_html from './html';
+import * as deploy_log from './log';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
 import * as deploy_targets from './targets';
@@ -933,4 +934,146 @@ export async function pullPackage(pkg: deploy_packages.Package, targetResolver: 
     )(FILES_TO_PULL,
       SELECTED_TARGET,
       RELOADER);
+}
+
+/**
+ * Registers commands for pull operations.
+ * 
+ * @param {vscode.ExtensionContext} context The extension context.
+ */
+export function registerPullCommands(context: vscode.ExtensionContext) {
+    context.subscriptions.push(
+        // pull
+        vscode.commands.registerCommand('extension.deploy.reloaded.pull', async () => {
+            try {
+                const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = [
+                    {
+                        action: async () => {
+                            await vscode.commands.executeCommand('extension.deploy.reloaded.pullFile');
+                        },
+                        label: '$(cloud-download)  ' + i18.t('pull.currentFile.label'),
+                        description: i18.t('pull.currentFile.description'),
+                    },
+
+                    {
+                        action: async () => {
+                            await vscode.commands.executeCommand('extension.deploy.reloaded.pullWorkspace');
+                        },
+                        label: '$(cloud-download)  ' + i18.t('pull.package.label'),
+                        description: i18.t('pull.package.description'),
+                    },
+
+                    {
+                        action: async () => {
+                            await vscode.commands.executeCommand('extension.deploy.reloaded.pullAllOpenFiles');
+                        },
+                        label: '$(cloud-download)  ' + i18.t('pull.allOpenFiles.label'),
+                        description: i18.t('pull.allOpenFiles.description'),
+                    },
+                    
+                    {
+                        action: async () => {
+                            await vscode.commands.executeCommand('extension.deploy.reloaded.pullFileList');
+                        },
+                        label: '$(list-ordered)  ' + i18.t('pull.fileList.label'),
+                        description: i18.t('pull.fileList.description'),
+                    }
+                ];
+
+                const SELECTED_ITEM = await vscode.window.showQuickPick(QUICK_PICKS);
+                if (SELECTED_ITEM) {
+                    await Promise.resolve(
+                        SELECTED_ITEM.action()
+                    );
+                }
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .trace(e, 'extension.deploy.reloaded.pull');
+
+                deploy_helpers.showErrorMessage(
+                    i18.t('pull.errors.operationFailed')
+                );
+            }
+        }),
+
+        // pull file list
+        vscode.commands.registerCommand('extension.deploy.reloaded.pullFileList', async () => {
+            try {
+                await pullFileList(context);
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                            .trace(e, 'extension.deploy.reloaded.pullFileList');
+                
+                deploy_helpers.showErrorMessage(
+                    i18.t('pull.errors.operationFailed')
+                );
+            }
+        }),   
+        
+        // pull workspace
+        vscode.commands.registerCommand('extension.deploy.reloaded.pullWorkspace', async () => {
+            try {
+                const PKG = await deploy_packages.showPackageQuickPick(
+                    context,
+                    deploy_packages.getAllPackagesSorted(),
+                    {
+                        placeHolder: i18.t('packages.selectPackage'),
+                    }
+                );
+
+                if (PKG) {
+                    await PKG.__workspace
+                             .pullPackage(PKG);
+                }
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .trace(e, 'extension.deploy.reloaded.pullWorkspace');
+
+                deploy_helpers.showErrorMessage(
+                    i18.t('pull.errors.operationFailed')
+                );
+            }
+        }),
+
+        // pull current file
+        vscode.commands.registerCommand('extension.deploy.reloaded.pullFile', async () => {
+            try {
+                await deploy_targets.invokeForActiveEditorAndTarget(
+                    i18.t('pull.selectSource'),
+                    async (file, target) => {
+                        await target.__workspace
+                                    .pullFileFrom(file, target);
+                    }
+                );
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .trace(e, 'extension.deploy.reloaded.pullFile');
+
+                deploy_helpers.showErrorMessage(
+                    i18.t('pull.errors.operationFailed')
+                );
+            }
+        }),
+
+        // pull all open files
+        vscode.commands.registerCommand('extension.deploy.reloaded.pullAllOpenFiles', async () => {
+            try {
+                await pullAllOpenFiles(
+                    deploy_workspaces.getActiveWorkspaces()
+                );
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .trace(e, 'extension.deploy.reloaded.pullAllOpenFiles');
+
+                deploy_helpers.showErrorMessage(
+                    i18.t('pull.errors.operationFailed')
+                );
+            }
+        }),
+    );
 }

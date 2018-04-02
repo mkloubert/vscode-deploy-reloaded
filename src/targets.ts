@@ -948,6 +948,74 @@ export function getZipFileName(target: Target, time?: Moment.Moment): string {
 }
 
 /**
+ * Invokes an action for the file of an active text editor
+ * by selecting a target.
+ * 
+ * @param {string} placeHolder The placeholder for the quick pick to use.
+ * @param {Function} action The action to invoke.
+ */
+export async function invokeForActiveEditorAndTarget(placeHolder: string,
+                                                     action: (file: string, target: Target) => any) {
+    const ACTIVE_EDITOR = vscode.window.activeTextEditor;
+    if (!ACTIVE_EDITOR) {
+        deploy_helpers.showWarningMessage(
+            i18.t('editors.active.noOpen')
+        );
+
+        return;
+    }
+
+    const MATCHING_WORKSPACES = deploy_workspaces.getAllWorkspaces().filter(ws => {
+        return ACTIVE_EDITOR.document &&
+               ws.isPathOf(ACTIVE_EDITOR.document.fileName);
+    });
+
+    const TARGETS: Target[] = [];
+    MATCHING_WORKSPACES.forEach(ws => {
+        Enumerable.from( ws.getTargets() )
+                  .pushTo(TARGETS);
+    });
+
+    const QUICK_PICK_ITEMS: deploy_contracts.ActionQuickPick[] = TARGETS.map((t, i) => {
+        return {
+            action: async () => {
+                if (action) {
+                    await Promise.resolve(
+                        action(ACTIVE_EDITOR.document.fileName,
+                               t)
+                    );
+                }
+            },
+            description: deploy_helpers.toStringSafe( t.description ).trim(),
+            detail: t.__workspace.rootPath,
+            label: getTargetName(t),
+        };
+    });
+
+    if (QUICK_PICK_ITEMS.length < 1) {
+        deploy_helpers.showWarningMessage(
+            i18.t('targets.noneFound')
+        );
+
+        return;
+    }
+
+    let selectedItem: deploy_contracts.ActionQuickPick;
+    if (1 === QUICK_PICK_ITEMS.length) {
+        selectedItem = QUICK_PICK_ITEMS[0];
+    }
+    else {
+        selectedItem = await vscode.window.showQuickPick(QUICK_PICK_ITEMS, {
+            placeHolder: placeHolder,
+        });
+    }
+
+    if (selectedItem) {
+        await selectedItem.action();
+    }
+}
+
+/**
  * Checks if a target is marked as 'in progress'.
  * 
  * @param {Target} target The target to check.

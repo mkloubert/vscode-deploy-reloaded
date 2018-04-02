@@ -299,7 +299,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         dir = await $fp(dir);
 
         for (const F of <string[]>(await $h.readDir(dir))) {
-            $fs.remove(
+            await $fs.remove(
                 $p.resolve(
                     $p.join(dir, F)
                 )
@@ -653,7 +653,14 @@ $exec(() => {
 
     // tslint:disable-next-line:no-unused-variable
     const $pwd = async (size = 20, chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789') => {
-        size = await $unwrap(size);
+        size = parseInt(
+            $h.toStringSafe(
+                await $unwrap(size)
+            ).trim()
+        );
+        if (isNaN(size)) {
+            size = 20;
+        }
 
         chars = $h.toStringSafe(
             await $unwrap(chars)
@@ -965,6 +972,7 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "### $aw\n";
     help += "An array of active workspaces.\n";
     help += "```javascript\n";
+    help += "$aw[0].editorRootPath\n";
     help += "$aw[0].name\n";
     help += "$aw[0].rootPath\n";
     help += "```\n";
@@ -980,12 +988,13 @@ function _27adf674_b653_4ee0_a33d_4f60be7859d2() {
     help += "### $w\n";
     help += "An array of all available workspace.\n";
     help += "```javascript\n";
+    help += "$w[0].editorRootPath\n";
     help += "$w[0].name\n";
     help += "$w[0].rootPath\n";
     help += "```\n";
     help += "\n";
 
-
+    
     help += "## Functions\n";
     // $asc
     help += "### $asc\n";

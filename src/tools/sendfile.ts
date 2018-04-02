@@ -212,7 +212,7 @@ export async function receiveFile(context: vscode.ExtensionContext) {
  * 
  * @param {vscode.ExtensionContext} context The extension context.
  */
-export function registerCommands(context: vscode.ExtensionContext) {
+export function registerSendFileCommands(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         // receive file
         vscode.commands.registerCommand('extension.deploy.reloaded.receiveFile', async () => {

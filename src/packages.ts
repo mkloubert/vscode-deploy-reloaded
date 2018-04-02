@@ -377,6 +377,25 @@ export async function findTargetsForFileOfPackage(
 }
 
 /**
+ * Returns a sorted list of all available packages of all opened workspaces.
+ * 
+ * @return {Package[]} The list of all sorted packages.
+ */
+export function getAllPackagesSorted() {
+    return deploy_helpers.from( deploy_workspaces.getAllWorkspaces() ).orderBy(ws => {
+        return ws.isActive ? 0 : 1;
+    }).selectMany(ws => {
+        return Enumerable.from( ws.getPackages() ).orderBy(pkg => {
+            return deploy_helpers.normalizeString(
+                getPackageName(pkg)
+            );
+        }).thenBy(pkg => {
+            return pkg.__index;
+        });
+    }).toArray();
+}
+
+/**
  * Detects a "fast file check" flag value.
  * 
  * @param {TObj} obj The child object.
