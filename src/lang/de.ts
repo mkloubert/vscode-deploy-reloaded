@@ -279,10 +279,12 @@ export const translation: Translation = {
             folder: {
                 description: "Lädt die Dateien dieses Ordners in ein lokales Verzeichnis",
                 label: "Dateien laden ...",
+                title: "Dateien laden ...",
             },
             folderWithSubfolders: {
                 description: "Lädt die Dateien dieses Ordners (inkl. Unterordnern) in ein lokales Verzeichnis",
                 label: "Dateien inkl. Unterverzeichnissen laden ...",
+                title: "Dateien inkl. Unterverzeichnissen laden ...",
             },
             pullingFile: "Lade Datei{0:trim,surround,leading_space} ...",
             pullingFrom: "Lade Dateien von{0:trim,surround,leading_space} nach{1:trim,surround,leading_space} ...",

@@ -279,10 +279,12 @@ export const translation: Translation = {
             folder: {
                 description: "Pull the files of that folder to a local directory",
                 label: "Pull files ...",
+                title: "Pull files ...",
             },
             folderWithSubfolders: {
                 description: "Pull the files (and sub folders) of that folder to a local directory",
                 label: "Pull files with sub folders ...",
+                title: "Pull files with sub folders ...",
             },
             pullingFile: "Pulling file{0:trim,surround,leading_space} ...",
             pullingFrom: "Pulling files from{0:trim,surround,leading_space} to{1:trim,surround,leading_space} ...",

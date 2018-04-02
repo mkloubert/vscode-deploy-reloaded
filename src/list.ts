@@ -45,7 +45,7 @@ type SyncFoldersAction = (
     callbacks: PullAllFilesFromDirCallbacks,
     recursive: boolean,
     depth?: number, maxDepth?: number
-) => void | PromiseLike<void>;
+) => PromiseLike<void>;
 
 interface SyncFoldersActionOptions {
     readonly action: SyncFoldersAction;
@@ -61,6 +61,7 @@ interface SyncFoldersActionOptions {
     };
     readonly label: string;
     readonly recursive: boolean;
+    readonly title: string;
 }
 
 
@@ -524,20 +525,29 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
             };
 
             try {
-                await deploy_helpers.withProgress(async (progress) => {
-                    if (!opts.action) {
-                        return;
+                await vscode.window.withProgress({
+                    location: vscode.ProgressLocation.Notification,
+                }, async (progress, progressCancelToken) => {
+                    progressCancelToken.onCancellationRequested(() => {
+                        try {
+                            PULL_CANCELLATION_SOURCE.cancel();
+                        }
+                        catch (e) {
+                            ME.logger
+                              .trace(e, 'list.listDirectory(4)');
+                        }
+                    });
+                    if (progressCancelToken.isCancellationRequested) {
+                        PULL_CANCELLATION_SOURCE.cancel();
                     }
 
-                    await Promise.resolve(
-                        opts.action(
-                            target,
-                            dir, TARGET_DIR,
-                            PULL_TRANSFORMER,
-                            cancelBtn, PULL_CANCELLATION_SOURCE,
-                            callbacks,
-                            opts.recursive
-                        )
+                    await opts.action(
+                        target,
+                        dir, TARGET_DIR,
+                        PULL_TRANSFORMER,
+                        cancelBtn, PULL_CANCELLATION_SOURCE,
+                        callbacks,
+                        opts.recursive
                     );
                 });
             }
@@ -751,6 +761,7 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
                                 cancel: CANCEL_OPTS,
                                 label: this.label,
                                 recursive: false,
+                                title: ME.t('listDirectory.pull.folder.title'),
                             });
                         },
 
@@ -766,6 +777,7 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
                                 cancel: CANCEL_OPTS,
                                 label: this.label,
                                 recursive: true,
+                                title: ME.t('listDirectory.pull.folderWithSubfolders.title'),
                             });
                         },
 

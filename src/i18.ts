@@ -284,10 +284,12 @@ export interface Translation {
             folder?: {
                 description?: string;
                 label?: string;
+                title?: string;
             };
             folderWithSubfolders?: {
                 description?: string;
                 label?: string;
+                title?: string;
             };
             pullingFile: string;
             pullingFrom: string;
