@@ -26,6 +26,7 @@ import * as deploy_values from '../values';
 import * as deploy_workspace from '../workspaces';
 import * as Enumerable from 'node-enumerable';
 import * as Events from 'events';
+import * as FSExtra from 'fs-extra';
 import * as Moment from 'moment';
 import * as Path from 'path';
 import * as vscode from 'vscode';
@@ -209,7 +210,6 @@ export interface AppTarget extends deploy_targets.Target {
     readonly useRelativePaths?: boolean;
 }
 
-//TODO: implement removeFolders()
 class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
     private readonly _ARGS_SCRIPT_EVENTS = new Events.EventEmitter();
     private readonly _ARGS_SCRIPT_STATES: deploy_contracts.KeyValuePairs = {};
@@ -225,6 +225,9 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
         return true;
     }
     public get canList() {
+        return true;
+    }
+    public get canRemoveFolders() {
         return true;
     }
 
@@ -513,6 +516,47 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
     protected onDispose() {
         this._ARGS_SCRIPT_EVENTS.removeAllListeners();
         this._INPUT_SCRIPT_EVENTS.removeAllListeners();
+    }
+
+    public async removeFolders(context: deploy_plugins.RemoveFoldersContext<AppTarget>) {
+        const TARGET = context.target;
+        const WORKSPACE = TARGET.__workspace;
+        const OUT_DIR = this.getOutDirectory(TARGET);
+
+        for (const F of context.folders) {
+            try {
+                await F.onBeforeRemove(
+                    deploy_helpers.toDisplayablePath(F.path)
+                );
+
+                const TARGET_DIR = Path.resolve(
+                    Path.join(
+                        OUT_DIR, F.path
+                    )
+                );
+        
+                if (!WORKSPACE.isPathOf(TARGET_DIR)) {
+                    throw new Error(
+                        this.t(TARGET,
+                               'plugins.app.invalidDirectory', F.path)
+                    );
+                }
+
+                if (!(await deploy_helpers.isDirectory(TARGET_DIR))) {
+                    throw new Error(
+                        this.t(TARGET,
+                               'isNo.directory', TARGET_DIR)
+                    );
+                }
+
+                await FSExtra.remove(TARGET_DIR);
+
+                await F.onRemoveCompleted();
+            }
+            catch (e) {
+                await F.onRemoveCompleted(e);
+            }
+        }
     }
 
     private runApp(target: AppTarget,

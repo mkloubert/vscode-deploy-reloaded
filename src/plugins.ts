@@ -1393,33 +1393,6 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
     }
 
     /**
-     * Prepares a base target.
-     * 
-     * @param {TTarget} baseTarget The base target.
-     * 
-     * @return {PrepareBaseTargetResult<TTarget>|PromiseLike<PrepareBaseTargetResult<TTarget>>} The result of the prepared target.
-     */
-    protected prepareBaseTarget(baseTarget: TTarget)
-        : PrepareBaseTargetResult<TTarget> | PromiseLike<PrepareBaseTargetResult<TTarget>>
-    {
-        return baseTarget;
-    }
-
-    /**
-     * Prepares a target.
-     * 
-     * @param {TTarget} myTarget The base target.
-     * @param {deploy_targets.Target} target The input target.
-     * @param {deploy_contracts.DeployOperation} operation The underlying operation.
-     * 
-     * @return {PrepareTargetsResult|PromiseLike<PrepareTargetsResult>} The target(s) to use.
-     */
-    protected prepareTarget(myTarget: TTarget, target: deploy_targets.Target, operation: deploy_contracts.DeployOperation)
-        : PrepareTargetsResult | PromiseLike<PrepareTargetsResult> {
-        return target;
-    }
-
-    /**
      * Prepares targets.
      * 
      * @param {TTarget} myTarget The base target.
@@ -1576,6 +1549,33 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
     )
     {
         return await deploy_targets.mapFilesForTarget(target, files);
+    }
+
+    /**
+     * Prepares a base target.
+     * 
+     * @param {TTarget} baseTarget The base target.
+     * 
+     * @return {PrepareBaseTargetResult<TTarget>|PromiseLike<PrepareBaseTargetResult<TTarget>>} The result of the prepared target.
+     */
+    protected prepareBaseTarget(baseTarget: TTarget)
+        : PrepareBaseTargetResult<TTarget> | PromiseLike<PrepareBaseTargetResult<TTarget>>
+    {
+        return baseTarget;
+    }
+
+    /**
+     * Prepares a target.
+     * 
+     * @param {TTarget} myTarget The base target.
+     * @param {deploy_targets.Target} target The input target.
+     * @param {deploy_contracts.DeployOperation} operation The underlying operation.
+     * 
+     * @return {PrepareTargetsResult|PromiseLike<PrepareTargetsResult>} The target(s) to use.
+     */
+    protected prepareTarget(myTarget: TTarget, target: deploy_targets.Target, operation: deploy_contracts.DeployOperation)
+        : PrepareTargetsResult | PromiseLike<PrepareTargetsResult> {
+        return target;
     }
 
     /** @inheritdoc */
