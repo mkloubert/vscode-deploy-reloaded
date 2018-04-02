@@ -40,6 +40,9 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
     public get canList() {
         return true;
     }
+    public get canRemoveFolders() {
+        return true;
+    }
 
     public async deleteFiles(context: deploy_plugins.DeleteContext<TestTarget>) {
         for (const F of context.files) {
@@ -198,6 +201,50 @@ class TestPlugin extends deploy_plugins.PluginBase<TestTarget> {
         }
 
         return RESULT;
+    }
+
+    public async removeFolders(context: deploy_plugins.RemoveFoldersContext<TestTarget>) {
+        const TARGET = context.target;
+        const WORKSPACE_DIR = TARGET.__workspace.rootPath;
+
+        for (const F of context.folders) {
+            try {
+                await F.onBeforeRemove(
+                    deploy_helpers.toDisplayablePath(F.path)
+                );
+
+                const TARGET_DIR = Path.resolve(
+                    Path.join(
+                        WORKSPACE_DIR, F.path
+                    )
+                );
+
+                const TARGET_FOLDER = Path.resolve(
+                    Path.join(
+                        TARGET_DIR, F.name,
+                    )
+                );
+        
+                if (!this.isPathOf(TARGET, TARGET_FOLDER) || (WORKSPACE_DIR === TARGET_FOLDER)) {
+                    throw new Error(
+                        this.t(TARGET,
+                               'plugins.test.invalidDirectory', TARGET_FOLDER)
+                    );
+                }
+
+                if (!(await deploy_helpers.isDirectory(TARGET_FOLDER))) {
+                    throw new Error(
+                        this.t(TARGET,
+                               'isNo.directory', TARGET_FOLDER)
+                    );
+                }
+
+                await F.onRemoveCompleted();
+            }
+            catch (e) {
+                await F.onRemoveCompleted(e);
+            }
+        }
     }
 
     public async uploadFiles(context: deploy_plugins.UploadContext<TestTarget>) {

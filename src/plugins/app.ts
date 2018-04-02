@@ -533,22 +533,28 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
                         OUT_DIR, F.path
                     )
                 );
+
+                const TARGET_FOLDER = Path.resolve(
+                    Path.join(
+                        TARGET_DIR, F.name,
+                    )
+                );
         
-                if (!this.isPathOf(TARGET, TARGET_DIR) || (OUT_DIR === TARGET_DIR)) {
+                if (!this.isPathOf(TARGET, TARGET_FOLDER) || (OUT_DIR === TARGET_FOLDER)) {
                     throw new Error(
                         this.t(TARGET,
-                               'plugins.app.invalidDirectory', F.path)
+                               'plugins.app.invalidDirectory', TARGET_FOLDER)
                     );
                 }
 
-                if (!(await deploy_helpers.isDirectory(TARGET_DIR))) {
+                if (!(await deploy_helpers.isDirectory(TARGET_FOLDER))) {
                     throw new Error(
                         this.t(TARGET,
-                               'isNo.directory', TARGET_DIR)
+                               'isNo.directory', TARGET_FOLDER)
                     );
                 }
 
-                await FSExtra.remove(TARGET_DIR);
+                await FSExtra.remove(TARGET_FOLDER);
 
                 await F.onRemoveCompleted();
             }
