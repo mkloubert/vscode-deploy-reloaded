@@ -18,6 +18,7 @@
 import * as CopyPaste from 'copy-paste';
 import * as deploy_contracts from './contracts';
 import * as deploy_files from './files';
+import * as deploy_gui from './gui';
 import * as deploy_helpers from './helpers';
 import * as deploy_log from './log';
 import * as deploy_plugins from './plugins';
@@ -31,34 +32,18 @@ import * as Path from 'path';
 import * as vscode from 'vscode';
 
 
-interface PullAllFilesFromDirCallbacks {
-    getCancelButtonText?: () => string;
-    readonly onRestoreButtonText: () => void;
-    readonly waitForCancelling: () => PromiseLike<void>;
-}
-
 type SyncFoldersAction = (
     target: deploy_targets.Target,
     sourceDir: string, targetDir: string,
     transformer: deploy_transformers.DataTransformer,
-    cancelBtn: vscode.StatusBarItem, cancelTokenSrc: vscode.CancellationTokenSource,
-    callbacks: PullAllFilesFromDirCallbacks,
+    progress: vscode.Progress<deploy_contracts.VSCodeProgress>,
+    cancelToken: vscode.CancellationToken,
     recursive: boolean,
     depth?: number, maxDepth?: number
 ) => PromiseLike<void>;
 
 interface SyncFoldersActionOptions {
     readonly action: SyncFoldersAction;
-    readonly cancel: {
-        readonly button: {
-            readonly askForCancellation: string;
-            readonly cancelling: string;
-            readonly commandIdPrefix: string;
-            readonly commandIdSuffixProvider: () => any;
-            readonly defaultText: string;
-            readonly defaultTooltip: string;
-        };
-    };
     readonly label: string;
     readonly recursive: boolean;
     readonly title: string;
@@ -416,146 +401,17 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
                 return;
             }
 
-            const PULL_CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
-
-            let cancelBtn: vscode.StatusBarItem;
-            let cancelBtnCommand: vscode.Disposable;
-            const DISPOSE_CANCEL_BTN = () => {
-                deploy_helpers.tryDispose(cancelBtn);
-                deploy_helpers.tryDispose(cancelBtnCommand);
-            };
-
-            let callbacks: PullAllFilesFromDirCallbacks;
-            const RESTORE_CANCEL_BTN_TEXT = () => {
-                const CBTN = cancelBtn;
-                if (!CBTN) {
-                    return;
-                }
-
-                let setDefaultText = true;
-                try {
-                    const CB = callbacks;
-                    if (!CB) {
-                        return;
-                    }
-                    
-                    const GET_TEXT = CB.getCancelButtonText;
-                    if (GET_TEXT) {
-                        CBTN.text = deploy_helpers.toStringSafe(
-                            deploy_helpers.applyFuncFor(
-                                GET_TEXT,
-                                CB
-                            )(),
-                        ).trim();
-
-                        setDefaultText = false;
-                    }
-                }
-                finally {
-                    if (setDefaultText) {
-                        CBTN.text = opts.cancel.button.defaultText;
-                    }
-                }
-            };
-
-            let isCancelling = false;
-            {
-                cancelBtn = vscode.window.createStatusBarItem();
-                cancelBtn.tooltip = opts.cancel.button.defaultTooltip;
-
-                RESTORE_CANCEL_BTN_TEXT();
-
-                const CANCEL_BTN_COMMAND_ID = `${opts.cancel.button.commandIdPrefix}${opts.cancel.button.commandIdSuffixProvider()}`;
-
-                cancelBtnCommand = vscode.commands.registerCommand(CANCEL_BTN_COMMAND_ID, async () => {
-                    try {
-                        isCancelling = true;
-
-                        cancelBtn.command = undefined;
-                        cancelBtn.text = opts.cancel.button.cancelling;
-
-                        const POPUP_BTNS: deploy_contracts.MessageItemWithValue[] = [
-                            {
-                                isCloseAffordance: true,
-                                title: ME.t('no'),
-                                value: 0,
-                            },
-                            {
-                                title: ME.t('yes'),
-                                value: 1,
-                            }
-                        ];
-
-                        const PRESSED_BTN = await ME.showWarningMessage.apply(
-                            ME,
-                            [ <any>opts.cancel.button.askForCancellation ].concat(
-                                POPUP_BTNS
-                            )
-                        );
-
-                        if (PRESSED_BTN) {
-                            if (1 === PRESSED_BTN) {
-                                PULL_CANCELLATION_SOURCE.cancel();
-                            }
-                        }
-                    }
-                    finally {
-                        if (!PULL_CANCELLATION_SOURCE.token.isCancellationRequested) {
-                            cancelBtn.command = CANCEL_BTN_COMMAND_ID;
-
-                            RESTORE_CANCEL_BTN_TEXT();
-                        }
-
-                        isCancelling = false;
-                    }
-                });
-
-                cancelBtn.command = CANCEL_BTN_COMMAND_ID;
-
-                cancelBtn.show();
-            }
-
-            callbacks = {
-                onRestoreButtonText: () => {
-                    RESTORE_CANCEL_BTN_TEXT();
-                },
-                waitForCancelling: async () => {
-                    await deploy_helpers.waitWhile(() => isCancelling);
-                },
-            };
-
-            try {
-                await vscode.window.withProgress({
-                    location: vscode.ProgressLocation.Notification,
-                }, async (progress, progressCancelToken) => {
-                    progressCancelToken.onCancellationRequested(() => {
-                        try {
-                            PULL_CANCELLATION_SOURCE.cancel();
-                        }
-                        catch (e) {
-                            ME.logger
-                              .trace(e, 'list.listDirectory(4)');
-                        }
-                    });
-                    if (progressCancelToken.isCancellationRequested) {
-                        PULL_CANCELLATION_SOURCE.cancel();
-                    }
-
-                    await opts.action(
-                        target,
-                        dir, TARGET_DIR,
-                        PULL_TRANSFORMER,
-                        cancelBtn, PULL_CANCELLATION_SOURCE,
-                        callbacks,
-                        opts.recursive
-                    );
-                });
-            }
-            finally {
-                DISPOSE_CANCEL_BTN();
-
-                deploy_helpers.tryDispose(PULL_CANCELLATION_SOURCE);
-            }
+            await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+            }, async (progress, progressCancelToken) => {
+                await opts.action(
+                    target,
+                    dir, TARGET_DIR,
+                    PULL_TRANSFORMER,
+                    progress, progressCancelToken,
+                    opts.recursive
+                );
+            });
         };  // EXECUTE_SYNC_FOLDERS_ACTION()
 
         let numberOfDirs = 0;
@@ -738,27 +594,11 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
             if (numberOfDirs > 0 || numberOfFiles > 0) {
                 // pull files
                 {
-                    const CANCEL_OPTS = {
-                        button: {
-                            askForCancellation: ME.t('pull.askForCancelOperation',
-                                                     TARGET_NAME),
-                            cancelling: ME.t('pull.cancelling'),
-                            commandIdPrefix: "extension.deploy.reloaded.buttons.cancelListPullFilesFrom",
-                            commandIdSuffixProvider: () => {
-                                return nextPullCancelBtnCommandId++;
-                            },
-                            defaultText: ME.t('pull.buttons.cancel.text',
-                                              TARGET_NAME),
-                            defaultTooltip: ME.t('pull.buttons.cancel.tooltip'),
-                        },
-                    };
-
                     // pull files
                     FUNC_QUICK_PICK_ITEMS.push({
                         action: async function() {
                             await EXECUTE_SYNC_FOLDERS_ACTION({
                                 action: pullAllFilesFromDir,
-                                cancel: CANCEL_OPTS,
                                 label: this.label,
                                 recursive: false,
                                 title: ME.t('listDirectory.pull.folder.title'),
@@ -774,7 +614,6 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
                         action: async function () {
                             await EXECUTE_SYNC_FOLDERS_ACTION({
                                 action: pullAllFilesFromDir,
-                                cancel: CANCEL_OPTS,
                                 label: this.label,
                                 recursive: true,
                                 title: ME.t('listDirectory.pull.folderWithSubfolders.title'),
@@ -822,8 +661,8 @@ async function pullAllFilesFromDir(
     target: deploy_targets.Target,
     sourceDir: string, targetDir: string,
     transformer: deploy_transformers.DataTransformer,
-    cancelBtn: vscode.StatusBarItem, cancelTokenSrc: vscode.CancellationTokenSource,
-    callbacks: PullAllFilesFromDirCallbacks,
+    progress: vscode.Progress<deploy_contracts.VSCodeProgress>,
+    cancelToken: vscode.CancellationToken,
     recursive: boolean,
     depth?: number, maxDepth?: number
 )
@@ -854,17 +693,9 @@ async function pullAllFilesFromDir(
                                     maxDepth));
     }
 
-    if (cancelTokenSrc.token.isCancellationRequested) {
+    if (cancelToken.isCancellationRequested) {
         return;
     }
-
-    let cancelButtonText = WORKSPACE.t('listDirectory.pull.pullingFrom',
-                                       deploy_helpers.toDisplayablePath(sourceDir), targetDir);
-
-    callbacks.getCancelButtonText = () => {
-        return cancelButtonText;
-    };
-    callbacks.onRestoreButtonText();
 
     WORKSPACE.output.appendLine('');
     WORKSPACE.output.appendLine(WORKSPACE.t('listDirectory.pull.pullingFrom',
@@ -877,16 +708,14 @@ async function pullAllFilesFromDir(
 
         const PLUGINS = WORKSPACE.getListPlugins(target);
         while (PLUGINS.length > 0) {
-            await callbacks.waitForCancelling();
-
-            if (cancelTokenSrc.token.isCancellationRequested) {
+            if (cancelToken.isCancellationRequested) {
                 return;
             }
             
             const P = PLUGINS.shift();
 
             const CTX: deploy_plugins.ListDirectoryContext = {
-                cancellationToken: cancelTokenSrc.token,
+                cancellationToken: cancelToken,
                 dir: sourceDir,
                 isCancelling: undefined,
                 target: target,
@@ -912,6 +741,12 @@ async function pullAllFilesFromDir(
             });
 
             if (FILES.length > 0) {
+                const POPUP_STATS: deploy_gui.ShowPopupWhenFinishedStats = {
+                    failed: [],
+                    operation: deploy_contracts.DeployOperation.Pull,
+                    succeeded: [],
+                };
+
                 const FILES_TO_DOWNLOAD: deploy_plugins.FileToDownload[] = [];
                 FILES.forEach(f => {
                     const NAME_AND_PATH: deploy_contracts.WithNameAndPath = {
@@ -929,6 +764,18 @@ async function pullAllFilesFromDir(
                         NAME_AND_PATH
                     );
 
+                    const UPDATE_PROGRESS = (message: string) => {
+                        const PERCENTAGE = Math.floor(
+                            (POPUP_STATS.succeeded.length + POPUP_STATS.failed.length) / FILES.length * 100.0
+                        );
+    
+                        progress.report({
+                            // increment: PERCENTAGE,
+                            message: message,
+                            percentage: PERCENTAGE,
+                        });
+                    };
+
                     SF.onBeforeDownload = async function(source?) {
                         if (arguments.length < 1) {
                             source = NAME_AND_PATH.path;
@@ -940,16 +787,13 @@ async function pullAllFilesFromDir(
                                                           deploy_helpers.normalizePath(NAME_AND_PATH.path + '/' + NAME_AND_PATH.name)
                                                       ));
 
-                        cancelButtonText = PULL_TEXT;
-                        callbacks.onRestoreButtonText();
-
                         WORKSPACE.output.append(
                             `\t` + PULL_TEXT + ' '
                         );
 
-                        await callbacks.waitForCancelling();
+                        UPDATE_PROGRESS( PULL_TEXT );
 
-                        if (cancelTokenSrc.token.isCancellationRequested) {
+                        if (cancelToken.isCancellationRequested) {
                             WORKSPACE.output.appendLine(`[${WORKSPACE.t('canceled')}]`);
                         }
                     };
@@ -1006,10 +850,16 @@ async function pullAllFilesFromDir(
 
                             WORKSPACE.output
                                      .append(`[${WORKSPACE.t('ok')}]`);
+
+                            POPUP_STATS.succeeded.push( LOCAL_FILE );
                         }
                         catch (e) {
                             WORKSPACE.output
                                      .append(`[${WORKSPACE.t('error', e)}]`);
+
+                            POPUP_STATS.failed.push( LOCAL_FILE );
+                            
+                            UPDATE_PROGRESS( WORKSPACE.t('error', e) );
                         }
                         finally {
                             if (disposeDownloadedFile) {
@@ -1025,7 +875,7 @@ async function pullAllFilesFromDir(
                 });
                 
                 const DL_CTX: deploy_plugins.DownloadContext = {
-                    cancellationToken: cancelTokenSrc.token,
+                    cancellationToken: cancelToken,
                     files: FILES_TO_DOWNLOAD,
                     isCancelling: undefined,
                     target: target,
@@ -1063,8 +913,7 @@ async function pullAllFilesFromDir(
                         target,
                         NEW_SOURCE_DIR, NEW_TARGET_DIR,
                         transformer,
-                        cancelBtn, cancelTokenSrc,
-                        callbacks,
+                        progress, cancelToken,
                         recursive,
                         depth + 1,
                     );
@@ -1076,9 +925,7 @@ async function pullAllFilesFromDir(
         WORKSPACE.output.appendLine(`[${WORKSPACE.t('error', e)}]`);
     }
     finally {
-        callbacks.getCancelButtonText = null;
-
-        if (cancelTokenSrc.token.isCancellationRequested) {
+        if (cancelToken.isCancellationRequested) {
             WORKSPACE.output.appendLine(`[${WORKSPACE.t('canceled')}]`);
         }
     }
