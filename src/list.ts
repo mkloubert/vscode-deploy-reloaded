@@ -599,7 +599,7 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
                         action: async function() {
                             await EXECUTE_SYNC_FOLDERS_ACTION({
                                 action: pullAllFilesFromDir,
-                                label: this.label,
+                                label: ME.t('listDirectory.pull.folder.label'),
                                 recursive: false,
                                 title: ME.t('listDirectory.pull.folder.title'),
                             });
@@ -614,7 +614,7 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
                         action: async function () {
                             await EXECUTE_SYNC_FOLDERS_ACTION({
                                 action: pullAllFilesFromDir,
-                                label: this.label,
+                                label: ME.t('listDirectory.pull.folderWithSubfolders.label'),
                                 recursive: true,
                                 title: ME.t('listDirectory.pull.folderWithSubfolders.title'),
                             });

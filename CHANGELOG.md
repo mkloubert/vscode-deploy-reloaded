@@ -11,6 +11,7 @@
   * [aws-sdk](https://www.npmjs.com/package/aws-sdk) `2.215.0`
   * [vscode-helpers"](https://www.npmjs.com/package/vscode-helpers") `0.26.0`
 * code cleanups and improvements
+* bugfixes
 
 ## 0.67.1 (March 28th, 2018; bugfixes)
 
