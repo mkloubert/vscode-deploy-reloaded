@@ -209,7 +209,7 @@ export interface AppTarget extends deploy_targets.Target {
     readonly useRelativePaths?: boolean;
 }
 
-
+//TODO: implement removeFolders()
 class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
     private readonly _ARGS_SCRIPT_EVENTS = new Events.EventEmitter();
     private readonly _ARGS_SCRIPT_STATES: deploy_contracts.KeyValuePairs = {};

@@ -59,7 +59,7 @@ export interface AzureBlobTarget extends deploy_targets.Target {
     readonly useDevelopmentStorage?: boolean;
 }
 
-
+//TODO: implement removeFolders()
 class AzureBlobPlugin extends deploy_plugins.AsyncFileClientPluginBase<AzureBlobTarget,
                                                                        deploy_clients_azureblob.AzureBlobClient,
                                                                        AzureBlobContext> {

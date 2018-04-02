@@ -43,6 +43,13 @@ export type BeforeDeleteFileCallback = (destination?: string) => PromiseLike<voi
 export type BeforeDownloadFileCallback = (source?: string) => PromiseLike<void>;
 
 /**
+ * A function / method that is called BEFORE a folder is going to be removed.
+ * 
+ * @param {string} [destination] The custom destination to display.
+ */
+export type BeforeRemoveFolderCallback = (destination?: string) => PromiseLike<void>;
+
+/**
  * A function / method that is called BEFORE a file is going to be uploaded.
  * 
  * @param {string} [destination] The custom destination to display.
@@ -115,10 +122,6 @@ export interface FileToDelete extends deploy_workspaces.WorkspaceFile {
      * The method that should be invoked AFTER a deletion of that file has been finished.
      */
     readonly onDeleteCompleted: DeleteFileCompletedCallback;
-    /**
-     * The underlying workspace.
-     */
-    readonly workspace: deploy_workspaces.Workspace;
 }
 
 /**
@@ -133,10 +136,6 @@ export interface FileToDownload extends deploy_workspaces.WorkspaceFile {
      * The method that should be invoked AFTER a download of that file has been finished.
      */
     readonly onDownloadCompleted: DownloadFileCompletedCallback;
-    /**
-     * The underlying workspace.
-     */
-    readonly workspace: deploy_workspaces.Workspace;
 }
 
 /**
@@ -161,6 +160,20 @@ export interface FileToUpload extends deploy_workspaces.WorkspaceFile {
      * @return {PromiseLike<Buffer>} The promise with the loaded data.
      */
     readonly read: () => PromiseLike<Buffer>;
+}
+
+/**
+ * A folder to remove.
+ */
+export interface FolderToRemove extends deploy_workspaces.WorkspaceDirectory {
+    /**
+     * The method that should be invoked BEFORE the folder is going to be removed.
+     */
+    readonly onBeforeRemove: BeforeRemoveFolderCallback;
+    /**
+     * The method that should be invoked AFTER the folder has been removed.
+     */
+    readonly onRemoveCompleted: RemoveFolderCompletedCallback;
 }
 
 /**
@@ -245,6 +258,10 @@ export interface Plugin<TTarget extends deploy_targets.Target = deploy_targets.T
      */
     readonly canList?: boolean;
     /**
+     * Gets if the plugin can remove whole folders or not.
+     */
+    readonly canRemoveFolders?: boolean;
+    /**
      * Gets if the plugin can upload files or not.
      */
     readonly canUpload?: boolean;
@@ -274,6 +291,12 @@ export interface Plugin<TTarget extends deploy_targets.Target = deploy_targets.T
      * @return {ListDirectoryResult<TTarget>|PromiseLike<ListDirectoryResult<TTarget>>} The result.
      */
     readonly listDirectory?: (context: ListDirectoryContext<TTarget>) => ListDirectoryResult<TTarget> | PromiseLike<ListDirectoryResult<TTarget>>;
+    /**
+     * Removes folders.
+     * 
+     * @param {RemoveFoldersContext<TTarget>} The context.
+     */
+    readonly removeFolders?: (context: RemoveFoldersContext<TTarget>) => void | PromiseLike<void>;
     /**
      * Uploads files.
      * 
@@ -315,6 +338,24 @@ export type PrepareBaseTargetResult<TTarget = deploy_targets.Target> = TTarget |
  * A result for preparing targets.
  */
 export type PrepareTargetsResult = deploy_targets.Target | deploy_targets.Target[] | false;
+
+/**
+ * A function / method that is called AFTER a delete operation for a folder has been finished.
+ * 
+ * @param {any} [err] The error (if occurred).
+ * @param {boolean} [deleteLocal] Tells the calling "client" that it should delete its local version or not.
+ */
+export type RemoveFolderCompletedCallback = (err?: any, deleteLocal?: boolean) => PromiseLike<void>;
+
+/**
+ * A remove folders context.
+ */
+export interface RemoveFoldersContext<TTarget extends deploy_targets.Target = deploy_targets.Target> extends TargetContext<TTarget> {
+    /**
+     * A list of one or more folders to remove.
+     */
+    readonly folders: FolderToRemove[];
+}
 
 /**
  * A context based on a target.
@@ -667,6 +708,10 @@ export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_
         return false;
     }
     /** @inheritdoc */
+    public get canRemoveFolders() {
+        return false;
+    }
+    /** @inheritdoc */
     public get canUpload() {
         return true;
     }
@@ -746,6 +791,11 @@ export abstract class PluginBase<TTarget extends deploy_targets.Target = deploy_
     /** @inheritdoc */
     public async listDirectory(context: ListDirectoryContext<TTarget>): Promise<ListDirectoryResult<TTarget>> {
         throw new Error(`'listDirectory()' is NOT implemented!`);
+    }
+
+    /** @inheritdoc */
+    public async removeFolders(context: RemoveFoldersContext<TTarget>): Promise<void> {
+        throw new Error(`'removeFolders()' is NOT implemented!`);
     }
 
     /**
@@ -1075,6 +1125,41 @@ export class SimpleFileToDownload implements FileToDownload {
 
     /** @inheritdoc */
     public onDownloadCompleted: DownloadFileCompletedCallback = async () => {
+    }
+
+    /** @inheritdoc */
+    public get path() {
+        return this._NAME_AND_PATH.path;
+    }
+}
+
+/**
+ * A simple implementation of a folder to remove.
+ */
+export class SimpleFolderToRemove implements FolderToRemove {
+    /**
+     * Initializes a new instance of that class.
+     * 
+     * @param {deploy_workspaces.Workspace} workspace the underlying workspace.
+     * @param {string} directory The path to the (local) directory.
+     * @param {deploy_contracts.WithNameAndPath} _NAME_AND_PATH Name and relative path information.
+     */
+    constructor(public readonly workspace: deploy_workspaces.Workspace,
+                public readonly directory: string,
+                private readonly _NAME_AND_PATH: deploy_contracts.WithNameAndPath) {
+    }
+
+    /** @inheritdoc */
+    public get name() {
+        return this._NAME_AND_PATH.name;
+    }
+
+    /** @inheritdoc */
+    public onBeforeRemove: BeforeRemoveFolderCallback = async () => {
+    }
+
+    /** @inheritdoc */
+    public onRemoveCompleted: RemoveFolderCompletedCallback = async () => {
     }
 
     /** @inheritdoc */

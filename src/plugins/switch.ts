@@ -20,7 +20,7 @@ import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
 import * as deploy_workspaces from '../workspaces';
 
-
+//TODO: implement removeFolders()
 class SwitchPlugin extends deploy_plugins.IterablePluginBase<deploy_workspaces.SwitchTarget> {
     protected async getTargets(switchTarget: deploy_workspaces.SwitchTarget, operation: deploy_contracts.DeployOperation, throwIfNonFound = false)
         : Promise<deploy_targets.Target[] | false>

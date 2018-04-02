@@ -53,7 +53,7 @@ export interface ListTargetEntry extends deploy_contracts.WithOptionalName {
  */
 export type ListTargetSettings = { [key: string]: any } | string;
 
-
+//TODO: implement removeFolders()
 class ListPlugin extends deploy_plugins.IterablePluginBase<ListTarget> {
     protected async prepareTargetsMany(listTarget: ListTarget, targets: deploy_targets.Target | deploy_targets.Target[]): Promise<deploy_targets.Target[] | false> {
         const ME = this;

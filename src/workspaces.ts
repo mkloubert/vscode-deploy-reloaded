@@ -196,6 +196,16 @@ export interface WorkspaceContext {
 }
 
 /**
+ * A workspace directory.
+ */
+export interface WorkspaceDirectory extends deploy_contracts.WithNameAndPath, WorkspaceItem {
+    /**
+     * The path to the (local) directory.
+     */
+    readonly directory: string;
+}
+
+/**
  * A workspace file.
  */
 export interface WorkspaceFile extends deploy_contracts.WithNameAndPath, WorkspaceItem {

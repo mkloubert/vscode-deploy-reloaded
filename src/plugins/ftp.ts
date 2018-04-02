@@ -178,6 +178,7 @@ export interface FTPUploadedModuleExecutorArguments extends FTPUploadScriptArgum
 const CACHE_PASSWORD = 'password';
 const CACHE_USER = 'user';
 
+//TODO: implement removeFolders()
 class FTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<FTPTarget,
                                                                  deploy_clients_ftp.FTPClientBase,
                                                                  FTPContext> {

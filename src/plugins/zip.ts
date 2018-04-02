@@ -43,7 +43,7 @@ export interface ZipTarget extends deploy_targets.Target {
     readonly open?: boolean;
 }
 
-
+//TODO: implement removeFolders()
 class ZipPlugin extends deploy_plugins.PluginBase<ZipTarget> {
     public get canDelete() {
         return true;

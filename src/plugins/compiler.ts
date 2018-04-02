@@ -53,7 +53,7 @@ export interface CompilerTarget extends deploy_targets.Target {
     readonly options?: Object;
 }
 
-
+//TODO: implement removeFolders()
 class CompilerPlugin extends deploy_plugins.PluginBase<CompilerTarget> {
     public get canDelete() {
         return true;

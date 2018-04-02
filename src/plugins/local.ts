@@ -44,7 +44,7 @@ interface TargetSettings {
     readonly empty?: boolean;
 }
 
-
+//TODO: implement removeFolders()
 class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
     public get canDelete() {
         return true;

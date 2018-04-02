@@ -40,7 +40,7 @@ export interface SlackTarget extends deploy_targets.Target {
     readonly token: string;
 }
 
-
+//TODO: implement removeFolders()
 class SlackPlugin extends deploy_plugins.PluginBase<SlackTarget> {
     public get canList() {
         return true;

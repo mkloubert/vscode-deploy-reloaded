@@ -92,7 +92,7 @@ export interface ScriptTarget extends deploy_targets.Target {
     readonly script: string;
 }
 
-
+//TODO: implement removeFolders()
 class ScriptPlugin extends deploy_plugins.PluginBase<ScriptTarget> {
     private readonly _EVENTS = new Events.EventEmitter();
     private readonly _GLOBAL_STATE: deploy_contracts.KeyValuePairs = {};
