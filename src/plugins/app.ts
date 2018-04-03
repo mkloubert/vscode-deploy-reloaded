@@ -197,6 +197,10 @@ export interface AppTarget extends deploy_targets.Target {
      */
     readonly pullFlag?: string;
     /**
+     * The optional operation flag, that indicates if folders should be removed.
+     */
+    readonly removeFoldersFlag?: string;
+    /**
      * Run in integrated terminal or not.
      */
     readonly runInTerminal?: boolean;
@@ -604,6 +608,10 @@ class AppPlugin extends deploy_plugins.PluginBase<AppTarget> {
 
                     case deploy_contracts.DeployOperation.Pull:
                         operationFlagDetector = (t) => t.pullFlag;
+                        break;
+
+                    case deploy_contracts.DeployOperation.RemoveFolders:
+                        operationFlagDetector = (t) => t.removeFoldersFlag;
                         break;
                 }
 

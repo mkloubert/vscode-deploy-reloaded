@@ -5027,6 +5027,10 @@
             "type": "string",
             "description": "The optional operation flag, that indicates the command that files should be pulled / downloaded."
            },
+           "removeFoldersFlag": {
+            "type": "string",
+            "description": "The optional operation flag, that indicates if folders should be removed."
+           },
            "runInTerminal": {
             "type": "boolean",
             "description": "Run in integrated terminal of the editor or not.",
