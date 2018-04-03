@@ -112,6 +112,9 @@ export abstract class AsyncFileListBase extends deploy_helpers.DisposableBase im
     /** @inheritdoc */
     public async removeFolder(path: string) {
         path = deploy_helpers.toStringSafe(path);
+        if ('' === normalizePath(path)) {
+            return false;  // NOT the roor folder!
+        }
 
         try {
             const FILES_AND_FOLDERS = deploy_helpers.asArray(await this.listDirectory(path));
@@ -201,4 +204,13 @@ export abstract class AsyncFileListBase extends deploy_helpers.DisposableBase im
 
     /** @inheritdoc */
     public readonly values: deploy_values.Value[] = [];
+}
+
+function normalizePath(p: string) {
+    p = deploy_helpers.normalizePath(p);
+    if ('.' === p) {
+        p = '';
+    }
+
+    return p;
 }
