@@ -627,6 +627,53 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
                     });
                 }
             }
+
+            if (deploy_helpers.isObject(selfInfo)) {
+                let exportPath = deploy_helpers.toStringSafe(selfInfo.exportPath);
+                if (deploy_helpers.isEmptyString(exportPath)) {
+                    exportPath = dir;
+                }
+
+                if (!deploy_helpers.isEmptyString(exportPath)) {
+                    // delete folder
+                    FUNC_QUICK_PICK_ITEMS.push({
+                        action: async function () {
+                            const SELECTED_ITEM = await vscode.window.showWarningMessage<deploy_contracts.MessageItemWithValue>(
+                                ME.t('listDirectory.removeFolder.askBeforeRemove',
+                                     exportPath),
+                                {
+                                    isCloseAffordance: true,
+                                    title: ME.t('no'),
+                                    value: 0,
+                                },
+                                {                                
+                                    title: ME.t('yes'),
+                                    value: 1,
+                                }
+                            );
+
+                            if (!SELECTED_ITEM || 1 !== SELECTED_ITEM.value) {
+                                return;
+                            }
+
+                            await vscode.window.withProgress({
+                                cancellable: true,
+                                location: vscode.ProgressLocation.Notification,
+                                title: ME.t('listDirectory.removeFolder.removing',
+                                            exportPath)
+                            }, async (progress, progressCancelToken) => {
+                                await removeFolder(
+                                    target, exportPath,
+                                    progress, progressCancelToken,
+                                );
+                            });
+                        },
+
+                        label: '$(trashcan)  ' + ME.t('listDirectory.removeFolder.label'),
+                        description: ME.t('listDirectory.removeFolder.description'),
+                    });
+                }
+            }
         }
 
         await SHOW_QUICK_PICKS();
@@ -930,5 +977,86 @@ async function pullAllFilesFromDir(
         if (cancelToken.isCancellationRequested) {
             WORKSPACE.output.appendLine(`[${WORKSPACE.t('canceled')}]`);
         }
+    }
+}
+
+async function removeFolder(
+    target: deploy_targets.Target, dir: string,
+    progress: vscode.Progress<deploy_contracts.VSCodeProgress>,
+    cancelToken: vscode.CancellationToken,
+) {
+    const WORKSPACE = target.__workspace;
+
+    const PROGRESS_MSG = WORKSPACE.t('listDirectory.removeFolder.removing',
+                                     dir);
+
+    WORKSPACE.output.appendLine('');
+    WORKSPACE.output.append(PROGRESS_MSG + ' ');
+
+    try {
+        const PLUGINS = WORKSPACE.getRemoveFolderPlugins(target);
+
+        const UPDATE_PROGRESS = (index: number, message: string) => {
+            const PERCENTAGE = Math.floor(
+                (index + 1) / PLUGINS.length * 100.0
+            );
+
+            progress.report({
+                // increment: PERCENTAGE,
+                message: message,
+                percentage: PERCENTAGE,
+            });
+        };
+
+        for (let i = 0; i < PLUGINS.length; i++) {
+            if (cancelToken.isCancellationRequested) {
+                break;
+            }
+
+            const P = PLUGINS[i];
+    
+            UPDATE_PROGRESS(i, PROGRESS_MSG);
+
+            const CTX: deploy_plugins.RemoveFoldersContext = {
+                cancellationToken: cancelToken,
+                folders: [
+                    new deploy_plugins.SimpleFolderToRemove(
+                        WORKSPACE,
+                        undefined,
+                        {
+                            name: deploy_helpers.normalizePath(
+                                Path.basename(dir)
+                            ),
+                            path: deploy_helpers.normalizePath(
+                                Path.dirname(dir)
+                            ),
+                        }
+                    )
+                ],
+                isCancelling: undefined,
+                target: target,
+            };
+
+            // CTX.isCancelling
+            Object.defineProperty(CTX, 'isCancelling', {
+                enumerable: true,
+
+                get: function () {
+                    return this.cancellationToken.isCancellationRequested;
+                }
+            });
+
+            await P.removeFolders(CTX);
+        }    
+
+        WORKSPACE.output.appendLine(`[${WORKSPACE.t('done')}]`);
+    }
+    catch (e) {
+        if (cancelToken.isCancellationRequested) {
+            WORKSPACE.output.appendLine(`[${WORKSPACE.t('canceled')}]`);
+        }
+        else {
+            WORKSPACE.output.appendLine(`[${WORKSPACE.t('error', e)}]`);   
+        }        
     }
 }

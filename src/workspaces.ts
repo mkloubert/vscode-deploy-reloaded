@@ -1525,6 +1525,23 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
     }
 
     /**
+     * Returns all plugins which can remove folders by target.
+     * 
+     * @param {deploy_targets.Target} target The target.
+     * 
+     * @return {deploy_plugins.Plugin[]} The plugins.
+     */
+    public getRemoveFolderPlugins(target: deploy_targets.Target) {
+        if (!target) {
+            return;
+        }
+
+        return this.context.plugins.filter(pi => {
+            return deploy_plugins.canRemoveFolders(pi, target);
+        });
+    }
+
+    /**
      * Returns the selected option of a switch (target),
      * 
      * @param {SwitchTarget} target The target.

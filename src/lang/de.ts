@@ -289,6 +289,12 @@ export const translation: Translation = {
             pullingFile: "Lade Datei{0:trim,surround,leading_space} ...",
             pullingFrom: "Lade Dateien von{0:trim,surround,leading_space} nach{1:trim,surround,leading_space} ...",
         },
+        removeFolder: {
+            askBeforeRemove: "Möchten Sie das Verzeichnis{0:trim,surround,leading_space} wirklich löschen?",
+            description: "Löscht dieses Verzeichnis inkl. seines Inhalts",
+            label: "Gesamtes Verzeichnis löschen ...",
+            removing: "Lösche Verzeichnis{0:trim,surround,leading_space} ...",
+        },
         selectSource: "Wählen Sie eine Quelle ...",
         size: "Grösse:{0:trim,leading_space}",
     },

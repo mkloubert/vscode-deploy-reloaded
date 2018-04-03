@@ -289,6 +289,12 @@ export const translation: Translation = {
             pullingFile: "Pulling file{0:trim,surround,leading_space} ...",
             pullingFrom: "Pulling files from{0:trim,surround,leading_space} to{1:trim,surround,leading_space} ...",
         },
+        removeFolder: {
+            askBeforeRemove: "Do you really want to delete the folder{0:trim,surround,leading_space}?",
+            description: "Deletes the folder and all its sub elements",
+            label: "Delete complete folder ...",
+            removing: "Removing folder{0:trim,surround,leading_space} ...",
+        },
         selectSource: "Select the source from where to start listening ...",
         size: "Size:{0:trim,leading_space}",
     },

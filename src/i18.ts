@@ -294,6 +294,12 @@ export interface Translation {
             pullingFile: string;
             pullingFrom: string;
         };
+        removeFolder?: {
+            askBeforeRemove?: string;
+            description?: string;
+            label?: string;
+            removing?: string;
+        };
         selectSource?: string;
         size?: string;
     };

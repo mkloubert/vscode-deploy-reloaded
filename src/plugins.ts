@@ -1812,6 +1812,26 @@ export function canList(plugin: Plugin, target: deploy_targets.Target) {
 }
 
 /**
+ * Checks if a plugin can remove folders.
+ * 
+ * @param {Plugin} plugin The plugin.
+ * @param {deploy_targets.Target} target The target.
+ * 
+ * @return {boolean} Can remove folders or not.
+ */
+export function canRemoveFolders(plugin: Plugin, target: deploy_targets.Target) {
+    if (!plugin) {
+        return false;
+    }
+
+    const PLUGIN_TYPE = deploy_helpers.normalizeString(plugin.__type);
+    const TARGET_TYPE = deploy_targets.normalizeTargetType(target);
+
+    return '' === PLUGIN_TYPE || 
+           (TARGET_TYPE === PLUGIN_TYPE && plugin.canRemoveFolders && plugin.removeFolders);
+}
+
+/**
  * Checks if a plugin can upload files.
  * 
  * @param {Plugin} plugin The plugin.
