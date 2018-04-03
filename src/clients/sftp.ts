@@ -688,11 +688,13 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
 
     /** @inheritdoc */
     public async removeFolder(path: string): Promise<boolean> {
+        path = toSFTPPath(path);
+        if ('/' === path) {
+            return false;  // NOT the root folder!
+        }
+
         try {
-            await this.client.rmdir(
-                toSFTPPath(path),
-                true,
-            );
+            await this.client.rmdir(path, true);
 
             return true;
         }

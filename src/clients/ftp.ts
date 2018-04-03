@@ -588,6 +588,11 @@ export abstract class FTPClientBase extends deploy_clients.AsyncFileListBase {
 
     /** @inheritdoc */
     public async removeFolder(path: string): Promise<boolean> {
+        path = toFTPPath(path);
+        if ('/' === path) {
+            return false;  // NOT the root folder!
+        }
+
         try {
             await this.rmdir(path);
 
@@ -1265,6 +1270,11 @@ class JsFTPClient extends FTPClientBase {
             try {
                 ME.connection.list(dir, (err, result) => {
                     if (err) {
+                        if (451 == err.code) {
+                            COMPLETED(null, []);
+                            return;
+                        }
+
                         COMPLETED(err);
                         return;
                     }
@@ -1449,10 +1459,30 @@ class JsFTPClient extends FTPClientBase {
 
         path = toFTPPath(path);
 
-        return new Promise<void>((resolve, reject) => {
+        return new Promise<void>(async (resolve, reject) => {
             const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
 
             try {
+                const FILES_AND_FOLDERS = await ME.list(path);
+
+                const TO_PATH = (wnp: deploy_contracts.WithNameAndPath) => {
+                    return deploy_helpers.normalizePath(
+                        deploy_helpers.normalizePath(wnp.path) + 
+                        '/' + 
+                        deploy_helpers.normalizePath(wnp.name),
+                    );
+                };
+
+                // first delete sub folders
+                for (const F of <deploy_files.DirectoryInfo[]>FILES_AND_FOLDERS.filter(ff => deploy_files.FileSystemType.Directory === ff.type)) {
+                    await ME.removeFolder( TO_PATH(F) );
+                }
+                
+                // then the files
+                for (const F of <deploy_files.FileInfo[]>FILES_AND_FOLDERS.filter(ff => deploy_files.FileSystemType.File === ff.type)) {
+                    await ME.deleteFile( TO_PATH(F) );
+                }
+
                 ME.connection.raw('rmd', path, (err) => {
                     COMPLETED(err);
                 });

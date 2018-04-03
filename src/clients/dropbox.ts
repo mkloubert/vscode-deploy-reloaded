@@ -163,9 +163,14 @@ export class DropBoxClient extends deploy_clients.AsyncFileListBase {
 
     /** @inheritdoc */
     public async removeFolder(path: string): Promise<boolean> {
+        path = toDropBoxPath(path);
+        if ('/' === path) {
+            return false;  // NOT the root folder!
+        }
+
         try {
             await this.connection.filesDeleteV2({
-                path: toDropBoxPath(path),
+                path: path,
             });
 
             return true;
@@ -216,16 +221,19 @@ export function createClient(opts: DropboxOptions): DropBoxClient {
 /**
  * Converts to a Dropbox path.
  * 
- * @param {string} path The path to convert.
+ * @param {string} p The path to convert.
  * 
  * @return {string} The converted path. 
  */
-export function toDropBoxPath(path: string) {
-    path = deploy_helpers.normalizePath(path);
+export function toDropBoxPath(p: string) {
+    p = deploy_helpers.normalizePath(p);
 
-    if ('' !== path) {
-        path = '/' + path;
+    if ('.' === p) {
+        p = '';
+    }
+    if ('' !== p) {
+        p = '/' + p;
     }
 
-    return path;
+    return p;
 }
