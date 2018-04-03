@@ -1761,15 +1761,26 @@ export abstract class IterablePluginBase<TTarget extends deploy_targets.Target &
  * @return {boolean} Can delete or not.
  */
 export function canDelete(plugin: Plugin, target: deploy_targets.Target) {
+    return canDo(plugin, target,
+                 p => p.canDelete, p => p.deleteFiles);
+}
+
+function canDo(
+    plugin: Plugin, target: deploy_targets.Target,
+    canFlagResolver: (p: Plugin) => boolean, methodResolver: (p: Plugin) => Function,
+) {
     if (!plugin || !target) {
         return false;
     }
 
-    const PLUGIN_TYPE = deploy_helpers.normalizeString(plugin.__type);
-    const TARGET_TYPE = deploy_targets.normalizeTargetType(target);
+    const PLUGIN_TYPE = deploy_helpers.normalizeString( plugin.__type );
+    const TARGET_TYPE = deploy_targets.normalizeTargetType( target );
+
+    const CAN_FLAG = deploy_helpers.toBooleanSafe( canFlagResolver(plugin) );
+    const METHOD = methodResolver(plugin);
 
     return (TARGET_TYPE === PLUGIN_TYPE || '' === PLUGIN_TYPE) &&
-           (plugin.canDelete && !_.isNil(plugin.deleteFiles));
+           (CAN_FLAG && !_.isNil(METHOD));
 }
 
 /**
@@ -1781,15 +1792,8 @@ export function canDelete(plugin: Plugin, target: deploy_targets.Target) {
  * @return {boolean} Can download or not.
  */
 export function canDownload(plugin: Plugin, target: deploy_targets.Target) {
-    if (!plugin || !target) {
-        return false;
-    }
-
-    const PLUGIN_TYPE = deploy_helpers.normalizeString(plugin.__type);
-    const TARGET_TYPE = deploy_targets.normalizeTargetType(target);
-
-    return (TARGET_TYPE === PLUGIN_TYPE || '' === PLUGIN_TYPE) &&
-           (plugin.canDownload && !_.isNil(plugin.downloadFiles));
+    return canDo(plugin, target,
+                 p => p.canDownload, p => p.downloadFiles);
 }
 
 /**
@@ -1801,15 +1805,8 @@ export function canDownload(plugin: Plugin, target: deploy_targets.Target) {
  * @return {boolean} Can list or not.
  */
 export function canList(plugin: Plugin, target: deploy_targets.Target) {
-    if (!plugin || !target) {
-        return false;
-    }
-
-    const PLUGIN_TYPE = deploy_helpers.normalizeString(plugin.__type);
-    const TARGET_TYPE = deploy_targets.normalizeTargetType(target);
-
-    return (TARGET_TYPE === PLUGIN_TYPE || '' === PLUGIN_TYPE) &&
-           (plugin.canList && !_.isNil(plugin.listDirectory));
+    return canDo(plugin, target,
+                 p => p.canList, p => p.listDirectory);
 }
 
 /**
@@ -1821,15 +1818,8 @@ export function canList(plugin: Plugin, target: deploy_targets.Target) {
  * @return {boolean} Can remove folders or not.
  */
 export function canRemoveFolders(plugin: Plugin, target: deploy_targets.Target) {
-    if (!plugin || !target) {
-        return false;
-    }
-
-    const PLUGIN_TYPE = deploy_helpers.normalizeString(plugin.__type);
-    const TARGET_TYPE = deploy_targets.normalizeTargetType(target);
-
-    return (TARGET_TYPE === PLUGIN_TYPE || '' === PLUGIN_TYPE) &&
-           (plugin.canRemoveFolders && !_.isNil(plugin.removeFolders));
+    return canDo(plugin, target,
+                 p => p.canRemoveFolders, p => p.removeFolders);
 }
 
 /**
@@ -1841,13 +1831,6 @@ export function canRemoveFolders(plugin: Plugin, target: deploy_targets.Target) 
  * @return {boolean} Can upload or not.
  */
 export function canUpload(plugin: Plugin, target: deploy_targets.Target) {
-    if (!plugin || !target) {
-        return false;
-    }
-
-    const PLUGIN_TYPE = deploy_helpers.normalizeString(plugin.__type);
-    const TARGET_TYPE = deploy_targets.normalizeTargetType(target);
-
-    return (TARGET_TYPE === PLUGIN_TYPE || '' === PLUGIN_TYPE) &&
-           (plugin.canUpload && !_.isNil(plugin.uploadFiles));
+    return canDo(plugin, target,
+                 p => p.canUpload, p => p.uploadFiles);
 }
