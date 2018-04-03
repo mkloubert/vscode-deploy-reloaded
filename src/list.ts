@@ -402,7 +402,9 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
             }
 
             await vscode.window.withProgress({
+                cancellable: true,
                 location: vscode.ProgressLocation.Notification,
+                title: opts.title,
             }, async (progress, progressCancelToken) => {
                 await opts.action(
                     target,

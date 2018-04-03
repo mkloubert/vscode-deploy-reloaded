@@ -579,6 +579,28 @@ export abstract class FTPClientBase extends deploy_clients.AsyncFileListBase {
      */
     public abstract put(file: string, data: Buffer): Promise<void>;
 
+    /**
+     * Removes a directory and its sub folders.
+     * 
+     * @param {string} file The path to the destination directory.
+     */
+    public abstract async rmdir(path: string): Promise<void>;
+
+    /** @inheritdoc */
+    public async removeFolder(path: string): Promise<boolean> {
+        try {
+            await this.rmdir(path);
+
+            return true;
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'clients.ftp.FTPClientBase.removeFolder(1)');
+
+            return false;
+        }
+    }
+
     /** @inheritdoc */
     public get type() {
         return 'ftp';
@@ -999,6 +1021,25 @@ class FtpClient extends FTPClientBase {
         });
     }
 
+    public rmdir(path: string): Promise<void> {
+        const ME = this;
+
+        path = toFTPPath(path);
+
+        return new Promise<void>((resolve, reject) => {
+            const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
+
+            try {
+                ME.connection.rmdir(path, true, (err) => {
+                    COMPLETED(err);
+                });
+            }
+            catch (e) {
+                COMPLETED(e);
+            }
+        });
+    }
+
     public unlink(path: string): Promise<void> {
         const ME = this;
 
@@ -1395,6 +1436,25 @@ class JsFTPClient extends FTPClientBase {
                     else {
                         COMPLETED(null);
                     }
+                });
+            }
+            catch (e) {
+                COMPLETED(e);
+            }
+        });
+    }
+
+    public rmdir(path: string): Promise<void> {
+        const ME = this;
+
+        path = toFTPPath(path);
+
+        return new Promise<void>((resolve, reject) => {
+            const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
+
+            try {
+                ME.connection.raw('rmd', path, (err) => {
+                    COMPLETED(err);
                 });
             }
             catch (e) {

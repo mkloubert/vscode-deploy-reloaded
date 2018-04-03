@@ -687,6 +687,24 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
     }
 
     /** @inheritdoc */
+    public async removeFolder(path: string): Promise<boolean> {
+        try {
+            await this.client.rmdir(
+                toSFTPPath(path),
+                true,
+            );
+
+            return true;
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'clients.sftp.SFTPClient.removeFolder(1)');
+
+            return false;
+        }
+    }
+
+    /** @inheritdoc */
     public get type(): string {
         return 'sftp';
     }

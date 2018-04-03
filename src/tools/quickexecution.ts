@@ -532,10 +532,10 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         await $vs.window.withProgress({
             location: $vs.ProgressLocation.Notification,
             cancellable: true,
-            title: 'Counting lines in files ...',   
+            title: 'Counting lines in files ...',  //TODO: translate
         }, async (progress, progressCancelToken) => {
             progress.report({
-                message: 'Detecting files ...',
+                message: 'Detecting files ...',  //TODO: translate
             });
 
             const FILES = await $h.glob(patterns, {

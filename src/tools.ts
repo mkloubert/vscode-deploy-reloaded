@@ -724,6 +724,7 @@ export async function detectGitChanges(context: vscode.ExtensionContext) {
         return;
     }
 
+    //TODO: replace withProgress() with notification API
     await deploy_helpers.withProgress(async (ctx) => {
         const BRANCH = RANGE.from.branch;
         const TOTAL_COUNT = await BRANCH.commitCount();

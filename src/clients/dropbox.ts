@@ -18,6 +18,7 @@
 import * as deploy_clients from '../clients';
 import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
+import * as deploy_log from '../log';
 const Dropbox = require('dropbox');
 import * as Moment from 'moment';
 
@@ -72,6 +73,9 @@ export class DropBoxClient extends deploy_clients.AsyncFileListBase {
             return true;
         }
         catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'clients.dropbox.DropBoxClient.deleteFile(1)');
+
             return false;
         }
     }
@@ -155,6 +159,23 @@ export class DropBoxClient extends deploy_clients.AsyncFileListBase {
         }
 
         return RESULT;
+    }
+
+    /** @inheritdoc */
+    public async removeFolder(path: string): Promise<boolean> {
+        try {
+            await this.connection.filesDeleteV2({
+                path: toDropBoxPath(path),
+            });
+
+            return true;
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'clients.dropbox.DropBoxClient.removeFolder(1)');
+
+            return false;
+        }
     }
 
     /** @inheritdoc */
