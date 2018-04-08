@@ -529,11 +529,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
             return $h.toStringSafe(e);
         }).filter(e => !$h.isEmptyString(e));
 
-        await $vs.window.withProgress({
-            location: $vs.ProgressLocation.Notification,
-            cancellable: true,
-            title: 'Counting lines in files ...',  //TODO: translate
-        }, async (progress, progressCancelToken) => {
+        await $h.withProgress(async (progress) => {
             progress.report({
                 message: 'Detecting files ...',  //TODO: translate
             });
@@ -551,7 +547,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
             if (FILES.length > 0) {
                 let lineCount = 0;
                 for (let i = 0; i < FILES.length; i++) {
-                    if (progressCancelToken.isCancellationRequested) {
+                    if (progress.cancellationToken.isCancellationRequested) {
                         return;
                     }
 
@@ -576,6 +572,10 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
             else {
                 $vs.window.showWarningMessage('No files found!');
             }    
+        }, {
+            location: $vs.ProgressLocation.Notification,
+            cancellable: true,
+            title: 'Counting lines in files ...',  //TODO: translate
         });
     };
 

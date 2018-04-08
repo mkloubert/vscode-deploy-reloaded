@@ -36,8 +36,7 @@ type SyncFoldersAction = (
     target: deploy_targets.Target,
     sourceDir: string, targetDir: string,
     transformer: deploy_transformers.DataTransformer,
-    progress: vscode.Progress<deploy_contracts.VSCodeProgress>,
-    cancelToken: vscode.CancellationToken,
+    progress: deploy_helpers.ProgressContext,
     recursive: boolean,
     depth?: number, maxDepth?: number
 ) => PromiseLike<void>;
@@ -235,14 +234,10 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
         }
 
         let selfInfo: deploy_files.DirectoryInfo;
-        const FILES_AND_FOLDERS = await vscode.window.withProgress({
-            cancellable: true,
-            location: vscode.ProgressLocation.Notification,
-            title: `[${TARGET_NAME}]`,
-        }, async (progress: vscode.Progress<deploy_contracts.VSCodeProgress>, progressCancelToken) => {
+        const FILES_AND_FOLDERS = await deploy_helpers.withProgress(async (progress) => {
             const CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
 
-            progressCancelToken.onCancellationRequested(() => {
+            progress.cancellationToken.onCancellationRequested(() => {
                 try {
                     CANCELLATION_SOURCE.cancel();
                 }
@@ -251,7 +246,7 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
                       .trace(e, 'list.listDirectory(3)');
                 }
             });
-            if (progressCancelToken.isCancellationRequested) {
+            if (progress.cancellationToken.isCancellationRequested) {
                 CANCELLATION_SOURCE.cancel();
             }
 
@@ -271,12 +266,9 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
                         index / TOTAL_COUNT * 100.0
                     );
 
-                    progress.report({
-                        // increment: PERCENTAGE,
-                        message: ME.t('listDirectory.loading',
-                                      displayDir),
-                        percentage: PERCENTAGE,
-                    });
+                    progress.increment = PERCENTAGE;
+                    progress.message = ME.t('listDirectory.loading',
+                                            displayDir);
 
                     const CTX: deploy_plugins.ListDirectoryContext = {
                         cancellationToken: CANCELLATION_SOURCE.token,
@@ -321,6 +313,10 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
             finally {
                 deploy_helpers.tryDispose(CANCELLATION_SOURCE);
             }
+        }, {
+            cancellable: true,
+            location: vscode.ProgressLocation.Notification,
+            title: `[${TARGET_NAME}]`,
         });
 
         if (false === FILES_AND_FOLDERS) {
@@ -401,18 +397,18 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
                 return;
             }
 
-            await vscode.window.withProgress({
-                cancellable: true,
-                location: vscode.ProgressLocation.Notification,
-                title: opts.title,
-            }, async (progress, progressCancelToken) => {
+            await deploy_helpers.withProgress(async (progress) => {
                 await opts.action(
                     target,
                     dir, TARGET_DIR,
                     PULL_TRANSFORMER,
-                    progress, progressCancelToken,
+                    progress,
                     opts.recursive
                 );
+            }, {
+                cancellable: true,
+                location: vscode.ProgressLocation.Notification,
+                title: opts.title,
             });
         };  // EXECUTE_SYNC_FOLDERS_ACTION()
 
@@ -656,16 +652,16 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
                                 return;
                             }
 
-                            await vscode.window.withProgress({
+                            await deploy_helpers.withProgress(async (progress) => {
+                                await removeFolder(
+                                    target, exportPath,
+                                    progress,
+                                );
+                            }, {
                                 cancellable: true,
                                 location: vscode.ProgressLocation.Notification,
                                 title: ME.t('listDirectory.removeFolder.removing',
                                             exportPath)
-                            }, async (progress, progressCancelToken) => {
-                                await removeFolder(
-                                    target, exportPath,
-                                    progress, progressCancelToken,
-                                );
                             });
                         },
 
@@ -710,8 +706,7 @@ async function pullAllFilesFromDir(
     target: deploy_targets.Target,
     sourceDir: string, targetDir: string,
     transformer: deploy_transformers.DataTransformer,
-    progress: vscode.Progress<deploy_contracts.VSCodeProgress>,
-    cancelToken: vscode.CancellationToken,
+    progress: deploy_helpers.ProgressContext,
     recursive: boolean,
     depth?: number, maxDepth?: number
 )
@@ -742,7 +737,7 @@ async function pullAllFilesFromDir(
                                     maxDepth));
     }
 
-    if (cancelToken.isCancellationRequested) {
+    if (progress.cancellationToken.isCancellationRequested) {
         return;
     }
 
@@ -757,14 +752,14 @@ async function pullAllFilesFromDir(
 
         const PLUGINS = WORKSPACE.getListPlugins(target);
         while (PLUGINS.length > 0) {
-            if (cancelToken.isCancellationRequested) {
+            if (progress.cancellationToken.isCancellationRequested) {
                 return;
             }
             
             const P = PLUGINS.shift();
 
             const CTX: deploy_plugins.ListDirectoryContext = {
-                cancellationToken: cancelToken,
+                cancellationToken: progress.cancellationToken,
                 dir: sourceDir,
                 isCancelling: undefined,
                 target: target,
@@ -817,12 +812,9 @@ async function pullAllFilesFromDir(
                         const PERCENTAGE = Math.floor(
                             (POPUP_STATS.succeeded.length + POPUP_STATS.failed.length) / FILES.length * 100.0
                         );
-    
-                        progress.report({
-                            // increment: PERCENTAGE,
-                            message: message,
-                            percentage: PERCENTAGE,
-                        });
+
+                        progress.increment = PERCENTAGE;
+                        progress.message = message;
                     };
 
                     SF.onBeforeDownload = async function(source?) {
@@ -842,7 +834,7 @@ async function pullAllFilesFromDir(
 
                         UPDATE_PROGRESS( PULL_TEXT );
 
-                        if (cancelToken.isCancellationRequested) {
+                        if (progress.cancellationToken.isCancellationRequested) {
                             WORKSPACE.output.appendLine(`[${WORKSPACE.t('canceled')}]`);
                         }
                     };
@@ -924,7 +916,7 @@ async function pullAllFilesFromDir(
                 });
                 
                 const DL_CTX: deploy_plugins.DownloadContext = {
-                    cancellationToken: cancelToken,
+                    cancellationToken: progress.cancellationToken,
                     files: FILES_TO_DOWNLOAD,
                     isCancelling: undefined,
                     target: target,
@@ -962,7 +954,7 @@ async function pullAllFilesFromDir(
                         target,
                         NEW_SOURCE_DIR, NEW_TARGET_DIR,
                         transformer,
-                        progress, cancelToken,
+                        progress,
                         recursive,
                         depth + 1,
                     );
@@ -974,7 +966,7 @@ async function pullAllFilesFromDir(
         WORKSPACE.output.appendLine(`[${WORKSPACE.t('error', e)}]`);
     }
     finally {
-        if (cancelToken.isCancellationRequested) {
+        if (progress.cancellationToken.isCancellationRequested) {
             WORKSPACE.output.appendLine(`[${WORKSPACE.t('canceled')}]`);
         }
     }
@@ -982,8 +974,7 @@ async function pullAllFilesFromDir(
 
 async function removeFolder(
     target: deploy_targets.Target, dir: string,
-    progress: vscode.Progress<deploy_contracts.VSCodeProgress>,
-    cancelToken: vscode.CancellationToken,
+    progress: deploy_helpers.ProgressContext,
 ) {
     const WORKSPACE = target.__workspace;
 
@@ -1001,15 +992,12 @@ async function removeFolder(
                 (index + 1) / PLUGINS.length * 100.0
             );
 
-            progress.report({
-                // increment: PERCENTAGE,
-                message: message,
-                percentage: PERCENTAGE,
-            });
+            progress.increment = PERCENTAGE;
+            progress.message = message;
         };
 
         for (let i = 0; i < PLUGINS.length; i++) {
-            if (cancelToken.isCancellationRequested) {
+            if (progress.cancellationToken.isCancellationRequested) {
                 break;
             }
 
@@ -1018,7 +1006,7 @@ async function removeFolder(
             UPDATE_PROGRESS(i, PROGRESS_MSG);
 
             const CTX: deploy_plugins.RemoveFoldersContext = {
-                cancellationToken: cancelToken,
+                cancellationToken: progress.cancellationToken,
                 folders: [
                     new deploy_plugins.SimpleFolderToRemove(
                         WORKSPACE,
@@ -1052,7 +1040,7 @@ async function removeFolder(
         WORKSPACE.output.appendLine(`[${WORKSPACE.t('done')}]`);
     }
     catch (e) {
-        if (cancelToken.isCancellationRequested) {
+        if (progress.cancellationToken.isCancellationRequested) {
             WORKSPACE.output.appendLine(`[${WORKSPACE.t('canceled')}]`);
         }
         else {

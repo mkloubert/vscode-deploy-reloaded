@@ -724,8 +724,7 @@ export async function detectGitChanges(context: vscode.ExtensionContext) {
         return;
     }
 
-    //TODO: replace withProgress() with notification API
-    await deploy_helpers.withProgress(async (ctx) => {
+    await deploy_helpers.withProgress(async (progress) => {
         const BRANCH = RANGE.from.branch;
         const TOTAL_COUNT = await BRANCH.commitCount();
         const SKIP = TOTAL_COUNT - RANGE.from.index - 1;
@@ -737,10 +736,14 @@ export async function detectGitChanges(context: vscode.ExtensionContext) {
         let run: boolean;
         do
         {
+            if (progress.cancellationToken.isCancellationRequested) {
+                return;
+            }
+
             ++page;
             run = true;
 
-            ctx.message = SELECT_WORKSPACE.t(
+            progress.message = SELECT_WORKSPACE.t(
                 'scm.loadingCommits',
                 BRANCH.id, page,
             );
@@ -762,9 +765,13 @@ export async function detectGitChanges(context: vscode.ExtensionContext) {
         while (run);
 
         for (let i = 0; i < COMMIT_WINDOW.length; i++) {
+            if (progress.cancellationToken.isCancellationRequested) {
+                return;
+            }
+
             const C = COMMIT_WINDOW[i];
 
-            ctx.message = SELECT_WORKSPACE.t(
+            progress.message = SELECT_WORKSPACE.t(
                 'scm.loadingCommitChanges',
                 C.id, i + 1, COMMIT_WINDOW.length,
             );
@@ -779,6 +786,10 @@ export async function detectGitChanges(context: vscode.ExtensionContext) {
         const DELETED_FILES: string[] = [];
         const MODIFIED_FILES: string[] = [];
         for (const FILE in ALL_CHANGES) {
+            if (progress.cancellationToken.isCancellationRequested) {
+                return;
+            }
+
             const CHG = ALL_CHANGES[FILE];
 
             const FULL_PATH = Path.resolve(
@@ -829,6 +840,10 @@ export async function detectGitChanges(context: vscode.ExtensionContext) {
             [ MODIFIED_FILES, SELECT_WORKSPACE.t('scm.changes.modified') ],
         ];
         for (const ITEM of FILES_TO_DISPLAY) {
+            if (progress.cancellationToken.isCancellationRequested) {
+                return;
+            }
+
             const FTD = <string[]>ITEM[0];
             const HEADER = <string>ITEM[1];
 
@@ -851,12 +866,14 @@ export async function detectGitChanges(context: vscode.ExtensionContext) {
             }
         }
 
-        await EDITOR.edit((builder) => {
-            builder.insert(
-                new vscode.Position(0, 0),
-                text.trim(),
-            );
-        });
+        if (!progress.cancellationToken.isCancellationRequested) {
+            await EDITOR.edit((builder) => {
+                builder.insert(
+                    new vscode.Position(0, 0),
+                    text.trim(),
+                );
+            });
+        }        
     });
 }
 

@@ -425,22 +425,22 @@ export async function pullFilesFrom(files: string[],
                                     fileListReloader: deploy_contracts.Reloader<string>) {
     const ME: deploy_workspaces.Workspace = this;
 
-    await vscode.window.withProgress({
-        location: vscode.ProgressLocation.Notification,
-        cancellable: true,
-        title: ME.t('pull.pullingFiles'),
-    }, async (progress, cancelToken) => {
+    await deploy_helpers.withProgress(async (progress) => {
         await deploy_helpers.applyFuncFor(
             pullFilesFromWithProgress,
             ME,
-        )(progress, cancelToken,
+        )(progress,
           files,
           target,
           fileListReloader);
+    }, {
+        location: vscode.ProgressLocation.Notification,
+        cancellable: true,
+        title: ME.t('pull.pullingFiles'),
     });
 }
 
-async function pullFilesFromWithProgress(progress: vscode.Progress<deploy_contracts.VSCodeProgress>, progressCancelToken: vscode.CancellationToken,
+async function pullFilesFromWithProgress(progress: deploy_helpers.ProgressContext,
                                          files: string[],
                                          target: deploy_targets.Target,
                                          fileListReloader: deploy_contracts.Reloader<string>) {
@@ -531,7 +531,7 @@ async function pullFilesFromWithProgress(progress: vscode.Progress<deploy_contra
 
     const CANCELLATION_SOURCE = new vscode.CancellationTokenSource();
 
-    progressCancelToken.onCancellationRequested(() => {
+    progress.cancellationToken.onCancellationRequested(() => {
         try {
             CANCELLATION_SOURCE.cancel();
         }
@@ -540,7 +540,7 @@ async function pullFilesFromWithProgress(progress: vscode.Progress<deploy_contra
               .trace(e, 'pull.pullFilesFromWithProgress().progressCancelToken.onCancellationRequested()');
         }
     });
-    if (progressCancelToken.isCancellationRequested) {
+    if (progress.cancellationToken.isCancellationRequested) {
         CANCELLATION_SOURCE.cancel();
     }
 
@@ -563,7 +563,7 @@ async function pullFilesFromWithProgress(progress: vscode.Progress<deploy_contra
                     continue;
                 }
 
-                progress.report({ /* increment: 0, */ percentage: 0 });
+                progress.increment = 0;
                 
                 ME.output.appendLine('');
                 
@@ -572,11 +572,8 @@ async function pullFilesFromWithProgress(progress: vscode.Progress<deploy_contra
                         (POPUP_STATS.succeeded.length + POPUP_STATS.failed.length) / files.length * 100.0
                     );
 
-                    progress.report({
-                        // increment: PERCENTAGE,
-                        message: message,
-                        percentage: PERCENTAGE,
-                    });
+                    progress.increment = PERCENTAGE;
+                    progress.message = message;
                 };
 
                 if (files.length > 1) {
