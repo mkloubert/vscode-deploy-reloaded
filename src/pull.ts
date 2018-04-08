@@ -563,16 +563,12 @@ async function pullFilesFromWithProgress(progress: deploy_helpers.ProgressContex
                     continue;
                 }
 
-                progress.increment = 0;
-                
+                progress.increment = undefined;
+
                 ME.output.appendLine('');
                 
                 const UPDATE_PROGRESS = (message: string) => {
-                    const PERCENTAGE = Math.floor(
-                        (POPUP_STATS.succeeded.length + POPUP_STATS.failed.length) / files.length * 100.0
-                    );
-
-                    progress.increment = PERCENTAGE;
+                    progress.increment = 1 / files.length * 100.0;
                     progress.message = message;
                 };
 
@@ -592,12 +588,15 @@ async function pullFilesFromWithProgress(progress: deploy_helpers.ProgressContex
 
                     const SF = new deploy_plugins.SimpleFileToDownload(ME, f, NAME_AND_PATH);
                     SF.onBeforeDownload = async function(source?) {
+                        const NOW = deploy_helpers.now();
+
                         if (arguments.length < 1) {
                             source = NAME_AND_PATH.path;
                         }
                         source = `${deploy_helpers.toStringSafe(source)} (${TARGET_NAME})`;
 
                         ME.output.append(
+                            `[${NOW.format( ME.t('time.timeWithSeconds') )}] ` + 
                             ME.t('pull.pullingFile',
                                  f, source) + ' '
                         );

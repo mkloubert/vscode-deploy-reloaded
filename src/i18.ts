@@ -586,7 +586,8 @@ export interface Translation {
         waitingForOther?: string;
     };
     time?: {
-        dateTimeWithSeconds?: string;
+        dateTimeWithSeconds?: string;        
+        timeWithSeconds?: string;
     };
     tools?: {
         bower?: {

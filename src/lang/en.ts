@@ -582,8 +582,9 @@ export const translation: Translation = {
         selectTarget: "Select a target ...",
         waitingForOther: "Wating for{0:trim,surround,leading_space} ...",
     },
-    time: {
+    time: {        
         dateTimeWithSeconds: "YYYY-MM-DD HH:mm:ss",
+        timeWithSeconds: "HH:mm:ss",
     },
     tools: {
         bower: {

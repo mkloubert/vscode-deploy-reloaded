@@ -555,16 +555,12 @@ async function deployFilesToWithProgress(progress: deploy_helpers.ProgressContex
                     continue;
                 }
 
-                progress.increment = 0;
-                
+                progress.increment = undefined;
+
                 ME.output.appendLine('');
                 
                 const UPDATE_PROGRESS = (message: string) => {
-                    const PERCENTAGE = Math.floor(
-                        (POPUP_STATS.succeeded.length + POPUP_STATS.failed.length) / files.length * 100.0
-                    );
-
-                    progress.increment = PERCENTAGE;
+                    progress.increment = 1 / files.length * 100.0;
                     progress.message = message;
                 };
 
@@ -589,12 +585,15 @@ async function deployFilesToWithProgress(progress: deploy_helpers.ProgressContex
 
                     const LF = new deploy_plugins.LocalFileToUpload(ME, f, NAME_AND_PATH);
                     LF.onBeforeUpload = async function(destination?: string) {
+                        const NOW = deploy_helpers.now();
+
                         if (arguments.length < 1) {
                             destination = NAME_AND_PATH.path;
                         }
                         destination = `${deploy_helpers.toStringSafe(destination)} (${TARGET_NAME})`;
 
                         ME.output.append(
+                            `[${NOW.format( ME.t('time.timeWithSeconds') )}] ` + 
                             ME.t('deploy.deployingFile',
                                  f, destination) + ' '
                         );

@@ -581,7 +581,7 @@ export const translation: Translation = {
         selectTarget: "Wählen Sie ein Ziel aus ...",
         waitingForOther: "Warte auf{0:trim,surround,leading_space} ...",
     },
-    time: {
+    time: {        
         dateTimeWithSeconds: "DD.MM.YYYY HH:mm:ss",
     },
     tools: {

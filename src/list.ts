@@ -262,11 +262,7 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
 
                     const PI = PLUGINS.shift();
 
-                    const PERCENTAGE = Math.floor(
-                        index / TOTAL_COUNT * 100.0
-                    );
-
-                    progress.increment = PERCENTAGE;
+                    progress.increment = 1 / TOTAL_COUNT * 100.0;
                     progress.message = ME.t('listDirectory.loading',
                                             displayDir);
 
@@ -809,11 +805,7 @@ async function pullAllFilesFromDir(
                     );
 
                     const UPDATE_PROGRESS = (message: string) => {
-                        const PERCENTAGE = Math.floor(
-                            (POPUP_STATS.succeeded.length + POPUP_STATS.failed.length) / FILES.length * 100.0
-                        );
-
-                        progress.increment = PERCENTAGE;
+                        progress.increment = 1 / FILES.length * 100.0;
                         progress.message = message;
                     };
 
@@ -988,11 +980,7 @@ async function removeFolder(
         const PLUGINS = WORKSPACE.getRemoveFolderPlugins(target);
 
         const UPDATE_PROGRESS = (index: number, message: string) => {
-            const PERCENTAGE = Math.floor(
-                (index + 1) / PLUGINS.length * 100.0
-            );
-
-            progress.increment = PERCENTAGE;
+            progress.increment = 1 / PLUGINS.length * 100.0;
             progress.message = message;
         };
 

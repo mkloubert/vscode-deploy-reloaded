@@ -286,17 +286,13 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
                 operation: deploy_contracts.DeployOperation.Delete,
                 succeeded: [],
             };
-            try {                
-                progress.increment = 0;
-                
+            try {
+                progress.increment = undefined;
+
                 ME.output.appendLine('');
                 
                 const UPDATE_PROGRESS = (message: string) => {
-                    const PERCENTAGE = Math.floor(
-                        (POPUP_STATS.succeeded.length + POPUP_STATS.failed.length) / files.length * 100.0
-                    );
-
-                    progress.increment = PERCENTAGE;
+                    progress.increment = 1 / files.length * 100.0;
                     progress.message = message;
                 };
 
@@ -321,12 +317,15 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
 
                     const SF = new deploy_plugins.SimpleFileToDelete(ME, f, NAME_AND_PATH);
                     SF.onBeforeDelete = async function (destination?: string) {
+                        const NOW = deploy_helpers.now();
+
                         if (arguments.length < 1) {
                             destination = NAME_AND_PATH.path;
                         }
                         destination = `${deploy_helpers.toStringSafe(destination)} (${TARGET_NAME})`;
 
                         ME.output.append(
+                            `[${NOW.format( ME.t('time.timeWithSeconds') )}] ` + 
                             ME.t('DELETE.deletingFile',
                                  f, destination) + ' '
                         );
