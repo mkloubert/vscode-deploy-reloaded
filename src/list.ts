@@ -810,6 +810,8 @@ async function pullAllFilesFromDir(
                     };
 
                     SF.onBeforeDownload = async function(source?) {
+                        const NOW = deploy_helpers.now();
+
                         if (arguments.length < 1) {
                             source = NAME_AND_PATH.path;
                         }
@@ -821,13 +823,14 @@ async function pullAllFilesFromDir(
                                                       ));
 
                         WORKSPACE.output.append(
-                            `\t` + PULL_TEXT + ' '
+                            `\t[${NOW.format( WORKSPACE.t('time.timeWithSeconds') )}] 🚚 ` +
+                            PULL_TEXT + ' '
                         );
 
-                        UPDATE_PROGRESS( PULL_TEXT );
+                        UPDATE_PROGRESS( `🚚 ` + PULL_TEXT );
 
                         if (progress.cancellationToken.isCancellationRequested) {
-                            WORKSPACE.output.appendLine(`[${WORKSPACE.t('canceled')}]`);
+                            WORKSPACE.output.appendLine(`✖️`);
                         }
                     };
 
@@ -882,13 +885,13 @@ async function pullAllFilesFromDir(
                             }
 
                             WORKSPACE.output
-                                     .append(`[${WORKSPACE.t('ok')}]`);
+                                     .appendLine(`✅`);
 
                             POPUP_STATS.succeeded.push( LOCAL_FILE );
                         }
                         catch (e) {
                             WORKSPACE.output
-                                     .append(`[${WORKSPACE.t('error', e)}]`);
+                                     .append(`[🔥: '${ deploy_helpers.toStringSafe(e) }']`);
 
                             POPUP_STATS.failed.push( LOCAL_FILE );
                             
@@ -955,11 +958,11 @@ async function pullAllFilesFromDir(
         }
     }
     catch (e) {
-        WORKSPACE.output.appendLine(`[${WORKSPACE.t('error', e)}]`);
+        WORKSPACE.output.appendLine(`[🔥: '${deploy_helpers.toStringSafe( e )}']`);
     }
     finally {
         if (progress.cancellationToken.isCancellationRequested) {
-            WORKSPACE.output.appendLine(`[${WORKSPACE.t('canceled')}]`);
+            WORKSPACE.output.appendLine(`✖️`);
         }
     }
 }
@@ -1025,14 +1028,14 @@ async function removeFolder(
             await P.removeFolders(CTX);
         }    
 
-        WORKSPACE.output.appendLine(`[${WORKSPACE.t('done')}]`);
+        WORKSPACE.output.appendLine(`✅`);
     }
     catch (e) {
         if (progress.cancellationToken.isCancellationRequested) {
-            WORKSPACE.output.appendLine(`[${WORKSPACE.t('canceled')}]`);
+            WORKSPACE.output.appendLine(`✖️`);
         }
         else {
-            WORKSPACE.output.appendLine(`[${WORKSPACE.t('error', e)}]`);   
+            WORKSPACE.output.appendLine(`🔥: '${ deploy_helpers.toStringSafe(e) }'`);   
         }        
     }
 }

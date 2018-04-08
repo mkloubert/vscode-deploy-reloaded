@@ -593,14 +593,14 @@ async function deployFilesToWithProgress(progress: deploy_helpers.ProgressContex
                         destination = `${deploy_helpers.toStringSafe(destination)} (${TARGET_NAME})`;
 
                         ME.output.append(
-                            `[${NOW.format( ME.t('time.timeWithSeconds') )}] ` + 
+                            `[${NOW.format( ME.t('time.timeWithSeconds') )}] 🚀 ` + 
                             ME.t('deploy.deployingFile',
                                  f, destination) + ' '
                         );
 
                         UPDATE_PROGRESS(
-                            ME.t('deploy.deployingFile',
-                                 f, destination)
+                            `🚀 ` + ME.t('deploy.deployingFile',
+                                         f, destination)
                         );
 
                         if (CANCELLATION_SOURCE.token.isCancellationRequested) {
@@ -609,7 +609,8 @@ async function deployFilesToWithProgress(progress: deploy_helpers.ProgressContex
                     };
                     LF.onUploadCompleted = async (err?: any) => {
                         if (err) {
-                            ME.output.appendLine(`[${ME.t('error', err)}]`);
+                            ME.output
+                              .append(`[🔥: '${ deploy_helpers.toStringSafe(err) }']`);
 
                             POPUP_STATS.failed.push( f );
                             
@@ -622,7 +623,7 @@ async function deployFilesToWithProgress(progress: deploy_helpers.ProgressContex
                                 delete SYNC_WHEN_STATES[SYNC_WHEN_OPEN_ID];
                             }
 
-                            ME.output.appendLine(`[${ME.t('ok')}]`);
+                            ME.output.appendLine(`✅`);
 
                             POPUP_STATS.succeeded.push( f );
                         }
@@ -761,7 +762,10 @@ async function deployFilesToWithProgress(progress: deploy_helpers.ProgressContex
                 }
             }
             catch (e) {
+                const NOW = deploy_helpers.now();
+
                 ME.output.appendLine(
+                    `🔥 [${NOW.format( ME.t('time.timeWithSeconds') )}] ` + 
                     ME.t('deploy.finishedOperationWithErrors',
                          TARGET_NAME, e)
                 );

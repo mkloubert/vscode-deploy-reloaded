@@ -325,23 +325,24 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
                         destination = `${deploy_helpers.toStringSafe(destination)} (${TARGET_NAME})`;
 
                         ME.output.append(
-                            `[${NOW.format( ME.t('time.timeWithSeconds') )}] ` + 
+                            `[${NOW.format( ME.t('time.timeWithSeconds') )}] 💣 ` + 
                             ME.t('DELETE.deletingFile',
                                  f, destination) + ' '
                         );
 
                         UPDATE_PROGRESS(
-                            ME.t('DELETE.deletingFile',
-                                 f, destination)
+                            `💣 ` + ME.t('DELETE.deletingFile',
+                                         f, destination)
                         );
 
                         if (CANCELLATION_SOURCE.token.isCancellationRequested) {
-                            ME.output.appendLine(`[${ME.t('canceled')}]`);
+                            ME.output.appendLine(`✖️`);
                         }
                     };
                     SF.onDeleteCompleted = async (err?: any, deleteLocal?: boolean) => {
                         if (err) {
-                            ME.output.appendLine(`[${ME.t('error', err)}]`);
+                            ME.output
+                              .append(`🔥: '${ deploy_helpers.toStringSafe(err) }'`);
 
                             POPUP_STATS.failed.push( f );
                             
@@ -362,10 +363,10 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
                                     }
                                 }
 
-                                ME.output.appendLine(`[${ME.t('ok')}]`);
+                                ME.output.appendLine(`✅`);
                             }
                             catch (e) {
-                                ME.output.appendLine(`[${ME.t('warning')}: ${deploy_helpers.toStringSafe(e)}]`);
+                                ME.output.appendLine(`⚠️: '${deploy_helpers.toStringSafe(e)}'`);
 
                                 UPDATE_PROGRESS( `${ME.t('warning')}: ${deploy_helpers.toStringSafe(e)}` );
                             }                            
@@ -491,7 +492,10 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
                 }
             }
             catch (e) {
+                const NOW = deploy_helpers.now();
+
                 ME.output.appendLine(
+                    `🔥 [${NOW.format( ME.t('time.timeWithSeconds') )}] ` + 
                     ME.t('DELETE.finishedOperationWithErrors',
                          TARGET_NAME, e)
                 );

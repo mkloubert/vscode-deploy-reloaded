@@ -596,18 +596,18 @@ async function pullFilesFromWithProgress(progress: deploy_helpers.ProgressContex
                         source = `${deploy_helpers.toStringSafe(source)} (${TARGET_NAME})`;
 
                         ME.output.append(
-                            `[${NOW.format( ME.t('time.timeWithSeconds') )}] ` + 
+                            `[${NOW.format( ME.t('time.timeWithSeconds') )}] 🚚 ` + 
                             ME.t('pull.pullingFile',
                                  f, source) + ' '
                         );
 
                         UPDATE_PROGRESS(
-                            ME.t('pull.pullingFile',
-                                 f, source)
+                            `🚚 ` + ME.t('pull.pullingFile',
+                                         f, source)
                         );
 
                         if (CANCELLATION_SOURCE.token.isCancellationRequested) {
-                            ME.output.appendLine(`[${ME.t('canceled')}]`);
+                            ME.output.appendLine(`✖️`);
                         }
                     };
                     SF.onDownloadCompleted = async (err?, downloadedFile?) => {
@@ -699,13 +699,14 @@ async function pullFilesFromWithProgress(progress: deploy_helpers.ProgressContex
                                     );
                                 }
 
-                                ME.output.appendLine(`[${ME.t('ok')}]`);
+                                ME.output.appendLine(`✅`);
                                 
                                 POPUP_STATS.succeeded.push( f );
                             }
                         }
                         catch (e) {
-                            ME.output.appendLine(`[${ME.t('error', e)}]`);
+                            ME.output
+                              .append(`🔥: '${ deploy_helpers.toStringSafe(e) }'`);
 
                             POPUP_STATS.failed.push( f );
                             
@@ -837,7 +838,10 @@ async function pullFilesFromWithProgress(progress: deploy_helpers.ProgressContex
                 }
             }
             catch (e) {
+                const NOW = deploy_helpers.now();
+
                 ME.output.appendLine(
+                    `🔥 [${NOW.format( ME.t('time.timeWithSeconds') )}] ` + 
                     ME.t('pull.finishedOperationWithErrors',
                          TARGET_NAME, e)
                 );
