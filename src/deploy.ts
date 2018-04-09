@@ -455,6 +455,7 @@ async function deployFilesToWithProgress(progress: deploy_helpers.ProgressContex
     let reloadFileList = false;
     const PREPARE_CANCELLED = !deploy_helpers.toBooleanSafe(
         await deploy_targets.executePrepareTargetOperations({
+            cancellationToken: progress.cancellationToken,
             files: files,
             deployOperation: deploy_contracts.DeployOperation.Deploy,
             onReloadFileList: () => {
@@ -566,22 +567,27 @@ async function deployFilesToWithProgress(progress: deploy_helpers.ProgressContex
 
                 if (files.length > 1) {
                     ME.output.appendLine(
-                        ME.t('deploy.startOperation',
-                             TARGET_NAME)
+                        `🚀 ` + ME.t('deploy.startOperation',
+                                      TARGET_NAME)
                     );
                 }
 
-                UPDATE_PROGRESS(
-                    ME.t('deploy.startOperation',
-                         TARGET_NAME)
-                );
+                let watch: deploy_helpers.StopWatch;
+                const START_WATCH = () => watch = deploy_helpers.startWatch();
+                const STOP_WATCH = () => {
+                    if (watch) {
+                        ME.output.appendLine(` [${watch.stop()} ms]`);
+                    }
+
+                    watch = null;
+                };
 
                 const FILES_TO_UPLOAD = files.map(f => {
                     const NAME_AND_PATH = deploy_targets.getNameAndPathForFileDeployment(target, f,
                                                                                          MAPPING_SCOPE_DIRS);
                     if (false === NAME_AND_PATH) {
                         return null;
-                    }
+                    }                    
 
                     const LF = new deploy_plugins.LocalFileToUpload(ME, f, NAME_AND_PATH);
                     LF.onBeforeUpload = async function(destination?: string) {
@@ -606,15 +612,15 @@ async function deployFilesToWithProgress(progress: deploy_helpers.ProgressContex
                         if (CANCELLATION_SOURCE.token.isCancellationRequested) {
                             ME.output.appendLine(`[${ME.t('canceled')}]`);
                         }
+                        else {
+                            START_WATCH();
+                        }
                     };
                     LF.onUploadCompleted = async (err?: any) => {
                         if (err) {
-                            ME.output
-                              .append(`[🔥: '${ deploy_helpers.toStringSafe(err) }']`);
+                            ME.output.append(`🔥: '${ deploy_helpers.toStringSafe(err) }'`);
 
                             POPUP_STATS.failed.push( f );
-                            
-                            UPDATE_PROGRESS( ME.t('error', err) );
                         }
                         else {
                             const SYNC_WHEN_OPEN_ID = ME.getSyncWhenOpenKey(target);
@@ -623,10 +629,12 @@ async function deployFilesToWithProgress(progress: deploy_helpers.ProgressContex
                                 delete SYNC_WHEN_STATES[SYNC_WHEN_OPEN_ID];
                             }
 
-                            ME.output.appendLine(`✅`);
+                            ME.output.append(`✅`);
 
                             POPUP_STATS.succeeded.push( f );
                         }
+
+                        STOP_WATCH();
                     };
 
                     LF.transformer = <deploy_transformers.DataTransformer>transformer;
@@ -664,8 +672,8 @@ async function deployFilesToWithProgress(progress: deploy_helpers.ProgressContex
 
                 const SHOW_CANCELED_BY_OPERATIONS_MESSAGE = () => {
                     ME.output.appendLine(
-                        ME.t('deploy.canceledByOperation',
-                             TARGET_NAME)
+                        `✖️ ` + ME.t('deploy.canceledByOperation',
+                                     TARGET_NAME)
                     );
                 };
 
@@ -690,6 +698,7 @@ async function deployFilesToWithProgress(progress: deploy_helpers.ProgressContex
                 ME.output.appendLine('');
                 const BEFORE_DEPLOY_ABORTED = !deploy_helpers.toBooleanSafe(
                     await deploy_targets.executeTargetOperations({
+                        cancellationToken: progress.cancellationToken,
                         files: FILES_TO_UPLOAD.map(ftu => {
                             return ftu.path + '/' + ftu.name;
                         }),
@@ -697,17 +706,26 @@ async function deployFilesToWithProgress(progress: deploy_helpers.ProgressContex
                             ++operationIndex;
 
                             ME.output.append(
-                                ME.t('targets.operations.runningBeforeDeploy',
-                                     GET_OPERATION_NAME(operation))
+                                `⚡ ` + ME.t('targets.operations.runningBeforeDeploy',
+                                            GET_OPERATION_NAME(operation))
                             );
+
+                            if (CANCELLATION_SOURCE.token.isCancellationRequested) {
+                                ME.output.appendLine(`✖️`);
+                            }
+                            else {
+                                START_WATCH();
+                            }
                         },
                         onExecutionCompleted: async (operation, err, doesContinue) => {
                             if (err) {
-                                ME.output.appendLine(`[${ME.t('error', err)}]`);
+                                ME.output.append(`🔥: '${ deploy_helpers.toStringSafe(err) }'`);
                             }
                             else {
-                                ME.output.appendLine(`[${ME.t('ok')}]`);
+                                ME.output.append(`✅`);
                             }
+
+                            STOP_WATCH();
                         },
                         operation: deploy_targets.TargetOperationEvent.BeforeDeploy,
                         target: target,
@@ -726,6 +744,7 @@ async function deployFilesToWithProgress(progress: deploy_helpers.ProgressContex
                 operationIndex = -1;
                 const AFTER_DEPLOY_ABORTED = !deploy_helpers.toBooleanSafe(
                     await deploy_targets.executeTargetOperations({
+                        cancellationToken: progress.cancellationToken,
                         files: FILES_TO_UPLOAD.map(ftu => {
                             return ftu.path + '/' + ftu.name;
                         }),
@@ -733,17 +752,26 @@ async function deployFilesToWithProgress(progress: deploy_helpers.ProgressContex
                             ++operationIndex;
 
                             ME.output.append(
-                                ME.t('targets.operations.runningAfterDeployed',
-                                     GET_OPERATION_NAME(operation))
+                                `⚡ ` + ME.t('targets.operations.runningAfterDeployed',
+                                            GET_OPERATION_NAME(operation))
                             );
+
+                            if (CANCELLATION_SOURCE.token.isCancellationRequested) {
+                                ME.output.appendLine(`✖️`);
+                            }
+                            else {
+                                START_WATCH();
+                            }
                         },
                         onExecutionCompleted: async (operation, err, doesContinue) => {
                             if (err) {
-                                ME.output.appendLine(`[${ME.t('error', err)}]`);
+                                ME.output.append(`🔥: '${ deploy_helpers.toStringSafe(err) }'`);
                             }
                             else {
-                                ME.output.appendLine(`[${ME.t('ok')}]`);
+                                ME.output.append(`✅`);
                             }
+
+                            STOP_WATCH();
                         },
                         operation: deploy_targets.TargetOperationEvent.AfterDeployed,
                         target: target,
@@ -755,17 +783,17 @@ async function deployFilesToWithProgress(progress: deploy_helpers.ProgressContex
                 }
 
                 if (files.length > 1) {
+                    ME.output.appendLine('');
                     ME.output.appendLine(
+                        `🚀 ` +
                         ME.t('deploy.finishedOperation',
                              TARGET_NAME)
                     );
                 }
             }
             catch (e) {
-                const NOW = deploy_helpers.now();
-
                 ME.output.appendLine(
-                    `🔥 [${NOW.format( ME.t('time.timeWithSeconds') )}] ` + 
+                    `🔥 ` + 
                     ME.t('deploy.finishedOperationWithErrors',
                          TARGET_NAME, e)
                 );

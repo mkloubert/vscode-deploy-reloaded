@@ -472,6 +472,7 @@ async function pullFilesFromWithProgress(progress: deploy_helpers.ProgressContex
     let reloadFileList = false;
     const PREPARE_CANCELLED = !deploy_helpers.toBooleanSafe(
         await deploy_targets.executePrepareTargetOperations({
+            cancellationToken: progress.cancellationToken,
             files: files,
             deployOperation: deploy_contracts.DeployOperation.Pull,
             onReloadFileList: () => {
@@ -574,10 +575,20 @@ async function pullFilesFromWithProgress(progress: deploy_helpers.ProgressContex
 
                 if (files.length > 1) {
                     ME.output.appendLine(
-                        ME.t('pull.startOperation',
-                             TARGET_NAME)
+                        `🚚 ` + ME.t('pull.startOperation',
+                                     TARGET_NAME)
                     );
                 }
+
+                let watch: deploy_helpers.StopWatch;
+                const START_WATCH = () => watch = deploy_helpers.startWatch();
+                const STOP_WATCH = () => {
+                    if (watch) {
+                        ME.output.appendLine(` [${watch.stop()} ms]`);
+                    }
+
+                    watch = null;
+                };
 
                 const FILES_TO_PULL = files.map(f => {
                     const NAME_AND_PATH = deploy_targets.getNameAndPathForFileDeployment(target, f,
@@ -608,6 +619,9 @@ async function pullFilesFromWithProgress(progress: deploy_helpers.ProgressContex
 
                         if (CANCELLATION_SOURCE.token.isCancellationRequested) {
                             ME.output.appendLine(`✖️`);
+                        }
+                        else {
+                            START_WATCH();
                         }
                     };
                     SF.onDownloadCompleted = async (err?, downloadedFile?) => {
@@ -699,18 +713,19 @@ async function pullFilesFromWithProgress(progress: deploy_helpers.ProgressContex
                                     );
                                 }
 
-                                ME.output.appendLine(`✅`);
+                                ME.output.append(`✅`);
                                 
                                 POPUP_STATS.succeeded.push( f );
+
+                                STOP_WATCH();
                             }
                         }
                         catch (e) {
-                            ME.output
-                              .append(`🔥: '${ deploy_helpers.toStringSafe(e) }'`);
+                            ME.output.append(`🔥: '${ deploy_helpers.toStringSafe(e) }'`);
 
                             POPUP_STATS.failed.push( f );
                             
-                            UPDATE_PROGRESS( ME.t('error', e) );
+                            STOP_WATCH();
                         }
                         finally {
                             if (disposeDownloadedFile) {
@@ -740,8 +755,8 @@ async function pullFilesFromWithProgress(progress: deploy_helpers.ProgressContex
 
                 const SHOW_CANCELED_BY_OPERATIONS_MESSAGE = () => {
                     ME.output.appendLine(
-                        ME.t('pull.canceledByOperation',
-                             TARGET_NAME)
+                        `✖️ ` + ME.t('pull.canceledByOperation',
+                                     TARGET_NAME)
                     );
                 };
 
@@ -766,6 +781,7 @@ async function pullFilesFromWithProgress(progress: deploy_helpers.ProgressContex
                 ME.output.appendLine('');
                 const BEFORE_PULL_ABORTED = !deploy_helpers.toBooleanSafe(
                     await deploy_targets.executeTargetOperations({
+                        cancellationToken: progress.cancellationToken,
                         files: FILES_TO_PULL.map(ftu => {
                             return ftu.path + '/' + ftu.name;
                         }),
@@ -773,17 +789,26 @@ async function pullFilesFromWithProgress(progress: deploy_helpers.ProgressContex
                             ++operationIndex;
 
                             ME.output.append(
-                                ME.t('targets.operations.runningBeforePull',
-                                     GET_OPERATION_NAME(operation))
+                                `⚡ ` + ME.t('targets.operations.runningBeforePull',
+                                            GET_OPERATION_NAME(operation))
                             );
+
+                            if (CANCELLATION_SOURCE.token.isCancellationRequested) {
+                                ME.output.appendLine(`✖️`);
+                            }
+                            else {
+                                START_WATCH();
+                            }
                         },
                         onExecutionCompleted: async (operation, err, doesContinue) => {
                             if (err) {
-                                ME.output.appendLine(`[${ME.t('error', err)}]`);
+                                ME.output.append(`🔥: '${ deploy_helpers.toStringSafe(err) }'`);
                             }
                             else {
-                                ME.output.appendLine(`[${ME.t('ok')}]`);
+                                ME.output.append(`✅`);
                             }
+
+                            STOP_WATCH();
                         },
                         operation: deploy_targets.TargetOperationEvent.BeforePull,
                         target: target,
@@ -802,6 +827,7 @@ async function pullFilesFromWithProgress(progress: deploy_helpers.ProgressContex
                 operationIndex = -1;
                 const AFTER_PULLED_ABORTED = !deploy_helpers.toBooleanSafe(
                     await deploy_targets.executeTargetOperations({
+                        cancellationToken: progress.cancellationToken,
                         files: FILES_TO_PULL.map(ftu => {
                             return ftu.path + '/' + ftu.name;
                         }),
@@ -809,17 +835,26 @@ async function pullFilesFromWithProgress(progress: deploy_helpers.ProgressContex
                             ++operationIndex;
 
                             ME.output.append(
-                                ME.t('targets.operations.runningAfterPulled',
-                                     GET_OPERATION_NAME(operation))
+                                `⚡ ` + ME.t('targets.operations.runningAfterPulled',
+                                            GET_OPERATION_NAME(operation))
                             );
+
+                            if (CANCELLATION_SOURCE.token.isCancellationRequested) {
+                                ME.output.appendLine(`✖️`);
+                            }
+                            else {
+                                START_WATCH();
+                            }
                         },
                         onExecutionCompleted: async (operation, err, doesContinue) => {
                             if (err) {
-                                ME.output.appendLine(`[${ME.t('error', err)}]`);
+                                ME.output.append(`🔥: '${ deploy_helpers.toStringSafe(err) }'`);
                             }
                             else {
-                                ME.output.appendLine(`[${ME.t('ok')}]`);
+                                ME.output.append(`✅`);
                             }
+
+                            STOP_WATCH();
                         },
                         operation: deploy_targets.TargetOperationEvent.AfterPulled,
                         target: target,
@@ -831,17 +866,19 @@ async function pullFilesFromWithProgress(progress: deploy_helpers.ProgressContex
                 }
 
                 if (files.length > 1) {
+                    const NOW = deploy_helpers.now();
+
+                    ME.output.appendLine('');
                     ME.output.appendLine(
+                        `🚚 ` +
                         ME.t('pull.finishedOperation',
                              TARGET_NAME)
                     );
                 }
             }
             catch (e) {
-                const NOW = deploy_helpers.now();
-
                 ME.output.appendLine(
-                    `🔥 [${NOW.format( ME.t('time.timeWithSeconds') )}] ` + 
+                    `🔥 ` + 
                     ME.t('pull.finishedOperationWithErrors',
                          TARGET_NAME, e)
                 );

@@ -211,6 +211,7 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
     let reloadFileList = false;
     const PREPARE_CANCELLED = !deploy_helpers.toBooleanSafe(
         await deploy_targets.executePrepareTargetOperations({
+            cancellationToken: progress.cancellationToken,
             files: files,
             deployOperation: deploy_contracts.DeployOperation.Delete,
             onReloadFileList: () => {
@@ -298,15 +299,20 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
 
                 if (files.length > 1) {
                     ME.output.appendLine(
-                        ME.t('DELETE.startOperation',
-                             TARGET_NAME)
+                        `🗑️ ` + ME.t('DELETE.startOperation',
+                                     TARGET_NAME)
                     );
                 }
 
-                UPDATE_PROGRESS(
-                    ME.t('DELETE.startOperation',
-                         TARGET_NAME)
-                );
+                let watch: deploy_helpers.StopWatch;
+                const START_WATCH = () => watch = deploy_helpers.startWatch();
+                const STOP_WATCH = () => {
+                    if (watch) {
+                        ME.output.appendLine(` [${watch.stop()} ms]`);
+                    }
+
+                    watch = null;
+                };
 
                 const FILES_TO_DELETE = files.map(f => {
                     const NAME_AND_PATH = deploy_targets.getNameAndPathForFileDeployment(target, f,
@@ -325,28 +331,28 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
                         destination = `${deploy_helpers.toStringSafe(destination)} (${TARGET_NAME})`;
 
                         ME.output.append(
-                            `[${NOW.format( ME.t('time.timeWithSeconds') )}] 💣 ` + 
+                            `[${NOW.format( ME.t('time.timeWithSeconds') )}] 🗑️ ` + 
                             ME.t('DELETE.deletingFile',
                                  f, destination) + ' '
                         );
 
                         UPDATE_PROGRESS(
-                            `💣 ` + ME.t('DELETE.deletingFile',
+                            `🗑️ ` + ME.t('DELETE.deletingFile',
                                          f, destination)
                         );
 
                         if (CANCELLATION_SOURCE.token.isCancellationRequested) {
                             ME.output.appendLine(`✖️`);
                         }
+                        else {
+                            START_WATCH();
+                        }
                     };
                     SF.onDeleteCompleted = async (err?: any, deleteLocal?: boolean) => {
                         if (err) {
-                            ME.output
-                              .append(`🔥: '${ deploy_helpers.toStringSafe(err) }'`);
+                            ME.output.append(`🔥: '${ deploy_helpers.toStringSafe(err) }'`);
 
                             POPUP_STATS.failed.push( f );
-                            
-                            UPDATE_PROGRESS( ME.t('error', err) );
                         }
                         else {
                             POPUP_STATS.succeeded.push( f );
@@ -363,14 +369,14 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
                                     }
                                 }
 
-                                ME.output.appendLine(`✅`);
+                                ME.output.append(`✅`);
                             }
                             catch (e) {
-                                ME.output.appendLine(`⚠️: '${deploy_helpers.toStringSafe(e)}'`);
-
-                                UPDATE_PROGRESS( `${ME.t('warning')}: ${deploy_helpers.toStringSafe(e)}` );
+                                ME.output.append(`⚠️: '${deploy_helpers.toStringSafe(e)}'`);
                             }                            
                         }
+
+                        STOP_WATCH();
                     };
 
                     return SF;
@@ -394,8 +400,8 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
 
                 const SHOW_CANCELED_BY_OPERATIONS_MESSAGE = () => {
                     ME.output.appendLine(
-                        ME.t('DELETE.canceledByOperation',
-                             TARGET_NAME)
+                        `✖️ ` + ME.t('DELETE.canceledByOperation',
+                                     TARGET_NAME)
                     );
                 };
 
@@ -420,6 +426,7 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
                 ME.output.appendLine('');
                 const BEFORE_DELETE_ABORTED = !deploy_helpers.toBooleanSafe(
                     await deploy_targets.executeTargetOperations({
+                        cancellationToken: progress.cancellationToken,
                         files: FILES_TO_DELETE.map(ftu => {
                             return ftu.path + '/' + ftu.name;
                         }),
@@ -427,17 +434,26 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
                             ++operationIndex;
 
                             ME.output.append(
-                                ME.t('targets.operations.runningBeforeDelete',
-                                     GET_OPERATION_NAME(operation))
+                                `⚡ ` + ME.t('targets.operations.runningBeforeDelete',
+                                            GET_OPERATION_NAME(operation))
                             );
+
+                            if (CANCELLATION_SOURCE.token.isCancellationRequested) {
+                                ME.output.appendLine(`✖️`);
+                            }
+                            else {
+                                START_WATCH();
+                            }
                         },
                         onExecutionCompleted: async (operation, err, doesContinue) => {
                             if (err) {
-                                ME.output.appendLine(`[${ME.t('error', err)}]`);
+                                ME.output.append(`🔥: '${ deploy_helpers.toStringSafe(err) }'`);
                             }
                             else {
-                                ME.output.appendLine(`[${ME.t('ok')}]`);
+                                ME.output.append(`✅`);
                             }
+
+                            STOP_WATCH();
                         },
                         operation: deploy_targets.TargetOperationEvent.BeforeDelete,
                         target: target,
@@ -456,6 +472,7 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
                 operationIndex = -1;
                 const AFTER_DELETED_ABORTED = !deploy_helpers.toBooleanSafe(
                     await deploy_targets.executeTargetOperations({
+                        cancellationToken: progress.cancellationToken,
                         files: FILES_TO_DELETE.map(ftu => {
                             return ftu.path + '/' + ftu.name;
                         }),
@@ -463,17 +480,26 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
                             ++operationIndex;
 
                             ME.output.append(
-                                ME.t('targets.operations.runningAfterDeleted',
-                                     GET_OPERATION_NAME(operation))
+                                `⚡ ` + ME.t('targets.operations.runningAfterDeleted',
+                                            GET_OPERATION_NAME(operation))
                             );
+
+                            if (CANCELLATION_SOURCE.token.isCancellationRequested) {
+                                ME.output.appendLine(`✖️`);
+                            }
+                            else {
+                                START_WATCH();
+                            }
                         },
                         onExecutionCompleted: async (operation, err, doesContinue) => {
                             if (err) {
-                                ME.output.appendLine(`[${ME.t('error', err)}]`);
+                                ME.output.append(`🔥: '${ deploy_helpers.toStringSafe(err) }'`);
                             }
                             else {
-                                ME.output.appendLine(`[${ME.t('ok')}]`);
+                                ME.output.append(`✅`);
                             }
+
+                            STOP_WATCH();
                         },
                         operation: deploy_targets.TargetOperationEvent.AfterDeleted,
                         target: target,
@@ -485,17 +511,17 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
                 }
 
                 if (files.length > 1) {
+                    ME.output.appendLine('');
                     ME.output.appendLine(
+                        `🗑️ ` +
                         ME.t('DELETE.finishedOperation',
                              TARGET_NAME)
                     );
                 }
             }
             catch (e) {
-                const NOW = deploy_helpers.now();
-
                 ME.output.appendLine(
-                    `🔥 [${NOW.format( ME.t('time.timeWithSeconds') )}] ` + 
+                    `🔥 ` + 
                     ME.t('DELETE.finishedOperationWithErrors',
                          TARGET_NAME, e)
                 );

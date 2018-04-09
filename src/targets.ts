@@ -49,6 +49,10 @@ import * as vscode from 'vscode';
  */
 export interface ExecutePrepareTargetOperationOptions {
     /**
+     * The cancellation token.
+     */
+    readonly cancellationToken: vscode.CancellationToken;
+    /**
      * The underlying files.
      */
     readonly files: string[];
@@ -70,6 +74,10 @@ export interface ExecutePrepareTargetOperationOptions {
  * Options for executing target operations.
  */
 export interface ExecuteTargetOperationOptions {
+    /**
+     * The cancellation token.
+     */
+    readonly cancellationToken: vscode.CancellationToken;
     /**
      * The underlying files.
      */
@@ -432,22 +440,40 @@ export async function executePrepareTargetOperations(opts: ExecutePrepareTargetO
         return operationName;
     };
 
+    let watch: deploy_helpers.StopWatch;
+    const START_WATCH = () => watch = deploy_helpers.startWatch();
+    const STOP_WATCH = () => {
+        if (watch) {
+            WORKSPACE.output.appendLine(` [${watch.stop()} ms]`);
+        }
+
+        watch = null;
+    };
+
     return await executeTargetOperations({
+        cancellationToken: opts.cancellationToken,
         files: opts.files,
         onBeforeExecute: async (operation: PrepareTargetOperation) => {
             ++operationIndex;
 
             WORKSPACE.output.append(
-                WORKSPACE.t('targets.operations.runningPrepare',
-                            GET_OPERATION_NAME(operation))
+                `⚡ ` + WORKSPACE.t('targets.operations.runningPrepare',
+                                   GET_OPERATION_NAME(operation))
             );
+
+            if (opts.cancellationToken.isCancellationRequested) {
+                WORKSPACE.output.appendLine(`✖️`);
+            }
+            else {
+                START_WATCH();
+            }
         },
         onExecutionCompleted: async (operation: PrepareTargetOperation, err, doesContinue) => {
             if (err) {
-                WORKSPACE.output.appendLine(`[${WORKSPACE.t('error', err)}]`);
+                WORKSPACE.output.append(`🔥: '${ deploy_helpers.toStringSafe(err) }'`);
             }
             else {
-                WORKSPACE.output.appendLine(`[${WORKSPACE.t('ok')}]`);
+                WORKSPACE.output.append(`✅`);
 
                 if (deploy_helpers.toBooleanSafe(operation.reloadFileList, true)) {
                     await Promise.resolve(
@@ -455,6 +481,8 @@ export async function executePrepareTargetOperations(opts: ExecutePrepareTargetO
                     );
                 }
             }
+
+            STOP_WATCH();
         },
         operation: TargetOperationEvent.Prepare,
         prepareDeployOperation: opts.deployOperation,
@@ -517,6 +545,10 @@ export async function executeTargetOperations(opts: ExecuteTargetOperationOption
     let prevOperation: TargetOperationExecutionContext;
     for (const OPERATION_VAL of deploy_helpers.asArray(operationsFromTarget)) {
         if (WORKSPACE.isInFinalizeState) {
+            return false;
+        }
+
+        if (opts.cancellationToken.isCancellationRequested) {
             return false;
         }
 

@@ -6,6 +6,7 @@
 
 * extension is build for [Visual Studio Code 1.22](https://code.visualstudio.com/updates/v1_22) now
 * using new progress api for deploy operations now
+* using emoji icons for deploy operations in output window now
 * added `$lines` function for quick code executions
 * updated the following [npm](https://www.npmjs.com/) modules:
   * [aws-sdk](https://www.npmjs.com/package/aws-sdk) `2.222.1`
@@ -15,7 +16,7 @@
   * [nodemailer](https://www.npmjs.com/package/nodemailer) `4.6.4`
   * [ssh2-sftp-client](https://www.npmjs.com/package/ssh2-sftp-client) `2.1.1`
   * [uglify-js](https://www.npmjs.com/package/uglify-js) `3.3.20`
-  * [vscode-helpers](https://www.npmjs.com/package/vscode-helpers) `1.5.0`
+  * [vscode-helpers](https://www.npmjs.com/package/vscode-helpers) `1.6.0`
 * code cleanups and improvements
 * bugfixes
 
