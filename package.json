@@ -1317,6 +1317,26 @@
         }
        ]
       },
+      "showStatusWhenFinished": {
+       "description": "Show workspace name as prefix in popup messages or not.",
+       "oneOf": [
+        {
+         "description": "Show a button in the status bar, after a deploy operation has been finished or not.",
+         "type": "boolean",
+         "default": false
+        },
+        {
+         "description": "Shows a button in the status bar, after a deploy operation has been finished and defines the time, in milliseconds, after it should disapears automatically.",
+         "type": "integer",
+         "minimum": 0,
+         "default": 60000
+        },
+        {
+         "description": "Shows a button in the status bar, after a deploy operation has been finished.",
+         "type": "null"
+        }
+       ]
+      },
       "showWorkspaceNameInPopups": {
        "description": "Show workspace name as prefix in popup messages or not.",
        "type": "boolean",

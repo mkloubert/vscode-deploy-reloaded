@@ -95,7 +95,7 @@ export const translation: Translation = {
             operationFailed: "Konnte das Löschen nicht durchführen (s. Debugkonsole 'STRG/CMD + SHIFT + Y')!",
         },
         finishedButton: {
-            text: "Löschen abgeschlossen",
+            text: "Löschen abgeschlossen ({0:trim,ending_space}ms)",
             tooltip: "Hier klicken, um die Ausgabe zu öffnen ...",
         },
         finishedOperation: "Das Löschen der Dateien in{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",
@@ -174,7 +174,7 @@ export const translation: Translation = {
             label: "Dateiliste",
         },
         finishedButton: {
-            text: "Bereitstellen abgeschlossen",
+            text: "Bereitstellen abgeschlossen ({0:trim,ending_space}ms)",
             tooltip: "Hier klicken, um die Ausgabe zu öffnen ...",
         },
         finishedOperation: "Das Bereitstellen der Dateien in{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",
@@ -473,7 +473,7 @@ export const translation: Translation = {
             operationForSourceFailed: "Das Laden der Datei(en) aus der Quelle{0:trim,surround,leading_space} schlug fehl:{1:trim,surround,leading_space}",
         },
         finishedButton: {
-            text: "Laden abgeschlossen",
+            text: "Laden abgeschlossen ({0:trim,ending_space}ms)",
             tooltip: "Hier klicken, um die Ausgabe zu öffnen ...",
         },
         finishedOperation: "Das Laden der Dateien von{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",

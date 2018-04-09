@@ -4455,6 +4455,55 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
     }
 
     /**
+     * Shows a "finished button".
+     * 
+     * @param {deploy_contracts.DeployOperation} operation The type of deploy operation.
+     * 
+     * @return {boolean} Operation was successful or not.
+     */
+    public showFinishedButton(operation: deploy_contracts.DeployOperation) {
+        const CFG = this.config;
+        if (!CFG) {
+            return;
+        }
+
+        const BTN = this.getFinishedButton(operation);
+        if (BTN) {
+            const SHOW_STATUS_WHEN_FINISHED = CFG.showStatusWhenFinished;            
+
+            let showButton = true;
+            let hideAfter: number;
+            if (null !== SHOW_STATUS_WHEN_FINISHED) {
+                if (_.isBoolean(SHOW_STATUS_WHEN_FINISHED)) {
+                    showButton = SHOW_STATUS_WHEN_FINISHED;
+                    hideAfter = 60000;
+                }
+                else {
+                    hideAfter = parseInt(
+                        deploy_helpers.toStringSafe(SHOW_STATUS_WHEN_FINISHED).trim()
+                    );
+                }   
+            }
+
+            if (showButton) {
+                BTN.show();
+
+                if (!isNaN(hideAfter)) {
+                    this.setTimeoutForFinishedButton(
+                        operation,
+                        (b) => b.hide(),
+                        hideAfter,
+                    );
+                }
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Promise (and safe) version of 'vscode.window.showErrorMessage()' function.
      * 
      * @param {any} msg The message to display.

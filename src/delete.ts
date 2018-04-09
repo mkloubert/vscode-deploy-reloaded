@@ -174,7 +174,7 @@ export async function deleteFilesIn(files: string[],
     }, {
         location: vscode.ProgressLocation.Notification,
         cancellable: true,
-        title: ME.t('delete.deletingFiles'),        
+        title: ME.t('DELETE.deletingFiles'),        
     });
 }
 
@@ -288,6 +288,8 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
                 succeeded: [],
             };
 
+            const OVERALL_WATCH = deploy_helpers.startWatch();
+
             // "finished button"
             await ME.invokeForFinishedButton(
                 deploy_contracts.DeployOperation.Delete,
@@ -321,15 +323,11 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
                         btn.color = new vscode.ThemeColor(color);
                         btn.text = `${icon} ` +
                                    `[${NOW.format( ME.t('time.timeWithSeconds') )}] ` + 
-                                   ME.t('DELETE.finishedButton.text');
+                                   ME.t('DELETE.finishedButton.text',
+                                        OVERALL_WATCH.stop());
                         btn.tooltip = ME.t('DELETE.finishedButton.tooltip');
 
-                        btn.show();
-
-                        ME.setTimeoutForFinishedButton(
-                            deploy_contracts.DeployOperation.Delete,
-                            (b) => b.hide()
-                        );
+                        ME.showFinishedButton(deploy_contracts.DeployOperation.Delete);
                     }
                 );
             };

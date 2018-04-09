@@ -552,6 +552,8 @@ async function deployFilesToWithProgress(progress: deploy_helpers.ProgressContex
                 succeeded: [],
             };
 
+            const OVERALL_WATCH = deploy_helpers.startWatch();
+
             // "finished button"
             await ME.invokeForFinishedButton(
                 deploy_contracts.DeployOperation.Deploy,
@@ -585,15 +587,11 @@ async function deployFilesToWithProgress(progress: deploy_helpers.ProgressContex
                         btn.color = new vscode.ThemeColor(color);
                         btn.text = `${icon} ` +
                                    `[${NOW.format( ME.t('time.timeWithSeconds') )}] ` + 
-                                   ME.t('deploy.finishedButton.text');
+                                   ME.t('deploy.finishedButton.text',
+                                        OVERALL_WATCH.stop());
                         btn.tooltip = ME.t('deploy.finishedButton.tooltip');
 
-                        btn.show();
-
-                        ME.setTimeoutForFinishedButton(
-                            deploy_contracts.DeployOperation.Deploy,
-                            (b) => b.hide()
-                        );
+                        ME.showFinishedButton(deploy_contracts.DeployOperation.Deploy);
                     }
                 );
             };        

@@ -9,7 +9,7 @@
 * extension is build for [Visual Studio Code 1.22](https://code.visualstudio.com/updates/v1_22) now
 * using new progress api for deploy operations now
 * using emoji icons for deploy operations in output window now
-* buttons are shown in the status bar after a deploy operation
+* buttons are shown in the status bar after a deploy operation, added `showStatusWhenFinished` to control this ... s. [issue #53](https://github.com/mkloubert/vscode-deploy-reloaded/issues/53)
 * added `$lines` function for quick code executions
 * updated the following [npm](https://www.npmjs.com/) modules:
   * [aws-sdk](https://www.npmjs.com/package/aws-sdk) `2.222.1`

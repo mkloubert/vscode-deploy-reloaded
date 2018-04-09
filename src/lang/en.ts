@@ -95,7 +95,7 @@ export const translation: Translation = {
             operationFailed: "Delete operation failed (s. debug console 'CTRL/CMD + SHIFT + Y')!",
         },
         finishedButton: {
-            text: "Delete operation finished",
+            text: "Delete operation finished ({0:trim,ending_space}ms)",
             tooltip: "Click here to open output ...",
         },
         finishedOperation: "Deleting files in{0:trim,surround,leading_space} has been finished.",
@@ -168,7 +168,7 @@ export const translation: Translation = {
             label: "File list",
         },
         finishedButton: {
-            text: "Deploy operation finished",
+            text: "Deploy operation finished ({0:trim,ending_space}ms)",
             tooltip: "Click here to open output ...",
         },
         finishedOperation: "Deploying files to{0:trim,surround,leading_space} has been finished.",
@@ -474,7 +474,7 @@ export const translation: Translation = {
             operationForSourceFailed: "Pulling file(s) from source{0:trim,surround,leading_space} failed:{1:trim,surround,leading_space}",
         },
         finishedButton: {
-            text: "Pull operation finished",
+            text: "Pull operation finished ({0:trim,ending_space}ms)",
             tooltip: "Click here to open output ...",
         },
         finishedOperation: "Pulling files from{0:trim,surround,leading_space} has been finished.",

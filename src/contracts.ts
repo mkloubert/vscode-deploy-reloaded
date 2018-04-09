@@ -257,7 +257,7 @@ export interface Configuration extends deploy_packages.WithFastFileCheckSettings
     /**
      * Indicates, if non saved documents will be saved automatically, before they are going to be deployed or not.
      */
-    readonly saveBeforeDeploy?: boolean;
+    readonly saveBeforeDeploy?: boolean;    
     /**
      * Show a popup after a successfull deploy operation or not.
      */
@@ -266,6 +266,10 @@ export interface Configuration extends deploy_packages.WithFastFileCheckSettings
      * Shows a popup when a deploy operation has been finished.
      */
     readonly showPopupWhenFinished?: deploy_gui.ShowPopupWhenFinishedValue;
+    /**
+     * Show a button in the status bar after a deploy operation has been finished.
+     */
+    readonly showStatusWhenFinished?: boolean | number | null;
     /**
      * Show workspace name as prefix in popup messages or not.
      */
