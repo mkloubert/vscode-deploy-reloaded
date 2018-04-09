@@ -1318,7 +1318,7 @@
        ]
       },
       "showStatusWhenFinished": {
-       "description": "Show workspace name as prefix in popup messages or not.",
+       "description": "Show a button in the status bar, after a deploy operation has been finished.",
        "oneOf": [
         {
          "description": "Show a button in the status bar, after a deploy operation has been finished or not.",
