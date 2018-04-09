@@ -4471,18 +4471,20 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
         if (BTN) {
             const SHOW_STATUS_WHEN_FINISHED = CFG.showStatusWhenFinished;            
 
-            let showButton = true;
+            let showButton = !_.isUndefined(SHOW_STATUS_WHEN_FINISHED);
             let hideAfter: number;
-            if (null !== SHOW_STATUS_WHEN_FINISHED) {
-                if (_.isBoolean(SHOW_STATUS_WHEN_FINISHED)) {
-                    showButton = SHOW_STATUS_WHEN_FINISHED;
-                    hideAfter = 60000;
+            if (showButton) {
+                if (null !== SHOW_STATUS_WHEN_FINISHED) {
+                    if (_.isBoolean(SHOW_STATUS_WHEN_FINISHED)) {
+                        showButton = SHOW_STATUS_WHEN_FINISHED;
+                        hideAfter = 60000;
+                    }
+                    else {
+                        hideAfter = parseInt(
+                            deploy_helpers.toStringSafe(SHOW_STATUS_WHEN_FINISHED).trim()
+                        );
+                    }   
                 }
-                else {
-                    hideAfter = parseInt(
-                        deploy_helpers.toStringSafe(SHOW_STATUS_WHEN_FINISHED).trim()
-                    );
-                }   
             }
 
             if (showButton) {
