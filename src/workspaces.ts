@@ -4350,7 +4350,7 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
     public setTimeoutForFinishedButton(
         operation: deploy_contracts.DeployOperation,
         callback: (btn: vscode.StatusBarItem) => any,
-        ms = 10000,
+        ms = 60000,
     ) {
         const ME = this;
 

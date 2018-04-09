@@ -299,7 +299,7 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
                     async (btn) => {
                         const NOW = deploy_helpers.now();
 
-                        let icon = `🚀`;
+                        let icon = `🗑️`;
                         let color: string = 'statusBar.foreground';
                         if (err) {
                             color = 'errorForeground';
