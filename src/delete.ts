@@ -287,6 +287,53 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
                 operation: deploy_contracts.DeployOperation.Delete,
                 succeeded: [],
             };
+
+            // "finished button"
+            await ME.invokeForFinishedButton(
+                deploy_contracts.DeployOperation.Delete,
+                (btn) => btn.hide(),
+            );
+            const UPDATE_FINISHED_BTN = async (err: any) => {
+                await ME.invokeForFinishedButton(
+                    deploy_contracts.DeployOperation.Delete,
+                    async (btn) => {
+                        const NOW = deploy_helpers.now();
+
+                        let icon = `🚀`;
+                        let color: string = 'statusBar.foreground';
+                        if (err) {
+                            color = 'errorForeground';
+                            icon = `🔥`;
+                        }
+                        else {
+                            if (POPUP_STATS.failed.length > 0) {
+                                if (POPUP_STATS.succeeded.length < 1) {
+                                    color = 'errorForeground';
+                                    icon = `🔥`;
+                                }
+                                else {
+                                    color = 'editorWarning.foreground';
+                                    icon = `⚠️`;
+                                }
+                            }
+                        }                        
+
+                        btn.color = new vscode.ThemeColor(color);
+                        btn.text = `${icon} ` +
+                                   `[${NOW.format( ME.t('time.timeWithSeconds') )}] ` + 
+                                   ME.t('DELETE.finishedButton.text');
+                        btn.tooltip = ME.t('DELETE.finishedButton.tooltip');
+
+                        btn.show();
+
+                        ME.setTimeoutForFinishedButton(
+                            deploy_contracts.DeployOperation.Delete,
+                            (b) => b.hide()
+                        );
+                    }
+                );
+            };
+
             try {
                 progress.increment = undefined;
 
@@ -518,6 +565,8 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
                              TARGET_NAME)
                     );
                 }
+
+                UPDATE_FINISHED_BTN(null);
             }
             catch (e) {
                 ME.output.appendLine(
@@ -527,7 +576,9 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
                 );
 
                 POPUP_STATS.failed = files;
-                POPUP_STATS.succeeded = [];                
+                POPUP_STATS.succeeded = [];
+
+                UPDATE_FINISHED_BTN(e);
             }
             finally {
                 deploy_helpers.applyFuncFor(

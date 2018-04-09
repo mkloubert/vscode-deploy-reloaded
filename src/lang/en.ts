@@ -94,6 +94,10 @@ export const translation: Translation = {
             invalidWorkspaceForPackage: "Package{0:trim,surround,leading_space} is not part of workspace{1:trim,surround,leading_space}!",
             operationFailed: "Delete operation failed (s. debug console 'CTRL/CMD + SHIFT + Y')!",
         },
+        finishedButton: {
+            text: "Delete operation finished",
+            tooltip: "Click here to open output ...",
+        },
         finishedOperation: "Deleting files in{0:trim,surround,leading_space} has been finished.",
         finishedOperationWithErrors: "[ERROR] Could not delete files in{0:trim,surround,leading_space}:{1:trim,surround,leading_space}",
         fileList: {
@@ -162,6 +166,10 @@ export const translation: Translation = {
         fileList: {
             description: "Deploys files, which are defined as list in the active text editor",
             label: "File list",
+        },
+        finishedButton: {
+            text: "Deploy operation finished",
+            tooltip: "Click here to open output ...",
         },
         finishedOperation: "Deploying files to{0:trim,surround,leading_space} has been finished.",
         finishedOperationWithErrors: "[ERROR] Could not deploy files to{0:trim,surround,leading_space}:{1:trim,surround,leading_space}",
@@ -464,6 +472,10 @@ export const translation: Translation = {
             invalidWorkspaceForPackage: "Cannot pull package{0:trim,surround,leading_space} to workspace{1:trim,surround,leading_space}!",
             operationFailed: "Pull operation failed (s. debug console 'CTRL/CMD + SHIFT + Y')!",
             operationForSourceFailed: "Pulling file(s) from source{0:trim,surround,leading_space} failed:{1:trim,surround,leading_space}",
+        },
+        finishedButton: {
+            text: "Pull operation finished",
+            tooltip: "Click here to open output ...",
         },
         finishedOperation: "Pulling files from{0:trim,surround,leading_space} has been finished.",
         finishedOperationWithErrors: "[ERROR] Could not pull files from{0:trim,surround,leading_space}:{1:trim,surround,leading_space}",

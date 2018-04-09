@@ -559,6 +559,53 @@ async function pullFilesFromWithProgress(progress: deploy_helpers.ProgressContex
                 operation: deploy_contracts.DeployOperation.Pull,
                 succeeded: [],
             };
+
+            // "finished button"
+            await ME.invokeForFinishedButton(
+                deploy_contracts.DeployOperation.Pull,
+                (btn) => btn.hide(),
+            );
+            const UPDATE_FINISHED_BTN = async (err: any) => {
+                await ME.invokeForFinishedButton(
+                    deploy_contracts.DeployOperation.Pull,
+                    async (btn) => {
+                        const NOW = deploy_helpers.now();
+
+                        let icon = `🚀`;
+                        let color: string = 'statusBar.foreground';
+                        if (err) {
+                            color = 'errorForeground';
+                            icon = `🔥`;
+                        }
+                        else {
+                            if (POPUP_STATS.failed.length > 0) {
+                                if (POPUP_STATS.succeeded.length < 1) {
+                                    color = 'errorForeground';
+                                    icon = `🔥`;
+                                }
+                                else {
+                                    color = 'editorWarning.foreground';
+                                    icon = `⚠️`;
+                                }
+                            }
+                        }                        
+
+                        btn.color = new vscode.ThemeColor(color);
+                        btn.text = `${icon} ` +
+                                   `[${NOW.format( ME.t('time.timeWithSeconds') )}] ` + 
+                                   ME.t('pull.finishedButton.text');
+                        btn.tooltip = ME.t('pull.finishedButton.tooltip');
+
+                        btn.show();
+
+                        ME.setTimeoutForFinishedButton(
+                            deploy_contracts.DeployOperation.Pull,
+                            (b) => b.hide()
+                        );
+                    }
+                );
+            };
+
             try {
                 if (!(await checkBeforePull(target, PI, files, MAPPING_SCOPE_DIRS, CANCELLATION_SOURCE.token))) {
                     continue;
@@ -875,6 +922,8 @@ async function pullFilesFromWithProgress(progress: deploy_helpers.ProgressContex
                              TARGET_NAME)
                     );
                 }
+
+                UPDATE_FINISHED_BTN(null);
             }
             catch (e) {
                 ME.output.appendLine(
@@ -885,6 +934,8 @@ async function pullFilesFromWithProgress(progress: deploy_helpers.ProgressContex
 
                 POPUP_STATS.failed = files;
                 POPUP_STATS.succeeded = [];
+
+                UPDATE_FINISHED_BTN(e);
             }
             finally {
                 deploy_helpers.applyFuncFor(

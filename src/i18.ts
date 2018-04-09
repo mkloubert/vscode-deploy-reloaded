@@ -99,6 +99,10 @@ export interface Translation {
             invalidWorkspaceForPackage?: string;
             operationFailed?: string;
         };
+        finishedButton?: {
+            text?: string;
+            tooltip?: string;
+        };
         finishedOperation?: string;
         finishedOperationWithErrors?: string;
         fileList?: {
@@ -169,6 +173,10 @@ export interface Translation {
             invalidWorkspaceForPackage?: string;
             operationFailed?: string;
             operationToTargetFailed?: string;
+        };
+        finishedButton?: {
+            text?: string;
+            tooltip?: string;
         };
         finishedOperation?: string;
         finishedOperationWithErrors?: string;
@@ -467,6 +475,10 @@ export interface Translation {
             invalidWorkspaceForPackage?: string;
             operationFailed?: string;
             operationForSourceFailed?: string;
+        };
+        finishedButton?: {
+            text?: string;
+            tooltip?: string;
         };
         finishedOperation?: string;
         finishedOperationWithErrors?: string;

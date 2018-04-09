@@ -94,6 +94,10 @@ export const translation: Translation = {
             invalidWorkspaceForPackage: "Das Paket{0:trim,surround,leading_space} ist nicht Teil des Arbeitsbereiches{1:trim,surround,leading_space}!",
             operationFailed: "Konnte das Löschen nicht durchführen (s. Debugkonsole 'STRG/CMD + SHIFT + Y')!",
         },
+        finishedButton: {
+            text: "Löschen abgeschlossen",
+            tooltip: "Hier klicken, um die Ausgabe zu öffnen ...",
+        },
         finishedOperation: "Das Löschen der Dateien in{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",
         finishedOperationWithErrors: "[FEHLER] Konnte Dateien nicht in{0:trim,surround,leading_space} löschen:{1:trim,surround,leading_space}",
         fileList: {
@@ -168,6 +172,10 @@ export const translation: Translation = {
         fileList: {
             description: "Stellt Dateien bereit, die als Liste im aktiven Texteditor definiert sind",
             label: "Dateiliste",
+        },
+        finishedButton: {
+            text: "Bereitstellen abgeschlossen",
+            tooltip: "Hier klicken, um die Ausgabe zu öffnen ...",
         },
         finishedOperation: "Das Bereitstellen der Dateien in{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",
         finishedOperationWithErrors: "[FEHLER] Konnte Dateien nicht in{0:trim,surround,leading_space} bereitstellen:{1:trim,surround,leading_space}",
@@ -463,6 +471,10 @@ export const translation: Translation = {
             invalidWorkspaceForPackage: "Das Paket{0:trim,surround,leading_space} kann nicht in den Arbeitsbereich{1:trim,surround,leading_space} geladen werden!",
             operationFailed: "Konnte das Laden nicht durchführen (s. Debugkonsole 'STRG/CMD + SHIFT + Y')!",
             operationForSourceFailed: "Das Laden der Datei(en) aus der Quelle{0:trim,surround,leading_space} schlug fehl:{1:trim,surround,leading_space}",
+        },
+        finishedButton: {
+            text: "Laden abgeschlossen",
+            tooltip: "Hier klicken, um die Ausgabe zu öffnen ...",
         },
         finishedOperation: "Das Laden der Dateien von{0:trim,surround,leading_space} wurde erfolgreich abgeschlossen.",
         finishedOperationWithErrors: "[FEHLER] Konnte Dateien nicht von{0:trim,surround,leading_space} laden:{1:trim,surround,leading_space}",
