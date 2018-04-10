@@ -530,10 +530,6 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
         }).filter(e => !$h.isEmptyString(e));
 
         await $h.withProgress(async (progress) => {
-            progress.report({
-                message: 'Detecting files ...',  //TODO: translate
-            });
-
             const FILES = await $h.glob(patterns, {
                 cwd: WORKSPACE.editorRootPath,
                 root: WORKSPACE.editorRootPath,
@@ -545,6 +541,8 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
             });
     
             if (FILES.length > 0) {
+                progress.increment = 1 / FILES.length * 100.0;
+                
                 let lineCount = 0;
                 for (let i = 0; i < FILES.length; i++) {
                     if (progress.cancellationToken.isCancellationRequested) {
@@ -552,15 +550,7 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
                     }
 
                     const F = FILES[i];
-                    const PERCENTAGE = Math.floor(
-                        (i + 1) / FILES.length * 100.0
-                    );
-
-                    progress.report({
-                        // increment: PERCENTAGE,
-                        message: `Scanning file '${F}' (${lineCount}) ...`,
-                        percentage: PERCENTAGE,
-                    });        
+                    progress.message = `Scanning file '${F}' (${lineCount}) ...`;
 
                     lineCount += (await $h.readFile(F)).toString('binary')
                                                        .split("\n")
