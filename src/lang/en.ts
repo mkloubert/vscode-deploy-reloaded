@@ -306,6 +306,10 @@ export const translation: Translation = {
         selectSource: "Select the source from where to start listening ...",
         size: "Size:{0:trim,leading_space}",
     },
+    log: {
+        noFileFound: "No log files found!",
+        selectLogFile: "Select the log file, that should be opened ...",
+    },
     maxDepthReached: "Cannot go deeper than{0:trim,leading_space}!",
     network: {
         hostname: 'Your hostname:{0:trim,surround,leading_space}',

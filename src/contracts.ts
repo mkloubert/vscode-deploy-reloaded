@@ -16,6 +16,7 @@
  */
 
 import * as deploy_api from './api';
+import * as deploy_buttons from './buttons';
 import * as deploy_commands from './commands';
 import * as deploy_gui from './gui';
 import * as deploy_log from './log';
@@ -154,6 +155,10 @@ export interface Configuration extends deploy_packages.WithFastFileCheckSettings
      * Defines of or more command for the editor to register.
      */
     readonly commands?: { [command: string]: deploy_commands.ScriptCommand | string };
+    /**
+     * A list of one or more global buttons.
+     */
+    readonly buttons?: deploy_buttons.Button | deploy_buttons.Button[];
     /**
      * Activates or deactivates 'deploy on change' feature for all packages.
      */

@@ -314,6 +314,7 @@ Press `F1` and enter one of the following commands:
 | `Deploy Reloaded: Delete ...` | Commands for deleting files.  |
 | `Deploy Reloaded: Deploy ...` | List of commands for deploying files. |
 | `Deploy Reloaded: List directory ...` | Lists a (remote) directory. |
+| `Deploy Reloaded: Log files ...` | Opens a log file of that extension. |
 | `Deploy Reloaded: Proxies ...` | Handles [TCP proxies](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/proxies). |
 | `Deploy Reloaded: Pull ...` | Pull or download files from remote. |
 | `Deploy Reloaded: Select deploy operation ...` | Lets the user select an operation for the active document. |

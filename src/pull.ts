@@ -436,7 +436,7 @@ export async function pullFilesFrom(files: string[],
     }, {
         location: vscode.ProgressLocation.Notification,
         cancellable: true,
-        title: ME.t('pull.pullingFiles'),
+        title: `🚚 ` + ME.t('pull.pullingFiles'),
     });
 }
 
@@ -1159,6 +1159,39 @@ export function registerPullCommands(context: vscode.ExtensionContext) {
                 deploy_helpers.showErrorMessage(
                     i18.t('pull.errors.operationFailed')
                 );
+            }
+        }),
+
+        // pull package files
+        vscode.commands.registerCommand('extension.deploy.reloaded.pullPackgeFiles', async (packageNames: string | string[], sourceNames: string | string[]) => {
+            packageNames = deploy_helpers.asArray( packageNames ).map(p => {
+                return deploy_helpers.normalizeString(p);
+            }).filter(p => '' !== p);
+
+            sourceNames = deploy_helpers.asArray( sourceNames ).map(s => {
+                return deploy_helpers.normalizeString(s);
+            }).filter(s => '' !== s);
+
+            const ALL_WORKSPACES = deploy_workspaces.getAllWorkspaces();
+
+            for (const PN of packageNames) {
+                const MATCHING_PACKAGES = deploy_helpers.from( ALL_WORKSPACES ).selectMany(ws => {
+                    return ws.getPackages();
+                }).where(p => {
+                    return PN === deploy_helpers.normalizeString(p.name);
+                });
+
+                for (const MP of MATCHING_PACKAGES) {
+                    try {
+                        await deploy_helpers.applyFuncFor(
+                            pullPackage, MP.__workspace
+                        )(MP, () => sourceNames);
+                    }
+                    catch (e) {
+                        deploy_log.CONSOLE
+                                  .trace(e, 'extension.deploy.reloaded.pullPackgeFiles(1)');
+                    }
+                }
             }
         }),
     );

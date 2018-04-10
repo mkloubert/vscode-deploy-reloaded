@@ -20,6 +20,7 @@ import * as _ from 'lodash';
 import * as ChildProcess from 'child_process';
 import * as Crypto from 'crypto';
 import * as deploy_api from './api';
+import * as deploy_buttons from './buttons';
 import * as deploy_code from './code';
 import * as deploy_commands from './commands';
 import * as deploy_contracts from './contracts';
@@ -71,11 +72,6 @@ export interface DeactivateAutoDeployOperationsForOptions {
      * Deactivate 'remove on change' or not.
      */
     readonly noRemoveOnChange?: boolean;
-}
-
-interface FinishedButton extends vscode.Disposable {
-    readonly button: vscode.StatusBarItem;
-    readonly command: vscode.Disposable;
 }
 
 interface PackageWithButton {
@@ -301,12 +297,7 @@ export interface WorkspaceSettings extends deploy_contracts.Configuration {
 let activeWorkspaceProvider: WorkspaceProvider;
 let allWorkspacesProvider: WorkspaceProvider;
 const FILES_CHANGES: { [path: string]: deploy_contracts.FileChangeType } = {};
-const KEY_FINISHED_BTNS = 'finished_buttons';
-const KEY_FINISHED_BTN_DELETE = 'finish_delete';
-const KEY_FINISHED_BTN_DEPLOY = 'finish_deploy';
-const KEY_FINISHED_BTN_PULL = 'finish_pull';
 const KEY_WORKSPACE_USAGE = 'vscdrLastExecutedWorkspaceActions';
-let nextFinishedBtnIds = Number.MIN_SAFE_INTEGER;
 let nextPackageButtonId = Number.MIN_SAFE_INTEGER;
 let nextTcpProxyButtonId = Number.MIN_SAFE_INTEGER;
 let nextSwitchButtonId = Number.MIN_SAFE_INTEGER;
@@ -717,58 +708,6 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
         return this._configSource;
     }
 
-    private createFinishedButton(state: deploy_contracts.KeyValuePairs, key: string, id: number): FinishedButton {
-        const ME = this;
-
-        let btn: vscode.StatusBarItem;
-        let cmd: vscode.Disposable;
-        try {
-            btn = vscode.window.createStatusBarItem();
-            btn.hide();
-
-            const CMD_ID = `extension.deploy.reloaded.buttons.finishedButtons.${key}${id}`;
-            cmd = vscode.commands.registerCommand(CMD_ID, () => {
-                ME.output.show();
-
-                btn.hide();
-            });
-
-            btn.command = CMD_ID;
-        }
-        catch (e) {
-            deploy_helpers.tryDispose(btn);
-            deploy_helpers.tryDispose(cmd);
-
-            throw e;
-        }
-
-        return {
-            button: btn,
-            command: cmd,
-            dispose: function() {
-                const BUTTONS = state['buttons'];
-
-                let timeouts: deploy_contracts.KeyValuePairs;
-                if (state['timeouts']) {
-                    timeouts = state['timeouts'][ KEY_FINISHED_BTNS ];
-                }
-
-                deploy_helpers.tryDispose( this.button );
-                deploy_helpers.tryDispose( this.command );
-
-                if (BUTTONS) {
-                    delete BUTTONS[ key ];
-                }
-
-                if (timeouts) {
-                    deploy_helpers.tryDispose( timeouts[key] );
-
-                    delete timeouts[ key ];
-                }
-            }
-        };
-    }
-
     /**
      * Creates a new git client (if possible).
      * 
@@ -856,7 +795,9 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
             deploy_targets.KEY_TARGETS_IN_PROGRESS
         ] = {};
 
-        this.initFinishedButtons(NEW_SESSION_STATE);
+        deploy_helpers.applyFuncFor(
+            deploy_buttons.initFinishedButtons, this
+        )(NEW_SESSION_STATE);
 
         return NEW_SESSION_STATE;
     }
@@ -1056,28 +997,6 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
             deploy_helpers.tryDispose(
                 this._CONFIG_FILE_WATCHERS.pop()
             );
-        }
-    }
-
-    private disposeFinishedButtons() {
-        const STATE = this.workspaceSessionState;
-        if (!STATE) {
-            return;
-        }
-
-        const BUTTONS = STATE['buttons'];
-        if (!BUTTONS) {
-            return;
-        }        
-
-        const KEYS = [
-            KEY_FINISHED_BTN_DEPLOY,
-            KEY_FINISHED_BTN_PULL,
-            KEY_FINISHED_BTN_DELETE,
-        ];
-
-        for (const K of KEYS) {
-            deploy_helpers.tryDispose(BUTTONS[ K ]);
         }
     }
 
@@ -1551,31 +1470,9 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
      * @return {vscode.StatusBarItem} The button.
      */
     public getFinishedButton(operation: deploy_contracts.DeployOperation): vscode.StatusBarItem {
-        const STATE = this.workspaceSessionState;
-        if (STATE) {
-            const BUTTONS = STATE['buttons'];
-            if (BUTTONS) {
-                let btn: FinishedButton;
-
-                switch (operation) {
-                    case deploy_contracts.DeployOperation.Deploy:
-                        btn = BUTTONS[ KEY_FINISHED_BTN_DEPLOY ];
-                        break;
-
-                    case deploy_contracts.DeployOperation.Pull:
-                        btn = BUTTONS[ KEY_FINISHED_BTN_PULL ];
-                        break;
-
-                    case deploy_contracts.DeployOperation.Delete:
-                        btn = BUTTONS[ KEY_FINISHED_BTN_DELETE ];
-                        break;
-                }
-
-                if (btn) {
-                    return btn.button;
-                }
-            }
-        }        
+        return deploy_helpers.applyFuncFor(
+            deploy_buttons.getFinishedButton, this
+        )(operation);
     }
 
     /**
@@ -2219,24 +2116,6 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
                 deploy_helpers.tryDispose(newWatcher);
             }
         });
-    }
-
-    private initFinishedButtons(state: deploy_contracts.KeyValuePairs) {
-        const ID = nextFinishedBtnIds++;
-
-        this.disposeFinishedButtons();
-
-        state['timeouts'][ KEY_FINISHED_BTNS ] = {};
-
-        const DEPLOY_BTN: FinishedButton = state['buttons'][KEY_FINISHED_BTN_DEPLOY] = this.createFinishedButton(
-            state, KEY_FINISHED_BTN_DEPLOY, ID
-        );
-        const DELETE_BTN: FinishedButton = state['buttons'][KEY_FINISHED_BTN_DELETE] = this.createFinishedButton(
-            state, KEY_FINISHED_BTN_DELETE, ID
-        );
-        const PULL_BTN: FinishedButton = state['buttons'][KEY_FINISHED_BTN_PULL] = this.createFinishedButton(
-            state, KEY_FINISHED_BTN_PULL, ID
-        );
     }
 
     /**
@@ -3012,7 +2891,13 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
         this.disposeConfigFileWatchers();
         deploy_helpers.tryDispose(this.context.fileWatcher);
 
-        this.disposeFinishedButtons();
+        // dispose buttons
+        deploy_helpers.applyFuncFor(
+            deploy_buttons.disposeButtons, this
+        )();
+        deploy_helpers.applyFuncFor(
+            deploy_buttons.disposeFinishedButtons, this
+        )();
 
         // output channel
         deploy_helpers.tryDispose(this._OUTPUT_CHANNEL);
@@ -3193,6 +3078,11 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
 
         ME._isReloadingConfig = true;
         this.disposeConfigFileWatchers();
+
+        // dispose global buttons
+        deploy_helpers.applyFuncFor(
+            deploy_buttons.disposeButtons, ME
+        )();
 
         const SCOPES = ME.getSettingScopes();
 
@@ -3377,6 +3267,7 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
 
                         ME.output.appendLine('');
                         ME.output.appendLine(
+                            `💤 ` + 
                             ME.t('deploy.onChange.waitingBeforeActivate',
                                  Math.round(TIME_TO_WAIT_BEFORE_ACTIVATE_DEPLOY_ON_CHANGE / 1000.0),
                                  ME.rootPath)
@@ -3388,6 +3279,7 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
 
                                 ME.output.appendLine('');
                                 ME.output.appendLine(
+                                    `▶️ `+ 
                                     ME.t('deploy.onChange.activated',
                                          ME.rootPath)
                                 );
@@ -3415,6 +3307,7 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
 
                         ME.output.appendLine('');
                         ME.output.appendLine(
+                            `💤 ` + 
                             ME.t('DELETE.onChange.waitingBeforeActivate',
                                  Math.round(TIME_TO_WAIT_BEFORE_ACTIVATE_REMOVE_ON_CHANGE / 1000.0),
                                  ME.rootPath)
@@ -3426,6 +3319,7 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
 
                                 ME.output.appendLine('');
                                 ME.output.appendLine(
+                                    `▶️ `+ 
                                     ME.t('DELETE.onChange.activated',
                                          ME.rootPath)
                                 );
@@ -3454,6 +3348,11 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
                 )();
 
                 await ME.reloadTcpProxies();
+
+                // global buttons
+                await deploy_helpers.applyFuncFor(
+                    deploy_buttons.reloadButtons, ME,
+                )();
 
                 await ME.initConfigFileWatchers(IMPORTED_LOCAL_FILES);
             };
@@ -4352,60 +4251,10 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
         callback: (btn: vscode.StatusBarItem) => any,
         ms = 60000,
     ) {
-        const ME = this;
-
-        const STATE = ME.workspaceSessionState;
-        if (STATE) {
-            let timeouts: deploy_contracts.KeyValuePairs;
-            if (STATE['timeouts']) {
-                timeouts = STATE['timeouts'][ KEY_FINISHED_BTNS ];
-            }
-
-            if (timeouts) {
-                let key: string | false = false;
-
-                switch (operation) {
-                    case deploy_contracts.DeployOperation.Deploy:
-                        key = KEY_FINISHED_BTN_DEPLOY;
-                        break;
-
-                    case deploy_contracts.DeployOperation.Pull:
-                        key = KEY_FINISHED_BTN_PULL;
-                        break;
-
-                    case deploy_contracts.DeployOperation.Delete:
-                        key = KEY_FINISHED_BTN_DELETE;
-                        break;
-                }
-
-                if (false !== key) {
-                    deploy_helpers.tryDispose( timeouts[key] );
-
-                    const BTN = ME.getFinishedButton(operation);
-                    if (BTN) {
-                        timeouts[key] = deploy_helpers.createTimeout(() => {
-                            try {
-                                if (callback) {
-                                    Promise.resolve( callback(BTN) ).then(() => {                                    
-                                    }, (err) => {
-                                        ME.logger
-                                          .trace(err, 'workspaces.Workspace.setTimeoutForFinishedButton(2)');
-                                    });
-                                }
-                            }
-                            catch (e) {
-                                ME.logger
-                                  .trace(e, 'workspaces.Workspace.setTimeoutForFinishedButton(1)');
-                            }
-                        }, ms);
-
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
+        return deploy_helpers.applyFuncFor(
+            deploy_buttons.setTimeoutForFinishedButton, this
+        )(operation,
+          callback, ms);
     }
 
     /**

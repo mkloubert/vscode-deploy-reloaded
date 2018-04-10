@@ -419,7 +419,7 @@ export async function deployFilesTo(files: string[],
     }, {
         location: vscode.ProgressLocation.Notification,
         cancellable: true,
-        title: ME.t('deploy.deployingFiles'),        
+        title: `🚀 ` + ME.t('deploy.deployingFiles'),        
     });
 }
 
@@ -1448,6 +1448,39 @@ export function registerDeployCommands(context: vscode.ExtensionContext) {
                 deploy_helpers.showErrorMessage(
                     i18.t('deploy.errors.operationFailed')
                 );
+            }
+        }),
+
+        // deploy package files
+        vscode.commands.registerCommand('extension.deploy.reloaded.deployPackageFiles', async (packageNames: string | string[], targetNames: string | string[]) => {
+            packageNames = deploy_helpers.asArray( packageNames ).map(p => {
+                return deploy_helpers.normalizeString(p);
+            }).filter(p => '' !== p);
+
+            targetNames = deploy_helpers.asArray( targetNames ).map(t => {
+                return deploy_helpers.normalizeString(t);
+            }).filter(t => '' !== t);
+
+            const ALL_WORKSPACES = deploy_workspaces.getAllWorkspaces();
+
+            for (const PN of packageNames) {
+                const MATCHING_PACKAGES = deploy_helpers.from( ALL_WORKSPACES ).selectMany(ws => {
+                    return ws.getPackages();
+                }).where(p => {
+                    return PN === deploy_helpers.normalizeString(p.name);
+                });
+
+                for (const MP of MATCHING_PACKAGES) {
+                    try {
+                        await deploy_helpers.applyFuncFor(
+                            deployPackage, MP.__workspace
+                        )(MP, () => targetNames);
+                    }
+                    catch (e) {
+                        deploy_log.CONSOLE
+                                  .trace(e, 'extension.deploy.reloaded.deployPackageFiles(1)');
+                    }
+                }
             }
         }),
     );

@@ -16,15 +16,23 @@
  */
 
 import * as _ from 'lodash';
+import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
 import * as FS from 'fs';
 import * as FSExtra from 'fs-extra';
+import * as i18 from './i18';
 import * as Moment from 'moment';
 import * as OS from 'os';
 import * as Path from 'path';
+import * as vscode from 'vscode';
 import * as vscode_helpers from 'vscode-helpers';
 
 export { ActionLogger, Logger } from 'vscode-helpers';
+
+interface LogFile {
+    mtime: Moment.Moment;
+    path: string;    
+}
 
 const NEW_CONSOLE_LOGGER = vscode_helpers.createLogger();
 // write to console
@@ -158,7 +166,7 @@ export async function cleanupLogFilesInHomeDirectory(maxLifeTime?: number) {
 
     const LOG_FILES = await deploy_helpers.glob('/*.log', {
         cwd: LOGS_DIR,
-        root: LOGS_DIR,        
+        root: LOGS_DIR,
     });
 
     for (const LF of LOG_FILES) {
@@ -178,4 +186,103 @@ export async function cleanupLogFilesInHomeDirectory(maxLifeTime?: number) {
         }
         catch (e) { /* ignore */ }
     }
+}
+
+async function openLogFile() {
+    let logFilePaths: string[];
+
+    const LOGS_DIR = deploy_helpers.getExtensionLogDirInHome();
+    if (await deploy_helpers.isDirectory(LOGS_DIR)) {
+        logFilePaths = await deploy_helpers.glob('/*.log', {
+            cwd: LOGS_DIR,
+            root: LOGS_DIR,
+        });
+    }
+
+    logFilePaths = deploy_helpers.asArray(logFilePaths);    
+
+    let logFiles: LogFile[] = [];
+    for (const LFP of logFilePaths) {
+        try {
+            const STATS = await FSExtra.lstat(LFP);
+
+            const F: LogFile = {
+                mtime: deploy_helpers.asUTC( STATS.mtime ),
+                path: LFP,
+            };
+
+            logFiles.push(F);
+        }
+        catch (e) {
+            CONSOLE.trace(e, 'log.openLogFile(1)');
+        }
+    }
+
+    logFiles = deploy_helpers.from(logFiles).orderByDescending(lf => {
+        return lf.mtime.unix();
+    }).thenBy(lf => {
+        return deploy_helpers.normalizeString( Path.basename(lf.path) );
+    }).thenBy(lf => {
+        return deploy_helpers.normalizeString( Path.dirname(lf.path) );
+    }).toArray();
+
+    const ITEMS: deploy_contracts.ActionQuickPick[] = logFiles.map(lf => {
+        return {
+            action: async () => {
+                await vscode.window.showTextDocument(
+                    await vscode.workspace.openTextDocument(lf.path)
+                );
+            },
+            description: lf.mtime.format( i18.t('time.dateTimeWithSeconds') ),
+            detail: Path.dirname(lf.path),
+            label: '$(file-text)  ' + Path.basename(lf.path),
+        };
+    });
+
+    if (ITEMS.length < 1) {
+        deploy_helpers.showWarningMessage(
+            i18.t('log.noFileFound'),
+        );
+
+        return;
+    }
+
+    let selectedItem: deploy_contracts.ActionQuickPick;
+    if (1 === ITEMS.length) {
+        selectedItem = ITEMS[0];
+    }
+    else {
+        selectedItem = await vscode.window.showQuickPick(
+            ITEMS,
+            {
+                placeHolder: i18.t('log.selectLogFile'),
+            }
+        );
+    }
+
+    if (selectedItem) {
+        await selectedItem.action();
+    }
+}
+
+/**
+ * Registers commands for log (file) operations.
+ * 
+ * @param {vscode.ExtensionContext} context The extension context.
+ */
+export function registerLogCommands(context: vscode.ExtensionContext) {
+    context.subscriptions.push(
+        vscode.commands.registerCommand('extension.deploy.reloaded.logFiles', async () => {
+            try {
+                await openLogFile();
+            }
+            catch (e) {
+                CONSOLE.trace(e, 'extension.deploy.reloaded.logFiles');
+
+                deploy_helpers.showErrorMessage(
+                    i18.t('error', e)
+                );
+            }
+        }),
+    );
 }

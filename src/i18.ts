@@ -311,6 +311,10 @@ export interface Translation {
         selectSource?: string;
         size?: string;
     };
+    log?: {
+        noFileFound?: string;
+        selectLogFile?: string;
+    };
     maxDepthReached?: string;
     network?: {
         hostname?: string;

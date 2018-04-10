@@ -306,6 +306,10 @@ export const translation: Translation = {
         selectSource: "Wählen Sie eine Quelle ...",
         size: "Grösse:{0:trim,leading_space}",
     },
+    log: {
+        noFileFound: "Keine Log-Datei gefunden!",
+        selectLogFile: "Wählen Sie die Log-Datei, die geöffnet werden soll ...",
+    },
     maxDepthReached: "Maximale Tiefe von{0:trim,leading_space} erreicht!",
     network: {
         hostname: 'Name dieses Computers:{0:trim,surround,leading_space}',

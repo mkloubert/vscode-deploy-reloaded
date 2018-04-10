@@ -949,6 +949,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
             }),
         );
 
+        deploy_log.registerLogCommands(context);
         deploy_deploy.registerDeployCommands(context);
         deploy_pull.registerPullCommands(context);
         deploy_delete.registerDeleteCommands(context);

@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.68.1",
+ "version": "0.69.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.22.0"
@@ -55,6 +55,11 @@
    {
     "command": "extension.deploy.reloaded.listDirectory",
     "title": "List directory ...",
+    "category": "Deploy Reloaded"
+   },
+   {
+    "command": "extension.deploy.reloaded.logFiles",
+    "title": "Log files ...",
     "category": "Deploy Reloaded"
    },
    {
@@ -320,6 +325,54 @@
           }
          ]
         }
+       }
+      },
+      "buttons": {
+       "type": "array",
+       "description": "Defines one or more global buttons, which execute a command.",
+       "items": {
+        "description": "Settings for a button.",
+        "type": "object",
+        "properties": {
+         "arguments": {
+          "description": "One or more argument for the underlying command.",
+          "type": "array"
+         },
+         "color": {
+          "description": "The (text) color for the button when proxy is running.",
+          "type": "string",
+          "default": "button.foreground"
+         },
+         "command": {
+          "description": "The ID of the command to execute.",
+          "type": "string"
+         },
+         "enabled": {
+          "description": "Enable button or not.",
+          "type": "boolean",
+          "default": true
+         },
+         "isRight": {
+          "description": "Put button on the right side or not.",
+          "type": "boolean",
+          "default": false
+         },
+         "priority": {
+          "description": "The priority.",
+          "type": "integer"
+         },
+         "text": {
+          "description": "The custom display text.",
+          "type": "string"
+         },
+         "tooltip": {
+          "description": "The custom tooltip.",
+          "type": "string"
+         }
+        },
+        "required": [
+         "command"
+        ]
        }
       },
       "checkForRequirements": {

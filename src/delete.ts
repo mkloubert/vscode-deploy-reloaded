@@ -174,7 +174,7 @@ export async function deleteFilesIn(files: string[],
     }, {
         location: vscode.ProgressLocation.Notification,
         cancellable: true,
-        title: ME.t('DELETE.deletingFiles'),        
+        title: `🗑️ ` + ME.t('DELETE.deletingFiles'),        
     });
 }
 
@@ -816,6 +816,39 @@ export function registerDeleteCommands(context: vscode.ExtensionContext) {
                 deploy_helpers.showErrorMessage(
                     i18.t('DELETE.errors.operationFailed')
                 );
+            }
+        }),
+
+        // delete package files
+        vscode.commands.registerCommand('extension.deploy.reloaded.deletePackageFiles', async (packageNames: string | string[], targetNames: string | string[]) => {
+            packageNames = deploy_helpers.asArray( packageNames ).map(p => {
+                return deploy_helpers.normalizeString(p);
+            }).filter(p => '' !== p);
+
+            targetNames = deploy_helpers.asArray( targetNames ).map(t => {
+                return deploy_helpers.normalizeString(t);
+            }).filter(t => '' !== t);
+
+            const ALL_WORKSPACES = deploy_workspaces.getAllWorkspaces();
+
+            for (const PN of packageNames) {
+                const MATCHING_PACKAGES = deploy_helpers.from( ALL_WORKSPACES ).selectMany(ws => {
+                    return ws.getPackages();
+                }).where(p => {
+                    return PN === deploy_helpers.normalizeString(p.name);
+                });
+
+                for (const MP of MATCHING_PACKAGES) {
+                    try {
+                        await deploy_helpers.applyFuncFor(
+                            deletePackage, MP.__workspace
+                        )(MP, () => targetNames);
+                    }
+                    catch (e) {
+                        deploy_log.CONSOLE
+                                  .trace(e, 'extension.deploy.reloaded.deletePackageFiles(1)');
+                    }
+                }
             }
         }),
     );
