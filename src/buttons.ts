@@ -23,6 +23,12 @@ import * as vscode from 'vscode';
 
 
 /**
+ * Describes a button, which can (de-)activate an auto deploy operation.
+ */
+export interface AutoDeployButton extends deploy_contracts.Button {    
+}
+
+/**
  * Description for a global button.
  */
 export interface Button extends deploy_contracts.ButtonWithCustomCommand {
@@ -31,6 +37,28 @@ export interface Button extends deploy_contracts.ButtonWithCustomCommand {
      */
     readonly arguments?: any[];
 }
+
+/**
+ * Describes a button that should be shown to actiovate or deactivate "deploy on change" feature.
+ */
+export interface DeployOnChangeButton extends AutoDeployButton {    
+}
+
+/**
+ * A value for a "deploy on change" button.
+ */
+export type DeployOnChangeButtonValue = boolean | DeployOnChangeButton;
+
+/**
+ * Describes a button that should be shown to actiovate or deactivate "deploy on save" feature.
+ */
+export interface DeployOnSaveButton extends AutoDeployButton {    
+}
+
+/**
+ * A value for a "deploy on save" button.
+ */
+export type DeployOnSaveButtonValue = boolean | DeployOnSaveButton;
 
 interface FinishedButton extends vscode.Disposable {
     readonly button: vscode.StatusBarItem;
@@ -41,6 +69,17 @@ interface GlobalButton extends vscode.Disposable {
     readonly button: vscode.StatusBarItem;    
     readonly command: vscode.Disposable;
 }
+
+/**
+ * Describes a button that should be shown to actiovate or deactivate "remove on change" feature.
+ */
+export interface RemoveOnChangeButton extends AutoDeployButton {    
+}
+
+/**
+ * A value for a "remove on change" button.
+ */
+export type RemoveOnChangeButtonValue = boolean | RemoveOnChangeButton;
 
 
 const KEY_FINISHED_BTNS = 'finished_buttons';
@@ -90,14 +129,10 @@ function createFinishedButton(state: deploy_contracts.KeyValuePairs, key: string
             deploy_helpers.tryDispose( this.command );
 
             if (BUTTONS) {
-                delete BUTTONS[ key ];
+                delete BUTTONS[key];
             }
 
-            if (timeouts) {
-                deploy_helpers.tryDispose( timeouts[key] );
-
-                delete timeouts[ key ];
-            }
+            deploy_helpers.tryDisposeAndDelete(timeouts, key);
         }
     };
 }
@@ -358,8 +393,7 @@ export function setTimeoutForFinishedButton(
             }
 
             if (false !== key) {
-                deploy_helpers.tryDispose( timeouts[key] );
-                delete timeouts[key];
+                deploy_helpers.tryDisposeAndDelete(timeouts, key);
 
                 const BTN = deploy_helpers.applyFuncFor(
                     getFinishedButton, WORKSPACE

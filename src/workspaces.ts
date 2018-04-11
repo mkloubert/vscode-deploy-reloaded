@@ -56,6 +56,12 @@ import * as Path from 'path';
 import * as vscode from 'vscode';
 
 
+interface AutoDeployButton extends vscode.Disposable {
+    button: vscode.StatusBarItem;
+    command: vscode.Disposable;
+    settings: deploy_buttons.AutoDeployButton;
+}
+
 /**
  * Options for 'Workspace.deactivateAutoDeployOperationsFor()' method.
  */
@@ -297,8 +303,16 @@ export interface WorkspaceSettings extends deploy_contracts.Configuration {
 let activeWorkspaceProvider: WorkspaceProvider;
 let allWorkspacesProvider: WorkspaceProvider;
 const FILES_CHANGES: { [path: string]: deploy_contracts.FileChangeType } = {};
+const KEY_AUTO_BTN_DEPLOY_ON_CHANGE = 'deploy_on_change';
+const KEY_AUTO_BTN_DEPLOY_ON_SAVE = 'deploy_on_save';
+const KEY_AUTO_BTN_REMOVE_ON_CHANGE = 'remove_on_change';
+const KEY_TIMEOUT_DEPLOY_ON_CHANGE = 'deploy_on_change';
+const KEY_TIMEOUT_REMOVE_ON_CHANGE = 'remove_on_change';
 const KEY_WORKSPACE_USAGE = 'vscdrLastExecutedWorkspaceActions';
+let nextDeployOnChangeButtonId = Number.MIN_SAFE_INTEGER;
+let nextDeployOnSaveButtonId = Number.MIN_SAFE_INTEGER;
 let nextPackageButtonId = Number.MIN_SAFE_INTEGER;
+let nextRemoveOnChangeButtonId = Number.MIN_SAFE_INTEGER;
 let nextTcpProxyButtonId = Number.MIN_SAFE_INTEGER;
 let nextSwitchButtonId = Number.MIN_SAFE_INTEGER;
 const SWITCH_STATE_REPO_COLLECTION_KEY = 'SwitchStates';
@@ -318,14 +332,8 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
      */
     protected _configSource: WorkspaceConfigSource;
     private _gitFolder: string | false;
-    /**
-     * Stores if 'deploy on change' feature is freezed or not.
-     */
-    protected _isDeployOnChangeFreezed = false;
-    /**
-     * Stores if 'deploy on save' feature is freezed or not.
-     */
-    protected _isDeployOnSaveFreezed = false;
+    private _isDeployOnChangeFreezed = false;
+    private _isDeployOnSaveFreezed = false;
     /**
      * Stores if workspace has been initialized or not.
      */
@@ -334,10 +342,7 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
      * Stores if configuration is currently reloaded or not.
      */
     protected _isReloadingConfig = false;
-    /**
-     * Stores if 'remove on change' feature is freezed or not.
-     */
-    protected _isRemoveOnChangeFreezed = false;
+    private _isRemoveOnChangeFreezed = false;
     /**
      * Stores the last timestamp of configuration update.
      */
@@ -752,7 +757,15 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
 
     private createWorkspaceSessionState(newCfg: WorkspaceSettings) {
         const NEW_SESSION_STATE: deploy_contracts.KeyValuePairs = {};
-            
+        
+        NEW_SESSION_STATE['auto'] = {};
+        NEW_SESSION_STATE['auto']['buttons'] = {};
+        NEW_SESSION_STATE['auto']['deploy'] = {};
+        NEW_SESSION_STATE['auto']['deploy']['on_change_or_save'] = {};
+        NEW_SESSION_STATE['auto']['remove'] = {};
+        NEW_SESSION_STATE['auto']['remove']['on_change'] = {};
+        NEW_SESSION_STATE['auto']['timeouts'] = {};
+
         NEW_SESSION_STATE['buttons'] = {};
 
         NEW_SESSION_STATE['commands'] = {};
@@ -816,20 +829,20 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
             opts = <any>{};
         }
 
-        let oldIsDeployOnChangeFreezed = this._isDeployOnChangeFreezed;
-        let oldIsDeployOnSaveFreezed = this._isDeployOnSaveFreezed;
-        let oldIsRemoveOnChangeFreezed = this._isRemoveOnChangeFreezed;
+        let oldIsDeployOnChangeFreezed = this.isDeployOnChangeFreezed;
+        let oldIsDeployOnSaveFreezed = this.isDeployOnSaveFreezed;
+        let oldIsRemoveOnChangeFreezed = this.isRemoveOnChangeFreezed;
         try {
             if (deploy_helpers.toBooleanSafe(opts.noDeployOnChange, true)) {
-                this._isDeployOnChangeFreezed = true;
+                this.isDeployOnChangeFreezed = true;
             }
 
             if (deploy_helpers.toBooleanSafe(opts.noRemoveOnChange, true)) {
-                this._isRemoveOnChangeFreezed = true;
+                this.isRemoveOnChangeFreezed = true;
             }
 
             if (deploy_helpers.toBooleanSafe(opts.noDeployOnSave, true)) {
-                this._isDeployOnSaveFreezed = true;
+                this.isDeployOnSaveFreezed = true;
             }
 
             if (action) {
@@ -839,9 +852,9 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
             }
         }
         finally {
-            this._isDeployOnChangeFreezed = oldIsDeployOnChangeFreezed;
-            this._isDeployOnSaveFreezed = oldIsDeployOnSaveFreezed;
-            this._isRemoveOnChangeFreezed = oldIsRemoveOnChangeFreezed;
+            this.isDeployOnChangeFreezed = oldIsDeployOnChangeFreezed;
+            this.isDeployOnSaveFreezed = oldIsDeployOnSaveFreezed;
+            this.isRemoveOnChangeFreezed = oldIsRemoveOnChangeFreezed;
         }
     }
 
@@ -990,6 +1003,22 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
 
         await deploy_deploy.deployUncommitedScmChanges
                            .apply(this, [ GIT, target ]);
+    }
+
+    private disposeAutoDeployButtons() {
+        const STATE = this.workspaceSessionState;
+        if (!STATE) {
+            return;
+        }
+
+        const TIMEOUTS = STATE['auto']['timeouts'];
+        deploy_helpers.tryDisposeAndDelete(TIMEOUTS, KEY_TIMEOUT_DEPLOY_ON_CHANGE);
+        deploy_helpers.tryDisposeAndDelete(TIMEOUTS, KEY_TIMEOUT_REMOVE_ON_CHANGE);
+
+        const BUTTONS = STATE['auto']['buttons'];
+        deploy_helpers.tryDisposeAndDelete(BUTTONS, KEY_AUTO_BTN_DEPLOY_ON_CHANGE);
+        deploy_helpers.tryDisposeAndDelete(BUTTONS, KEY_AUTO_BTN_DEPLOY_ON_SAVE);
+        deploy_helpers.tryDisposeAndDelete(BUTTONS, KEY_AUTO_BTN_REMOVE_ON_CHANGE);
     }
 
     private disposeConfigFileWatchers() {
@@ -2415,17 +2444,27 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
     }
 
     /**
-     * Gets if 'deploy on change' is currently freezed or not.
+     * Gets or sets if 'deploy on change' is currently freezed or not.
      */
     public get isDeployOnChangeFreezed() {
         return this._isDeployOnChangeFreezed;
     }
+    public set isDeployOnChangeFreezed(newValue: boolean) {
+        this._isDeployOnChangeFreezed = deploy_helpers.toBooleanSafe(newValue);
+
+        this.updateAutoDeployButtons();
+    }
 
     /**
-     * Gets if 'deploy on change' is currently freezed or not.
+     * Gets or sets if 'deploy on change' is currently freezed or not.
      */
     public get isDeployOnSaveFreezed() {
         return this._isDeployOnSaveFreezed;
+    }
+    public set isDeployOnSaveFreezed(newValue: boolean) {
+        this._isDeployOnSaveFreezed = deploy_helpers.toBooleanSafe(newValue);
+
+        this.updateAutoDeployButtons();
     }
 
     /**
@@ -2571,10 +2610,15 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
     }
 
     /**
-     * Gets if 'remove on change' is currently freezed or not.
+     * Gets or sets if 'remove on change' is currently freezed or not.
      */
     public get isRemoveOnChangeFreezed() {
         return this._isRemoveOnChangeFreezed;
+    }
+    public set isRemoveOnChangeFreezed(newValue: boolean) {
+        this._isRemoveOnChangeFreezed = deploy_helpers.toBooleanSafe(newValue);
+
+        this.updateAutoDeployButtons();
     }
 
     /**
@@ -2898,6 +2942,7 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
         deploy_helpers.applyFuncFor(
             deploy_buttons.disposeFinishedButtons, this
         )();
+        this.disposeAutoDeployButtons();
 
         // output channel
         deploy_helpers.tryDispose(this._OUTPUT_CHANNEL);
@@ -3055,6 +3100,137 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
         )(pkg, targetResolver);
     }
 
+    private async reloadAutoDeployButtons() {
+        const ME = this;
+
+        if (ME.isInFinalizeState) {
+            return;
+        }
+
+        const CFG = ME.config;
+        if (!CFG) {
+            return;
+        }
+
+        const STATE = ME.workspaceSessionState;
+        if (!STATE) {
+            return;
+        }
+
+        const BUTTONS = STATE['auto']['buttons'];
+
+        const CREATE_BTN = async (
+            settings: deploy_buttons.AutoDeployButton | boolean,
+            key: string,
+            idResolver: () => number,
+            action: (btn: vscode.StatusBarItem) => any,
+        ) => {
+            if (_.isNil(settings)) {
+                return;
+            }
+
+            if (!deploy_helpers.isObject<deploy_buttons.AutoDeployButton>(settings)) {
+                settings = {
+                    enabled: settings,
+                };
+            }
+
+            if (!deploy_helpers.toBooleanSafe(settings.enabled, true)) {
+                return;
+            }
+
+            let btn: vscode.StatusBarItem;
+            let cmd: vscode.Disposable;
+            try {
+                const ID = idResolver();                            
+
+                btn = await deploy_helpers.createButton(settings);
+
+                const CMD_ID = `extension.deploy.reloaded.buttons.autoDeploy.${key}${ID}`;
+                cmd = vscode.commands.registerCommand(CMD_ID, async () => {
+                    btn.command = undefined;
+                    try {
+                        await Promise.resolve(
+                            action(btn)
+                        );
+                    }
+                    catch (e) {
+                        deploy_log.CONSOLE
+                                  .trace(e, CMD_ID);
+                    }
+                    finally {
+                        ME.updateAutoDeployButtons();
+
+                        btn.command = CMD_ID;
+                    }
+                });
+
+                const NEW_BTN: AutoDeployButton = {
+                    button: btn,
+                    command: cmd,
+                    dispose: function() {
+                        deploy_helpers.tryDispose( this.button );
+                        deploy_helpers.tryDispose( this.command );
+                    },
+                    settings: settings,
+                };
+                BUTTONS[key] = NEW_BTN;
+
+                btn.command = CMD_ID;
+                btn.show();
+            }
+            catch (e) {
+                deploy_helpers.tryDispose( btn );
+                deploy_helpers.tryDispose( cmd );
+
+                deploy_log.CONSOLE
+                          .trace(e, 'workspaces.Workspace.reloadAutoDeployButtons(2)');
+            }
+        };
+
+        try {
+            // deploy on change
+            await CREATE_BTN(
+                CFG.deployOnChangeButton,
+                KEY_AUTO_BTN_DEPLOY_ON_CHANGE,
+                () => nextDeployOnChangeButtonId++,
+                () => {
+                    deploy_helpers.tryDisposeAndDelete( STATE['auto']['timeouts'], KEY_TIMEOUT_DEPLOY_ON_CHANGE );
+
+                    ME.isDeployOnChangeFreezed = !ME.isDeployOnChangeFreezed;
+                }
+            );
+
+            // deploy on save
+            await CREATE_BTN(
+                CFG.deployOnSaveButton,
+                KEY_AUTO_BTN_DEPLOY_ON_SAVE,
+                () => nextDeployOnSaveButtonId++,
+                () => {
+                    ME.isDeployOnSaveFreezed = !ME.isDeployOnSaveFreezed;
+                }
+            );
+
+            // remove on change
+            await CREATE_BTN(
+                CFG.removeOnChangeButton,
+                KEY_AUTO_BTN_REMOVE_ON_CHANGE,
+                () => nextRemoveOnChangeButtonId++,
+                () => {
+                    deploy_helpers.tryDisposeAndDelete( STATE['auto']['timeouts'], KEY_TIMEOUT_REMOVE_ON_CHANGE );
+                    
+                    ME.isRemoveOnChangeFreezed = !ME.isRemoveOnChangeFreezed;
+                }
+            );
+
+            ME.updateAutoDeployButtons();
+        }
+        catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'workspaces.Workspace.reloadAutoDeployButtons(1)');
+        }
+    }
+
     /**
      * Reloads the current configuration for that workspace.
      * 
@@ -3079,10 +3255,11 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
         ME._isReloadingConfig = true;
         this.disposeConfigFileWatchers();
 
-        // dispose global buttons
+        // dispose buttons
         deploy_helpers.applyFuncFor(
             deploy_buttons.disposeButtons, ME
         )();
+        this.disposeAutoDeployButtons();
 
         const SCOPES = ME.getSettingScopes();
 
@@ -3091,9 +3268,9 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
             ME.cleanupTimeouts();
             deploy_helpers.applyFuncFor(deploy_commands.cleanupCommands, ME)();
 
-            ME._isDeployOnChangeFreezed = false;
-            ME._isDeployOnSaveFreezed = false;
-            ME._isRemoveOnChangeFreezed = false;
+            ME.isDeployOnChangeFreezed = false;
+            ME.isDeployOnSaveFreezed = false;
+            ME.isRemoveOnChangeFreezed = false;
 
             const IMPORTED_LOCAL_FILES: string[] = [];            
             let loadedCfg: WorkspaceSettings = vscode.workspace.getConfiguration(ME.configSource.section,
@@ -3208,9 +3385,11 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
             await ME.reloadTargets(loadedCfg);
             await ME.reloadPackages(loadedCfg);
 
+            const NEW_STATE = ME.createWorkspaceSessionState(loadedCfg);
+
             const OLD_CFG = ME._config;
             ME._config = loadedCfg;
-            ME._workspaceSessionState = ME.createWorkspaceSessionState(loadedCfg);
+            ME._workspaceSessionState = NEW_STATE;
             ME._lastConfigUpdate = Moment();
 
             try {
@@ -3263,7 +3442,7 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
                         // deactivate 'deploy on change'
                         // for a while
 
-                        ME._isDeployOnChangeFreezed = true;
+                        ME.isDeployOnChangeFreezed = true;
 
                         ME.output.appendLine('');
                         ME.output.appendLine(
@@ -3273,25 +3452,23 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
                                  ME.rootPath)
                         );
 
-                        ME._TIMEOUTS.push(
-                            setTimeout(() => {
-                                ME._isDeployOnChangeFreezed = false;
+                        NEW_STATE['auto']['timeouts'][ KEY_TIMEOUT_DEPLOY_ON_CHANGE ] = deploy_helpers.createTimeout(() => {
+                            ME.isDeployOnChangeFreezed = false;
 
-                                ME.output.appendLine('');
-                                ME.output.appendLine(
-                                    `▶️ `+ 
-                                    ME.t('deploy.onChange.activated',
-                                         ME.rootPath)
-                                );
-                            }, TIME_TO_WAIT_BEFORE_ACTIVATE_DEPLOY_ON_CHANGE)
-                        );
+                            ME.output.appendLine('');
+                            ME.output.appendLine(
+                                `▶️ `+ 
+                                ME.t('deploy.onChange.activated',
+                                     ME.rootPath)
+                            );
+                        }, TIME_TO_WAIT_BEFORE_ACTIVATE_DEPLOY_ON_CHANGE);
                     }
                 }
                 catch (e) {
                     ME.logger
                       .trace(e, 'workspaces.reloadConfiguration(5)');
 
-                    ME._isDeployOnChangeFreezed = false;
+                    ME.isDeployOnChangeFreezed = false;
                 }
 
                 // timeToWaitBeforeActivateRemoveOnChange
@@ -3303,7 +3480,7 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
                         // deactivate 'remove on change'
                         // for a while
 
-                        ME._isRemoveOnChangeFreezed = true;
+                        ME.isRemoveOnChangeFreezed = true;
 
                         ME.output.appendLine('');
                         ME.output.appendLine(
@@ -3313,25 +3490,23 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
                                  ME.rootPath)
                         );
 
-                        ME._TIMEOUTS.push(
-                            setTimeout(() => {
-                                ME._isRemoveOnChangeFreezed = false;
+                        NEW_STATE['auto']['timeouts'][ KEY_TIMEOUT_REMOVE_ON_CHANGE ] = deploy_helpers.createTimeout(() => {
+                            ME.isRemoveOnChangeFreezed = false;
 
-                                ME.output.appendLine('');
-                                ME.output.appendLine(
-                                    `▶️ `+ 
-                                    ME.t('DELETE.onChange.activated',
-                                         ME.rootPath)
-                                );
-                            }, TIME_TO_WAIT_BEFORE_ACTIVATE_REMOVE_ON_CHANGE)
-                        );
+                            ME.output.appendLine('');
+                            ME.output.appendLine(
+                                `▶️ `+ 
+                                ME.t('DELETE.onChange.activated',
+                                     ME.rootPath)
+                            );
+                        }, TIME_TO_WAIT_BEFORE_ACTIVATE_REMOVE_ON_CHANGE);
                     }
                 }
                 catch (e) {
                     ME.logger
                       .trace(e, 'workspaces.reloadConfiguration(6)');
 
-                    ME._isRemoveOnChangeFreezed = false;
+                    ME.isRemoveOnChangeFreezed = false;
                 }
 
                 await ME.reloadPackageButtons();
@@ -3349,10 +3524,11 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
 
                 await ME.reloadTcpProxies();
 
-                // global buttons
+                // buttons
                 await deploy_helpers.applyFuncFor(
                     deploy_buttons.reloadButtons, ME,
                 )();
+                await ME.reloadAutoDeployButtons();
 
                 await ME.initConfigFileWatchers(IMPORTED_LOCAL_FILES);
             };
@@ -4591,6 +4767,76 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
         }
 
         return relativePath;
+    }
+
+    private updateAutoDeployButtons() {
+        const ME = this;
+
+        if (ME.isInFinalizeState) {
+            return;
+        }
+
+        const STATE = ME.workspaceSessionState;
+        if (!STATE) {
+            return;
+        }
+
+        const BUTTONS = STATE['auto']['buttons'];
+        if (!BUTTONS) {
+            return;
+        }
+
+        const UPDATE_BTN = (
+            btn: AutoDeployButton,
+            isFreezed: () => boolean,
+            lang: string,
+        ) => {
+            if (!btn) {
+                return;
+            }
+
+            try {
+                const IS_FREEZED = isFreezed();
+
+                const ICON = IS_FREEZED ? `💤` : `▶️`;
+
+                const LANG_KEY_TEXT = `${lang}.button.text`;
+                const LANG_KEY_TOOLTIP = `${lang}.button.tooltip`;
+
+                let color: string | vscode.ThemeColor = deploy_helpers.normalizeString(btn.settings.color);
+                if ('' === color) {
+                    color = new vscode.ThemeColor("button.foreground");
+                }
+
+                let text = ME.replaceWithValues(btn.settings.text);
+                if (deploy_helpers.isEmptyString(text)) {
+                    text = ME.t(LANG_KEY_TEXT);
+                }
+
+                btn.button.text = `${ICON} ${text}`;
+
+                btn.button.tooltip = ME.replaceWithValues(btn.settings.tooltip);
+                if (deploy_helpers.isEmptyString(btn.button.tooltip)) {
+                    btn.button.tooltip = ME.t(LANG_KEY_TOOLTIP);
+                }
+
+                btn.button.color = color;
+            }
+            catch (e) {
+                deploy_log.CONSOLE
+                          .trace(e, 'workspaces.Workspace.updateAutoDeployButtons(2)');
+            }
+        };
+
+        UPDATE_BTN(BUTTONS[ KEY_AUTO_BTN_DEPLOY_ON_CHANGE ],
+                   () => ME.isDeployOnChangeFreezed,
+                   'deploy.onChange');
+        UPDATE_BTN(BUTTONS[ KEY_AUTO_BTN_DEPLOY_ON_SAVE ],
+                   () => ME.isDeployOnSaveFreezed,
+                   'deploy.onSave');
+        UPDATE_BTN(BUTTONS[ KEY_AUTO_BTN_REMOVE_ON_CHANGE ],
+                   () => ME.isRemoveOnChangeFreezed,
+                   'DELETE.onChange');
     }
 
     private async updateSwitchButtons() {

@@ -261,14 +261,13 @@ export abstract class FTPClientBase extends deploy_clients.AsyncFileListBase {
             return false;
         }
 
-        // check if remote directory exists
+        // check if remote directory exists ...
         if (true === this._existingRemoteDirs[dir]) {
-            return false;
+            return false;  // seems to exist
         }
 
         try {
-            // check if exist
-            await this.list(dir);
+            await this.cwd(dir);
         }
         catch (e) {
             // no, try to create
@@ -1135,13 +1134,8 @@ class JsFTPClient extends FTPClientBase {
             const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
 
             try {
-                ME.connection.list(dir, (err) => {
-                    if (err) {
-                        COMPLETED(err);
-                    }
-                    else {
-                        COMPLETED(null);
-                    }
+                ME.connection.raw("CWD", [ dir ], (err) => {
+                    COMPLETED(err);
                 });
             }
             catch (e) {

@@ -106,6 +106,10 @@ export const translation: Translation = {
         },
         onChange: {
             activated: "Remove on change has been activated for workspace{0:trim,surround,leading_space}.",
+            button: {
+                text: "Remove on change",
+                tooltip: "Click here to activate or deactivate 'remove on change' ..."
+            },
             failed: "Remove on change for{0:trim,surround,leading_space} in{1:trim,surround,leading_space} failed:{2:trim,surround,leading_space}",
             text: "Remove on change",
             waitingBeforeActivate: "Remove on change is deactivated for about{0:trim,leading_space} seconds for workspace{1:trim,surround,leading_space}.",
@@ -195,11 +199,19 @@ export const translation: Translation = {
         },
         onChange: {
             activated: "Deploy on change has been activated for workspace{0:trim,surround,leading_space}.",
+            button: {
+                text: "Deploy on change",
+                tooltip: "Click here to activate or deactivate 'deploy on change' ..."
+            },
             failed: "Deploy on change from{0:trim,surround,leading_space} to{1:trim,surround,leading_space} failed:{2:trim,surround,leading_space}",
             text: "Deploy on change",
             waitingBeforeActivate: "Deploy on change is deactivated for about{0:trim,leading_space} seconds for workspace{1:trim,surround,leading_space}.",
         },
         onSave: {
+            button: {
+                text: "Deploy on save",
+                tooltip: "Click here to activate or deactivate 'deploy on save' ..."
+            },
             failed: "Deploy on save from{0:trim,surround,leading_space} to{1:trim,surround,leading_space} failed:{2:trim,surround,leading_space}",
             text: "Deploy on save",
         },

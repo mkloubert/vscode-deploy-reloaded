@@ -106,6 +106,10 @@ export const translation: Translation = {
         },
         onChange: {
             activated: "Automatisches Löschen wurde für den Arbeitsbereich{0:trim,surround,leading_space} aktiviert.",
+            button: {
+                text: "Automatisches Löschen",
+                tooltip: "Hier klicken, um 'Automatisches Löschen' zu aktivieren bzw. zu deaktivieren ..."
+            },
             failed: "Das automatische Löschen von{0:trim,surround,leading_space} in{1:trim,surround,leading_space} ist fehlgeschlagen:{2:trim,surround,leading_space}",
             text: "Automatisches Löschen",
             waitingBeforeActivate: "Automatisches Löschen wird für ca.{0:trim,leading_space} Sekunden für den Arbeitsbereich{1:trim,surround,leading_space} deaktiviert.",
@@ -195,11 +199,19 @@ export const translation: Translation = {
         },
         onChange: {
             activated: "Das Bereitstellen nach dem Ändern wurde für den Arbeitsbereich{0:trim,surround,leading_space} aktiviert.",
+            button: {
+                text: "Automatisches Bereitstellen nach dem Ändern",
+                tooltip: "Hier klicken, um 'Automatisches Bereitstellen nach dem Ändern' zu aktivieren bzw. zu deaktivieren ..."
+            },
             failed: "Das Bereitstellen nach dem Ändern von{0:trim,surround,leading_space} nach{1:trim,surround,leading_space} ist fehlgeschlagen:{2:trim,surround,leading_space}",
             text: "Bereitstellen beim Ändern",
             waitingBeforeActivate: "Das Bereitstellen nach dem Ändern wird für ca.{0:trim,leading_space} Sekunden für den Arbeitsbereich{1:trim,surround,leading_space} deaktiviert.",
         },
         onSave: {
+            button: {
+                text: "Automatisches Bereitstellen nach dem Speichern",
+                tooltip: "Hier klicken, um 'Automatisches Bereitstellen nach dem Speichern' zu aktivieren bzw. zu deaktivieren ..."
+            },
             failed: "Das Bereitstellen nach dem Speichern von{0:trim,surround,leading_space} nach{1:trim,surround,leading_space} ist fehlgeschlagen:{2:trim,surround,leading_space}",
             text: "Bereitstellen nach dem Speichern",
         },

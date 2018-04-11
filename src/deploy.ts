@@ -986,20 +986,72 @@ export async function deployPackage(pkg: deploy_packages.Package, targetResolver
  * @param {string} file The file to check. 
  */
 export async function deployOnChange(file: string) {
-    const ME: deploy_workspaces.Workspace = this;
+    const WORKSPACE: deploy_workspaces.Workspace = this;
 
-    return await deploy_helpers.applyFuncFor(
-        deploy_packages.autoDeployFile,
-        ME
-    )(file,
-     (pkg) => pkg.deployOnChange,
-     (pkg) => {
-         return deploy_packages.getFastFileCheckFlag(
-             pkg, (p) => p.fastCheckOnChange,
-             ME.config, (c) => c.fastCheckOnChange,
-         );
-     },
-     'deploy.onChange.failed');
+    if (WORKSPACE.isInFinalizeState) {
+        return;
+    }
+
+    const CFG = WORKSPACE.config;
+    if (!CFG) {
+        return;
+    }
+    
+    const STATE = WORKSPACE.workspaceSessionState;
+    if (!STATE) {
+        return;
+    }
+
+    const KEY = Path.resolve(file);
+
+    const FILES_IN_PROGRESS = STATE['auto']['deploy']['on_change_or_save'];
+
+    if (true === FILES_IN_PROGRESS[KEY]) {
+        return;
+    }
+
+    FILES_IN_PROGRESS[KEY] = true;
+    const RESTORE_IN_PROGRESS_STATE = () => {
+        delete FILES_IN_PROGRESS[KEY];
+    };
+
+    let pauseFilesFor: number;
+    const FINISHED = async () => {
+        deploy_helpers.tryDisposeAndDelete(STATE['auto'], deploy_packages.KEY_PAUSE_FILES_FOR);
+
+        if (isNaN(pauseFilesFor)) {
+            RESTORE_IN_PROGRESS_STATE();
+        }
+        else {
+            STATE['auto'][ deploy_packages.KEY_PAUSE_FILES_FOR ] = deploy_helpers.createTimeout(() => {
+                RESTORE_IN_PROGRESS_STATE();
+            }, pauseFilesFor);
+        }
+    };
+
+    try {
+        const OPTS: deploy_packages.AutoDeployFileOptions = {
+            file: file,
+            settingsResolver: (pkg) => pkg.deployOnChange,
+            fastFileCheckFlagResolver: (pkg) => {
+                return deploy_packages.getFastFileCheckFlag(
+                    pkg, (p) => p.fastCheckOnChange,
+                    CFG, (c) => c.fastCheckOnChange,
+                );
+            },
+            errorMsgTemplate: 'deploy.onChange.failed',
+            prepareForPackage: (pkg) => {
+                pauseFilesFor = deploy_packages.getPauseFilesForValue(pkg, pauseFilesFor);
+            },
+        };
+    
+        await deploy_helpers.applyFuncFor(
+            deploy_packages.autoDeployFile, WORKSPACE
+        )(OPTS);
+    }
+    finally {
+        await FINISHED();
+    }
 }
 
 /**
@@ -1008,20 +1060,72 @@ export async function deployOnChange(file: string) {
  * @param {string} file The file to check. 
  */
 export async function deployOnSave(file: string) {
-    const ME: deploy_workspaces.Workspace = this;
+    const WORKSPACE: deploy_workspaces.Workspace = this;
 
-    return await deploy_helpers.applyFuncFor(
-        deploy_packages.autoDeployFile,
-        ME
-    )(file,
-     (pkg) => pkg.deployOnSave,
-     (pkg) => {
-        return deploy_packages.getFastFileCheckFlag(
-            pkg, (p) => p.fastCheckOnSave,
-            ME.config, (c) => c.fastCheckOnSave,
-        );
-     },
-     'deploy.onSave.failed');
+    if (WORKSPACE.isInFinalizeState) {
+        return;
+    }
+
+    const CFG = WORKSPACE.config;
+    if (!CFG) {
+        return;
+    }
+
+    const STATE = WORKSPACE.workspaceSessionState;
+    if (!STATE) {
+        return;
+    }
+
+    const KEY = Path.resolve(file);
+    
+    const FILES_IN_PROGRESS = STATE['auto']['deploy']['on_change_or_save'];
+
+    if (true === FILES_IN_PROGRESS[KEY]) {
+        return;
+    }
+
+    FILES_IN_PROGRESS[KEY] = true;
+    const RESTORE_IN_PROGRESS_STATE = () => {
+        delete FILES_IN_PROGRESS[KEY];
+    };
+
+    let pauseFilesFor: number;
+    const FINISHED = async () => {
+        deploy_helpers.tryDisposeAndDelete(STATE['auto'], deploy_packages.KEY_PAUSE_FILES_FOR);
+
+        if (isNaN(pauseFilesFor)) {
+            RESTORE_IN_PROGRESS_STATE();
+        }
+        else {
+            STATE['auto'][ deploy_packages.KEY_PAUSE_FILES_FOR ] = deploy_helpers.createTimeout(() => {
+                RESTORE_IN_PROGRESS_STATE();
+            }, pauseFilesFor);
+        }
+    };
+
+    try {
+        const OPTS: deploy_packages.AutoDeployFileOptions = {
+            file: file,
+            settingsResolver: (pkg) => pkg.deployOnSave,
+            fastFileCheckFlagResolver: (pkg) => {
+                return deploy_packages.getFastFileCheckFlag(
+                    pkg, (p) => p.fastCheckOnSave,
+                    CFG, (c) => c.fastCheckOnSave,
+                );
+            },
+            errorMsgTemplate: 'deploy.onSave.failed',
+            prepareForPackage: (pkg) => {
+                pauseFilesFor = deploy_packages.getPauseFilesForValue(pkg, pauseFilesFor);
+            },
+        };
+    
+        await deploy_helpers.applyFuncFor(
+            deploy_packages.autoDeployFile, WORKSPACE
+        )(OPTS);
+    }
+    finally {
+        await FINISHED();
+    }
 }
 
 /**

@@ -164,9 +164,17 @@ export interface Configuration extends deploy_packages.WithFastFileCheckSettings
      */
     readonly deployOnChange?: boolean;
     /**
+     * Shows a button that (de-)activate "deploy on change" feature.
+     */
+    readonly deployOnChangeButton?: deploy_buttons.DeployOnChangeButtonValue;
+    /**
      * Activates or deactivates 'deploy on save' feature for all packages.
      */
     readonly deployOnSave?: boolean;
+    /**
+     * Shows a button that can (de-)activate "deploy on save" feature.
+     */
+    readonly deployOnSaveButton?: deploy_buttons.DeployOnSaveButtonValue;
     /**
      * Settings for the process's environment.
      */
@@ -249,6 +257,10 @@ export interface Configuration extends deploy_packages.WithFastFileCheckSettings
      * Activates or deactivates "remove on change" feature for all packages.
      */
     readonly removeOnChange?: boolean;
+    /**
+     * Shows a button that (de-)activate "remove on change" feature.
+     */    
+    readonly removeOnChangeButton?: deploy_buttons.RemoveOnChangeButtonValue;
     /**
      * Run build task on startup or define the wait time, in milliseconds, after
      * the build task should be run after startup.

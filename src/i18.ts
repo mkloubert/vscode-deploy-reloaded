@@ -111,6 +111,10 @@ export interface Translation {
         };
         onChange?: {
             activated?: string;
+            button?: {
+                text?: string;
+                tooltip?: string;
+            };
             failed?: string;
             text?: string;
             waitingBeforeActivate?: string;
@@ -199,12 +203,20 @@ export interface Translation {
             };
         };
         onChange?: {
+            button?: {
+                text?: string;
+                tooltip?: string;
+            };
             activated?: string;
             failed?: string;
             text?: string;
             waitingBeforeActivate?: string;
         };
         onSave?: {
+            button?: {
+                text?: string;
+                tooltip?: string;
+            };
             failed?: string;
             text?: string;
         };

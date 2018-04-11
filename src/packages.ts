@@ -35,6 +35,32 @@ import * as vscode from 'vscode';
 
 
 /**
+ * Options for 'autoDeployFile()' function.
+ */
+export interface AutoDeployFileOptions {
+    /**
+     * @param {string} errorMsgTemplate The template for an error message.
+     */
+    readonly errorMsgTemplate: string;
+    /**
+     * A custom "fast file check" resolver.
+     */
+    readonly fastFileCheckFlagResolver: PackageFastFileCheckFlagResolver;
+    /**
+     * The file to check.
+     */
+    readonly file: string;
+    /**
+     * Prepares something for a package.
+     */
+    readonly prepareForPackage?: PrepareForPackage;
+    /**
+     * The settings resolver.
+     */
+    readonly settingsResolver: PackageDeploySettingsResolver;
+}
+
+/**
  * A package.
  */
 export interface Package extends deploy_values.Applyable,
@@ -72,6 +98,10 @@ export interface Package extends deploy_values.Applyable,
      * Settings for importing files via git.
      */
     readonly git?: PackageDeploySettingValue;
+    /**
+     * The number of milliseconds to wait before an auto operation can be done for a file again.
+     */
+    readonly pauseFilesFor?: number;
     /**
      * Deletes a file of this package, if it has been deleted from a workspace.
      */
@@ -163,6 +193,13 @@ export interface PackageGitSettings extends deploy_contracts.FileFilter {
 export type PackageDeploySettingValue = string | PackageGitSettings;
 
 /**
+ * A function that should be invoked to prepare something for a package.
+ * 
+ * @param {Package} The underlying package.
+ */
+export type PrepareForPackage = (pkg: Package) => void | PromiseLike<void>;
+
+/**
  * Stores settings for 'sync when open' feature.
  */
 export interface SyncWhenOpenSetting extends deploy_contracts.FileFilter {
@@ -191,43 +228,42 @@ export interface WithFastFileCheckSettings {
 }
 
 const AUTO_DEPLOY_STATES: deploy_contracts.KeyValuePairs<deploy_targets.Target> = {};
+/**
+ * The name of a key for 'pauseFilesFor' data.
+ */
+export const KEY_PAUSE_FILES_FOR = 'pauseFilesFor';
 const KEY_PACKAGE_USAGE = 'vscdrLastExecutedPackageActions';
 
 /**
  * Handles an "auto deploy" of a file.
  * 
- * @param {string} file The file to check. 
- * @param {PackageDeploySettingsResolver} settingsResolver The settings resolver.
- * @param {PackageFastFileCheckFlagResolver} fastFileCheckFlagResolver A custom "fast file check" resolver.
- * @param {string} errorMsgTemplate The template for an error message.
+ * @param {AutoDeployFileOptions} opts Options.
  */
-export async function autoDeployFile(file: string,
-                                     settingsResolver: PackageDeploySettingsResolver,
-                                     fastFileCheckFlagResolver: PackageFastFileCheckFlagResolver,
-                                     errorMsgTemplate: string) {
-    const ME: deploy_workspaces.Workspace = this;
+export async function autoDeployFile(opts: AutoDeployFileOptions) {
+    const WORKSPACE: deploy_workspaces.Workspace = this;
 
     try {
         const TARGETS = await deploy_helpers.applyFuncFor(
-            findTargetsForFileOfPackage, ME
-        )(file,
-          settingsResolver,
-          fastFileCheckFlagResolver);
+            findTargetsForFileOfPackage, WORKSPACE
+        )(opts.file,
+          opts.settingsResolver,
+          opts.fastFileCheckFlagResolver,
+          opts.prepareForPackage);
         if (false === TARGETS) {
             return;
         }
 
-        for (const T of Enumerable.from(TARGETS).distinct(true)) {
+        for (const T of deploy_helpers.from(TARGETS).distinct(true)) {
             await invokeForAutoTargetOperation(T, async (target) => {
                 const TARGET_NAME = deploy_targets.getTargetName(target);
                 
                 try {
-                    await ME.deployFileTo(file, target);
+                    await WORKSPACE.deployFileTo(opts.file, target);
                 }
                 catch (e) {
-                    ME.showErrorMessage(
-                        ME.t(errorMsgTemplate,
-                             file, TARGET_NAME, e)
+                    WORKSPACE.showErrorMessage(
+                        WORKSPACE.t(opts.errorMsgTemplate,
+                                    opts.file, TARGET_NAME, e)
                     );
                 }
             });
@@ -245,6 +281,7 @@ export async function autoDeployFile(file: string,
  * @param {string} file The path to the file.
  * @param {PackageDeploySettingsResolver} settingsResolver The resolver for the settings.
  * @param {PackageFastFileCheckFlagResolver} fastFileCheckFlagResolver A custom "fast file check" resolver.
+ * @param {PrepareForPackage} [prepareForPackage] A function that prepares something for a package.
  * 
  * @return {Promise<deploy_targets.Target[]>|false} The List of targets or (false) if at least one target name could not be resolved.
  */
@@ -252,6 +289,7 @@ export async function findTargetsForFileOfPackage(
     file: string,
     settingsResolver: PackageDeploySettingsResolver,
     fastFileCheckFlagResolver: PackageFastFileCheckFlagResolver,
+    prepareForPackage?: PrepareForPackage,
 ): Promise<deploy_targets.Target[] | false>
 {
     const ME: deploy_workspaces.Workspace = this;
@@ -266,11 +304,17 @@ export async function findTargetsForFileOfPackage(
     const KNOWN_TARGETS = ME.getTargets();
 
     const TARGETS: deploy_targets.Target[] = [];
-    for (let pkg of ME.getPackages()) {
+    for (const PKG of ME.getPackages()) {
+        if (prepareForPackage) {
+            await Promise.resolve(
+                prepareForPackage(PKG)
+            );
+        }
+
         let settings: PackageDeploySettings;
         if (settingsResolver) {
             settings = await Promise.resolve(
-                settingsResolver(pkg)
+                settingsResolver(PKG)
             );
         }
 
@@ -287,17 +331,17 @@ export async function findTargetsForFileOfPackage(
             targetNames = deploy_helpers.asArray(settings.targets);
             if (targetNames.length < 1) {
                 // nothing defined => take from package
-                targetNames = deploy_helpers.asArray(pkg.targets);
+                targetNames = deploy_helpers.asArray(PKG.targets);
             }
         }
         else if (deploy_helpers.isBool(settings)) {
             if (true === settings) {
-                filter = pkg;
-                targetNames = pkg.targets;
+                filter = PKG;
+                targetNames = PKG.targets;
             }
         }
         else {
-            filter = pkg;
+            filter = PKG;
             targetNames = settings;
         }
 
@@ -322,7 +366,7 @@ export async function findTargetsForFileOfPackage(
 
         const FAST_FILE_CHECK = deploy_helpers.toBooleanSafe(
             await Promise.resolve(
-                fastFileCheckFlagResolver(pkg)
+                fastFileCheckFlagResolver(PKG)
             )
         );
 
@@ -344,8 +388,8 @@ export async function findTargetsForFileOfPackage(
         }
         else {
             fileListResolver = async () => {
-                let fileList = await ME.findFilesByFilter(pkg);
-                if (filter !== pkg) {
+                let fileList = await ME.findFilesByFilter(PKG);
+                if (filter !== PKG) {
                     fileList = fileList.filter(f => {
                         const REL_PATH = ME.toRelativePath(f);
                         if (false !== REL_PATH) {
@@ -466,6 +510,35 @@ export function getPackageName(pkg: Package): string {
     }
 
     return name;
+}
+
+/**
+ * Returns the (next) 'pauseFilesFor' value by a package.
+ * 
+ * @param {Package} pkg The current package.
+ * @param {number} currentValue The current value.
+ * 
+ * @return {number} The new value.
+ */
+export function getPauseFilesForValue(pkg: Package, currentValue: number): number {
+    if (pkg) {
+        const NEW_VALUE = parseInt(
+            deploy_helpers.toStringSafe( pkg.pauseFilesFor ).trim()
+        );
+        
+        if (!isNaN(NEW_VALUE) && NEW_VALUE > 0) {
+            if (isNaN(currentValue)) {
+                currentValue = NEW_VALUE;  // not set yet
+            }
+            else {
+                if (NEW_VALUE > currentValue) {
+                    currentValue = NEW_VALUE;  // only if greater
+                }
+            }
+        }
+    }
+
+    return currentValue;
 }
 
 /**
@@ -957,34 +1030,74 @@ export function preparePackageForFileFilter<TPackage extends Package = Package>(
  * @param {string} file The file to check.
  */
 export async function removeOnChange(file: string) {
-    const ME: deploy_workspaces.Workspace = this;
+    const WORKSPACE: deploy_workspaces.Workspace = this;
 
-    if (ME.isInFinalizeState) {
+    if (WORKSPACE.isInFinalizeState) {
         return;
     }
 
+    const CFG = WORKSPACE.config;
+    if (!CFG) {
+        return;
+    }
+    
+    const STATE = WORKSPACE.workspaceSessionState;
+    if (!STATE) {
+        return;
+    }
+
+    const KEY = Path.resolve(file);
+
+    const FILES_IN_PROGRESS = STATE['auto']['remove']['on_change'];
+
+    if (true === FILES_IN_PROGRESS[KEY]) {
+        return;
+    }
+
+    FILES_IN_PROGRESS[KEY] = true;
+    const RESTORE_IN_PROGRESS_STATE = () => {
+        delete FILES_IN_PROGRESS[KEY];
+    };
+
+    let pauseFilesFor: number;
+    const FINISHED = async () => {
+        deploy_helpers.tryDisposeAndDelete(STATE['auto'], KEY_PAUSE_FILES_FOR);
+
+        if (isNaN(pauseFilesFor)) {
+            RESTORE_IN_PROGRESS_STATE();
+        }
+        else {
+            STATE['auto'][ KEY_PAUSE_FILES_FOR ] = deploy_helpers.createTimeout(() => {
+                RESTORE_IN_PROGRESS_STATE();
+            }, pauseFilesFor);
+        }
+    };
+
     try {
         const TARGETS = await deploy_helpers.applyFuncFor(
-            findTargetsForFileOfPackage, ME
+            findTargetsForFileOfPackage, WORKSPACE
         )(file,
           (pkg) => pkg.removeOnChange,
-          (pkg) => true);
+          (pkg) => true,
+          (pkg) => {
+              pauseFilesFor = getPauseFilesForValue(pkg, pauseFilesFor);
+          });
 
         if (false === TARGETS) {
             return;
         }
 
-        for (const T of Enumerable.from(TARGETS).distinct(true)) {
+        for (const T of deploy_helpers.from(TARGETS).distinct(true)) {
             await invokeForAutoTargetOperation(T, async (target) => {
                 const TARGET_NAME = deploy_targets.getTargetName(target);
 
                 try {
-                    await ME.deleteFileIn(file, target, false);
+                    await WORKSPACE.deleteFileIn(file, target, false);
                 }
                 catch (e) {
-                    ME.showErrorMessage(
-                        ME.t('DELETE.onChange.failed',
-                             file, TARGET_NAME, e)
+                    WORKSPACE.showErrorMessage(
+                        WORKSPACE.t('DELETE.onChange.failed',
+                                    file, TARGET_NAME, e)
                     );
                 }
             });
@@ -993,6 +1106,9 @@ export async function removeOnChange(file: string) {
     catch (e) {
         deploy_log.CONSOLE
                   .trace(e, 'delete.removeOnChange()');
+    }
+    finally {
+        await FINISHED();        
     }
 }
 
