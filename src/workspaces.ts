@@ -1019,6 +1019,8 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
         deploy_helpers.tryDisposeAndDelete(BUTTONS, KEY_AUTO_BTN_DEPLOY_ON_CHANGE);
         deploy_helpers.tryDisposeAndDelete(BUTTONS, KEY_AUTO_BTN_DEPLOY_ON_SAVE);
         deploy_helpers.tryDisposeAndDelete(BUTTONS, KEY_AUTO_BTN_REMOVE_ON_CHANGE);
+        
+        deploy_helpers.tryDisposeAndDelete(STATE['auto'], deploy_packages.KEY_PAUSE_FILES_FOR);
     }
 
     private disposeConfigFileWatchers() {
