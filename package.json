@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.72.1",
+ "version": "0.73.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.22.0"
@@ -1069,6 +1069,11 @@
          "if": {
           "description": "(JavaScript) Code, which indicates, if entry is available or not.",
           "type": "string"
+         },
+         "isHidden": {
+          "description": "Hide package in the GUI or not.",
+          "type": "boolean",
+          "default": false
          },
          "name": {
           "description": "A (display) name for that package.",
@@ -4034,6 +4039,11 @@
            },
            "inputScriptOptions": {
             "description": "Options for the input script."
+           },
+           "isHidden": {
+            "description": "Hide target in the GUI or not.",
+            "type": "boolean",
+            "default": false
            },
            "mappings": {
             "description": "Defines one or more folder mappings by minimatch patterns.",
@@ -7718,6 +7728,11 @@
             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
             "type": "string"
            },
+           "isHidden": {
+            "description": "Hide target in the GUI or not.",
+            "type": "boolean",
+            "default": false
+           },
            "mappings": {
             "description": "Defines one or more folder mappings by minimatch patterns.",
             "type": "object",
@@ -11331,6 +11346,11 @@
            "if": {
             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
             "type": "string"
+           },
+           "isHidden": {
+            "description": "Hide target in the GUI or not.",
+            "type": "boolean",
+            "default": false
            },
            "mappings": {
             "description": "Defines one or more folder mappings by minimatch patterns.",
@@ -14973,6 +14993,11 @@
             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
             "type": "string"
            },
+           "isHidden": {
+            "description": "Hide target in the GUI or not.",
+            "type": "boolean",
+            "default": false
+           },
            "mappings": {
             "description": "Defines one or more folder mappings by minimatch patterns.",
             "type": "object",
@@ -18593,6 +18618,11 @@
            "if": {
             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
             "type": "string"
+           },
+           "isHidden": {
+            "description": "Hide target in the GUI or not.",
+            "type": "boolean",
+            "default": false
            },
            "mappings": {
             "description": "Defines one or more folder mappings by minimatch patterns.",
@@ -22225,6 +22255,11 @@
            "if": {
             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
             "type": "string"
+           },
+           "isHidden": {
+            "description": "Hide target in the GUI or not.",
+            "type": "boolean",
+            "default": false
            },
            "mappings": {
             "description": "Defines one or more folder mappings by minimatch patterns.",
@@ -26118,6 +26153,11 @@
             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
             "type": "string"
            },
+           "isHidden": {
+            "description": "Hide target in the GUI or not.",
+            "type": "boolean",
+            "default": false
+           },
            "mappings": {
             "description": "Defines one or more folder mappings by minimatch patterns.",
             "type": "object",
@@ -27314,6 +27354,11 @@
              "description": "A name of a package.",
              "type": "string"
             }
+           },
+           "supportsDeepDirectoryCreation": {
+            "type": "boolean",
+            "description": "Server supports deep directory creation or not.",
+            "default": false
            },
            "transformer": {
             "description": "The path (or URI) to the data transformer script.",
@@ -29790,6 +29835,11 @@
            "if": {
             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
             "type": "string"
+           },
+           "isHidden": {
+            "description": "Hide target in the GUI or not.",
+            "type": "boolean",
+            "default": false
            },
            "mappings": {
             "description": "Defines one or more folder mappings by minimatch patterns.",
@@ -33422,6 +33472,11 @@
             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
             "type": "string"
            },
+           "isHidden": {
+            "description": "Hide target in the GUI or not.",
+            "type": "boolean",
+            "default": false
+           },
            "mappings": {
             "description": "Defines one or more folder mappings by minimatch patterns.",
             "type": "object",
@@ -37045,6 +37100,11 @@
            "ignoreTLS": {
             "type": "boolean",
             "description": "Ignore TLS or not.",
+            "default": false
+           },
+           "isHidden": {
+            "description": "Hide target in the GUI or not.",
+            "type": "boolean",
             "default": false
            },
            "mappings": {
@@ -40723,6 +40783,11 @@
             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
             "type": "string"
            },
+           "isHidden": {
+            "description": "Hide target in the GUI or not.",
+            "type": "boolean",
+            "default": false
+           },
            "mappings": {
             "description": "Defines one or more folder mappings by minimatch patterns.",
             "type": "object",
@@ -44343,6 +44408,11 @@
            "if": {
             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
             "type": "string"
+           },
+           "isHidden": {
+            "description": "Hide target in the GUI or not.",
+            "type": "boolean",
+            "default": false
            },
            "mappings": {
             "description": "Defines one or more folder mappings by minimatch patterns.",
@@ -48111,6 +48181,11 @@
             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
             "type": "string"
            },
+           "isHidden": {
+            "description": "Hide target in the GUI or not.",
+            "type": "boolean",
+            "default": false
+           },
            "mappings": {
             "description": "Defines one or more folder mappings by minimatch patterns.",
             "type": "object",
@@ -51727,6 +51802,11 @@
            "if": {
             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
             "type": "string"
+           },
+           "isHidden": {
+            "description": "Hide target in the GUI or not.",
+            "type": "boolean",
+            "default": false
            },
            "mappings": {
             "description": "Defines one or more folder mappings by minimatch patterns.",
@@ -55628,6 +55708,11 @@
             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
             "type": "string"
            },
+           "isHidden": {
+            "description": "Hide target in the GUI or not.",
+            "type": "boolean",
+            "default": false
+           },
            "mappings": {
             "description": "Defines one or more folder mappings by minimatch patterns.",
             "type": "object",
@@ -56857,6 +56942,11 @@
              "description": "A name of a package.",
              "type": "string"
             }
+           },
+           "supportsDeepDirectoryCreation": {
+            "type": "boolean",
+            "description": "Server supports deep directory creation or not.",
+            "default": false
            },
            "transformer": {
             "description": "The path (or URI) to the data transformer script.",
@@ -59305,6 +59395,11 @@
            "if": {
             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
             "type": "string"
+           },
+           "isHidden": {
+            "description": "Hide target in the GUI or not.",
+            "type": "boolean",
+            "default": false
            },
            "mappings": {
             "description": "Defines one or more folder mappings by minimatch patterns.",
@@ -62970,6 +63065,11 @@
            "if": {
             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
             "type": "string"
+           },
+           "isHidden": {
+            "description": "Hide target in the GUI or not.",
+            "type": "boolean",
+            "default": false
            },
            "mappings": {
             "description": "Defines one or more folder mappings by minimatch patterns.",
@@ -66643,6 +66743,11 @@
             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
             "type": "string"
            },
+           "isHidden": {
+            "description": "Hide target in the GUI or not.",
+            "type": "boolean",
+            "default": false
+           },
            "mappings": {
             "description": "Defines one or more folder mappings by minimatch patterns.",
             "type": "object",
@@ -70260,6 +70365,11 @@
            "if": {
             "description": "(JavaScript) Code, which indicates, if entry is available or not.",
             "type": "string"
+           },
+           "isHidden": {
+            "description": "Hide target in the GUI or not.",
+            "type": "boolean",
+            "default": false
            },
            "mappings": {
             "description": "Defines one or more folder mappings by minimatch patterns.",

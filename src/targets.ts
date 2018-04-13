@@ -137,6 +137,7 @@ export type PrepareTargetOperationValue = PrepareTargetOperation | string;
  * A target.
  */
 export interface Target extends deploy_values.Applyable,
+                                deploy_contracts.CanHide,
                                 deploy_transformers.CanTransformData,
                                 deploy_contracts.ConditionalItem,
                                 deploy_contracts.Encryptable,
@@ -1272,7 +1273,9 @@ export function resetTargetUsage(context: vscode.ExtensionContext) {
 export async function showTargetQuickPick(context: vscode.ExtensionContext,
                                           targets: Target | Target[],
                                           opts?: vscode.QuickPickOptions): Promise<Target | false> {
-    const QUICK_PICKS: deploy_contracts.ActionQuickPick<string>[] = deploy_helpers.asArray(targets).map(t => {
+    const QUICK_PICKS: deploy_contracts.ActionQuickPick<string>[] = deploy_helpers.asArray(targets).filter(f => {
+        return !deploy_helpers.toBooleanSafe(f.isHidden);
+    }).map(t => {
         const WORKSPACE = t.__workspace;
 
         return {

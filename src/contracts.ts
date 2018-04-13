@@ -96,6 +96,16 @@ export interface Cancelable {
 }
 
 /**
+ * An object that can be hidden.
+ */
+export interface CanHide {
+    /**
+     * Is hidden or not.
+     */
+    readonly isHidden?: boolean;
+}
+
+/**
  * Possible values for a 'checkForRequirements' setting.
  */
 export type CheckForRequirementsEntry = string | CheckForRequirementsSettings;

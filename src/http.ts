@@ -15,6 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as deploy_contracts from './contracts';
 import * as deploy_helpers from './helpers';
 import * as HTTP from 'http';
 import * as HTTPs from 'https';
@@ -30,34 +31,28 @@ export interface RequestOptions extends HTTP.RequestOptions {
     /**
      * The maximum number of redirections.
      */
-    maximumRedirections?: number;
+    readonly maximumRedirections?: number;
     /**
      * Do not redirect automatically.
      */
-    noRedirect?: boolean;
+    readonly noRedirect?: boolean;
     /**
      * Raise error on 4xx status code or not.
      */
-    raiseOnClientError?: boolean;
+    readonly raiseOnClientError?: boolean;
     /**
      * Raise error on 5xx status code or not.
      */
-    raiseOnServerError?: boolean;
+    readonly raiseOnServerError?: boolean;
     /**
      * Raise error on status code that is greater than 599 or less than 200. Default: (true)
      */
-    raiseOnUnsupportedResponse?: boolean;
+    readonly raiseOnUnsupportedResponse?: boolean;
     /**
      * Function or data for setting up the request.
      */
-    setup?: any;
+    readonly setup?: any;
 }
-
-
-/**
- * Stores the address of the default host.
- */
-export const DEFAULT_HOST = '127.0.0.1';
 
 
 /**
@@ -106,7 +101,7 @@ function requestInner(url: string | URL.Url, opts: RequestOptions,
             if (!deploy_helpers.isObject<URL.Url>(url)) {
                 url = deploy_helpers.toStringSafe(url);
                 if (deploy_helpers.isEmptyString(url)) {
-                    url = `http://${DEFAULT_HOST}/`;
+                    url = `http://${deploy_contracts.DEFAULT_HOST}/`;
                 }
 
                 url = URL.parse(url);
@@ -150,7 +145,7 @@ function requestInner(url: string | URL.Url, opts: RequestOptions,
             DEFAULT_OPTS.port = port;
 
             if (deploy_helpers.isEmptyString(DEFAULT_OPTS.hostname)) {
-                DEFAULT_OPTS.hostname = DEFAULT_HOST;
+                DEFAULT_OPTS.hostname = deploy_contracts.DEFAULT_HOST;
             }
 
             const FINAL_REQUEST_OPTS: RequestOptions = MergeDeep(DEFAULT_OPTS, opts);

@@ -64,6 +64,7 @@ export interface AutoDeployFileOptions {
  * A package.
  */
 export interface Package extends deploy_values.Applyable,
+                                 deploy_contracts.CanHide,
                                  deploy_contracts.ConditionalItem,
                                  deploy_contracts.FileFilter,
                                  deploy_contracts.PlatformItem,
@@ -1138,7 +1139,9 @@ export function resetPackageUsage(context: vscode.ExtensionContext) {
 export async function showPackageQuickPick(context: vscode.ExtensionContext,
                                            packages: Package | Package[],
                                            opts?: vscode.QuickPickOptions): Promise<Package | false> {
-    const QUICK_PICKS: deploy_contracts.ActionQuickPick<string>[] = deploy_helpers.asArray(packages).map(pkg => {
+    const QUICK_PICKS: deploy_contracts.ActionQuickPick<string>[] = deploy_helpers.asArray(packages).filter(pkg => {
+        return !deploy_helpers.toBooleanSafe(pkg.isHidden);
+    }).map(pkg => {
         const WORKSPACE = pkg.__workspace;
 
         return {
