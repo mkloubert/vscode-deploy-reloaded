@@ -314,7 +314,7 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
         }, {
             cancellable: true,
             location: vscode.ProgressLocation.Notification,
-            title: `[${TARGET_NAME}]`,
+            title: `🔍 [${TARGET_NAME}]`,
         });
 
         if (false === FILES_AND_FOLDERS) {
@@ -658,8 +658,8 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
                             }, {
                                 cancellable: true,
                                 location: vscode.ProgressLocation.Notification,
-                                title: ME.t('listDirectory.removeFolder.removing',
-                                            exportPath)
+                                title: `💣 ` + ME.t('listDirectory.removeFolder.removing',
+                                                    exportPath)
                             });
                         },
 
@@ -974,13 +974,10 @@ async function removeFolder(
     target: deploy_targets.Target, dir: string,
     progress: deploy_helpers.ProgressContext,
 ) {
-    const WORKSPACE = target.__workspace;
-
-    const PROGRESS_MSG = WORKSPACE.t('listDirectory.removeFolder.removing',
-                                     dir);
+    const TARGET_NAME = deploy_targets.getTargetName(target);
+    const WORKSPACE = target.__workspace;    
 
     WORKSPACE.output.appendLine('');
-    WORKSPACE.output.append(PROGRESS_MSG + ' ');
 
     try {
         const PLUGINS = WORKSPACE.getRemoveFolderPlugins(target);
@@ -991,6 +988,16 @@ async function removeFolder(
             });
         };
 
+        let watch: deploy_helpers.StopWatch;
+        const START_WATCH = () => watch = deploy_helpers.startWatch();
+        const STOP_WATCH = () => {
+            if (watch) {
+                WORKSPACE.output.appendLine(` [${watch.stop()} ms]`);
+            }
+
+            watch = null;
+        };
+
         for (let i = 0; i < PLUGINS.length; i++) {
             if (progress.cancellationToken.isCancellationRequested) {
                 break;
@@ -998,24 +1005,59 @@ async function removeFolder(
 
             const P = PLUGINS[i];
     
-            UPDATE_PROGRESS(PROGRESS_MSG);
+            const FOLDER_TO_REMOVE = new deploy_plugins.SimpleFolderToRemove(
+                WORKSPACE,
+                undefined,
+                {
+                    name: deploy_helpers.normalizePath(
+                        Path.basename(dir)
+                    ),
+                    path: deploy_helpers.normalizePath(
+                        Path.dirname(dir)
+                    ),
+                }
+            );
+
+            FOLDER_TO_REMOVE.onBeforeRemove = async (destination?) => {
+                const NOW = deploy_helpers.now();
+
+                if (arguments.length < 1) {
+                    destination = FOLDER_TO_REMOVE.path;
+                }
+                destination = `${deploy_helpers.toStringSafe(destination)} (${TARGET_NAME})`;
+
+                const PROGRESS_MSG = `💣 ` +
+                                     WORKSPACE.t('listDirectory.currentFileOrFolder.removeFolder.removing',
+                                                 dir);
+
+                WORKSPACE.output.append(
+                    `[${NOW.format( WORKSPACE.t('time.timeWithSeconds') )}] ` + 
+                    PROGRESS_MSG + ' '
+                );
+
+                UPDATE_PROGRESS( PROGRESS_MSG );
+
+                if (progress.cancellationToken.isCancellationRequested) {
+                    WORKSPACE.output.appendLine(`✖️`);
+                }
+                else {
+                    START_WATCH();
+                }
+            };
+            FOLDER_TO_REMOVE.onRemoveCompleted = async (err?, deleteLocal?) => {
+                if (err) {
+                    WORKSPACE.output.append(`🔥: '${ deploy_helpers.toStringSafe(err) }'`);
+                }
+                else {
+                    WORKSPACE.output.append(`✅`);
+                }
+
+                STOP_WATCH();
+            };
 
             const CTX: deploy_plugins.RemoveFoldersContext = {
                 cancellationToken: progress.cancellationToken,
-                folders: [
-                    new deploy_plugins.SimpleFolderToRemove(
-                        WORKSPACE,
-                        undefined,
-                        {
-                            name: deploy_helpers.normalizePath(
-                                Path.basename(dir)
-                            ),
-                            path: deploy_helpers.normalizePath(
-                                Path.dirname(dir)
-                            ),
-                        }
-                    )
-                ],
+                folders: [ FOLDER_TO_REMOVE ],
                 isCancelling: undefined,
                 target: target,
             };
@@ -1031,15 +1073,9 @@ async function removeFolder(
 
             await P.removeFolders(CTX);
         }    
-
-        WORKSPACE.output.appendLine(`✅`);
     }
     catch (e) {
-        if (progress.cancellationToken.isCancellationRequested) {
-            WORKSPACE.output.appendLine(`✖️`);
-        }
-        else {
-            WORKSPACE.output.appendLine(`🔥: '${ deploy_helpers.toStringSafe(e) }'`);   
-        }        
+        deploy_log.CONSOLE
+                  .trace(e, 'list.removeFolder(1)');
     }
 }

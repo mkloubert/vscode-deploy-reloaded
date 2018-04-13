@@ -19,12 +19,15 @@ import * as deploy_contracts from './contracts';
 import * as deploy_delete from './delete';
 import * as deploy_deploy from './deploy';
 import * as deploy_helpers from './helpers';
+import * as deploy_list from './list';
 import * as deploy_log from './log';
+import * as deploy_plugins from './plugins';
 import * as deploy_pull from './pull';
 import * as deploy_targets from './targets';
 import * as deploy_values from './values';
 import * as deploy_workspaces from './workspaces';
 import * as Enumerable from 'node-enumerable';
+import * as FSExtra from 'fs-extra';
 import * as i18 from './i18';
 import * as Path from 'path';
 import * as vscode from 'vscode';
@@ -542,7 +545,30 @@ export async function handleFilesAndFolders(
             }
         };
 
-        const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = [
+        const QUICK_PICKS: deploy_contracts.ActionQuickPick[] = [];
+        const SHOW_QUICK_PICKS = async () => {
+            const SELECTED_ITEM = await vscode.window.showQuickPick(
+                QUICK_PICKS
+            );
+
+            if (SELECTED_ITEM) {
+                await Promise.resolve(
+                    SELECTED_ITEM.action()
+                );
+            }
+        };
+
+        const ADD_SEPARATOR = () => {
+            QUICK_PICKS.push({
+                action: () => {
+                    SHOW_QUICK_PICKS();
+                },
+                label: '-',
+                description: '',
+            });
+        };
+
+        QUICK_PICKS.push(
             {
                 action: async () => {
                     await INVOKE_TARGET_ACTION(async (target, files) => {
@@ -618,16 +644,221 @@ export async function handleFilesAndFolders(
                 label: '$(trashcan)  ' + i18.t(`DELETE.currentFileOrFolder.${uriType}.label`),
                 description: i18.t(`DELETE.currentFileOrFolder.${uriType}.description`),
             },
-        ];
-
-        const SELECTED_ITEM = await vscode.window.showQuickPick(
-            QUICK_PICKS
         );
-        if (SELECTED_ITEM) {
-            await Promise.resolve(
-                SELECTED_ITEM.action()
-            ); 
+
+        if (1 === filesAndFolders.length) {
+            const LOCAL_ITEM = filesAndFolders[0];
+
+            if ('folder' === uriType) {
+                const TARGETS_CAN_LIST = deploy_helpers.from( ACTIVE_TARGETS ).where(t => {
+                    return t.__workspace
+                            .getListPlugins(t).length > 0;
+                }).toArray();
+                const TARGETS_CAN_REMOVE_FOLDER = deploy_helpers.from( ACTIVE_TARGETS ).where(t => {
+                    return t.__workspace
+                            .getRemoveFolderPlugins(t).length > 0;
+                }).toArray();
+
+                if (TARGETS_CAN_LIST.length > 0 || TARGETS_CAN_REMOVE_FOLDER.length > 0) {
+                    ADD_SEPARATOR();
+                }
+
+                if (TARGETS_CAN_LIST.length > 0) {
+                    QUICK_PICKS.push(
+                        // list directory
+                        {
+                            action: async () => {
+                                const SELECTED_TARGET = await deploy_targets.showTargetQuickPick(
+                                    context, TARGETS_CAN_LIST,
+                                    {
+                                        placeHolder: i18.t('targets.selectTarget'),
+                                    }
+                                );
+
+                                if (SELECTED_TARGET) {
+                                    const WORKSPACE = SELECTED_TARGET.__workspace;
+
+                                    const RELATIVE_PATH = WORKSPACE.toRelativePath(LOCAL_ITEM);
+                                    if (false !== RELATIVE_PATH) {
+                                        await deploy_helpers.applyFuncFor(
+                                            deploy_list.listDirectory, WORKSPACE
+                                        )(SELECTED_TARGET,
+                                          deploy_helpers.normalizePath(RELATIVE_PATH));
+                                    }                            
+                                }
+                            },
+                            label: '$(list-ordered)  ' + i18.t(`listDirectory.currentFileOrFolder.label`),
+                            description: i18.t(`listDirectory.currentFileOrFolder.description`),
+                        }
+                    );
+                }
+
+                if (TARGETS_CAN_REMOVE_FOLDER.length > 0) {
+                    QUICK_PICKS.push(
+                        // remove folder
+                        {
+                            action: async () => {
+                                const SELECTED_TARGET = await deploy_targets.showTargetQuickPick(
+                                    context, TARGETS_CAN_REMOVE_FOLDER,
+                                    {
+                                        placeHolder: i18.t('targets.selectTarget'),
+                                    }
+                                );
+
+                                if (!SELECTED_TARGET) {
+                                    return;
+                                }
+
+                                const MAPPING_SCOPE_DIRS = await deploy_targets.getScopeDirectoriesForTargetFolderMappings(
+                                    SELECTED_TARGET
+                                );
+                                const TARGET_NAME = deploy_targets.getTargetName(SELECTED_TARGET);
+                                const WORKSPACE = SELECTED_TARGET.__workspace;
+
+                                const NAME_AND_PATH = deploy_targets.getNameAndPathForFileDeployment(SELECTED_TARGET, LOCAL_ITEM,
+                                                                                                     MAPPING_SCOPE_DIRS);
+                                if (false === NAME_AND_PATH) {
+                                    return;
+                                }
+
+                                const PLUGINS = WORKSPACE.getRemoveFolderPlugins(SELECTED_TARGET);
+
+                                if (PLUGINS.length < 1) {
+                                    return;
+                                }
+
+                                const MAPPED_PATH = '/' + deploy_helpers.normalizePath(
+                                    deploy_helpers.normalizePath(NAME_AND_PATH.path) + 
+                                    '/' + 
+                                    deploy_helpers.normalizePath(NAME_AND_PATH.name)
+                                );
+
+                                const SELECTED_ITEM = await vscode.window.showWarningMessage<deploy_contracts.MessageItemWithValue>(
+                                    WORKSPACE.t('listDirectory.currentFileOrFolder.removeFolder.askBeforeRemove',
+                                    MAPPED_PATH
+                                ),
+                                    {
+                                        isCloseAffordance: true,
+                                        title: WORKSPACE.t('no'),
+                                        value: 0,
+                                    },
+                                    {                                
+                                        title: WORKSPACE.t('yes'),
+                                        value: 1,
+                                    },
+                                    {                                
+                                        title: WORKSPACE.t('listDirectory.currentFileOrFolder.removeFolder.yesWithLocalFolder'),
+                                        value: 2,
+                                    }
+                                );
+    
+                                if (!SELECTED_ITEM || 0 === SELECTED_ITEM.value) {
+                                    return;
+                                }
+
+                                WORKSPACE.output.appendLine('');
+
+                                const WITH_LOCAL_FOLDER = 2 === SELECTED_ITEM.value;
+
+                                await deploy_helpers.withProgress(async (progress) => {
+                                    let watch: deploy_helpers.StopWatch;
+                                    const START_WATCH = () => watch = deploy_helpers.startWatch();
+                                    const STOP_WATCH = () => {
+                                        if (watch) {
+                                            WORKSPACE.output.appendLine(` [${watch.stop()} ms]`);
+                                        }
+
+                                        watch = null;
+                                    };
+
+                                    while (PLUGINS.length > 0) {
+                                        const PI = PLUGINS.shift();
+
+                                        const FOLDER_TO_REMOVE = new deploy_plugins.SimpleFolderToRemove(
+                                            WORKSPACE,
+                                            LOCAL_ITEM,
+                                            NAME_AND_PATH,
+                                        );
+
+                                        FOLDER_TO_REMOVE.onBeforeRemove = async (destination?) => {
+                                            const NOW = deploy_helpers.now();
+
+                                            if (arguments.length < 1) {
+                                                destination = NAME_AND_PATH.path;
+                                            }
+                                            destination = `${deploy_helpers.toStringSafe(destination)} (${TARGET_NAME})`;
+
+                                            const PROGRESS_MSG = `💣 ` +
+                                                                 WORKSPACE.t('listDirectory.currentFileOrFolder.removeFolder.removing',
+                                                                             MAPPED_PATH);
+
+                                            WORKSPACE.output.append(
+                                                `[${NOW.format( WORKSPACE.t('time.timeWithSeconds') )}] ` + 
+                                                PROGRESS_MSG + ' '
+                                            );
+
+                                            if (progress.cancellationToken.isCancellationRequested) {
+                                                WORKSPACE.output.appendLine(`✖️`);
+                                            }
+                                            else {
+                                                START_WATCH();
+                                            }
+                                        };
+                                        FOLDER_TO_REMOVE.onRemoveCompleted = async (err?, deleteLocal?) => {
+                                            if (err) {
+                                                WORKSPACE.output.append(`🔥: '${ deploy_helpers.toStringSafe(err) }'`);
+                                            }
+                                            else {
+                                                let showOK = true;
+
+                                                if (WITH_LOCAL_FOLDER) {
+                                                    if (deploy_helpers.toBooleanSafe(deleteLocal, true)) {
+                                                        try {
+                                                            await FSExtra.remove( LOCAL_ITEM );
+                                                        }
+                                                        catch (e) {
+                                                            showOK = false;
+
+                                                            WORKSPACE.output.append(`⚠️: '${deploy_helpers.toStringSafe(e)}'`);
+                                                        }
+                                                    }
+                                                }
+
+                                                if (showOK) {
+                                                    WORKSPACE.output.append(`✅`);
+                                                }
+                                            }
+
+                                            STOP_WATCH();
+                                        };
+
+                                        const CTX: deploy_plugins.RemoveFoldersContext = {
+                                            cancellationToken: null,                                            
+                                            isCancelling: null,
+                                            folders: [
+                                                FOLDER_TO_REMOVE
+                                            ],
+                                            target: SELECTED_TARGET,
+                                        };
+
+                                        await PI.removeFolders(CTX);
+                                    }                                    
+                                }, {
+                                    cancellable: true,
+                                    location: vscode.ProgressLocation.Notification,
+                                    title: `💣 ` + WORKSPACE.t('listDirectory.currentFileOrFolder.removeFolder.removing',
+                                                               MAPPED_PATH),
+                                });
+                            },
+                            label: '$(trashcan)  ' + i18.t(`listDirectory.currentFileOrFolder.removeFolder.label`),
+                            description: i18.t(`listDirectory.currentFileOrFolder.removeFolder.description`),
+                        }
+                    );
+                }
+            }
         }
+
+        await SHOW_QUICK_PICKS();
     }
     catch (e) {
         deploy_log.CONSOLE

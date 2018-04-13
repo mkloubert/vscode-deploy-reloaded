@@ -282,6 +282,17 @@ export const translation: Translation = {
             label: "Pfad kopieren ...",
         },
         currentDirectory: "Aktuelles Verzeichnis:{0:trim,surround,leading_space} ({1:trim,surround})",
+        currentFileOrFolder: {
+            description: "Zeigt den Inhalt dieses Verzeichnisses in einem Ziel an",
+            label: "Verzeichnis anzeigen ...",
+            removeFolder: {
+                askBeforeRemove: "Möchten Sie das Verzeichnis{0:trim,surround,leading_space} wirklich löschen?",
+                description: "Löscht das Verzeichnis samt Inhalt in einem Ziel",
+                label: "Gesamtes Verzeichnis löschen ...",
+                removing: "Lösche Verzeichnis{0:trim,surround,leading_space} ...",
+                yesWithLocalFolder: "JA inkl. lokalem Verzeichnis",
+            },
+        },
         directoryIsEmpty: "(Verzeichnis ist leer)",
         errors: {
             failed: "Konnte das Auflisten des Verzeichnisses{0:trim,surround,leading_space} ({1:trim,surround,leading_space}) nicht durchführen: {2:trim,surround,leading_space}",

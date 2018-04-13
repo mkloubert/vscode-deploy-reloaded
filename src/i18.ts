@@ -287,6 +287,17 @@ export interface Translation {
             label?: string;
         };
         currentDirectory?: string;
+        currentFileOrFolder?: {
+            description?: string;
+            label?: string;
+            removeFolder?: {
+                askBeforeRemove?: string;
+                description?: string;
+                label?: string;
+                removing?: string;
+                yesWithLocalFolder?: string;
+            };
+        };
         directoryIsEmpty?: string;
         errors?: {
             failed?: string;

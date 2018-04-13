@@ -282,6 +282,17 @@ export const translation: Translation = {
             label: "Copy path ...",
         },
         currentDirectory: "Current directory:{0:trim,surround,leading_space} ({1:trim,surround})",
+        currentFileOrFolder: {
+            description: "Lists the items of that directory on a target",
+            label: "Show directory ...",
+            removeFolder: {
+                askBeforeRemove: "Do you really want to delete the folder{0:trim,surround,leading_space}?",
+                description: "Deletes the directory and all its content on a target",
+                label: "Delete complete folder ...",
+                removing: "Removing folder{0:trim,surround,leading_space} ...",
+                yesWithLocalFolder: "YES with local folder",
+            },
+        },
         directoryIsEmpty: "(directory is empty)",
         errors: {
             failed: "Could not list directory{0:trim,surround,leading_space} ({1:trim,surround,leading_space}): {2:trim,surround,leading_space}",
