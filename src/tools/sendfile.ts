@@ -299,7 +299,7 @@ export async function sendFile(context: vscode.ExtensionContext) {
                     port = DEFAULT_PORT;
                 }
 
-                context.globalState.update(LAST_REMOTE_ADDR, port).then(() => {
+                context.globalState.update(LAST_REMOTE_ADDR_KEY, `${host}:${port}`).then(() => {
                 }, (err) => {
                     deploy_log.CONSOLE
                               .trace(err, "tools.sendfile.sendFile('updateLastRemoteAddress')");
