@@ -126,6 +126,10 @@ export interface FTPTarget extends deploy_targets.Target {
      */
     readonly port?: number;
     /**
+     * Server supports deep directory creation or not.
+     */
+    readonly supportsDeepDirectoryCreation?: boolean;
+    /**
      * The path to an (event) script, which is executed AFTER a file has been uploaded or tried to be uploaded.
      */
     readonly uploaded?: string;
@@ -460,6 +464,7 @@ class FTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<FTPTarget,
                             this.replaceWithValues(target, target.port)
                         ).trim()
                     ),
+                    supportsDeepDirectoryCreation: target.supportsDeepDirectoryCreation,
                     uploadCompleted: uploadCompleted,
                     user: user,
                     valueProvider: () => WORKSPACE.getValues(),

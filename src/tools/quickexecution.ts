@@ -541,8 +541,6 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
             });
     
             if (FILES.length > 0) {
-                progress.increment = 1 / FILES.length * 100.0;
-                
                 let lineCount = 0;
                 for (let i = 0; i < FILES.length; i++) {
                     if (progress.cancellationToken.isCancellationRequested) {
@@ -550,7 +548,10 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
                     }
 
                     const F = FILES[i];
-                    progress.message = `Scanning file '${F}' (${lineCount}) ...`;
+                    progress.baseContext.report({
+                        increment: 1.0 / FILES.length * 100.0,
+                        message: `Scanning file '${F}' (${lineCount}) ...`,
+                    });
 
                     lineCount += (await $h.readFile(F)).toString('binary')
                                                        .split("\n")

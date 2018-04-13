@@ -189,6 +189,10 @@ export interface SFTPConnectionOptions {
      */
     readonly readyTimeout?: number;
     /**
+     * Server supports deep directory creation or not.
+     */
+    readonly supportsDeepDirectoryCreation?: boolean;
+    /**
      * Try keyboard-interactive user authentication if primary user authentication method fails.
      */
     readonly tryKeyboard?: boolean;
@@ -311,6 +315,42 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
      * Gets the underlying client.
      */
     public readonly client: SFTP;
+
+    private async createDirectoryIfNeeded(dir: string) {
+        dir = toSFTPPath(dir);
+        
+        if ('/' !== dir) {
+            if (true !== this._checkedRemoteDirs[dir]) {
+                try {
+                    // check if exist
+                    await this.client.list(dir);
+                }
+                catch {
+                    // no, try to create
+                    await this.client.mkdir(dir, true);
+                }
+
+                // mark as checked
+                this._checkedRemoteDirs[dir] = true;
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private async createParentDirectoryIfNeeded(dir: string): Promise<boolean> {
+        dir = toSFTPPath(dir);
+        const PARENT_DIR = toSFTPPath(deploy_helpers.from( dir.split('/') )
+                                                    .skipLast()
+                                                    .joinToString('/'));
+        if (PARENT_DIR === dir) {
+            return false;
+        }
+
+        return this.createDirectoryIfNeeded(PARENT_DIR);
+    }
 
     /** @inheritdoc */
     public async deleteFile(path: string): Promise<boolean> {
@@ -735,22 +775,11 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
                     fileModes = modes;
                 }
 
-                // check if remote directory exists
-                if ('/' !== REMOTE_DIR) {
-                    if (true !== this._checkedRemoteDirs[REMOTE_DIR]) {
-                        try {
-                            // check if exist
-                            await this.client.list(REMOTE_DIR);
-                        }
-                        catch (e) {
-                            // no, try to create
-                            await this.client.mkdir(REMOTE_DIR, true);
-                        }
-
-                        // mark as checked
-                        this._checkedRemoteDirs[REMOTE_DIR] = true;
-                    }
+                // create directories if needed
+                if (!deploy_helpers.toBooleanSafe(this.options.supportsDeepDirectoryCreation)) {
+                    await this.createParentDirectoryIfNeeded(REMOTE_DIR);
                 }
+                await this.createDirectoryIfNeeded(REMOTE_DIR);
 
                 let modeToSet: SFTPModeForFile = false;
                 if (false !== fileModes) {

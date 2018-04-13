@@ -273,8 +273,37 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
         CANCELLATION_SOURCE.cancel();
     }
 
+    const IS_MULTI_ROOT = deploy_workspaces.getAllWorkspaces().length > 1;
+    const GET_FILE_PATH_FOR_DISPLAY = (f: string) => {
+        if (!IS_MULTI_ROOT) {
+            const RELATIVE_PATH = ME.toRelativePath(f);
+            if (false !== RELATIVE_PATH) {
+                return deploy_helpers.toDisplayablePath(RELATIVE_PATH);
+            }
+        }
+
+        return f;
+    };
+
     const TARGET_SESSION = await deploy_targets.waitForOtherTargets(target);
     try {
+        const ITEMS_FOR_PROGRESS: any[] = [];
+        const TOTAL_COUNT = files.length * PLUGINS.length;
+        const INCREMENT = TOTAL_COUNT > 0 ? (1.0 / TOTAL_COUNT * 100.0)
+                                          : 0;
+        const UPDATE_PROGRESS = (item: any, msg: string) => {
+            let inc: number;
+            if (ITEMS_FOR_PROGRESS.indexOf(item) < 0) {
+                ITEMS_FOR_PROGRESS.push(item);
+                inc = INCREMENT;
+            }
+
+            progress.baseContext.report({
+                // increment: inc,
+                message: msg,
+            });
+        };
+
         while (PLUGINS.length > 0) {
             if (CANCELLATION_SOURCE.token.isCancellationRequested) {
                 break;
@@ -333,14 +362,7 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
             };
 
             try {
-                progress.increment = undefined;
-
                 ME.output.appendLine('');
-                
-                const UPDATE_PROGRESS = (message: string) => {
-                    progress.increment = 1 / files.length * 100.0;
-                    progress.message = message;
-                };
 
                 if (files.length > 1) {
                     ME.output.appendLine(
@@ -359,7 +381,7 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
                     watch = null;
                 };
 
-                const FILES_TO_DELETE = files.map(f => {
+                const FILES_TO_DELETE = deploy_helpers.from(files.map(f => {
                     const NAME_AND_PATH = deploy_targets.getNameAndPathForFileDeployment(target, f,
                                                                                          MAPPING_SCOPE_DIRS);
                     if (false === NAME_AND_PATH) {
@@ -375,16 +397,17 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
                         }
                         destination = `${deploy_helpers.toStringSafe(destination)} (${TARGET_NAME})`;
 
+                        const PROGRESS_MSG = `🗑️ ` +
+                                             (TOTAL_COUNT > 1 ? `(${(ITEMS_FOR_PROGRESS.length + 1)} / ${TOTAL_COUNT}) ` : '') + 
+                                             ME.t('DELETE.deletingFile',
+                                                  GET_FILE_PATH_FOR_DISPLAY(f), destination);
+
                         ME.output.append(
-                            `[${NOW.format( ME.t('time.timeWithSeconds') )}] 🗑️ ` + 
-                            ME.t('DELETE.deletingFile',
-                                 f, destination) + ' '
+                            `[${NOW.format( ME.t('time.timeWithSeconds') )}] ` + 
+                            PROGRESS_MSG
                         );
 
-                        UPDATE_PROGRESS(
-                            `🗑️ ` + ME.t('DELETE.deletingFile',
-                                         f, destination)
-                        );
+                        UPDATE_PROGRESS(SF, PROGRESS_MSG);
 
                         if (CANCELLATION_SOURCE.token.isCancellationRequested) {
                             ME.output.appendLine(`✖️`);
@@ -425,7 +448,15 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
                     };
 
                     return SF;
-                }).filter(f => !_.isNil(f));
+                })).where(f => !_.isNil(f)).orderBy(f => {
+                   return deploy_helpers.normalizeString(f.path).length;
+                }).thenBy(f => {
+                    return deploy_helpers.normalizeString(f.path);
+                }).thenBy(f => {
+                    return deploy_helpers.normalizeString(f.name).length;
+                }).thenBy(f => {
+                    return deploy_helpers.normalizeString(f.name);
+                }).toArray();
 
                 const CTX: deploy_plugins.DeleteContext = {
                     cancellationToken: CANCELLATION_SOURCE.token,

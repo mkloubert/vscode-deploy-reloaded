@@ -160,6 +160,10 @@ export interface SFTPTarget extends deploy_targets.Target {
      */
     readonly readyTimeout?: number;
     /**
+     * Server supports deep directory creation or not.
+     */
+    readonly supportsDeepDirectoryCreation?: boolean;
+    /**
      * Try keyboard-interactive user authentication if primary user authentication method fails.
      */
     readonly tryKeyboard?: boolean;
@@ -542,7 +546,8 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
                         deploy_helpers.toStringSafe(
                             this.replaceWithValues(target, target.readyTimeout)
                         ).trim()
-                    ),                    
+                    ),
+                    supportsDeepDirectoryCreation: target.supportsDeepDirectoryCreation,
                     uploadCompleted: uploadCompleted,
                     user: user,
                     valueProvider: () => WORKSPACE.getValues(),

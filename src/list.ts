@@ -262,9 +262,11 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
 
                     const PI = PLUGINS.shift();
 
-                    progress.increment = 1 / TOTAL_COUNT * 100.0;
-                    progress.message = ME.t('listDirectory.loading',
-                                            displayDir);
+                    progress.baseContext.report({
+                        increment: 1.0 / TOTAL_COUNT * 100.0,
+                        message: ME.t('listDirectory.loading',
+                                      displayDir)
+                    });
 
                     const CTX: deploy_plugins.ListDirectoryContext = {
                         cancellationToken: CANCELLATION_SOURCE.token,
@@ -805,8 +807,9 @@ async function pullAllFilesFromDir(
                     );
 
                     const UPDATE_PROGRESS = (message: string) => {
-                        progress.increment = 1 / FILES.length * 100.0;
-                        progress.message = message;
+                        progress.baseContext.report({
+                            message: message,
+                        });
                     };
 
                     SF.onBeforeDownload = async function(source?) {
@@ -982,9 +985,10 @@ async function removeFolder(
     try {
         const PLUGINS = WORKSPACE.getRemoveFolderPlugins(target);
 
-        const UPDATE_PROGRESS = (index: number, message: string) => {
-            progress.increment = 1 / PLUGINS.length * 100.0;
-            progress.message = message;
+        const UPDATE_PROGRESS = (message: string) => {            
+            progress.baseContext.report({
+                message: message,
+            });
         };
 
         for (let i = 0; i < PLUGINS.length; i++) {
@@ -994,7 +998,7 @@ async function removeFolder(
 
             const P = PLUGINS[i];
     
-            UPDATE_PROGRESS(i, PROGRESS_MSG);
+            UPDATE_PROGRESS(PROGRESS_MSG);
 
             const CTX: deploy_plugins.RemoveFoldersContext = {
                 cancellationToken: progress.cancellationToken,

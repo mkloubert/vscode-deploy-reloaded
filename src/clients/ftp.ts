@@ -153,6 +153,10 @@ export interface FTPConnectionOptions {
      */
     readonly port?: number;
     /**
+     * Server supports deep directory creation or not.
+     */
+    readonly supportsDeepDirectoryCreation?: boolean;
+    /**
      * Is invoked AFTER an upload process.
      */
     readonly uploadCompleted?: FTPUploadCompleted;
@@ -269,7 +273,7 @@ export abstract class FTPClientBase extends deploy_clients.AsyncFileListBase {
         try {
             await this.cwd(dir);
         }
-        catch (e) {
+        catch {
             // no, try to create
             await this.mkdir(dir);
         }
@@ -278,6 +282,25 @@ export abstract class FTPClientBase extends deploy_clients.AsyncFileListBase {
         this._existingRemoteDirs[dir] = true;
 
         return true;
+    }
+
+    /**
+     * Creates a parent directory if it does not exist.
+     * 
+     * @param {string} dir The child of the directory to check.
+     * 
+     * @return {Promise<boolean>} The promise that indicates if parent directory has been created or not.
+     */
+    protected async createParentDirectoryIfNeeded(dir: string): Promise<boolean> {
+        dir = toFTPPath(dir);
+        const PARENT_DIR = toFTPPath(deploy_helpers.from( dir.split('/') )
+                                                   .skipLast()
+                                                   .joinToString('/'));
+        if (PARENT_DIR === dir) {
+            return false;
+        }
+
+        return this.createDirectoryIfNeeded(PARENT_DIR);
     }
 
     /**
@@ -974,17 +997,16 @@ class FtpClient extends FTPClientBase {
 
         dir = toFTPPath(dir);
 
-        return new Promise<void>((resolve, reject) => {
+        return new Promise<void>(async (resolve, reject) => {
             const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
 
             try {
+                if (!deploy_helpers.toBooleanSafe(ME.options.supportsDeepDirectoryCreation)) {
+                    await ME.createParentDirectoryIfNeeded(dir);
+                }
+
                 ME.connection.mkdir(dir, true, (err) => {
-                    if (err) {
-                        COMPLETED(err);
-                    }
-                    else {
-                        COMPLETED(null);
-                    }
+                    COMPLETED(err);
                 });
             }
             catch (e) {
@@ -1397,17 +1419,16 @@ class JsFTPClient extends FTPClientBase {
 
         dir = toFTPPath(dir);
 
-        return new Promise<void>((resolve, reject) => {
+        return new Promise<void>(async (resolve, reject) => {
             const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
 
             try {
-                ME.connection.raw('mkd', dir, (err) => {
-                    if (err) {
-                        COMPLETED(err);
-                    }
-                    else {
-                        COMPLETED(null);
-                    }
+                if (!deploy_helpers.toBooleanSafe(ME.options.supportsDeepDirectoryCreation)) {
+                    await ME.createParentDirectoryIfNeeded(dir);
+                }
+
+                ME.connection.raw('mkd', [ dir ], (err) => {
+                    COMPLETED(err);
                 });
             }
             catch (e) {

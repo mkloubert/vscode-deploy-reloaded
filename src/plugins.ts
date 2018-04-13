@@ -936,7 +936,15 @@ export abstract class AsyncFileClientPluginBase<TTarget extends deploy_targets.T
         const ME = this;
 
         await ME.invokeForConnection(context.target, async (conn) => {
+            if (context.isCancelling) {
+                return;
+            }
+
             for (const FILE of context.files) {
+                if (context.isCancelling) {
+                    break;
+                }
+
                 try {
                     const REMOTE_DIR = '/' + FILE.path;
 
@@ -960,7 +968,15 @@ export abstract class AsyncFileClientPluginBase<TTarget extends deploy_targets.T
         const ME = this;
 
         await ME.invokeForConnection(context.target, async (conn) => {
+            if (context.isCancelling) {
+                return;
+            }
+
             for (const FILE of context.files) {
+                if (context.isCancelling) {
+                    break;
+                }
+
                 try {
                     const REMOTE_DIR = '/' + FILE.path;
 
@@ -1006,6 +1022,10 @@ export abstract class AsyncFileClientPluginBase<TTarget extends deploy_targets.T
         const ME = this;
 
         return await ME.invokeForConnection(context.target, async (conn) => {
+            if (context.isCancelling) {
+                return;
+            }
+
             const DIR = conn.getDir(context.dir);
 
             let exportPath: string;
@@ -1062,7 +1082,15 @@ export abstract class AsyncFileClientPluginBase<TTarget extends deploy_targets.T
         const ME = this;
 
         await ME.invokeForConnection(context.target, async (conn) => {
+            if (context.isCancelling) {
+                return;
+            }
+
             for (const FOLDER of context.folders) {
+                if (context.isCancelling) {
+                    break;
+                }
+
                 try {
                     const REMOTE_DIR = '/' + FOLDER.path;
 
@@ -1086,7 +1114,15 @@ export abstract class AsyncFileClientPluginBase<TTarget extends deploy_targets.T
         const ME = this;
 
         await ME.invokeForConnection(context.target, async (conn) => {
+            if (context.isCancelling) {
+                return;
+            }
+
             for (const FILE of context.files) {
+                if (context.isCancelling) {
+                    break;
+                }
+
                 try {
                     const REMOTE_DIR = '/' + FILE.path;
 
