@@ -556,32 +556,29 @@ async function pullFilesFromWithProgress(progress: deploy_helpers.ProgressContex
 
         return f;
     };
+    
+    const TOTAL_COUNT = files.length * PLUGINS.length;
 
     const TARGET_SESSION = await deploy_targets.waitForOtherTargets(target);
     try {
-        const ITEMS_FOR_PROGRESS: any[] = [];
-        const TOTAL_COUNT = files.length * PLUGINS.length;
-        const INCREMENT = TOTAL_COUNT > 0 ? (1.0 / TOTAL_COUNT * 100.0)
-                                          : 0;
-        const UPDATE_PROGRESS = (item: any, msg: string) => {
-            let inc = 0;
-            if (ITEMS_FOR_PROGRESS.indexOf(item) < 0) {
-                ITEMS_FOR_PROGRESS.push(item);
-                inc = INCREMENT;
-            }
-
-            progress.baseContext.report({
-                // increment: inc,
-                message: msg,
-            });
-        };
-
         while (PLUGINS.length > 0) {
             if (CANCELLATION_SOURCE.token.isCancellationRequested) {
                 break;
             }    
 
             const PI = PLUGINS.shift();
+            
+            const ITEMS_FOR_PROGRESS: any[] = [];
+            const UPDATE_PROGRESS = (item: any, msg: string) => {
+                if (ITEMS_FOR_PROGRESS.indexOf(item) < 0) {
+                    ITEMS_FOR_PROGRESS.push(item);
+                }
+    
+                progress.baseContext.report({
+                    // increment: inc,
+                    message: msg,
+                });
+            };    
 
             const POPUP_STATS: deploy_gui.ShowPopupWhenFinishedStats = {
                 failed: [],
