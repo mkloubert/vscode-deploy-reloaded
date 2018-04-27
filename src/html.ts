@@ -201,7 +201,7 @@ export function openHtmlDocument(html: string, title?: string, opts?: WebviewOpt
         title = '';
     }
 
-    const PANEL = vscode.window.createWebviewPanel('catCoding', title, position, opts);
+    const PANEL = vscode.window.createWebviewPanel('vscodeDeployReloaded', title, position, opts);
 
     PANEL.onDidChangeViewState(function(e) {
         tryInvokeWebViewCallback(
