@@ -31,7 +31,7 @@ const REPOSITORY = {
     // END: footer.html
 
     // START: header.html
-    "header.html": new Buffer("H4sIAAAAAAAACsVTbWvbMBD+Pth/UA3DchrJaQih0KQQYg8GgXR9g34qiqzW8mTJky5hZuS/T7bTNR0dy6BQgznf+e557rmTJkfJcn59d5GiHEp1/vHDZGeRfya5YNnuu/VLAQzxnFknYBrcXH8mp4H/v5fhoFYCQV2JaQDiB8TcuS4l7qHbq/kySUmSXiyWd+QyXSxnSZogZ/k08HlxrqhlUjnOHDjaVKJe/AI+bvHfkLItPpyKW1nBPlfBNqyLdpQPa81BGo02jmf2fjUeJYKbTNxo2RjswEboZwdpBaytRlmXcPllbsrKaKEBz6xlNa2sAdNw0ZJVlDOlMAOzajH66IkJ89+Ae6DhpxAdIxwOBo3ltFna3NPMAA8iCuYKrNSP+GQcRdQpyQUmw6hD2Ua0MFLjMIx8ZPvHUFqtL6dyRAjK5WOu/Au0cIiQ8/8amtgwhbuKv4ztH5t8BoyfG6kY/+a7CdCDsSXz53XFnBiP+oUzutm2FxedHaau+LoWtn5XXcX3pgUypEM6oqXUByhreF9V17m7y71zVyarvfcLA0j+EBAEAAA=", 'base64'),
+    "header.html": new Buffer("H4sIAAAAAAAACsVUbWvbMBD+Pth/UA3DclfJaQhhsKQQYg8GhfQd+mkoslrLkyVXuoSa0v9eyU7XdOtYBoMJzPmku+e553T2ZC9bzC+uT3JUQq2O3r+bbCzya1IKVmzeO78WwBAvmXUCptHlxRfyKfLnWxEOWiUQtI2YRiDuIeXO9SHpPro6ny+ynGT5yfHimpzlx4tZlmfIWT6NfFxaKmqZVI4zB46GTLSfvoJPO/x/SNkl707FrWxgqyNhcaMdoLXjphBoihi/W0krrtzc+7NG4uTzK9RniF9gtyVUbM363V7JzUpzkEYHmsJ+W45HmQh8l1oGgx3YBD30kFbAympU9AFnX+embowWGvDMWtbSxhowgYvWrKGcKYUZmGWHcYCemTD/AbgFGn+I0UeE48EgWE7DLHQ6AQ8SCuYcrNS3+HCcJNQpyQUmw6RHeUxoZaTGcZz4ncefev1GV/YIQaW8LZV/gFYOEXL0V00Ta6Zwn/Gbtv1hQF4A05dCGsa/+2oidGNszfxnsGROjEcHlTM6DJEXF258F3XV6UrY9r/qqu5CCWRIh3REa6l3UBZ431TXu5t/xsZdmqL13hOY8hvAZwQAAA==", 'base64'),
     // END: header.html
 
 };
