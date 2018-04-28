@@ -246,7 +246,7 @@ async function checkBeforePull(
                             }
                         }
 
-                        await deploy_html.openMarkdownDocument(md, {
+                        deploy_html.openMarkdownDocument(md, {
                             documentTitle: TITLE,
                         });
                     }
@@ -939,8 +939,6 @@ async function pullFilesFromWithProgress(progress: deploy_helpers.ProgressContex
                 }
 
                 if (files.length > 1) {
-                    const NOW = deploy_helpers.now();
-
                     ME.output.appendLine('');
                     ME.output.appendLine(
                         `🚚 ` +

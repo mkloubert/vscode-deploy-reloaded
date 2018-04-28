@@ -49,8 +49,6 @@ interface SyncFoldersActionOptions {
 }
 
 
-let nextPullCancelBtnCommandId = Number.MIN_SAFE_INTEGER;
-
 async function createPullDataTransformer(target: deploy_targets.Target): Promise<deploy_transformers.DataTransformer> {
     const WORKSPACE = target.__workspace;
 
@@ -253,8 +251,6 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
             try {
                 const LOADED_FILES_AND_FILES: deploy_files.FileSystemInfo[] = [];
 
-                let index = -1;
-                // const TOTAL_COUNT = PLUGINS.length;
                 while (PLUGINS.length > 0) {
                     if (CANCELLATION_SOURCE.token.isCancellationRequested) {
                         return false;
@@ -263,7 +259,6 @@ export async function listDirectory(target: deploy_targets.Target, dir?: string)
                     const PI = PLUGINS.shift();
 
                     progress.baseContext.report({
-                        // increment: 1.0 / TOTAL_COUNT * 100.0,
                         message: ME.t('listDirectory.loading',
                                       displayDir)
                     });

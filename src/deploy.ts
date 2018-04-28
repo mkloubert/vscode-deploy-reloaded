@@ -258,7 +258,7 @@ async function checkBeforeDeploy(
                             }
                         }
 
-                        await deploy_html.openMarkdownDocument(md, {
+                        deploy_html.openMarkdownDocument(md, {
                             documentTitle: TITLE,
                         });
                     }

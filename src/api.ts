@@ -1089,7 +1089,7 @@ export class ApiHost extends deploy_helpers.DisposableBase {
                 documentTitle: title,
             }, doc.options);
 
-            await deploy_html.openMarkdownDocument(
+            deploy_html.openMarkdownDocument(
                 deploy_helpers.toStringSafe( doc.content ),
                 OPTS,
             );

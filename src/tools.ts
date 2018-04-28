@@ -1075,7 +1075,7 @@ export async function showPackageFiles(context: vscode.ExtensionContext,
         md += WORKSPACE.t('noFiles');
     }
 
-    await deploy_html.openMarkdownDocument(md, {
+    deploy_html.openMarkdownDocument(md, {
         documentTitle: "[vscode-deploy-reloaded] " + WORKSPACE.t('tools.showPackageFiles.title',
                                                                  PACKAGE_NAME),
     });

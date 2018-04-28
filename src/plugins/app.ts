@@ -26,7 +26,6 @@ import * as deploy_values from '../values';
 import * as deploy_workspace from '../workspaces';
 import * as Enumerable from 'node-enumerable';
 import * as Events from 'events';
-import * as FSExtra from 'fs-extra';
 import * as Moment from 'moment';
 import * as Path from 'path';
 import * as vscode from 'vscode';
