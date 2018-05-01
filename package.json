@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.73.0",
+ "version": "0.73.1",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.22.0"
@@ -71950,6 +71950,6 @@
   "tmp": "0.0.33",
   "uglify-js": "^3.3.21",
   "uuid": "^3.2.1",
-  "vscode-helpers": "^1.10.0"
+  "vscode-helpers": "^1.10.1"
  }
 }
