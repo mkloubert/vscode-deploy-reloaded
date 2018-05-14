@@ -555,7 +555,10 @@ async function activateExtension(context: vscode.ExtensionContext) {
                 context,
                 async (ev, folder) => {
                     if (ev === deploy_helpers.WorkspaceWatcherEvent.Added) {
-                        return await createNewWorkspace( folder );
+                        if (folder && folder.uri && (['', 'file'].indexOf( deploy_helpers.normalizeString(folder.uri.scheme) ) > -1)) {
+                            // only if local URI
+                            return await createNewWorkspace( folder );
+                        }
                     }
                 },
                 async (err, ev, folder, workspace) => {
