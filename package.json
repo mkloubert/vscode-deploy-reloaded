@@ -5,7 +5,7 @@
  "version": "0.74.0",
  "publisher": "mkloubert",
  "engines": {
-  "vscode": "^1.23.0"
+  "vscode": "^1.22.0"
  },
  "license": "LGPL-3.0",
  "preview": true,
@@ -71874,7 +71874,7 @@
   "@types/moment-timezone": "^0.5.4",
   "@types/mssql": "^4.0.7",
   "@types/mysql": "^2.15.4",
-  "@types/node": "^7.0.61",
+  "@types/node": "^7.0.64",
   "@types/node-emoji": "^1.8.0",
   "@types/nodemailer": "^4.6.0",
   "@types/public-ip": "^2.3.0",
@@ -71883,9 +71883,9 @@
   "@types/ssh2-sftp-client": "^2.0.1",
   "@types/tmp": "0.0.33",
   "@types/uuid": "^3.4.3",
-  "tslint": "^5.9.1",
+  "tslint": "^5.10.0",
   "typescript": "^2.8.3",
-  "vscode": "^1.1.16"
+  "vscode": "^1.1.17"
  },
  "icon": "icon.png",
  "badges": [
@@ -71908,10 +71908,10 @@
  "readmeFilename": "README.md",
  "dependencies": {
   "@slack/client": "^3.16.0",
-  "aws-sdk": "^2.228.1",
+  "aws-sdk": "^2.238.1",
   "azure-storage": "^2.8.2",
   "coffeescript": "^2.3.0",
-  "compare-versions": "^3.1.0",
+  "compare-versions": "^3.2.0",
   "copy-paste": "^1.3.0",
   "dropbox": "^2.5.13",
   "express": "^4.16.3",
@@ -71933,7 +71933,7 @@
   "mime-types": "^2.1.18",
   "minimatch": "^3.0.4",
   "moment": "^2.22.1",
-  "moment-timezone": "^0.5.16",
+  "moment-timezone": "^0.5.17",
   "mssql": "^4.1.0",
   "mysql": "^2.15.0",
   "node-emoji": "^1.8.1",
@@ -71948,7 +71948,7 @@
   "sanitize-filename": "^1.6.1",
   "ssh2-sftp-client": "^2.2.1",
   "tmp": "0.0.33",
-  "uglify-js": "^3.3.22",
+  "uglify-js": "^3.3.25",
   "uuid": "^3.2.1",
   "vscode-helpers": "^1.10.1"
  }
