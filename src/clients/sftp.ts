@@ -591,7 +591,7 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
                                 };
 
                                 try {
-                                    stream.once('error', endListener);                        
+                                    stream.once('error', errorListener);                        
                                     stream.once('end', endListener);                        
                                     stream.on('data', dataListener);
                                 }
