@@ -2,10 +2,10 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.74.1",
+ "version": "0.75.0",
  "publisher": "mkloubert",
  "engines": {
-  "vscode": "^1.22.0"
+  "vscode": "^1.23.0"
  },
  "license": "LGPL-3.0",
  "preview": true,
@@ -26130,7 +26130,8 @@
             "enum": [
              "",
              "jsftp",
-             "ftp"
+             "ftp",
+             "ftp-legacy"
             ],
             "type": "string",
             "description": "The engine to use.",
@@ -27346,6 +27347,29 @@
               }
              ]
             }
+           },
+           "rejectUnauthorized": {
+            "description": "Reject unauthorized server certificates or not.",
+            "type": "boolean",
+            "default": false
+           },
+           "secure": {
+            "oneOf": [
+             {
+              "description": "Set to (true) for both control and data connection encryption.",
+              "type": "boolean",
+              "default": false
+             },
+             {
+              "description": "Use 'control' for control connection encryption only, or 'implicit' for implicitly encrypted control connection.",
+              "type": "string",
+              "enum": [
+               "",
+               "control",
+               "implicit"
+              ]
+             }
+            ]
            },
            "showIf": {
             "description": "Defines a list of one or more package names, which will show this target in GUI, if one of them is selected.",
@@ -71855,10 +71879,9 @@
  },
  "devDependencies": {
   "@types/copy-paste": "^1.1.30",
-  "@types/express": "^4.11.1",
+  "@types/express": "^4.16.0",
   "@types/filesize": "^3.6.0",
   "@types/fs-extra": "^4.0.8",
-  "@types/ftp": "^0.3.29",
   "@types/glob": "^5.0.35",
   "@types/html-entities": "^1.2.16",
   "@types/html-minifier": "^1.1.32",
@@ -71866,15 +71889,15 @@
   "@types/ip": "0.0.30",
   "@types/is-stream": "^1.1.0",
   "@types/less": "0.0.32",
-  "@types/lodash": "^4.14.108",
+  "@types/lodash": "^4.14.109",
   "@types/marked": "^0.3.0",
   "@types/mime-types": "^2.1.0",
   "@types/minimatch": "^3.0.3",
   "@types/mocha": "^2.2.48",
-  "@types/moment-timezone": "^0.5.4",
+  "@types/moment-timezone": "^0.5.6",
   "@types/mssql": "^4.0.7",
-  "@types/mysql": "^2.15.4",
-  "@types/node": "^7.0.64",
+  "@types/mysql": "^2.15.5",
+  "@types/node": "^7.0.65",
   "@types/node-emoji": "^1.8.0",
   "@types/nodemailer": "^4.6.0",
   "@types/public-ip": "^2.3.0",
@@ -71884,8 +71907,8 @@
   "@types/tmp": "0.0.33",
   "@types/uuid": "^3.4.3",
   "tslint": "^5.10.0",
-  "typescript": "^2.8.3",
-  "vscode": "^1.1.17"
+  "typescript": "^2.9.1",
+  "vscode": "^1.1.18"
  },
  "icon": "icon.png",
  "badges": [
@@ -71907,11 +71930,12 @@
  },
  "readmeFilename": "README.md",
  "dependencies": {
+  "@icetee/ftp": "^1.0.2",
   "@slack/client": "^3.16.0",
-  "aws-sdk": "^2.238.1",
-  "azure-storage": "^2.8.2",
-  "coffeescript": "^2.3.0",
-  "compare-versions": "^3.2.0",
+  "aws-sdk": "^2.252.1",
+  "azure-storage": "^2.8.3",
+  "coffeescript": "^2.3.1",
+  "compare-versions": "^3.2.1",
   "copy-paste": "^1.3.0",
   "dropbox": "^2.5.13",
   "express": "^4.16.3",
@@ -71921,7 +71945,7 @@
   "glob": "^7.1.2",
   "hexy": "^0.2.11",
   "html-entities": "^1.2.1",
-  "html-minifier": "^3.5.15",
+  "html-minifier": "^3.5.16",
   "i18next": "^10.6.0",
   "ip": "^1.1.5",
   "is-stream": "^1.1.0",
@@ -71932,7 +71956,7 @@
   "merge-deep": "^3.0.1",
   "mime-types": "^2.1.18",
   "minimatch": "^3.0.4",
-  "moment": "^2.22.1",
+  "moment": "^2.22.2",
   "moment-timezone": "^0.5.17",
   "mssql": "^4.1.0",
   "mysql": "^2.15.0",
@@ -71940,7 +71964,7 @@
   "node-enumerable": "^3.9.0",
   "node-simple-socket": "^2.8.1",
   "node-zip": "^1.1.1",
-  "nodemailer": "^4.6.4",
+  "nodemailer": "^4.6.5",
   "parse-listing": "^1.1.3",
   "public-ip": "^2.4.0",
   "pug": "^2.0.3",
@@ -71948,8 +71972,8 @@
   "sanitize-filename": "^1.6.1",
   "ssh2-sftp-client": "^2.2.1",
   "tmp": "0.0.33",
-  "uglify-js": "^3.3.25",
+  "uglify-js": "^3.4.0",
   "uuid": "^3.2.1",
-  "vscode-helpers": "^1.10.1"
+  "vscode-helpers": "^2.6.2"
  }
 }

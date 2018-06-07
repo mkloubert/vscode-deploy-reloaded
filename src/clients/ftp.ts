@@ -23,7 +23,8 @@ import * as deploy_files from '../files';
 import * as deploy_helpers from '../helpers';
 import * as deploy_log from '../log';
 import * as deploy_values from '../values';
-import * as FTP from 'ftp';
+const FTP = require('@icetee/ftp');
+const FTP_Legacy = require('ftp');
 import * as i18 from '../i18';
 const jsFTP = require('jsftp');
 import * as Moment from 'moment';
@@ -153,6 +154,14 @@ export interface FTPConnectionOptions {
      */
     readonly port?: number;
     /**
+     * Reject unauthorized server certificates or not.
+     */
+    readonly rejectUnauthorized?: boolean;
+    /**
+     * Set to true for both control and data connection encryption, 'control' for control connection encryption only, or 'implicit' for implicitly encrypted control connection (this mode is deprecated in modern times, but usually uses port 990) Default: false, applies only when engine is set to 'ftp'
+     */
+    readonly secure?: boolean | string;
+    /**
      * Server supports deep directory creation or not.
      */
     readonly supportsDeepDirectoryCreation?: boolean;
@@ -168,10 +177,6 @@ export interface FTPConnectionOptions {
      * A function that provides values for the connection.
      */
     readonly valueProvider?: deploy_values.ValuesProvider;
-    /**
-     * Set to true for both control and data connection encryption, 'control' for control connection encryption only, or 'implicit' for implicitly encrypted control connection (this mode is deprecated in modern times, but usually uses port 990) Default: false, applies only when engine is set to 'ftp'
-     */
-    readonly secure?: boolean | "implicit";
 }
 
 /**
@@ -709,8 +714,10 @@ class FtpClient extends FTPClientBase {
             pwd = undefined;
         }
 
+        const ENGINE = deploy_helpers.normalizeString(this.options.engine);
+
         return new Promise<boolean>((resolve, reject) => {
-            let conn: FTP;
+            let conn: any;
             let completedInvoked = false;
             const COMPLETED = (err: any, connected?: boolean) => {
                 if (completedInvoked) {
@@ -734,7 +741,8 @@ class FtpClient extends FTPClientBase {
             }
 
             try {
-                conn = new FTP();
+                conn = ('ftp-legacy' === ENGINE) ? new FTP_Legacy()
+                                                 : new FTP();
 
                 conn.once('error', function(err) {
                     if (err) {
@@ -749,10 +757,30 @@ class FtpClient extends FTPClientBase {
                     COMPLETED(null, true);
                 });
 
+                let secure: any = this.options.secure;
+                let secureOptions: any;
+                if (!_.isNil(secure)) {
+                    secureOptions = {
+                        rejectUnauthorized: deploy_helpers.toBooleanSafe(this.options.rejectUnauthorized),
+                    };
+
+                    if (_.isBoolean(secure)) {
+                        if (!secure) {
+                            secureOptions = undefined;
+                        }
+                    } else {
+                        secure = deploy_helpers.normalizeString(secure);
+                        if ('' === secure) {
+                            secure = true;
+                        }
+                    }
+                }
+
                 conn.connect({
                     host: host, port: port,
                     user: user, password: pwd,
-                    secure: this.options.secure
+                    secure: secure,
+                    secureOptions: secureOptions,
                 });
             }
             catch (e) {
@@ -761,7 +789,7 @@ class FtpClient extends FTPClientBase {
         });
     }
 
-    public get connection(): FTP {
+    public get connection(): any {
         return this._connection;
     }
 
@@ -1553,6 +1581,7 @@ export function createClient(opts: FTPConnectionOptions): FTPClientBase {
 
     switch (deploy_helpers.normalizeString(opts.engine)) {
         case 'ftp':
+        case 'ftp-legacy':
             return new FtpClient(opts);
     }
 

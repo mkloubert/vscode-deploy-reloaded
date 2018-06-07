@@ -2,6 +2,23 @@
 
 [![Share via Facebook](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/share/Facebook.png)](https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded&quote=vscode-deploy-reloaded) [![Share via Twitter](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/share/Twitter.png)](https://twitter.com/intent/tweet?source=https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded&text=vscode-deploy-reloaded:%20https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded&via=mjkloubert) [![Share via Google+](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/share/Google+.png)](https://plus.google.com/share?url=https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded) [![Share via Pinterest](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/share/Pinterest.png)](https://pinterest.com/pin/create/button/?url=https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded&media=https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo1.gif&description=Recoded%20version%20of%20Visual%20Studio%20Code%20extension%20%27vs-deploy%27%2C%20which%20provides%20commands%20to%20deploy%20files%20to%20one%20or%20more%20destinations.) [![Share via Reddit](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/share/Reddit.png)](https://www.reddit.com/submit?url=https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded&title=vscode-deploy-reloaded) [![Share via LinkedIn](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/share/LinkedIn.png)](https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded&title=vscode-deploy-reloaded&summary=Recoded%20version%20of%20Visual%20Studio%20Code%20extension%20%27vs-deploy%27%2C%20which%20provides%20commands%20to%20deploy%20files%20to%20one%20or%20more%20destinations.&source=https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded) [![Share via Wordpress](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/share/Wordpress.png)](https://wordpress.com/press-this.php?u=https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded&quote=vscode-deploy-reloaded&s=Recoded%20version%20of%20Visual%20Studio%20Code%20extension%20%27vs-deploy%27%2C%20which%20provides%20commands%20to%20deploy%20files%20to%20one%20or%20more%20destinations.&i=https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/demo1.gif) [![Share via Email](https://raw.githubusercontent.com/mkloubert/vscode-deploy-reloaded/master/img/share/Email.png)](mailto:?subject=vscode-deploy-reloaded&body=Recoded%20version%20of%20Visual%20Studio%20Code%20extension%20'vs-deploy'%2C%20which%20provides%20commands%20to%20deploy%20files%20to%20one%20or%20more%20destinations.:%20https%3A%2F%2Fmarketplace.visualstudio.com%2Fitems%3FitemName%3Dmkloubert.vscode-deploy-reloaded)
 
+## 0.75.0 (June 7th, 2018; FTPS support)
+
+* added support for secure FTPS protocol (s. [issue #67](https://github.com/mkloubert/vscode-deploy-reloaded/issues/67)) ... thanks to [Jan Hajek
+](https://github.com/hajekj)!
+* `ftp` engine of [FTP target](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_ftp) now uses fork [@icetee/ftp](https://github.com/mscdex/node-ftp) of [node-ftp](https://github.com/mscdex/node-ftp) module ... if you have problems, you can change the engine to `ftp-legacy` to switch to the old module
+* extension requires at least [Visual Studio Code 1.23](https://code.visualstudio.com/updates/v1_23) now
+* updated the following [npm](https://www.npmjs.com/) modules:
+  * [aws-sdk](https://www.npmjs.com/package/aws-sdk) `^2.252.1`
+  * [azure-storage](https://www.npmjs.com/package/azure-storage) `^2.8.3`
+  * [coffeescript](https://www.npmjs.com/package/coffeescript) `^2.3.1`
+  * [compare-versions](https://www.npmjs.com/package/compare-versions) `^3.2.1`
+  * [html-minifier](https://www.npmjs.com/package/html-minifier) `^3.5.16`
+  * [moment](https://www.npmjs.com/package/moment) `^2.22.2`
+  * [nodemailer](https://www.npmjs.com/package/nodemailer) `^4.6.5`
+  * [uglify-js](https://www.npmjs.com/package/uglify-js) `^3.4.0`
+  * [vscode-helpers](https://www.npmjs.com/package/vscode-helpers) `^2.6.2`
+
 ## 0.74.1 (May 14th, 2018; npm updates)
 
 * updated the following [npm](https://www.npmjs.com/) modules:
@@ -16,7 +33,6 @@
   * [moment-timezone](https://www.npmjs.com/package/moment-timezone) `^0.5.17`
   * [ssh2-sftp-client](https://www.npmjs.com/package/ssh2-sftp-client) `^2.2.1`
   * [uglify-js](https://www.npmjs.com/package/uglify-js) `^3.3.25`
-  * [vscode-helpers](https://www.npmjs.com/package/vscode-helpers) `^2.20.0`
 * bugfixes with new filesystem API
 
 ## 0.73.1 (May 1st, 2018; fixes)
