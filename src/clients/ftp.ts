@@ -167,7 +167,11 @@ export interface FTPConnectionOptions {
     /**
      * A function that provides values for the connection.
      */
-    readonly valueProvider?: deploy_values.ValuesProvider;  
+    readonly valueProvider?: deploy_values.ValuesProvider;
+    /**
+     * Set to true for both control and data connection encryption, 'control' for control connection encryption only, or 'implicit' for implicitly encrypted control connection (this mode is deprecated in modern times, but usually uses port 990) Default: false, applies only when engine is set to 'ftp'
+     */
+    readonly secure?: boolean | "implicit";
 }
 
 /**
@@ -748,6 +752,7 @@ class FtpClient extends FTPClientBase {
                 conn.connect({
                     host: host, port: port,
                     user: user, password: pwd,
+                    secure: this.options.secure
                 });
             }
             catch (e) {

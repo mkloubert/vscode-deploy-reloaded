@@ -141,6 +141,10 @@ export interface FTPTarget extends deploy_targets.Target {
      * The username.
      */
     readonly user?: string;
+    /**
+     * Set to true for both control and data connection encryption, 'control' for control connection encryption only, or 'implicit' for implicitly encrypted control connection (this mode is deprecated in modern times, but usually uses port 990) Default: false, applies only when engine is set to 'ftp'
+     */
+    readonly secure?: boolean | "implicit";
 }
 
 /**
@@ -467,6 +471,7 @@ class FTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<FTPTarget,
                     supportsDeepDirectoryCreation: target.supportsDeepDirectoryCreation,
                     uploadCompleted: uploadCompleted,
                     user: user,
+                    secure: target.secure,
                     valueProvider: () => WORKSPACE.getValues(),
                 }),
                 getDir: (subDir) => {

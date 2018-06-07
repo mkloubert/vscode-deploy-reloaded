@@ -19,7 +19,7 @@ The extension supports the following destinations:
 | [Compiler](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_compiler) |
 | [DropBox](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_dropbox) |
 | [External Node.js based scripts](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_script) |
-| [FTP](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_ftp) |
+| [FTP(S)](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_ftp) |
 | [Local or shared network folders inside a LAN](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_local) |
 | [Mail (SMTP)](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_mail) |
 | [SFTP](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_sftp) |
