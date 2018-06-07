@@ -702,10 +702,9 @@ class FtpClient extends FTPClientBase {
             host = '127.0.0.1';
         }
 
-        let port = parseInt(deploy_helpers.toStringSafe(this.options.port).trim());
-        if (isNaN(port)) {
-            port = 21;
-        }
+        const PORT = parseInt(
+            deploy_helpers.toStringSafe(this.options.port).trim()
+        );
 
         let user = deploy_helpers.toStringSafe(this.options.user, 'anonymous');
 
@@ -776,8 +775,19 @@ class FtpClient extends FTPClientBase {
                     }
                 }
 
+                let ftpPort = PORT;
+                if (isNaN(ftpPort)) {
+                    ftpPort = 21;
+
+                    if (!_.isNil(secure)) {
+                        if (false !== secure) {
+                            ftpPort = 990;
+                        }
+                    }
+                }        
+
                 conn.connect({
-                    host: host, port: port,
+                    host: host, port: ftpPort,
                     user: user, password: pwd,
                     secure: secure,
                     secureOptions: secureOptions,
