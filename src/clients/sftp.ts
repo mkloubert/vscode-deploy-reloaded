@@ -542,7 +542,7 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
 
                             output = Buffer.alloc(0);
 
-                            this.client['client'].exec(entry.command, (err, stream) => {
+                            this.client['client'].exec(COMMAND_TO_EXECUTE, (err, stream) => {
                                 if (err) {
                                     COMP(err);
                                     return;
