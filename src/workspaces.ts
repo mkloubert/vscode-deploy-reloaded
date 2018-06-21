@@ -5053,7 +5053,7 @@ export async function showWorkspaceQuickPick(context: vscode.ExtensionContext,
 
     if (QUICK_PICKS.length < 1) {
         deploy_helpers.showWarningMessage(
-            i18.t('noneFound.noneFound')
+            i18.t('workspaces.noneFound')
         );
         
         return false;
