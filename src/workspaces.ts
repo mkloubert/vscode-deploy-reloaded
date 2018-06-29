@@ -78,6 +78,10 @@ export interface DeactivateAutoDeployOperationsForOptions {
      * Deactivate 'remove on change' or not.
      */
     readonly noRemoveOnChange?: boolean;
+    /**
+     * Retry if another operation is currently in progress or not.
+     */
+    readonly retry?: boolean;
 }
 
 interface PackageWithButton {
@@ -332,6 +336,7 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
      */
     protected _configSource: WorkspaceConfigSource;
     private _gitFolder: string | false;
+    private _isAutoDeployOperationDeactivatedFor = false;
     private _isDeployOnChangeFreezed = false;
     private _isDeployOnSaveFreezed = false;
     /**
@@ -829,32 +834,56 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
             opts = <any>{};
         }
 
-        let oldIsDeployOnChangeFreezed = this.isDeployOnChangeFreezed;
-        let oldIsDeployOnSaveFreezed = this.isDeployOnSaveFreezed;
-        let oldIsRemoveOnChangeFreezed = this.isRemoveOnChangeFreezed;
-        try {
-            if (deploy_helpers.toBooleanSafe(opts.noDeployOnChange, true)) {
-                this.isDeployOnChangeFreezed = true;
-            }
+        const ME = this;        
 
-            if (deploy_helpers.toBooleanSafe(opts.noRemoveOnChange, true)) {
-                this.isRemoveOnChangeFreezed = true;
-            }
+        if (this._isAutoDeployOperationDeactivatedFor) {
+            if (deploy_helpers.toBooleanSafe(opts.retry, true)) {
+                const MY_ARGS = arguments;
 
-            if (deploy_helpers.toBooleanSafe(opts.noDeployOnSave, true)) {
-                this.isDeployOnSaveFreezed = true;
-            }
+                deploy_helpers.invokeAfter(async () => {
+                    await ME.deactivateAutoDeployOperationsFor
+                            .apply(ME, MY_ARGS);
+                }, 750).then(() => {
+                }).catch((err) => {
+                    ME.logger
+                      .trace(err, 'workspaces.Workspace.deactivateAutoDeployOperationsFor.invokeAfter()');  
+                });
 
-            if (action) {
-                return await Promise.resolve(
-                    action()
-                );
+                return;
             }
         }
-        finally {
-            this.isDeployOnChangeFreezed = oldIsDeployOnChangeFreezed;
-            this.isDeployOnSaveFreezed = oldIsDeployOnSaveFreezed;
-            this.isRemoveOnChangeFreezed = oldIsRemoveOnChangeFreezed;
+
+        this._isAutoDeployOperationDeactivatedFor = true;
+        try {
+            let oldIsDeployOnChangeFreezed = this.isDeployOnChangeFreezed;
+            let oldIsDeployOnSaveFreezed = this.isDeployOnSaveFreezed;
+            let oldIsRemoveOnChangeFreezed = this.isRemoveOnChangeFreezed;
+            try {
+                if (deploy_helpers.toBooleanSafe(opts.noDeployOnChange, true)) {
+                    this.isDeployOnChangeFreezed = true;
+                }
+
+                if (deploy_helpers.toBooleanSafe(opts.noRemoveOnChange, true)) {
+                    this.isRemoveOnChangeFreezed = true;
+                }
+
+                if (deploy_helpers.toBooleanSafe(opts.noDeployOnSave, true)) {
+                    this.isDeployOnSaveFreezed = true;
+                }
+
+                if (action) {
+                    return await Promise.resolve(
+                        action()
+                    );
+                }
+            }
+            finally {
+                this.isDeployOnChangeFreezed = oldIsDeployOnChangeFreezed;
+                this.isDeployOnSaveFreezed = oldIsDeployOnSaveFreezed;
+                this.isRemoveOnChangeFreezed = oldIsRemoveOnChangeFreezed;
+            }
+        } finally {
+            this._isAutoDeployOperationDeactivatedFor = false;
         }
     }
 
@@ -2886,11 +2915,11 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
             try {
                 switch (type) {
                     case deploy_contracts.FileChangeType.Changed:
-                        await this.deployOnChange(e.fsPath);
+                        await ME.deployOnChange(e.fsPath);
                         break;
 
                     case deploy_contracts.FileChangeType.Created:
-                        await this.deployOnChange(e.fsPath);
+                        await ME.deployOnChange(e.fsPath);
                         break;
 
                     case deploy_contracts.FileChangeType.Deleted:
