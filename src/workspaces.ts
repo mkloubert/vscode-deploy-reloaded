@@ -322,6 +322,7 @@ const SWITCH_STATE_REPO_COLLECTION_KEY = 'SwitchStates';
  */
 export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_contracts.Translator {
     private readonly _APIS: deploy_api.ApiHost[] = [];
+    private readonly _AUTO_DEPLOY_QUEUE = deploy_helpers.createQueue();
     /**
      * Stores the current configuration.
      */
@@ -2906,7 +2907,7 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
             }
 
             if (action) {
-                await ME.deployQueue.add(async () => {
+                await ME._AUTO_DEPLOY_QUEUE.add(async () => {
                     if (ME.canDoAutoOperations) {
                         await action();
                     }
