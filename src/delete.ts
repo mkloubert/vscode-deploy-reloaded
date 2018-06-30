@@ -162,19 +162,21 @@ export async function deleteFilesIn(files: string[],
                                     deleteLocalFiles?: boolean) {
     const ME: deploy_workspaces.Workspace = this;
 
-    await deploy_helpers.withProgress(async (progress) => {
-        await deploy_helpers.applyFuncFor(
-            deleteFilesInWithProgress,
-            ME,
-        )(progress,
-          files,
-          target,
-          fileListReloader,
-          deleteLocalFiles);
-    }, {
-        location: vscode.ProgressLocation.Notification,
-        cancellable: true,
-        title: `🗑️ ` + ME.t('DELETE.deletingFiles'),        
+    await ME.deployQueue.add(async () => {
+        await deploy_helpers.withProgress(async (progress) => {
+            await deploy_helpers.applyFuncFor(
+                deleteFilesInWithProgress,
+                ME,
+            )(progress,
+              files,
+              target,
+              fileListReloader,
+              deleteLocalFiles);
+        }, {
+            location: vscode.ProgressLocation.Notification,
+            cancellable: true,
+            title: `🗑️ ` + ME.t('DELETE.deletingFiles'),        
+        });
     });
 }
 
@@ -285,7 +287,6 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
         return f;
     };
 
-    const TARGET_SESSION = await deploy_targets.waitForOtherTargets(target);
     try {
         const ITEMS_FOR_PROGRESS: any[] = [];
         const TOTAL_COUNT = files.length * PLUGINS.length;
@@ -619,10 +620,6 @@ async function deleteFilesInWithProgress(progress: deploy_helpers.ProgressContex
     }
     finally {
         deploy_helpers.tryDispose(CANCELLATION_SOURCE);
-
-        deploy_targets.unmarkTargetAsInProgress(
-            target, TARGET_SESSION
-        );
     }
 }
 

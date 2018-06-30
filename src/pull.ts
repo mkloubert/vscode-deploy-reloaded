@@ -425,18 +425,20 @@ export async function pullFilesFrom(files: string[],
                                     fileListReloader: deploy_contracts.Reloader<string>) {
     const ME: deploy_workspaces.Workspace = this;
 
-    await deploy_helpers.withProgress(async (progress) => {
-        await deploy_helpers.applyFuncFor(
-            pullFilesFromWithProgress,
-            ME,
-        )(progress,
-          files,
-          target,
-          fileListReloader);
-    }, {
-        location: vscode.ProgressLocation.Notification,
-        cancellable: true,
-        title: `🚚 ` + ME.t('pull.pullingFiles'),
+    await ME.deployQueue.add(async () => {
+        await deploy_helpers.withProgress(async (progress) => {
+            await deploy_helpers.applyFuncFor(
+                pullFilesFromWithProgress,
+                ME,
+            )(progress,
+              files,
+              target,
+              fileListReloader);
+        }, {
+            location: vscode.ProgressLocation.Notification,
+            cancellable: true,
+            title: `🚚 ` + ME.t('pull.pullingFiles'),
+        });
     });
 }
 
@@ -557,7 +559,6 @@ async function pullFilesFromWithProgress(progress: deploy_helpers.ProgressContex
         return f;
     };
 
-    const TARGET_SESSION = await deploy_targets.waitForOtherTargets(target);
     try {
         const ITEMS_FOR_PROGRESS: any[] = [];
         const TOTAL_COUNT = files.length * PLUGINS.length;
@@ -976,10 +977,6 @@ async function pullFilesFromWithProgress(progress: deploy_helpers.ProgressContex
     }
     finally {
         deploy_helpers.tryDispose(CANCELLATION_SOURCE);
-
-        deploy_targets.unmarkTargetAsInProgress(
-            target, TARGET_SESSION
-        );
     }
 }
 

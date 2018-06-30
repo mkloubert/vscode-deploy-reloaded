@@ -53,7 +53,6 @@ import * as ip from 'ip';
 const MergeDeep = require('merge-deep');
 import * as Moment from 'moment';
 import * as Path from 'path';
-import * as PQueue from 'p-queue';
 import * as vscode from 'vscode';
 
 
@@ -303,6 +302,7 @@ export interface WorkspaceSettings extends deploy_contracts.Configuration {
 
 let activeWorkspaceProvider: WorkspaceProvider;
 let allWorkspacesProvider: WorkspaceProvider;
+const GLOBAL_DEPLOY_QUEUE = deploy_helpers.createQueue();
 const KEY_AUTO_BTN_DEPLOY_ON_CHANGE = 'deploy_on_change';
 const KEY_AUTO_BTN_DEPLOY_ON_SAVE = 'deploy_on_save';
 const KEY_AUTO_BTN_REMOVE_ON_CHANGE = 'remove_on_change';
@@ -322,7 +322,6 @@ const SWITCH_STATE_REPO_COLLECTION_KEY = 'SwitchStates';
  */
 export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_contracts.Translator {
     private readonly _APIS: deploy_api.ApiHost[] = [];
-    private readonly _AUTO_DEPLOY_QUEUE = new PQueue({ concurrency: 1 });
     /**
      * Stores the current configuration.
      */
@@ -332,7 +331,8 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
      * Stores the source of the configuration data.
      */
     protected _configSource: WorkspaceConfigSource;
-    private readonly _DEACTIVATE_AUTO_DEPLOY_FOR_QUEUE = new PQueue({ concurrency: 1 });
+    private readonly _DEACTIVATE_AUTO_DEPLOY_FOR_QUEUE = deploy_helpers.createQueue();
+    private readonly _DEPLOY_QUEUE = deploy_helpers.createQueue();
     private _gitFolder: string | false;
     private _isDeployOnChangeFreezed = false;
     private _isDeployOnSaveFreezed = false;
@@ -354,6 +354,7 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
     private readonly _OUTPUT_CHANNEL: deploy_output.OutputChannelWrapper;
     private readonly _PACKAGE_BUTTONS: PackageWithButton[] = [];
     private _packages: deploy_packages.Package[];
+    private readonly _QUEUE = deploy_helpers.createQueue();
     private _rootPath: string | false;
     private _selectedSwitches: deploy_contracts.KeyValuePairs;
     /**
@@ -804,12 +805,6 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
 
         NEW_SESSION_STATE['timeouts'] = {};
 
-        // targets
-        NEW_SESSION_STATE[ deploy_targets.KEY_TARGETS_STATE_STORAGE ] = {};
-        NEW_SESSION_STATE[ deploy_targets.KEY_TARGETS_STATE_STORAGE ][
-            deploy_targets.KEY_TARGETS_IN_PROGRESS
-        ] = {};
-
         deploy_helpers.applyFuncFor(
             deploy_buttons.initFinishedButtons, this
         )(NEW_SESSION_STATE);
@@ -992,6 +987,22 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
             deploy_deploy.deployPackage,
             this
         )(pkg, targetResolver);
+    }
+
+    /**
+     * Gets the workspace-wide queue for all deploy processes.
+     */
+    public get deployQueue() {
+        let queueToUse = this._DEPLOY_QUEUE;
+
+        const CFG = this.config;
+        if (CFG) {
+            if (deploy_helpers.toBooleanSafe(CFG.useGlobalQueue)) {
+                queueToUse = GLOBAL_DEPLOY_QUEUE;
+            }
+        }
+
+        return queueToUse;
     }
 
     /**
@@ -2895,7 +2906,7 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
             }
 
             if (action) {
-                return await ME._AUTO_DEPLOY_QUEUE.add(async () => {
+                await ME.deployQueue.add(async () => {
                     if (ME.canDoAutoOperations) {
                         await action();
                     }
@@ -3100,6 +3111,13 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
             deploy_pull.pullPackage,
             this
         )(pkg, targetResolver);
+    }
+
+    /**
+     * Gets the workspace-wide queue.
+     */
+    public get queue() {
+        return this._QUEUE;
     }
 
     private async reloadAutoDeployButtons() {

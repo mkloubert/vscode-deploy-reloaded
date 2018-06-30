@@ -321,6 +321,10 @@ export interface Configuration extends deploy_packages.WithFastFileCheckSettings
      * The time (in milliseconds) to wait before activating 'remove on change' feature.
      */
     readonly timeToWaitBeforeActivateRemoveOnChange?: number;
+    /**
+     * Use a global queue for all deploy operations or not.
+     */
+    readonly useGlobalQueue?: boolean;
 }
 
 /**
