@@ -106,6 +106,16 @@ export interface CanHide {
 }
 
 /**
+ * Settings, which indicates if 'fast-glob' can be used instead of 'node-glob'.
+ */
+export interface CanUseFastGlob {
+    /**
+     * Use 'fast-glob' instead of 'node-glob' or not.
+     */
+    readonly useFastGlob?: boolean;    
+}
+
+/**
  * Possible values for a 'checkForRequirements' setting.
  */
 export type CheckForRequirementsEntry = string | CheckForRequirementsSettings;
@@ -138,7 +148,8 @@ export interface ConditionalItem {
 /**
  * Deploy settings.
  */
-export interface Configuration extends deploy_packages.WithFastFileCheckSettings,
+export interface Configuration extends CanUseFastGlob,
+                                       deploy_packages.WithFastFileCheckSettings,
                                        deploy_values.WithValueItems
 {
     /**

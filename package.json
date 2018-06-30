@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.79.1",
+ "version": "0.80.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.24.0"
@@ -879,6 +879,11 @@
               ],
               "type": "string",
               "default": "deploy"
+             },
+             "useFastGlob": {
+              "description": "Use 'fast-glob' instead of 'node-glob' for that package.",
+              "type": "boolean",
+              "default": false
              }
             }
            }
@@ -5280,6 +5285,11 @@
             "type": "string",
             "description": "Deploys via a shell command."
            },
+           "useFastGlob": {
+            "description": "Use 'fast-glob' instead of 'node-glob' for that target.",
+            "type": "boolean",
+            "default": false
+           },
            "usePlaceholders": {
             "type": "boolean",
             "description": "Use placeholder for arguments or not.",
@@ -8937,6 +8947,11 @@
             "type": "boolean",
             "description": "Use local development storage or not.",
             "default": false
+           },
+           "useFastGlob": {
+            "description": "Use 'fast-glob' instead of 'node-glob' for that target.",
+            "type": "boolean",
+            "default": false
            }
           }
          },
@@ -12559,6 +12574,11 @@
             ],
             "type": "string",
             "description": "Deploys to a list of other targets."
+           },
+           "useFastGlob": {
+            "description": "Use 'fast-glob' instead of 'node-glob' for that target.",
+            "type": "boolean",
+            "default": false
            }
           },
           "required": [
@@ -16201,6 +16221,11 @@
             ],
             "type": "string",
             "description": "Compiles files."
+           },
+           "useFastGlob": {
+            "description": "Use 'fast-glob' instead of 'node-glob' for that target.",
+            "type": "boolean",
+            "default": false
            }
           },
           "required": [
@@ -19827,6 +19852,11 @@
             ],
             "type": "string",
             "description": "Deploys to a Dropbox folder."
+           },
+           "useFastGlob": {
+            "description": "Use 'fast-glob' instead of 'node-glob' for that target.",
+            "type": "boolean",
+            "default": false
            }
           },
           "required": [
@@ -23476,6 +23506,11 @@
             ],
             "type": "string",
             "description": "Iterates over a list of values and deploys for each of them."
+           },
+           "useFastGlob": {
+            "description": "Use 'fast-glob' instead of 'node-glob' for that target.",
+            "type": "boolean",
+            "default": false
            },
            "usePlaceholders": {
             "type": "boolean",
@@ -27405,6 +27440,11 @@
            "uploadedOptions": {
             "description": "Options for the script defined in 'uploaded'."
            },
+           "useFastGlob": {
+            "description": "Use 'fast-glob' instead of 'node-glob' for that target.",
+            "type": "boolean",
+            "default": false
+           },
            "user": {
             "type": "string",
             "description": "The username.",
@@ -31072,6 +31112,11 @@
             ],
             "type": "string",
             "description": "Shows a list with possible settings for other targets."
+           },
+           "useFastGlob": {
+            "description": "Use 'fast-glob' instead of 'node-glob' for that target.",
+            "type": "boolean",
+            "default": false
            }
           },
           "required": [
@@ -34701,6 +34746,11 @@
             ],
             "type": "string",
             "description": "Deploys to a local folder or a shared folder (like SMB) inside your LAN."
+           },
+           "useFastGlob": {
+            "description": "Use 'fast-glob' instead of 'node-glob' for that target.",
+            "type": "boolean",
+            "default": false
            }
           }
          },
@@ -38365,6 +38415,11 @@
             "type": "string",
             "description": "Deploys to a SMTP mail server."
            },
+           "useFastGlob": {
+            "description": "Use 'fast-glob' instead of 'node-glob' for that target.",
+            "type": "boolean",
+            "default": false
+           },
            "user": {
             "type": "string",
             "description": "The user for the authentication."
@@ -42019,6 +42074,11 @@
             ],
             "type": "string",
             "description": "Iterates over a list of objects that contain properties."
+           },
+           "useFastGlob": {
+            "description": "Use 'fast-glob' instead of 'node-glob' for that target.",
+            "type": "boolean",
+            "default": false
            }
           },
           "required": [
@@ -45711,6 +45771,11 @@
             ],
             "type": "string",
             "description": "Asks the user for a list of settings that will be applied to one or more other targets."
+           },
+           "useFastGlob": {
+            "description": "Use 'fast-glob' instead of 'node-glob' for that target.",
+            "type": "boolean",
+            "default": false
            }
           },
           "required": [
@@ -49409,6 +49474,11 @@
             ],
             "type": "string",
             "description": "Deploys to an AWS S3 bucket."
+           },
+           "useFastGlob": {
+            "description": "Use 'fast-glob' instead of 'node-glob' for that target.",
+            "type": "boolean",
+            "default": false
            }
           },
           "required": [
@@ -53040,6 +53110,11 @@
             ],
             "type": "string",
             "description": "Deploys via a script."
+           },
+           "useFastGlob": {
+            "description": "Use 'fast-glob' instead of 'node-glob' for that target.",
+            "type": "boolean",
+            "default": false
            }
           },
           "required": [
@@ -56998,6 +57073,11 @@
            "uploadedOptions": {
             "description": "Options for the script defined in 'uploaded'."
            },
+           "useFastGlob": {
+            "description": "Use 'fast-glob' instead of 'node-glob' for that target.",
+            "type": "boolean",
+            "default": false
+           },
            "user": {
             "type": "string",
             "description": "The username."
@@ -60629,6 +60709,11 @@
             ],
             "type": "string",
             "description": "Deploys to a Slack workspace."
+           },
+           "useFastGlob": {
+            "description": "Use 'fast-glob' instead of 'node-glob' for that target.",
+            "type": "boolean",
+            "default": false
            }
           },
           "required": [
@@ -64345,6 +64430,11 @@
             ],
             "type": "string",
             "description": "Switches between targets."
+           },
+           "useFastGlob": {
+            "description": "Use 'fast-glob' instead of 'node-glob' for that target.",
+            "type": "boolean",
+            "default": false
            }
           },
           "required": [
@@ -67971,6 +68061,11 @@
             ],
             "type": "string",
             "description": "A mock deployer that only checks what files will be deployed."
+           },
+           "useFastGlob": {
+            "description": "Use 'fast-glob' instead of 'node-glob' for that target.",
+            "type": "boolean",
+            "default": false
            }
           }
          },
@@ -71599,6 +71694,11 @@
             ],
             "type": "string",
             "description": "Deploys to a ZIP file."
+           },
+           "useFastGlob": {
+            "description": "Use 'fast-glob' instead of 'node-glob' for that target.",
+            "type": "boolean",
+            "default": false
            }
           }
          }
@@ -71614,6 +71714,11 @@
        "description": "The time (in milliseconds) to wait before activating 'remove on change' feature.",
        "type": "integer",
        "minimum": 0
+      },
+      "useFastGlob": {
+       "description": "Use 'fast-glob' instead of 'node-glob' by deafult.",
+       "type": "boolean",
+       "default": false
       },
       "useGlobalQueue": {
        "description": "Use a global queue for all deploy operations or not.",
@@ -71979,6 +72084,6 @@
   "tmp": "0.0.33",
   "uglify-js": "^3.4.2",
   "uuid": "^3.3.2",
-  "vscode-helpers": "^2.9.0"
+  "vscode-helpers": "^2.10.3"
  }
 }

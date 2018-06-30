@@ -45,6 +45,7 @@ import * as deploy_tasks from './tasks';
 import * as deploy_values from './values';
 import * as Enumerable from 'node-enumerable';
 import * as Events from 'events';
+const FastGlob = require('fast-glob');
 import * as FS from 'fs';
 import * as Glob from 'glob';
 import * as i18 from './i18';
@@ -1283,6 +1284,44 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
 
         return await deploy_helpers.glob(patterns,
                                          MergeDeep(DEFAULT_OPTS, opts));
+    }
+
+    /**
+     * Finds files inside that workspace.
+     * 
+     * @param {deploy_contracts.FileFilter} filter The filter to use.
+     * @param {Glob.IOptions} [opts] Custom options.
+     * 
+     * @return {Promise<deploy_helpers.FastGlobEntryItem>} The promise with the found files.
+     */
+    public findFilesByFilterFast(filter: deploy_contracts.FileFilter, opts?: deploy_helpers.FastGlobOptions) {
+        if (!filter) {
+            filter = <any>{};
+        }
+
+        let patterns = deploy_helpers.asArray(filter.files).map(p => {
+            return deploy_helpers.toStringSafe(p);
+        }).filter(p => !deploy_helpers.isEmptyString(p));
+
+        let exclude = deploy_helpers.asArray(filter.exclude).map(e => {
+            return deploy_helpers.toStringSafe(e);
+        }).filter(e => !deploy_helpers.isEmptyString(e));
+
+        const DEFAULT_OPTS: deploy_helpers.FastGlobOptions = {
+            absolute: true,
+            cwd: this.rootPath,
+            deep: true,
+            followSymlinkedDirectories: true,
+            stats: false,
+            ignore: exclude,
+            onlyFiles: true,
+            unique: true,            
+        };
+
+        return deploy_helpers.fastGlob(
+            patterns,
+            MergeDeep(DEFAULT_OPTS, opts),
+        );
     }
 
     private getAllSwitchOptions(target: SwitchTarget): SwitchTargetOption[] {

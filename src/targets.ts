@@ -139,6 +139,7 @@ export type PrepareTargetOperationValue = PrepareTargetOperation | string;
 export interface Target extends deploy_values.Applyable,
                                 deploy_contracts.CanHide,
                                 deploy_transformers.CanTransformData,
+                                deploy_contracts.CanUseFastGlob,
                                 deploy_contracts.ConditionalItem,
                                 deploy_contracts.Encryptable,
                                 deploy_contracts.PlatformItem,
@@ -771,56 +772,88 @@ export async function getScopeDirectoriesForTargetFolderMappings(target: Target)
     }
 
     const WORKSPACE = target.__workspace;
+    const CFG = WORKSPACE.config;
 
-    const PATTERNS: string[] = [];
+    let useFastGlob = target.useFastGlob;
+    if (CFG) {
+        useFastGlob = deploy_helpers.toBooleanSafe(useFastGlob,
+                                                   deploy_helpers.toBooleanSafe(CFG.useFastGlob));
+    }
+    useFastGlob = deploy_helpers.toBooleanSafe(useFastGlob);
+
+    let patterns: string[] = [];
     
     const MAPPINGS = target.mappings;
     if (deploy_helpers.isObject(MAPPINGS)) {
         for (const P in MAPPINGS) {
             if (!deploy_helpers.isEmptyString(P)) {
-                PATTERNS.push(P);
+                patterns.push(P);
             }
         }
     }
 
-    const DIRS: string[] = [];
+    patterns = Enumerable.from(patterns)
+                         .distinct()
+                         .toArray();
 
-    if (PATTERNS.length > 0) {
-        const FILES_AND_FOLDERS = await WORKSPACE.findFilesByFilter({
-            files: Enumerable.from(PATTERNS)
-                             .distinct()
-                             .toArray()
-        }, {
-            absolute: true,
-            dot: true,
-            nocase: true,
-            nodir: false,
-            nosort: true,
-        });
+    let dirs: string[] = [];
 
-        for (const FF of FILES_AND_FOLDERS) {
-            let dirToAdd: string;
+    if (patterns.length > 0) {
+        let filesAndFolder: string[] = [];
 
-            const STATS = await deploy_helpers.lstat(FF);
-            if (STATS.isDirectory()) {
-                dirToAdd = FF;
-            }
-            else {
-                dirToAdd = Path.dirname(FF);
-            }
+        let itemAdder: () => Promise<void>;
 
-            if (deploy_helpers.isEmptyString(dirToAdd)) {
-                continue;
-            }
+        if (useFastGlob) {
+            filesAndFolder = (await WORKSPACE.findFilesByFilterFast({
+                files: patterns,
+            }, {
+                absolute: true,
+                dot: true,
+                nocase: true,
+                onlyDirectories: true,
+                onlyFiles: false,
+            })).map((x: string) => {
+                return Path.resolve(x);
+            });
 
-            dirToAdd = Path.resolve(dirToAdd);
-            if (DIRS.indexOf(dirToAdd) < 0) {
-                DIRS.push(dirToAdd);
-            }
+            itemAdder = async () => {
+                dirs = filesAndFolder;
+            };
+        } else {
+            filesAndFolder = await WORKSPACE.findFilesByFilter({
+                files: patterns,
+            }, {
+                absolute: true,
+                dot: true,
+                nocase: true,
+                nodir: false,
+                nosort: true,
+                nounique: false,
+            });
+
+            itemAdder = async () => {
+                for (const FF of filesAndFolder) {
+                    let dirToAdd: string;
+        
+                    if (await deploy_helpers.isDirectory(FF, false)) {
+                        dirToAdd = FF;
+                    }
+                    else {
+                        dirToAdd = Path.dirname(FF);
+                    }
+        
+                    dirToAdd = Path.resolve(dirToAdd);
+                    if (dirs.indexOf(dirToAdd) < 0) {
+                        dirs.push(dirToAdd);
+                    }
+                }
+            };
         }
+
+        await itemAdder();
     }
 
-    return DIRS;
+    return dirs;
 }
 
 /**

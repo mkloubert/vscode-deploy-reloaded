@@ -65,6 +65,7 @@ export interface AutoDeployFileOptions {
  */
 export interface Package extends deploy_values.Applyable,
                                  deploy_contracts.CanHide,
+                                 deploy_contracts.CanUseFastGlob,
                                  deploy_contracts.ConditionalItem,
                                  deploy_contracts.FileFilter,
                                  deploy_contracts.PlatformItem,
@@ -294,6 +295,7 @@ export async function findTargetsForFileOfPackage(
 ): Promise<deploy_targets.Target[] | false>
 {
     const ME: deploy_workspaces.Workspace = this;
+    const CFG = ME.config;
     
     file = deploy_helpers.toStringSafe(file);
     file = Path.resolve(file);
@@ -325,6 +327,13 @@ export async function findTargetsForFileOfPackage(
 
         let filter: deploy_contracts.FileFilter;
         let targetNames: string | string[] | false = false;
+        
+        let useFastGlob = PKG.useFastGlob;
+        if (CFG) {
+            useFastGlob = deploy_helpers.toBooleanSafe(useFastGlob,
+                                                       deploy_helpers.toBooleanSafe(CFG.useFastGlob));
+        }
+        useFastGlob = deploy_helpers.toBooleanSafe(useFastGlob);
 
         if (deploy_helpers.isObject<PackageDeployFileFilter>(settings)) {
             filter = settings;
@@ -388,8 +397,17 @@ export async function findTargetsForFileOfPackage(
             };
         }
         else {
+            // kloubi
             fileListResolver = async () => {
-                let fileList = await ME.findFilesByFilter(PKG);
+                let fileList: string[];
+                if (useFastGlob) {
+                    fileList = (await ME.findFilesByFilterFast(PKG)).map((x: string) => {
+                        return Path.resolve(x);
+                    });
+                } else {
+                    fileList = await ME.findFilesByFilter(PKG);
+                }
+
                 if (filter !== PKG) {
                     fileList = fileList.filter(f => {
                         const REL_PATH = ME.toRelativePath(f);
