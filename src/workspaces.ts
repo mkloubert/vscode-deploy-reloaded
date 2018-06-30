@@ -53,6 +53,7 @@ import * as ip from 'ip';
 const MergeDeep = require('merge-deep');
 import * as Moment from 'moment';
 import * as Path from 'path';
+import * as PQueue from 'p-queue';
 import * as vscode from 'vscode';
 
 
@@ -78,10 +79,6 @@ export interface DeactivateAutoDeployOperationsForOptions {
      * Deactivate 'remove on change' or not.
      */
     readonly noRemoveOnChange?: boolean;
-    /**
-     * Retry if another operation is currently in progress or not.
-     */
-    readonly retry?: boolean;
 }
 
 interface PackageWithButton {
@@ -306,7 +303,6 @@ export interface WorkspaceSettings extends deploy_contracts.Configuration {
 
 let activeWorkspaceProvider: WorkspaceProvider;
 let allWorkspacesProvider: WorkspaceProvider;
-const FILES_CHANGES: { [path: string]: deploy_contracts.FileChangeType } = {};
 const KEY_AUTO_BTN_DEPLOY_ON_CHANGE = 'deploy_on_change';
 const KEY_AUTO_BTN_DEPLOY_ON_SAVE = 'deploy_on_save';
 const KEY_AUTO_BTN_REMOVE_ON_CHANGE = 'remove_on_change';
@@ -326,6 +322,7 @@ const SWITCH_STATE_REPO_COLLECTION_KEY = 'SwitchStates';
  */
 export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_contracts.Translator {
     private readonly _APIS: deploy_api.ApiHost[] = [];
+    private readonly _AUTO_DEPLOY_QUEUE = new PQueue({ concurrency: 1 });
     /**
      * Stores the current configuration.
      */
@@ -335,8 +332,8 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
      * Stores the source of the configuration data.
      */
     protected _configSource: WorkspaceConfigSource;
+    private readonly _DEACTIVATE_AUTO_DEPLOY_FOR_QUEUE = new PQueue({ concurrency: 1 });
     private _gitFolder: string | false;
-    private _isAutoDeployOperationDeactivatedFor = false;
     private _isDeployOnChangeFreezed = false;
     private _isDeployOnSaveFreezed = false;
     /**
@@ -826,65 +823,47 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
      * 
      * @param {Function} action The action to invoke.
      * @param {DeactivateAutoDeployOperationsForOptions} [opts] Custom options.
+     * 
+     * @return {Promise<TResult>} The promise with the result of the action.
      */
-    public async deactivateAutoDeployOperationsFor<TResult = any>(
+    public deactivateAutoDeployOperationsFor<TResult = any>(
         action: () => TResult | PromiseLike<TResult>, opts?: DeactivateAutoDeployOperationsForOptions
     ) {
         if (!opts) {
             opts = <any>{};
         }
 
-        const ME = this;        
+        const ME = this;
 
-        if (this._isAutoDeployOperationDeactivatedFor) {
-            if (deploy_helpers.toBooleanSafe(opts.retry, true)) {
-                const MY_ARGS = arguments;
-
-                deploy_helpers.invokeAfter(async () => {
-                    await ME.deactivateAutoDeployOperationsFor
-                            .apply(ME, MY_ARGS);
-                }, 750).then(() => {
-                }).catch((err) => {
-                    ME.logger
-                      .trace(err, 'workspaces.Workspace.deactivateAutoDeployOperationsFor.invokeAfter()');  
-                });
-
-                return;
-            }
-        }
-
-        this._isAutoDeployOperationDeactivatedFor = true;
-        try {
-            let oldIsDeployOnChangeFreezed = this.isDeployOnChangeFreezed;
-            let oldIsDeployOnSaveFreezed = this.isDeployOnSaveFreezed;
-            let oldIsRemoveOnChangeFreezed = this.isRemoveOnChangeFreezed;
+        return ME._DEACTIVATE_AUTO_DEPLOY_FOR_QUEUE.add(async () => {
+            let oldIsDeployOnChangeFreezed = ME.isDeployOnChangeFreezed;
+            let oldIsDeployOnSaveFreezed = ME.isDeployOnSaveFreezed;
+            let oldIsRemoveOnChangeFreezed = ME.isRemoveOnChangeFreezed;
             try {
                 if (deploy_helpers.toBooleanSafe(opts.noDeployOnChange, true)) {
-                    this.isDeployOnChangeFreezed = true;
+                    ME.isDeployOnChangeFreezed = true;
                 }
 
                 if (deploy_helpers.toBooleanSafe(opts.noRemoveOnChange, true)) {
-                    this.isRemoveOnChangeFreezed = true;
+                    ME.isRemoveOnChangeFreezed = true;
                 }
 
                 if (deploy_helpers.toBooleanSafe(opts.noDeployOnSave, true)) {
-                    this.isDeployOnSaveFreezed = true;
+                    ME.isDeployOnSaveFreezed = true;
                 }
 
                 if (action) {
-                    return await Promise.resolve(
+                    return Promise.resolve(
                         action()
                     );
                 }
             }
             finally {
-                this.isDeployOnChangeFreezed = oldIsDeployOnChangeFreezed;
-                this.isDeployOnSaveFreezed = oldIsDeployOnSaveFreezed;
-                this.isRemoveOnChangeFreezed = oldIsRemoveOnChangeFreezed;
+                ME.isDeployOnChangeFreezed = oldIsDeployOnChangeFreezed;
+                ME.isDeployOnSaveFreezed = oldIsDeployOnSaveFreezed;
+                ME.isRemoveOnChangeFreezed = oldIsRemoveOnChangeFreezed;
             }
-        } finally {
-            this._isAutoDeployOperationDeactivatedFor = false;
-        }
+        });
     }
 
     /**
@@ -2898,37 +2877,29 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
                 return;
             }
 
-            const MY_ARGS = arguments;
+            let action: () => Promise<void>;
 
-            if (!_.isNil(FILES_CHANGES[e.fsPath])) {
-                if (retry) {
-                    await deploy_helpers.invokeAfter(async () => {
-                        await ME.onDidFileChange
-                                .apply(ME, MY_ARGS);
-                    });
-                }
-
-                return;
-            }
-
-            FILES_CHANGES[e.fsPath] = type;
-            try {
-                switch (type) {
-                    case deploy_contracts.FileChangeType.Changed:
+            switch (type) {
+                case deploy_contracts.FileChangeType.Changed:
+                case deploy_contracts.FileChangeType.Created:
+                    action = async () => {
                         await ME.deployOnChange(e.fsPath);
-                        break;
+                    };
+                    break;
 
-                    case deploy_contracts.FileChangeType.Created:
-                        await ME.deployOnChange(e.fsPath);
-                        break;
-
-                    case deploy_contracts.FileChangeType.Deleted:
+                case deploy_contracts.FileChangeType.Deleted:
+                    action = async () => {
                         await ME.removeOnChange(e.fsPath);
-                        break;
-                }
+                    };                
+                    break;
             }
-            finally {
-                delete FILES_CHANGES[e.fsPath];
+
+            if (action) {
+                return await ME._AUTO_DEPLOY_QUEUE.add(async () => {
+                    if (ME.canDoAutoOperations) {
+                        await action();
+                    }
+                });
             }
         }
         catch (e) {
