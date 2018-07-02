@@ -64,6 +64,7 @@ export interface Translation {
     };
     'continue'?: string;
     credentials?: {
+        enterPassphrase?: string;
         enterPassword?: string;
         enterUsername?: string;
     };

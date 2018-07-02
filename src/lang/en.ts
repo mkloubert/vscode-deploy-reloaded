@@ -59,6 +59,7 @@ export const translation: Translation = {
     },
     'continue': "Continue",
     credentials: {
+        enterPassphrase: "Enter the passphrase ...",
         enterPassword: "Enter the password ...",
         enterUsername: "Enter the name of the user ...",
     },

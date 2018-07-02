@@ -2,7 +2,7 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.80.1",
+ "version": "0.81.0",
  "publisher": "mkloubert",
  "engines": {
   "vscode": "^1.24.0"
@@ -53138,6 +53138,11 @@
             "description": "Always ask for password and do not cache, if no password is defined.",
             "default": false
            },
+           "alwaysAskForPrivateKeyPassphrase": {
+            "type": "boolean",
+            "description": "Always ask for private key passphrase and do not cache.",
+            "default": false
+           },
            "alwaysAskForUser": {
             "type": "boolean",
             "description": "Always ask for username and do not cache, if no user is defined.",
@@ -53156,6 +53161,11 @@
               ]
              }
             }
+           },
+           "askForPrivateKeyPassphrase": {
+            "type": "boolean",
+            "description": "Ask for private key passphrase.",
+            "default": false
            },
            "beforeDelete": {
             "description": "One or more operations that should be invoked BEFORE a delete operation starts.",

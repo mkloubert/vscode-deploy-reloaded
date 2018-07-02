@@ -100,9 +100,17 @@ export interface SFTPTarget extends deploy_targets.Target {
      */
     readonly alwaysAskForPassword?: boolean;
     /**
+     * Always ask for private key passphrase and do not cache.
+     */
+    readonly alwaysAskForPrivateKeyPassphrase?: boolean;
+    /**
      * Always ask for uasername and do not cache, if no user is defined.
      */
     readonly alwaysAskForUser?: boolean;
+    /**
+     * Ask for private key passphrase.
+     */
+    readonly askForPrivateKeyPassphrase?: boolean;
     /**
      * The path to an (event) script, which is executed BEFORE a file is going to be uploaded.
      */
@@ -226,6 +234,7 @@ export interface SFTPUploadedModuleExecutorArguments extends SFTPUploadScriptArg
 
 
 const CACHE_PASSWORD = 'password';
+const CACHE_PRIV_KEY_PASSPHRASE = 'privateKeyPassphrase';
 const CACHE_USER = 'user';
 
 class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
@@ -268,6 +277,7 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
         const DIR = this.replaceWithValues(target, target.dir);
 
         let cachePassword = false;
+        let cachePrivKeyPassphrase = false;
         let cacheUsername = false;
 
         const ALWAYS_ASK_FOR_USER = deploy_helpers.toBooleanSafe( target.alwaysAskForUser );
@@ -319,6 +329,32 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
             }
 
             cachePassword = !ALWAYS_ASK_FOR_PASSWORD;
+        }
+
+        const ALWAYS_ASK_FOR_PRIV_KEY_PASSPHRASE = deploy_helpers.toBooleanSafe( target.alwaysAskForPrivateKeyPassphrase );
+        let privateKeyPassphrase = target.privateKeyPassphrase;
+        if (IS_PRIVATE_KEY_DEFINED && _.isNil(privateKeyPassphrase)) {
+            let askForPrivKeyPassphrase = ALWAYS_ASK_FOR_PRIV_KEY_PASSPHRASE;
+            if (!askForPrivKeyPassphrase) {
+                askForPrivKeyPassphrase = !CACHE.has( CACHE_PRIV_KEY_PASSPHRASE );
+            }
+
+            if (askForPrivKeyPassphrase) {
+                privateKeyPassphrase = await vscode.window.showInputBox({
+                    ignoreFocusOut: true,
+                    password: true,
+                    prompt: this.t(target, 'credentials.enterPassphrase'),
+                });
+
+                if (_.isNil(privateKeyPassphrase)) {
+                    return;
+                }
+            }
+            else {
+                privateKeyPassphrase = CACHE.get( CACHE_PRIV_KEY_PASSPHRASE );
+            }
+
+            cachePrivKeyPassphrase = !ALWAYS_ASK_FOR_PRIV_KEY_PASSPHRASE;
         }
 
         let beforeUpload: deploy_clients_sftp.SFTPBeforeUpload;
@@ -541,7 +577,7 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
                         ).trim()
                     ),
                     privateKey: privateKeyFile,
-                    privateKeyPassphrase: target.privateKeyPassphrase,
+                    privateKeyPassphrase: privateKeyPassphrase,
                     readyTimeout: parseInt(
                         deploy_helpers.toStringSafe(
                             this.replaceWithValues(target, target.readyTimeout)
@@ -575,12 +611,20 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
             else {
                 CACHE.unset(CACHE_PASSWORD);
             }
+            
+            if (cachePrivKeyPassphrase) {
+                CACHE.set(CACHE_PRIV_KEY_PASSPHRASE, privateKeyPassphrase);
+            }
+            else {
+                CACHE.unset(CACHE_PRIV_KEY_PASSPHRASE);
+            }
     
             return CTX;
         }
         catch (e) {
             CACHE.unset(CACHE_USER)
-                 .unset(CACHE_PASSWORD);
+                 .unset(CACHE_PASSWORD)
+                 .unset(CACHE_PRIV_KEY_PASSPHRASE);
 
             throw e;
         }
