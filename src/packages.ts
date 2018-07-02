@@ -397,7 +397,6 @@ export async function findTargetsForFileOfPackage(
             };
         }
         else {
-            // kloubi
             fileListResolver = async () => {
                 let fileList: string[];
                 if (useFastGlob) {

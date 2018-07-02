@@ -27,8 +27,7 @@ import * as FS from 'fs';
 import * as Minimatch from 'minimatch';
 import * as Moment from 'moment';
 import * as Path from 'path';
-import * as SFTP from 'ssh2-sftp-client';
-
+const SFTP = require('ssh2-sftp-client');
 
 /**
  * An action that is invoked BEFORE an upload process starts.
@@ -46,7 +45,7 @@ export interface SFTPBeforeUploadArguments {
     /**
      * The underlying (raw) connection.
      */
-    readonly connection: SFTP;
+    readonly connection: any;
     /**
      * The data to upload.
      */
@@ -246,7 +245,7 @@ export interface SFTPUploadCompletedArguments {
     /**
      * The underlying (raw) connection.
      */
-    readonly connection: SFTP;
+    readonly connection: any;
     /**
      * The data.
      */
@@ -314,7 +313,7 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
     /**
      * Gets the underlying client.
      */
-    public readonly client: SFTP;
+    public readonly client: any;
 
     private async createDirectoryIfNeeded(dir: string) {
         dir = toSFTPPath(dir);
@@ -397,38 +396,9 @@ export class SFTPClient extends deploy_clients.AsyncFileListBase {
                     VALUES,
                 );
 
-                const STREAM = await ME.client.get(path, null, null);
-
-                STREAM.once('error', (err) => {
-                    COMPLETED(err);
-                });
-        
-                const DOWNLOADED_DATA = await deploy_helpers.invokeForTempFile(async (tmpFile) => {
-                    return new Promise<Buffer>((res, rej) => {
-                        const COMP = deploy_helpers.createCompletedAction(res, rej);
-        
-                        try {
-                            const PIPE = STREAM.pipe(
-                                FS.createWriteStream(tmpFile)
-                            );
-        
-                            PIPE.once('error', (err) => {
-                                COMP(err);
-                            });
-        
-                            STREAM.once('end', () => {
-                                deploy_helpers.readFile(tmpFile).then((data) => {
-                                    COMP(null, data);
-                                }).catch((err) => {
-                                    COMP(err);
-                                });
-                            });
-                        }
-                        catch (e) {
-                            COMP(e);
-                        }
-                    });
-                });
+                const DOWNLOADED_DATA = await deploy_helpers.asBuffer(
+                    await ME.client.get(path, null, null)
+                );
 
                 await this.executeCommandsBy(
                     (o) => o.commands.downloaded,
