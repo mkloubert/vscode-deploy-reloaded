@@ -331,9 +331,10 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
             cachePassword = !ALWAYS_ASK_FOR_PASSWORD;
         }
 
+        const ASK_FOR_PRIV_KEY_PASSPHRASE = deploy_helpers.toBooleanSafe( target.askForPrivateKeyPassphrase );
         const ALWAYS_ASK_FOR_PRIV_KEY_PASSPHRASE = deploy_helpers.toBooleanSafe( target.alwaysAskForPrivateKeyPassphrase );
         let privateKeyPassphrase = target.privateKeyPassphrase;
-        if (IS_PRIVATE_KEY_DEFINED && _.isNil(privateKeyPassphrase)) {
+        if (IS_PRIVATE_KEY_DEFINED && ASK_FOR_PRIV_KEY_PASSPHRASE && _.isNil(privateKeyPassphrase)) {
             let askForPrivKeyPassphrase = ALWAYS_ASK_FOR_PRIV_KEY_PASSPHRASE;
             if (!askForPrivKeyPassphrase) {
                 askForPrivKeyPassphrase = !CACHE.has( CACHE_PRIV_KEY_PASSPHRASE );
