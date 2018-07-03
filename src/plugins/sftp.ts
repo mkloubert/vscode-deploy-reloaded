@@ -108,9 +108,17 @@ export interface SFTPTarget extends deploy_targets.Target {
      */
     readonly alwaysAskForUser?: boolean;
     /**
+     * Ask for password.
+     */
+    readonly askForPassword?: boolean;
+    /**
      * Ask for private key passphrase.
      */
     readonly askForPrivateKeyPassphrase?: boolean;
+    /**
+     * Ask for username.
+     */
+    readonly askForUser?: boolean;
     /**
      * The path to an (event) script, which is executed BEFORE a file is going to be uploaded.
      */
@@ -280,9 +288,10 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
         let cachePrivKeyPassphrase = false;
         let cacheUsername = false;
 
+        const ASK_FOR_USER = deploy_helpers.toBooleanSafe( target.askForUser );
         const ALWAYS_ASK_FOR_USER = deploy_helpers.toBooleanSafe( target.alwaysAskForUser );
         let user = target.user;
-        if (_.isNil(user) && !IS_PRIVATE_KEY_DEFINED) {
+        if (ASK_FOR_USER && _.isNil(user)) {
             let askForUser = ALWAYS_ASK_FOR_USER;
             if (!askForUser) {
                 askForUser = !CACHE.has( CACHE_USER );
@@ -305,9 +314,10 @@ class SFTPPlugin extends deploy_plugins.AsyncFileClientPluginBase<SFTPTarget,
             cacheUsername = !ALWAYS_ASK_FOR_USER;
         }
 
+        const ASK_FOR_PASSWORD = deploy_helpers.toBooleanSafe( target.askForPassword );
         const ALWAYS_ASK_FOR_PASSWORD = deploy_helpers.toBooleanSafe( target.alwaysAskForPassword );
         let pwd = target.password;
-        if (_.isNil(pwd) && !IS_PRIVATE_KEY_DEFINED) {
+        if (!IS_PRIVATE_KEY_DEFINED && ASK_FOR_PASSWORD && _.isNil(pwd)) {
             let askForPassword = ALWAYS_ASK_FOR_PASSWORD;
             if (!askForPassword) {
                 askForPassword = !CACHE.has( CACHE_PASSWORD );
