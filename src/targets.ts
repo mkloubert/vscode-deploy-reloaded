@@ -24,6 +24,7 @@ import * as deploy_mappings from './mappings';
 import * as deploy_packages from './packages';
 import * as deploy_targets_operations_cleanup from './targets/operations/cleanup';
 import * as deploy_targets_operations_command from './targets/operations/command';
+import * as deploy_targets_operations_devtools from './targets/operations/devtools';
 import * as deploy_targets_operations_exec from './targets/operations/exec';
 import * as deploy_targets_operations_http from './targets/operations/http';
 import * as deploy_targets_operations_open from './targets/operations/open';
@@ -564,6 +565,11 @@ export async function executeTargetOperations(opts: ExecuteTargetOperationOption
             case '':
             case 'open':
                 executor = deploy_targets_operations_open.execute;
+                break;
+
+            case 'browser':
+            case 'chrome':
+                executor = deploy_targets_operations_devtools.execute;
                 break;
 
             case 'cleanup':

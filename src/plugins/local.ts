@@ -20,6 +20,7 @@ import * as deploy_helpers from '../helpers';
 import * as deploy_plugins from '../plugins';
 import * as deploy_targets from '../targets';
 import * as deploy_workspaces from '../workspaces';
+import * as FS from 'fs';
 import * as FSExtra from 'fs-extra';
 import * as Moment from 'moment';
 import * as Path from 'path';
@@ -37,6 +38,10 @@ export interface LocalTarget extends deploy_targets.Target {
      * Empty directory before deploy or not.
      */
     readonly empty?: boolean;
+    /**
+     * Try to synchronize the timestamps between source and target files or not.
+     */
+    readonly syncTime?: boolean;
 }
 
 interface TargetSettings {
@@ -103,6 +108,11 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
     }
 
     public async downloadFiles(context: deploy_plugins.DownloadContext<LocalTarget>) {
+        const TARGET = context.target;
+        const WORKSPACE = TARGET.__workspace;
+        
+        const SYNC_TIME = deploy_helpers.toBooleanSafe(TARGET.syncTime, true);
+
         for (const F of context.files) {
             try {
                 const SETTINGS = await this.getTargetSettings(context, F);
@@ -128,6 +138,13 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
                 );
 
                 await F.onDownloadCompleted(null, DOWNLOADED_FILE);
+
+                if (SYNC_TIME) {
+                    await trySyncTimes(
+                        TARGET_FILE, F.file, 
+                        WORKSPACE.logger, 'plugins.local.downloadFiles(trySyncTimes)'
+                    );
+                }
             }
             catch (e) {
                 await F.onDownloadCompleted(e);
@@ -335,6 +352,10 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
 
     public async uploadFiles(context: deploy_plugins.UploadContext<LocalTarget>) {
         const ME = this;
+        const TARGET = context.target;
+        const WORKSPACE = TARGET.__workspace;
+
+        const SYNC_TIME = deploy_helpers.toBooleanSafe(TARGET.syncTime, true);
 
         const ALREADY_CHECKED = {};
         for (const F of context.files) {
@@ -385,6 +406,13 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
                         TARGET_FILE,
                         DATA,
                     );
+
+                    if (SYNC_TIME) {
+                        await trySyncTimes(
+                            F.file, TARGET_FILE,
+                            WORKSPACE.logger, 'plugins.local.uploadFiles(trySyncTimes)'
+                        );    
+                    }
                 }
 
                 await F.onUploadCompleted();
@@ -405,4 +433,28 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
  */
 export function createPlugins(context: deploy_plugins.PluginContext) {
     return new LocalPlugin(context);
+}
+
+async function trySyncTimes(
+    src: string, dest: string,
+    logger: deploy_helpers.Logger, logTag: string,
+): Promise<boolean> {
+    try {
+        const STATS_SRC = await FSExtra.stat(src);
+        if (STATS_SRC) {
+            const STATS_DEST = await FSExtra.stat(dest);
+            if (STATS_DEST) {
+                try {
+                    await FSExtra.utimes(dest,
+                                         STATS_SRC.atime, STATS_SRC.mtime);
+
+                    return true;
+                } catch (e) {
+                    logger.warn(e, logTag);
+                }
+            }
+        }
+    } catch { }
+
+    return false;
 }

@@ -603,6 +603,15 @@ export interface Translation {
         noPluginsFound?: string;
         noWorkspaceFound?: string;
         operations?: {
+            devTools?: {
+                errors?: {
+                    couldNotConnectTo?: string;
+                };
+                pages?: {
+                    defaultTitle?: string;
+                    selectPage?: string;
+                };
+            };
             http?: {
                 bodyScriptNotFound?: string;
                 noBodyScriptFunction?: string;

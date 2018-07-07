@@ -1,7 +1,10 @@
 out
 node_modules
+.vs
 .vscode-test/
 .vsix
 /pushall.sh
 /typedoc.cmd
 /tsdoc
+/.vscode/vscode-kanban.json
+/.vscode/vscode-kanban.filter

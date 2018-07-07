@@ -600,6 +600,15 @@ export const translation: Translation = {
         noPluginsFound: "No matching plugins found!",
         noWorkspaceFound: "No matching workspace found!",
         operations: {
+            devTools: {
+                errors: {
+                    couldNotConnectTo: "Connection to{0:trim,surround,leading_space} failed!",
+                },
+                pages: {
+                    defaultTitle: "Page #{0:trim}",
+                    selectPage: "Select a page ...",
+                },
+            },
             http: {
                 bodyScriptNotFound: "Script{0:trim,surround,leading_space} not found!",
                 noBodyScriptFunction: "Script{0:trim,surround,leading_space} does not contain a 'getBody' function!",
