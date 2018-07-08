@@ -2,13 +2,12 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.83.0",
+ "version": "0.84.0",
  "publisher": "mkloubert",
  "engines": {
-  "vscode": "^1.24.0"
+  "vscode": "^1.25.0"
  },
  "license": "LGPL-3.0",
- "preview": true,
  "categories": [
   "Azure",
   "Other"
@@ -70,6 +69,11 @@
    {
     "command": "extension.deploy.reloaded.pull",
     "title": "Pull ...",
+    "category": "Deploy Reloaded"
+   },
+   {
+    "command": "extension.deploy.reloaded.showNotifications",
+    "title": "Show notification(s) ...",
     "category": "Deploy Reloaded"
    },
    {
@@ -80631,7 +80635,7 @@
   "tmp": "0.0.33",
   "uglify-js": "^3.4.2",
   "uuid": "^3.3.2",
-  "vscode-helpers": "^2.10.3",
+  "vscode-helpers": "^2.12.0",
   "ws": "^5.2.1"
  }
 }

@@ -392,49 +392,15 @@ export async function _1b87f2ee_b636_45b6_807c_0e2d25384b02_1409614337(
 
     // tslint:disable-next-line:no-unused-variable
     const $guid = async (ver?: string, ...guidArgs: any[]) => {
-        const UUID = require('uuid');
-
         ver = $h.normalizeString(
             await $unwrap(ver)
         );
-        guidArgs = $h.normalizeString(
+        guidArgs = $h.asArray(
             await $unwrap(guidArgs)
         );
         
-        const ARGS = [];
-        if (guidArgs) {
-            for (const A of guidArgs) {
-                ARGS.push(
-                    await $unwrap(A)
-                );
-            }
-        }
-
-        let func: (...a: any[]) => string;
-        switch (ver) {
-            case '1':
-            case 'v1':
-                func = UUID.v1;
-                break;
-
-            case '':
-            case '4':
-            case 'v4':
-                func = UUID.v4;
-                break;
-
-            case '5':
-            case 'v5':
-                func = UUID.v5;
-                break;
-        }
-
-        if (!func) {
-            throw new Error($i18.t('tools.quickExecution.uuid.notSupported',
-                                   ver));
-        }
-
-        return func.apply(null, ARGS);
+        return $h.guid
+                 .apply(null, [ <any>ver ].concat( guidArgs ));
     };
 
     // tslint:disable-next-line:no-unused-variable

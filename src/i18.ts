@@ -351,6 +351,12 @@ export interface Translation {
     notFound?: {
         dir?: string;
     };
+    notifications?: {
+        defaultName?: string;
+        loading?: string;
+        noneFound?: string;
+        selectNotifications?: string;
+    };
     ok?: string;
     output?: {
         open?: string;
@@ -635,7 +641,9 @@ export interface Translation {
         waitingForOther?: string;
     };
     time?: {
-        dateTimeWithSeconds?: string;        
+        date?: string;
+        dateTime?: string;
+        dateTimeWithSeconds?: string;
         timeWithSeconds?: string;
     };
     tools?: {

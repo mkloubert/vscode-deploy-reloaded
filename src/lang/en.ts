@@ -346,6 +346,12 @@ export const translation: Translation = {
     notFound: {
         dir: "Directory{0:trim,surround,leading_space} not found!",
     },
+    notifications: {
+        defaultName: "Notification #{0:trim}",
+        loading: "Loading notifications ...",
+        noneFound: "No notifications found!",
+        selectNotifications: "Select one or more notifications ...",
+    },
     ok: 'OK',
     output: {
         open: "Open output",
@@ -632,6 +638,8 @@ export const translation: Translation = {
         waitingForOther: "Wating for{0:trim,surround,leading_space} ...",
     },
     time: {        
+        date: "YYYY-MM-DD",
+        dateTime: "YYYY-MM-DD HH:mm",
         dateTimeWithSeconds: "YYYY-MM-DD HH:mm:ss",
         timeWithSeconds: "HH:mm:ss",
     },

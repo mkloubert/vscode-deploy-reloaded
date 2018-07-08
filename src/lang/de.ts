@@ -346,6 +346,12 @@ export const translation: Translation = {
     notFound: {
         dir: "Das Verzeichnis{0:trim,surround,leading_space} wurde nicht gefunden!",
     },
+    notifications: {
+        defaultName: "Benachrichtigung #{0:trim}",
+        loading: "Lade Benachrichtigungen ...",
+        noneFound: "Keine Benachrichtigungen gefunden!",
+        selectNotifications: "Wählen Sie eine oder mehrere Benachrichtigungen aus ...",
+    },
     output: {
         open: "Ausgabe öffnen",
     },
@@ -631,7 +637,9 @@ export const translation: Translation = {
         waitingForOther: "Warte auf{0:trim,surround,leading_space} ...",
     },
     time: {        
-        dateTimeWithSeconds: "DD.MM.YYYY HH:mm:ss",
+        date: "DD.MM.YYYY",
+        dateTime: "DD.MM.YYYY HH:mm",        
+        dateTimeWithSeconds: "DD.MM.YYYY HH:mm:ss",        
     },
     tools: {
         bower: {

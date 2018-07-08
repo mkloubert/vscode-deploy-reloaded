@@ -28,6 +28,20 @@ import * as vscode from 'vscode';
 
 
 /**
+ * A message item with a value.
+ */
+export interface ActionMessageItem<TValue = any, TResult = any> extends MessageItemWithValue<TValue> {
+    /**
+     * The action.
+     * 
+     * @param {ActionMessageItem<TValue>} [item] The underlying item.
+     * 
+     * @return {TResult} The result of the action.
+     */
+    readonly action?: (item?: ActionMessageItem<TValue>) => TResult;
+}
+
+/**
  * A quick pick item based on an action.
  */
 export interface ActionQuickPick<TState = any> extends vscode.QuickPickItem {
@@ -478,24 +492,6 @@ export interface MessageItemWithValue<TValue = any> extends vscode.MessageItem {
      * The value.
      */
     readonly value?: TValue;
-}
-
-/**
- * Describes the structure of the package file of that extenstion.
- */
-export interface PackageFile {
-    /**
-     * The display name.
-     */
-    readonly displayName: string;
-    /**
-     * The (internal) name.
-     */
-    readonly name: string;
-    /**
-     * The version string.
-     */
-    readonly version: string;
 }
 
 /**

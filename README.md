@@ -318,6 +318,7 @@ Press `F1` and enter one of the following commands:
 | `Deploy Reloaded: Proxies ...` | Handles [TCP proxies](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/proxies). |
 | `Deploy Reloaded: Pull ...` | Pull or download files from remote. |
 | `Deploy Reloaded: Select deploy operation ...` | Lets the user select an operation for the active document. |
+| `Deploy Reloaded: Show notification(s) ...` | (Re-)Shows one or more notifications from the extension's author(s). |
 | `Deploy Reloaded: Switches ...` | Handle [switch targets](https://github.com/mkloubert/vscode-deploy-reloaded/wiki/target_switch). |
 | `Deploy Reloaded: Tools ...` | A set of helpful tools. |
 

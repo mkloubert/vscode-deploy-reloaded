@@ -30,7 +30,6 @@ import * as Enumerable from 'node-enumerable';
 import * as i18 from './i18';
 import * as Moment from 'moment';
 import * as Path from 'path';
-import * as UUID from 'uuid';
 import * as vscode from 'vscode';
 
 
@@ -581,9 +580,9 @@ export function getTargetsOfPackage(pkg: Package, targetResolver: deploy_targets
             targets = ME.getTargets();
         }
         else if (targets.length > 1) {
-            const ID = `${pkg.__id}\n` + 
-                       `${UUID.v4()}\n` + 
-                       `${Moment.utc().unix()}`;
+            const ID = `${ pkg.__id }\n` + 
+                       `${ deploy_helpers.uuid() }\n` + 
+                       `${ Moment.utc().unix() }`;
 
             const BATCH_TARGET = {
                 __cache: new deploy_helpers.MemoryCache(),

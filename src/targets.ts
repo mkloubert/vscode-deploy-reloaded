@@ -41,7 +41,6 @@ import * as Minimatch from 'minimatch';
 import * as Moment from 'moment';
 import * as Path from 'path';
 import * as SanitizeFilename from 'sanitize-filename';
-import * as UUID from 'uuid';
 import * as vscode from 'vscode';
 
 
@@ -375,9 +374,9 @@ export function createTargetSessionValue(target: Target): symbol {
     }
 
     return Symbol(
-        `${Moment.utc().unix()}::` + 
-        `${getTargetIdHash(target)}::` + 
-        `${UUID.v4()}`,
+        `${ Moment.utc().unix() }::` + 
+        `${ getTargetIdHash(target) }::` + 
+        `${ deploy_helpers.uuid() }`,
     );
 }
 

@@ -28,6 +28,7 @@ import * as deploy_gui from './gui';
 import * as deploy_helpers from './helpers';
 import * as deploy_html from './html';
 import * as deploy_log from './log';
+import * as deploy_notifications from './notifications';
 import * as deploy_packages from './packages';
 import * as deploy_plugins from './plugins';
 import * as deploy_proxies from './proxies';
@@ -55,7 +56,7 @@ let currentContext: vscode.ExtensionContext;
 let isDeactivating = false;
 let nextWorkspaceId = Number.MAX_SAFE_INTEGER;
 let outputChannel: vscode.OutputChannel;
-let packageFile: deploy_contracts.PackageFile;
+let packageFile: deploy_helpers.PackageFile;
 const PLUGINS: deploy_plugins.Plugin[] = [];
 let selectWorkspaceBtn: vscode.StatusBarItem;
 const WORKSPACE_COMMANDS: deploy_commands.WorkspaceCommandRepository = {};
@@ -528,6 +529,11 @@ export async function activate(context: vscode.ExtensionContext) {
 async function activateExtension(context: vscode.ExtensionContext) {
     const WF = deploy_helpers.buildWorkflow();
 
+    // extension's root directory
+    WF.next(() => {
+        deploy_helpers.setExtensionRoot(__dirname);
+    });
+
     WF.next(() => {
         currentContext = context;
     });
@@ -618,12 +624,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
     // package file
     WF.next(async () => {
         try {
-            const CUR_DIR = __dirname;
-            const FILE_PATH = Path.join(CUR_DIR, '../package.json');
-
-            packageFile = JSON.parse(
-                (await deploy_helpers.readFile(FILE_PATH)).toString('utf8')
-            );
+            packageFile = await deploy_helpers.getPackageFile();
         }
         catch (e) {
             deploy_log.CONSOLE
@@ -957,6 +958,7 @@ async function activateExtension(context: vscode.ExtensionContext) {
         deploy_pull.registerPullCommands(context);
         deploy_delete.registerDeleteCommands(context);
         deploy_tools_send_file.registerSendFileCommands(context);
+        deploy_notifications.registerNotificationCommands(context, packageFile);
     });
 
     // HTML document provider
@@ -1199,6 +1201,22 @@ async function activateExtension(context: vscode.ExtensionContext) {
         outputChannel.appendLine('');
         outputChannel.appendLine(i18.t('extension.initialized'));
         outputChannel.appendLine('');
+    });
+
+    // notifications
+    WF.next(() => {
+        try {
+            deploy_notifications.showExtensionNotifications(
+                context, packageFile,
+            ).then(() => {
+            }, (err) => {
+                deploy_log.CONSOLE
+                          .trace(err, 'extension.notifications(2)');
+            });
+        } catch (e) {
+            deploy_log.CONSOLE
+                      .trace(e, 'extension.notifications(1)');
+        }
     });
 
     if (!isDeactivating) {

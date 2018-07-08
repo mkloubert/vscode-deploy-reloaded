@@ -17,7 +17,6 @@
 
 import * as _ from 'lodash';
 import * as deploy_contracts from '../../contracts';
-import * as deploy_devtools from '../../devtools';
 import * as deploy_helpers from '../../helpers';
 import * as deploy_targets from '../../targets';
 import * as vscode from 'vscode';
@@ -67,7 +66,7 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
     const ALWAYS_ASK_FOR_PAGE = deploy_helpers.toBooleanSafe(OPERATION.alwaysAskForPage);
     const PAGES = deploy_helpers.toStringSafe( OPERATION.pages );
 
-    let sendCallback: deploy_devtools.SendToBrowserItemCallback;
+    let sendCallback: deploy_helpers.SendToBrowserItemCallback;
     if (deploy_helpers.toBooleanSafe(OPERATION.debug, true)) {
         sendCallback = async (msg) => {
             if (_.isNil(msg)) {
@@ -116,7 +115,7 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
         pageFilter = new RegExp(PAGES, 'i');
     }
 
-    const CLIENT = new deploy_devtools.DevToolsClient({
+    const CLIENT = deploy_helpers.createDevToolsClient({
         host: OPERATION.host,
         port: OPERATION.port,
     });
@@ -133,6 +132,8 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
                     title = WORKSPACE.t('targets.operations.devTools.pages.defaultTitle',
                                         i + 1);
                 }
+
+                let description = deploy_helpers.toStringSafe(p.description).trim();
 
                 return {
                     action: async () => {
@@ -154,6 +155,7 @@ export async function execute(context: deploy_targets.TargetOperationExecutionCo
                             } catch { }
                         }
                     },
+                    description: description,
                     detail: p.socketUri,
                     label: title,
                     state: p,
