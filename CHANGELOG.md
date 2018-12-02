@@ -4,6 +4,7 @@
 
 ## 0.85.0 (December 2nd, 2018; npm update)
 
+* [Federico Salani](https://github.com/488kuroi) activated already existing feature for custom deploy files ... s. [pull request #105](https://github.com/mkloubert/vscode-deploy-reloaded/pull/105)
 * extension requires at least [Visual Studio Code 1.25](https://code.visualstudio.com/updates/v1_25) now
 * updated the following [npm](https://www.npmjs.com/) modules:
   * [aws-sdk](https://www.npmjs.com/package/aws-sdk) `^2.368.0`

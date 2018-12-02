@@ -2310,8 +2310,6 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
                 );
             }
 
-            console.log( settingsData );
-
             ME._configSource = {
                 section: settingsData.section,
                 resource: vscode.Uri.file(settingsData.file),
