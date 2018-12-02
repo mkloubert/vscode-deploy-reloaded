@@ -2236,6 +2236,7 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
 
             const DEFAULT_DIR = this.folder.uri.fsPath;
             const DEFAULT_FILENAME = './.vscode/settings.json';
+            const ALTERNATIVE_FILENAME = './deploy.json';
             const DEFAULT_FILE = Path.join(
                 DEFAULT_DIR,
                 DEFAULT_FILENAME,
@@ -2251,13 +2252,13 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
 
                     const POSSIBLE_FILES: SettingsData[] = [
                         // deploy.json
-                        /* TODO: implement later
+                        /* TODO: implement later */
                         {
-                            section: ALTERNATIVE_SECTION_NAME,
+                            section: DEFAULT_SECTION_NAME,
                             file: Path.resolve(
                                 Path.join(dir, ALTERNATIVE_FILENAME)
                             )
-                        },*/
+                        },
 
                         // settings.json
                         {
@@ -2308,6 +2309,8 @@ export class Workspace extends deploy_helpers.WorkspaceBase implements deploy_co
                     )
                 );
             }
+
+            console.log( settingsData );
 
             ME._configSource = {
                 section: settingsData.section,
