@@ -368,6 +368,7 @@ The API documentation can be found [here](https://mkloubert.github.io/vscode-dep
 
 ### Contributors [[&uarr;](#support-and-contribute-)]
 
+* [Federico Salani](https://github.com/488kuroi)
 * [Jan Hajek](https://github.com/hajekj)
 * [Robert Ehlers](https://github.com/rehlers)
 * [Pelly](https://github.com/solid-pixel)

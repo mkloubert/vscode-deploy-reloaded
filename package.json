@@ -2,10 +2,10 @@
  "name": "vscode-deploy-reloaded",
  "displayName": "Deploy (Reloaded)",
  "description": "Deploys files of a workspace to a destination.",
- "version": "0.84.0",
+ "version": "0.85.0",
  "publisher": "mkloubert",
  "engines": {
-  "vscode": "^1.25.0"
+  "vscode": "^1.29.0"
  },
  "license": "LGPL-3.0",
  "categories": [
@@ -80568,8 +80568,8 @@
   "@types/uuid": "^3.4.3",
   "@types/ws": "^5.1.2",
   "tslint": "^5.10.0",
-  "typescript": "^2.9.2",
-  "vscode": "^1.1.18"
+  "typescript": "^3.2.1",
+  "vscode": "^1.1.22"
  },
  "icon": "icon.png",
  "badges": [
