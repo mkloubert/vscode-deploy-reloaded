@@ -1,14 +1,14 @@
 /**
  * This file is part of the vscode-deploy-reloaded distribution.
  * Copyright (c) Marcel Joachim Kloubert.
- * 
- * vscode-deploy-reloaded is free software: you can redistribute it and/or modify  
- * it under the terms of the GNU Lesser General Public License as   
+ *
+ * vscode-deploy-reloaded is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, version 3.
  *
- * vscode-deploy-reloaded is distributed in the hope that it will be useful, but 
- * WITHOUT ANY WARRANTY; without even the implied warranty of 
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+ * vscode-deploy-reloaded is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
@@ -30,10 +30,10 @@ import * as Moment from 'moment';
 
 /**
  * A function that detects the ACL for a file when uploading it.
- * 
+ *
  * @param {string} file The path of the file inside the bucket.
  * @param {string} defaultAcl The default ACL of the bucket.
- * 
+ *
  * @return {string} The ACL.
  */
 export type S3BucketFileAclDetector = (file: string, defaultAcl: string) => string;
@@ -76,6 +76,10 @@ export interface S3BucketOptions {
      * A function that provides values for a client.
      */
     readonly valueProvider?: S3ValueProvider;
+    /**
+     * Custom options.
+     */
+    readonly customOpts?: object;
 }
 
 /**
@@ -119,7 +123,7 @@ const KNOWN_CREDENTIAL_CLASSES = {
 export class S3BucketClient extends deploy_clients.AsyncFileListBase {
     /**
      * Initializes a new instance of that class.
-     * 
+     *
      * @param {S3BucketOptions} options The options.
      */
     constructor(public readonly options: S3BucketOptions) {
@@ -177,7 +181,7 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
 
         const FIND_FULL_FILE_PATH = async (p: string): Promise<string> => {
             p = deploy_helpers.toStringSafe(p);
-            
+
             if (Path.isAbsolute(p)) {
                 // exist if file exists
 
@@ -219,7 +223,7 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
             if ('' !== credentialType) {
                 credentialClass = KNOWN_CREDENTIAL_CLASSES[credentialType];
             }
-    
+
             credentialConfig = this.options.credentials.config;
 
             switch (credentialType) {
@@ -234,9 +238,9 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
                     // FileSystemCredentials
                     if (!deploy_helpers.isNullOrUndefined(credentialConfig)) {
                         credentialConfig = deploy_helpers.toStringSafe(credentialConfig);
-                        
+
                         if (!deploy_helpers.isEmptyString(credentialConfig)) {
-                            credentialConfig = await FIND_FULL_FILE_PATH(credentialConfig); 
+                            credentialConfig = await FIND_FULL_FILE_PATH(credentialConfig);
                         }
                     }
                     break;
@@ -281,12 +285,16 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
                     break;
             }
         }
-    
+
         if (!credentialClass) {
             throw new Error(i18.t('s3bucket.credentialTypeNotSupported',
                                   credentialType));
         }
-    
+
+        if (this.options.customOpts) {
+            AWS.config.update(this.options.customOpts);
+        }
+
         return new AWS.S3({
             credentials: new credentialClass(credentialConfig),
             params: {
@@ -332,7 +340,7 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
         const ME = this;
 
         path = toS3Path(path);
-        
+
         return new Promise<Buffer>(async (resolve, reject) => {
             const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
 
@@ -513,7 +521,7 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
         if (!data) {
             data = Buffer.alloc(0);
         }
-        
+
         return new Promise<void>(async (resolve, reject) => {
             const COMPLETED = deploy_helpers.createCompletedAction(resolve, reject);
 
@@ -559,9 +567,9 @@ export class S3BucketClient extends deploy_clients.AsyncFileListBase {
 
 /**
  * Creates a new client.
- * 
+ *
  * @param {S3BucketOptions} opts The options.
- * 
+ *
  * @return {S3BucketClient} The new client.
  */
 export function createClient(opts: S3BucketOptions): S3BucketClient {
@@ -574,10 +582,10 @@ export function createClient(opts: S3BucketOptions): S3BucketClient {
 
 /**
  * Returns the name of an ACL safe.
- * 
+ *
  * @param {string} acl The input value.
- * 
- * @return {string} The normalized, safe value. 
+ *
+ * @return {string} The normalized, safe value.
  */
 export function getAclSafe(acl: string) {
     acl = deploy_helpers.normalizeString(acl);
@@ -590,10 +598,10 @@ export function getAclSafe(acl: string) {
 
 /**
  * Converts to a S3 path.
- * 
+ *
  * @param {string} path The path to convert.
- * 
- * @return {string} The converted path. 
+ *
+ * @return {string} The converted path.
  */
 export function toS3Path(path: string) {
     return deploy_helpers.normalizePath(path);

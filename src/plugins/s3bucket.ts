@@ -1,14 +1,14 @@
 /**
  * This file is part of the vscode-deploy-reloaded distribution.
  * Copyright (c) Marcel Joachim Kloubert.
- * 
- * vscode-deploy-reloaded is free software: you can redistribute it and/or modify  
- * it under the terms of the GNU Lesser General Public License as   
+ *
+ * vscode-deploy-reloaded is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, version 3.
  *
- * vscode-deploy-reloaded is distributed in the hope that it will be useful, but 
- * WITHOUT ANY WARRANTY; without even the implied warranty of 
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+ * vscode-deploy-reloaded is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
@@ -59,7 +59,11 @@ export interface S3BucketTarget extends deploy_targets.Target {
         readonly type?: string;
     };
     /**
-     * The custom root directory. 
+     * Custom options.
+     */
+    readonly customOpts?: object;
+    /**
+     * The custom root directory.
      */
     readonly dir?: string;
 }
@@ -71,7 +75,7 @@ class S3BucketPlugin extends deploy_plugins.AsyncFileClientPluginBase<S3BucketTa
         const ME = this;
 
         const DIR = ME.replaceWithValues(target, target.dir);
-        
+
         const FILTERS: deploy_contracts.KeyValuePairs<deploy_contracts.FileFilter> = {};
         if (deploy_helpers.isObject<S3BucketAclFilters>(target.acl)) {
             for (const ACL in target.acl) {
@@ -114,6 +118,7 @@ class S3BucketPlugin extends deploy_plugins.AsyncFileClientPluginBase<S3BucketTa
                 acl: ME.replaceWithValues(target, target.acl),
                 bucket: ME.replaceWithValues(target, target.bucket),
                 credentials: target.credentials,
+                customOpts: target.customOpts,
                 directoryScopeProvider: () => {
                     return SCOPES;
                 },
@@ -133,8 +138,8 @@ class S3BucketPlugin extends deploy_plugins.AsyncFileClientPluginBase<S3BucketTa
             }),
             getDir: (subDir) => {
                 return deploy_helpers.normalizePath(
-                    deploy_helpers.normalizePath(DIR).trim() + 
-                    '/' + 
+                    deploy_helpers.normalizePath(DIR).trim() +
+                    '/' +
                     deploy_helpers.normalizePath(subDir).trim()
                 );
             },
@@ -145,9 +150,9 @@ class S3BucketPlugin extends deploy_plugins.AsyncFileClientPluginBase<S3BucketTa
 
 /**
  * Creates a new instance of that plugin.
- * 
+ *
  * @param {deploy_plugins.PluginContext} context The context for the plugin.
- * 
+ *
  * @return {deploy_plugins.Plugin} The new plugin.
  */
 export function createPlugins(context: deploy_plugins.PluginContext) {
