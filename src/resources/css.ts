@@ -26,13 +26,13 @@ import * as ZLib from 'zlib';
 
 
 const REPOSITORY = {
-    // START: hl.railscasts.css
-    "hl.railscasts.css": new Buffer("H4sIAAAAAAAACq1UwW7bMAy9+ysEDAXaok7tJHZt97rLrjtsx4GSaEeLLGUS3SQY9u+Ts9qRi6KnISfSj++RT2Qe75PkKyjtBXjyqVZ7ZJ7OGtmtuGPflLctPbAvRqzY7WfoFRr2facI75Lk/jFJVjv907PfCWNS+YOGc8O4tmL/HDL2BV2r7TE9NQwGsmPuAFIq0zUsWxXYjxkOYt85OxjZsE/rzfgb08Jq60IGS8yleE7+vGqlwvY9Gnp4DX8NlvDSwFTBRb0tqpGjtYbSyzANUwRaxTx7PB+tkxOPR42CrEsJugWdWJfrTRYVenJhgqnODD1HN0UOOzwdpugFnAKucYoJ+2AR4fxhIQRFkMpjoYF7WkCKvG6LuJfQ7NwI9Es+rHhbQgw+H5YICdt6U18Qk+S551ZPlHzQGukaKU0/lFnEylyEpxwQzV5oZfYLuVLWgmPU0AEc9H7ZUiazto0wI6Piw5s3FhKqso5gPRIsEDWvilrG0yu6voQPb62sWVS0rSjLuGJc1Rl1XdN0Ksi323W+fm9Zo2tQJviA6XwURyVp17A8y24iKRm27yOpMsv+i8685UKD928Me8o27XtYJRfAitcV8AgYtnoHXv2j+/DmwulY011xR1TdjsJfhtWx8fPmEJ4oeCOsg9GdhgVP0I2Djui/3qezQLsEAAA=", 'base64'),
-    // END: hl.railscasts.css
-
     // START: style.css
     "style.css": new Buffer("H4sIAAAAAAAACo1Q3crCMAy9H+wdAuKdg82/Qfc02RpssTal7fc5Ed/doJswvLFwoJyfnJCyMM0GzFawE+wFB8ER7mUB8gZHGBX0nE33ZrRNweFNOMfDeSIvGE/WV2LLfFHQbMM4KVersxGmrtfCPMqiLPAznB3L8Eh6Mmcac6Vp4IjZslfg2VMnwpxUhv8pzvkv+5/XFJ1dZDL2juZEz1Ecsk4YYdW2LSR2dm5/i1UKOFh/UlAvednWYUikIFFAqaRuUZH1Bqaf+akvoNavoqOoTf06mcx7AlJvfWSTAQAA", 'base64'),
     // END: style.css
+
+    // START: hl.railscasts.css
+    "hl.railscasts.css": new Buffer("H4sIAAAAAAAACq1UwW7bMAy9+ysEDAXaok7tJHZt97rLrjtsx4GSaEeLLGUS3SQY9u+Ts9qRi6KnISfSj++RT2Qe75PkKyjtBXjyqVZ7ZJ7OGtmtuGPflLctPbAvRqzY7WfoFRr2facI75Lk/jFJVjv907PfCWNS+YOGc8O4tmL/HDL2BV2r7TE9NQwGsmPuAFIq0zUsWxXYjxkOYt85OxjZsE/rzfgb08Jq60IGS8yleE7+vGqlwvY9Gnp4DX8NlvDSwFTBRb0tqpGjtYbSyzANUwRaxTx7PB+tkxOPR42CrEsJugWdWJfrTRYVenJhgqnODD1HN0UOOzwdpugFnAKucYoJ+2AR4fxhIQRFkMpjoYF7WkCKvG6LuJfQ7NwI9Es+rHhbQgw+H5YICdt6U18Qk+S551ZPlHzQGukaKU0/lFnEylyEpxwQzV5oZfYLuVLWgmPU0AEc9H7ZUiazto0wI6Piw5s3FhKqso5gPRIsEDWvilrG0yu6voQPb62sWVS0rSjLuGJc1Rl1XdN0Ksi323W+fm9Zo2tQJviA6XwURyVp17A8y24iKRm27yOpMsv+i8685UKD928Me8o27XtYJRfAitcV8AgYtnoHXv2j+/DmwulY011xR1TdjsJfhtWx8fPmEJ4oeCOsg9GdhgVP0I2Djui/3qezQLsEAAA=", 'base64'),
+    // END: hl.railscasts.css
 
 };
 
@@ -40,7 +40,7 @@ const REPOSITORY = {
 /**
  * A possible value for a repository key.
  */
-export type RepositoryKey = "hl.railscasts.css" | "style.css";
+export type RepositoryKey = "style.css" | "hl.railscasts.css";
 
 
 /**
