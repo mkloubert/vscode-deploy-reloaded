@@ -1314,7 +1314,7 @@ export function unlink(path: string | Buffer) {
  * 
  * @return {deploy_contracts.KeyValuePairs<string>} The parameters of the URI as object.
  */
-export function uriParamsToObject(uri: URL.Url | vscode.Uri): deploy_contracts.KeyValuePairs<string> {
+export function uriParamsToObject(uri: any): deploy_contracts.KeyValuePairs<string> {
     if (!uri) {
         return <any>uri;
     }

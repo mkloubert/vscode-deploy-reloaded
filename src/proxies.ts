@@ -809,7 +809,7 @@ export function registerLoggingForTcpProxy(proxy: TcpProxy, loggerProvider: () =
                 listener: listener,
             });
 
-            proxy.on(ev, listener);
+            proxy.on(ev, <any>listener);
         }
 
         return listener;
@@ -818,7 +818,7 @@ export function registerLoggingForTcpProxy(proxy: TcpProxy, loggerProvider: () =
     const CTX: TcpProxyLoggingContext = {
         dispose: () => {
             Enumerable.popFrom(LISTENERS_TO_REMOVE).forAll(l => {
-                proxy.removeListener(l.ev, l.listener);
+                proxy.removeListener(l.ev, <any>l.listener);
             });
         },
         proxy: proxy,
