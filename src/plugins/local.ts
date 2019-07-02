@@ -156,7 +156,7 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
                                     item: deploy_workspaces.WorkspaceItem): Promise<TargetSettings> {
         const ME = this;
 
-        const DIR = ME.normalizeDir(context.target, item);
+        const DIR = await ME.normalizeDir(context.target, item);
 
         if (await deploy_helpers.exists(DIR)) {
             if (!(await deploy_helpers.lstat(DIR)).isDirectory()) {
@@ -176,7 +176,7 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
     public async listDirectory(context: deploy_plugins.ListDirectoryContext<LocalTarget>) {
         const ME = this;
 
-        const DIR = ME.normalizeDir(context.target, context);
+        const DIR = await ME.normalizeDir(context.target, context);
 
         let targetDir = Path.join(
             DIR,
@@ -286,7 +286,7 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
         return RESULT;
     }
 
-    private normalizeDir(target: LocalTarget, wsi: deploy_workspaces.WorkspaceItem) {
+    private async normalizeDir(target: LocalTarget, wsi: deploy_workspaces.WorkspaceItem) {
         let dir = this.replaceWithValues(
             target,
             target.dir
@@ -299,6 +299,10 @@ class LocalPlugin extends deploy_plugins.PluginBase<LocalTarget> {
             dir = Path.join(wsi.workspace.rootPath, dir);
         }
         dir = Path.resolve(dir);
+
+        if ((await deploy_helpers.lstat(dir)).isSymbolicLink()) {
+            dir = await deploy_helpers.realpath(dir);
+        }
 
         return dir;
     }
