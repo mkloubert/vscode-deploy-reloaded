@@ -80571,7 +80571,7 @@
   "@types/uuid": "^3.4.5",
   "@types/ws": "^5.1.2",
   "tslint": "^5.18.0",
-  "typescript": "^3.5.3",
+  "typescript": "3.4.5",
   "vscode": "^1.1.35"
  },
  "icon": "icon.png",
@@ -80625,7 +80625,7 @@
   "mssql": "^4.3.7",
   "mysql": "^2.17.1",
   "node-emoji": "^1.10.0",
-  "node-enumerable": "^3.9.0",
+  "node-enumerable": "^4.0.2",
   "node-simple-socket": "^2.8.1",
   "node-zip": "^1.1.1",
   "nodemailer": "^4.7.0",
@@ -80638,7 +80638,7 @@
   "tmp": "0.0.33",
   "uglify-js": "^3.6.0",
   "uuid": "^3.3.2",
-  "vscode-helpers": "^2.12.0",
+  "vscode-helpers": "^5.1.0",
   "ws": "^5.2.2"
  }
 }

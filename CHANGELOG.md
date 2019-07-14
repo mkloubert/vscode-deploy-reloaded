@@ -21,9 +21,11 @@
   * [mssql](https://www.npmjs.com/package/mssql) `^4.3.7`
   * [mysql](https://www.npmjs.com/package/mysql) `^2.17.1`
   * [node-emoji](https://www.npmjs.com/package/node-emoji) `^1.10.0`
+  * [node-enumerable](https://www.npmjs.com/package/node-enumerable) `^4.0.2`
   * [public-ip](https://www.npmjs.com/package/public-ip) `^2.5.0`
   * [pug](https://www.npmjs.com/package/pug) `^2.0.4`
   * [uglify-js](https://www.npmjs.com/package/uglify-js) `^3.6.0`
+  * [vscode-helpers](https://www.npmjs.com/package/vscode-helpers) `^5.1.0`
 
 ## 0.87.2 (February 18th, 2019; ssh update)
 
