@@ -373,6 +373,7 @@ The API documentation can be found [here](https://mkloubert.github.io/vscode-dep
 * [Jan Hajek](https://github.com/hajekj)
 * [Robert Ehlers](https://github.com/rehlers)
 * [Pelly](https://github.com/solid-pixel)
+* [Yuping Zuo](https://github.com/zypA13510)
 
 ## Related projects [[&uarr;](#table-of-contents)]
 

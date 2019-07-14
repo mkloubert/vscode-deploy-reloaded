@@ -1030,6 +1030,33 @@ export function readStream(stream: NodeJS.ReadableStream): Promise<Buffer> {
 }
 
 /**
+ * Promise version of 'FS.realpath()' function.
+ * 
+ * @param {string|Buffer} path The path.
+ * 
+ * @return {Promise<string>} The resolved path.
+ */
+export function realpath(path: string | Buffer) {
+    return new Promise<string>((resolve, reject) => {
+        const COMPLETED = createCompletedAction(resolve, reject);
+
+        try {
+            FS.realpath(path, (err, resolvedPath) => {
+                if (err) {
+                    COMPLETED(err);
+                }
+                else {
+                    COMPLETED(null, resolvedPath);
+                }
+            });
+        }
+        catch (e) {
+            COMPLETED(e);
+        }
+    });
+}
+
+/**
  * Replaces all occurrences of a string.
  * 
  * @param {string} str The input string.
