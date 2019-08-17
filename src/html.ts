@@ -153,12 +153,25 @@ export async function openHtmlDocument(html: string, title?: string, id?: any): 
         NEW_DOC.title = deploy_helpers.toStringSafe(title).trim();
     }
 
-    if (HTML_DOCS) {
-        HTML_DOCS.push(NEW_DOC);
-    }
+    //Find eexisting column
+    const column = vscode.window.activeTextEditor
+        ? vscode.window.activeTextEditor.viewColumn
+        : undefined;
 
-    return await vscode.commands.executeCommand(OPEN_HTML_DOC_COMMAND,
-                                                NEW_DOC, HTML_DOCS);
+    //Create webview panel
+    const panel = vscode.window.createWebviewPanel(
+        "New files list",
+        NEW_DOC.title,
+        column || vscode.ViewColumn.One,
+        {
+            enableScripts: false,
+        }
+    );
+
+    //Load content into webview
+    panel.webview.html = NEW_DOC.body.toString();
+    return true;
+
 }
 
 /**
