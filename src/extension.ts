@@ -961,51 +961,6 @@ async function activateExtension(context: vscode.ExtensionContext) {
         deploy_notifications.registerNotificationCommands(context, packageFile);
     });
 
-    // HTML document provider
-    WF.next(() => {
-        let htmlViewer: vscode.Disposable;
-        let openHtmlCmd: vscode.Disposable;
-        try {
-            htmlViewer = vscode.workspace.registerTextDocumentContentProvider(deploy_html.HTML_URI_PROTOCOL,
-                                                                              new deploy_html.HtmlTextDocumentContentProvider());
-            
-            openHtmlCmd = vscode.commands.registerCommand(deploy_html.OPEN_HTML_DOC_COMMAND, async (doc: deploy_contracts.Document) => {
-                try {
-                    const URL = vscode.Uri.parse(`${deploy_html.HTML_URI_PROTOCOL}://authority/?id=${encodeURIComponent(deploy_helpers.toStringSafe(doc.id))}` + 
-                                                 `&x=${encodeURIComponent(deploy_helpers.toStringSafe(new Date().getTime()))}`);
-
-                    let title = deploy_helpers.toStringSafe(doc.title).trim();
-                    if ('' === title) {
-                        title = `[vscode-deploy-reloaded] ${i18.t('documents.html.defaultName', doc.id)}`;
-                    }
-
-                    try {
-                        return await vscode.commands.executeCommand('vscode.previewHtml',
-                                                                    URL, vscode.ViewColumn.One, title);
-                    }
-                    finally {
-                        deploy_html.removeDocuments(doc);
-                    }
-                }
-                catch (e) {
-                    deploy_log.CONSOLE
-                              .trace(e, deploy_html.OPEN_HTML_DOC_COMMAND);
-                }
-            });
-
-            context.subscriptions.push(
-                htmlViewer, openHtmlCmd
-            );
-        }
-        catch (e) {
-            deploy_helpers.tryDispose(htmlViewer);
-            deploy_helpers.tryDispose(openHtmlCmd);
-
-            deploy_log.CONSOLE
-                      .trace(e, 'extension.deploy.reloaded.initHtmlDocProvider');
-        }
-    });
-    
     // load plugins
     WF.next(async () => {
         await reloadPlugins();

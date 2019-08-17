@@ -51,76 +51,8 @@ export const HTML_URI_PROTOCOL = 'vscode-deploy-reloaded-html';
  */
 export const OPEN_HTML_DOC_COMMAND = 'extension.deploy.reloaded.openHtmlDoc';
 
-const HTML_DOCS: deploy_contracts.Document[] = [];
+const HTML_DOCS2: deploy_contracts.Document[] = [];
 let nextHtmlDocId = Number.MIN_SAFE_INTEGER;
-
-/**
- * HTML content provider.
- */
-export class HtmlTextDocumentContentProvider implements vscode.TextDocumentContentProvider {
-    /** @inheritdoc */
-    public provideTextDocumentContent(uri: vscode.Uri, token: vscode.CancellationToken): Thenable<string> {
-        const ME = this;
-
-        let func: (uri: vscode.Uri) => string | PromiseLike<string>;
-        let funcThisArgs: any = ME;
-        switch (deploy_helpers.normalizeString(uri.authority)) {
-            case 'authority':
-                func = ME.getHtmlDoc;
-                break;
-        }
-
-        if (!func) {
-            func = () => null;
-        }
-        
-        return Promise.resolve(func.apply(funcThisArgs,
-                                          [ uri ]));
-    }
-
-    /**
-     * Returns a HTML document by URI.
-     * 
-     * @param {vscode.Uri} uri The URI of the document.
-     * 
-     * @return {string} The document.
-     */
-    protected getHtmlDoc(uri: vscode.Uri): string {
-        let doc: deploy_contracts.Document;
-
-        const PARAMS = deploy_helpers.uriParamsToObject(uri);
-        const ID_VALUE = decodeURIComponent(deploy_helpers.getUriParam(PARAMS, 'id'));
-
-        if (!deploy_helpers.isEmptyString(ID_VALUE)) {
-            const ID = ID_VALUE.trim();
-            
-            // search for document
-            for (let i = 0; i < HTML_DOCS.length; i++) {
-                const D = HTML_DOCS[i];
-
-                if (deploy_helpers.toStringSafe(D.id).trim() === ID) {
-                    doc = D;  // found
-                    break;
-                }
-            }
-        }
-
-        let html = '';
-
-        if (doc) {
-            if (doc.body) {
-                let enc = deploy_helpers.normalizeString(doc.encoding);
-                if ('' === enc) {
-                    enc = 'utf8';
-                }
-
-                html = doc.body.toString(enc);
-            }
-        }
-
-        return html;
-    }
-}
 
 /**
  * Opens a HTML document in a new tab.
@@ -153,14 +85,14 @@ export async function openHtmlDocument(html: string, title?: string, id?: any): 
         NEW_DOC.title = deploy_helpers.toStringSafe(title).trim();
     }
 
-    //Find eexisting column
+    //Find existing column
     const column = vscode.window.activeTextEditor
         ? vscode.window.activeTextEditor.viewColumn
         : undefined;
 
     //Create webview panel
     const panel = vscode.window.createWebviewPanel(
-        "New files list",
+        "VscdrGeneralHtmlWebView",
         NEW_DOC.title,
         column || vscode.ViewColumn.One,
         {
@@ -171,7 +103,6 @@ export async function openHtmlDocument(html: string, title?: string, id?: any): 
     //Load content into webview
     panel.webview.html = NEW_DOC.body.toString();
     return true;
-
 }
 
 /**
@@ -214,39 +145,11 @@ ${CSS}
         deploy_helpers.toStringSafe(md),
         MergeDeep(DEFAULT_OPTS, opts),
     );
-    
+
     html += await deploy_res_html.getStringContent("footer.html");
-    
+
     return await openHtmlDocument(
         html,
-        DOCUMENT_TITLE, DOCUMENT_ID    
+        DOCUMENT_TITLE, DOCUMENT_ID
     );
-}
-
-/**
- * Removes documents from a storage.
- * 
- * @param {deploy_contracts.Document|vspt_contracts.Document[]} docs The document(s) to remove.
- * 
- * @return {deploy_contracts.Document[]} The removed documents.
- */
-export function removeDocuments(docs: deploy_contracts.Document | deploy_contracts.Document[]): deploy_contracts.Document[] {
-    const IDS = deploy_helpers.asArray(docs)
-                              .map(x => x.id);
-
-    const REMOVED = [];
-
-    for (let i = 0; i < HTML_DOCS.length; ) {
-        const DOC = HTML_DOCS[i];
-
-        if (IDS.indexOf(DOC.id) > -1) {
-            REMOVED.push(DOC);
-            HTML_DOCS.splice(i, 1);
-        }
-        else {
-            ++i;
-        }
-    }
-
-    return REMOVED;
 }

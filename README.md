@@ -368,11 +368,12 @@ The API documentation can be found [here](https://mkloubert.github.io/vscode-dep
 
 ### Contributors [[&uarr;](#support-and-contribute-)]
 
-* [denis-gorin](https://github.com/denis-gorin)
-* [Federico Salani](https://github.com/488kuroi)
-* [Jan Hajek](https://github.com/hajekj)
 * [Robert Ehlers](https://github.com/rehlers)
+* [denis-gorin](https://github.com/denis-gorin)
+* [Jan Hajek](https://github.com/hajekj)
+* [Simon Hopwood](https://github.com/DrummerSi)
 * [Pelly](https://github.com/solid-pixel)
+* [Federico Salani](https://github.com/488kuroi)
 * [Yuping Zuo](https://github.com/zypA13510)
 
 ## Related projects [[&uarr;](#table-of-contents)]
