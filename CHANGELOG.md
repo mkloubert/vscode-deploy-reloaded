@@ -13,6 +13,7 @@
   * [sanitize-filename](https://www.npmjs.com/package/sanitize-filename) `^1.6.3`
   * [uuid](https://www.npmjs.com/package/uuid) `^3.3.3`
   * [vscode-helpers](https://www.npmjs.com/package/vscode-helpers) `^5.1.1`
+* fixes
 
 ## 0.88.0 (July 14th, 2019; fixes)
 

@@ -24,7 +24,7 @@ import * as FS from 'fs';
 import * as i18 from './i18';
 import * as OS from 'os';
 import * as Path from 'path';
-import * as SanitizeFilename from 'sanitize-filename';
+const SanitizeFilename = require('sanitize-filename');
 
 /**
  * An object that can apply to (its) properties by using

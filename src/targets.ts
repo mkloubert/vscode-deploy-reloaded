@@ -40,7 +40,7 @@ import * as i18 from './i18';
 import * as Minimatch from 'minimatch';
 import * as Moment from 'moment';
 import * as Path from 'path';
-import * as SanitizeFilename from 'sanitize-filename';
+const SanitizeFilename = require('sanitize-filename');
 import * as vscode from 'vscode';
 
 
@@ -548,7 +548,7 @@ export async function executeTargetOperations(opts: ExecuteTargetOperationOption
 
         operationToExecute = Enumerable.from(
             WORKSPACE.filterConditionalItems(operationToExecute, true)
-        ).singleOrDefault(null);
+        ).singleOrDefault(() => true, null);
 
         if (!deploy_helpers.isObject<TargetOperation>(operationToExecute)) {
             continue;

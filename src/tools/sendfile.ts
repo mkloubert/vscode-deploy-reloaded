@@ -21,7 +21,7 @@ import * as deploy_log from '../log';
 import * as i18 from '../i18';
 import * as Path from 'path';
 import * as Net from 'net';
-import * as SanitizeFilename from 'sanitize-filename';
+const SanitizeFilename = require('sanitize-filename');
 import * as SimpleSocket from 'node-simple-socket';
 import * as vscode from 'vscode';
 
