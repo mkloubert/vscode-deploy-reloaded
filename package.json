@@ -5,7 +5,7 @@
  "version": "0.89.0",
  "publisher": "mkloubert",
  "engines": {
-  "vscode": "^1.37.0"
+  "vscode": "^1.38.0"
  },
  "license": "LGPL-3.0",
  "categories": [
@@ -80543,7 +80543,7 @@
  },
  "devDependencies": {
   "@types/copy-paste": "^1.1.30",
-  "@types/express": "^4.17.0",
+  "@types/express": "^4.17.1",
   "@types/filesize": "^3.6.0",
   "@types/fs-extra": "^4.0.9",
   "@types/glob": "^5.0.36",
@@ -80553,24 +80553,24 @@
   "@types/ip": "0.0.30",
   "@types/is-stream": "^1.1.0",
   "@types/less": "0.0.32",
-  "@types/lodash": "^4.14.137",
+  "@types/lodash": "^4.14.138",
   "@types/marked": "^0.3.0",
   "@types/mime-types": "^2.1.0",
   "@types/minimatch": "^3.0.3",
   "@types/mocha": "^2.2.48",
   "@types/moment-timezone": "^0.5.12",
-  "@types/mssql": "^4.0.16",
-  "@types/mysql": "^2.15.6",
+  "@types/mssql": "^4.3.1",
+  "@types/mysql": "^2.15.7",
   "@types/node": "10.1.4",
   "@types/node-emoji": "^1.8.1",
   "@types/nodemailer": "^4.6.8",
   "@types/public-ip": "^2.4.0",
   "@types/pug": "^2.0.4",
-  "@types/sanitize-filename": "^1.1.28",
+  "@types/sanitize-filename": "^1.6.3",
   "@types/tmp": "0.0.33",
   "@types/uuid": "^3.4.5",
   "@types/ws": "^5.1.2",
-  "tslint": "^5.18.0",
+  "tslint": "^5.20.0",
   "typescript": "3.4.5",
   "vscode": "^1.1.36"
  },
@@ -80596,7 +80596,7 @@
  "dependencies": {
   "@icetee/ftp": "^1.0.3",
   "@slack/client": "^3.16.0",
-  "aws-sdk": "^2.512.0",
+  "aws-sdk": "^2.533.0",
   "azure-storage": "^2.10.3",
   "coffeescript": "^2.4.1",
   "compare-versions": "^3.5.1",
@@ -80633,11 +80633,11 @@
   "public-ip": "^2.5.0",
   "pug": "^2.0.4",
   "random-float": "^1.0.0",
-  "sanitize-filename": "^1.6.2",
+  "sanitize-filename": "^1.6.3",
   "ssh2-sftp-client": "2.3.0",
   "tmp": "0.0.33",
   "uglify-js": "^3.6.0",
-  "uuid": "^3.3.2",
+  "uuid": "^3.3.3",
   "vscode-helpers": "^5.1.1",
   "ws": "^5.2.2"
  }

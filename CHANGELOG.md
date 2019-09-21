@@ -5,13 +5,14 @@
 ## 0.89.0 (August 17th, 2019; fixed HTML viewer)
 
 * File preview working ... s. [pull request #141](https://github.com/mkloubert/vscode-deploy-reloaded/pull/141)
-* extension requires at least [Visual Studio Code 1.37](https://code.visualstudio.com/updates/v1_37) now
+* extension requires at least [Visual Studio Code 1.38](https://code.visualstudio.com/updates/v1_38) now
 * updated the following [npm](https://www.npmjs.com/) modules:
-  * [aws-sdk](https://www.npmjs.com/package/aws-sdk) `^2.512.0`
+  * [aws-sdk](https://www.npmjs.com/package/aws-sdk) `^2.533.0`
   * [compare-versions](https://www.npmjs.com/package/compare-versions) `^3.5.1`
   * [lodash](https://www.npmjs.com/package/lodash) `^4.17.15`
-  * [sanitize-filename](https://www.npmjs.com/package/sanitize-filename) `^1.6.2`
-  * [vscode-helpers](https://www.npmjs.com/package/aws-sdk) `^5.1.1`
+  * [sanitize-filename](https://www.npmjs.com/package/sanitize-filename) `^1.6.3`
+  * [uuid](https://www.npmjs.com/package/uuid) `^3.3.3`
+  * [vscode-helpers](https://www.npmjs.com/package/vscode-helpers) `^5.1.1`
 
 ## 0.88.0 (July 14th, 2019; fixes)
 
