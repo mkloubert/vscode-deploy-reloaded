@@ -80634,7 +80634,7 @@
   "pug": "^2.0.4",
   "random-float": "^1.0.0",
   "sanitize-filename": "^1.6.3",
-  "ssh2-sftp-client": "2.3.0",
+  "ssh2-sftp-client": "4.2.4",
   "tmp": "0.0.33",
   "uglify-js": "^3.6.0",
   "uuid": "^3.3.3",
