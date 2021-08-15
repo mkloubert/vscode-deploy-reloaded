@@ -18,7 +18,7 @@
 import * as deploy_contracts from '../contracts';
 import * as deploy_helpers from '../helpers';
 import * as deploy_sql from '../sql';
-import * as MySQL from 'mysql';
+import * as MySQL from '../../node_modules/mysql';
 
 
 /**
